@@ -5,7 +5,7 @@
 #
 # SVM_learning_spectra_selected
 # Perform SVM machine learning on Raman maps.
-# version: 20160915c
+# version: 20160915d
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -22,25 +22,22 @@ mapfile = "Dracken-7-tracky_map1_bs_fit2_selected.txt"
 trainedData = "trained.pkl"
 kernel = 'rbf'  #Use either 'linear' or 'rbf' (for large number of features)
 
+f = open(mapfile, 'r')
+M = np.loadtxt(f, unpack =False)
+f.close()
+        
+En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+        
+M = np.delete(M,np.s_[0:1],0)
+Cl = ['{:.2f}'.format(x) for x in M[:,0]]
+        
+A = np.delete(M,np.s_[0:1],1)
 try:
     with open(trainedData):
         print(" Opening training data...")
         clf = joblib.load(trainedData)
 except:
-        print(" Opening learning files and parameters...")
-        f = open(mapfile, 'r')
-        M = np.loadtxt(f, unpack =False)
-        f.close()
-        
-        En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-        
-        M = np.delete(M,np.s_[0:1],0)
-        #Cl = [round(x*100) for x in M[:,0]]
-        Cl = ['{:.2f}'.format(x) for x in M[:,0]]
-        
-        A = np.delete(M,np.s_[0:1],1)
-
-        print(' Retraining data...\n')
+    print(' Retraining data...')
         clf = svm.SVC(kernel = kernel, C = 1.0)
         clf.fit(A,Cl)
         joblib.dump(clf, trainedData)
