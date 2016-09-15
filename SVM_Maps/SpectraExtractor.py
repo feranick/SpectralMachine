@@ -4,7 +4,7 @@
 #
 # SpectraExtractor.py
 # Extract spectra of specific phases
-# version: 20160915a
+# version: 20160915b
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -26,17 +26,17 @@ f = open(mapfile, 'r')
 A = np.loadtxt(f, unpack =False, skiprows=1)
 A = np.delete(A, np.s_[0:2], 1)
 f.close()
-print(A.shape)
+print('\n Shape map: ' + str(A.shape))
 
 f = open(clustfile, 'r')
 Cl = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(phaseColumn-1,phaseColumn))
 f.close()
-print(Cl.shape)
+print(' Shape cluster vector: ' + str(Cl.shape))
 
 f = open(clustfile, 'r')
 L = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(labelColumn-1,labelColumn))
 f.close()
-print(L.shape)
+print(' Shape label vector: ' + str(L.shape))
 
 phaseMap = np.zeros(A.shape[1]+1)
 
@@ -47,7 +47,7 @@ for i in range(0,A.shape[0]):
 
 phaseMap = np.delete(phaseMap, np.s_[0:1], 0)
 
-print(phaseMap.shape)
+print(' Shape new map: ' + str(phaseMap.shape) + '\n')
 #print(phaseMap)
 
 np.savetxt(newMapFile, phaseMap, delimiter=' ', fmt='%10.6f')
