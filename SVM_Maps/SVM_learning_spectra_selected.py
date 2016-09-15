@@ -5,7 +5,7 @@
 #
 # SVM_learning_spectra_selected
 # Perform SVM machine learning on Raman maps.
-# version: 20160914a
+# version: 20160915a
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -20,6 +20,7 @@ sampleFile = "Sample.txt"
 
 mapfile = "Dracken-7-tracky_map1_bs_fit2_selected.txt"
 trainedData = "trained.pkl"
+kernel = 'rbf'  #Use either 'linear' or 'rbf' (for large number of features)
 
 try:
     with open(trainedData):
@@ -42,7 +43,7 @@ except:
         #print(A)
         #print(Cl)
         print(' Retraining data...\n')
-        clf = svm.SVC(kernel = 'linear', C = 1.0)
+        clf = svm.SVC(kernel = kernel, C = 1.0)
         clf.fit(A,Cl)
         joblib.dump(clf, trainedData)
 
