@@ -5,7 +5,7 @@
 #
 # SVM_learning_spectra_Labspec-full
 # Perform SVM machine learning on Raman maps.
-# version: 20160915a
+# version: 20160915b
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -60,5 +60,4 @@ R = np.loadtxt(f, unpack =True, usecols=range(1,2))
 R = R.reshape(1,-1)
 f.close()
 
-print(" Prediction in progress...")
-print(clf.predict(R))
+print('\n Predicted value = ' + str(clf.predict(R)[0]) + '\n')
