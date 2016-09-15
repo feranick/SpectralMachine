@@ -1,19 +1,26 @@
 #!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
-
+# **************************************
+#
+# SpectraExtractor.py
 # Extract spectra of specific phases
+# version: 20160914a
+#
+# By: Nicola Ferralis <feranick@hotmail.com>
+#
+#***************************************
 
 import numpy as np
 from sklearn import svm
 from sklearn.externals import joblib
 
-phaseColumn = 9
-selPhase = 1
+phaseColumn = 8
+selPhase = 4
 labelColumn = 2
 
-mapfile = "Paraffin+cis-Azo2_map3_bs.txt"
-clustfile = "Cluster_matrix-clust-all.txt"
-newMapFile = "Paraffin_map3_phase1.txt"
+mapfile = "Dracken-7-tracky_map1_bs_fit2_despiked.txt"
+clustfile = "Draken_map1_fit3-den_ratio-d1g-col-clust-all.txt"
+newMapFile = "Dracken-7-tracky_map1_bs_fit2_selected.txt"
 
 f = open(mapfile, 'r')
 A = np.loadtxt(f, unpack =False, skiprows=1)

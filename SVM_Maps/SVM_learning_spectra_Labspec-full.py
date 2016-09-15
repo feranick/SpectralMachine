@@ -1,6 +1,16 @@
 #!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
 
+#*********************************************
+#
+# SVM_learning_spectra_Labspec-full
+# Perform SVM machine learning on Raman maps.
+# version: 20160914a
+#
+# By: Nicola Ferralis <feranick@hotmail.com>
+#
+#**********************************************
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import style
