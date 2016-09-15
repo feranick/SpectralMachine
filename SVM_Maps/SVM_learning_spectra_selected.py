@@ -5,7 +5,7 @@
 #
 # SVM_learning_spectra_selected
 # Perform SVM machine learning on Raman maps.
-# version: 20160915e
+# version: 20160915f
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -21,7 +21,7 @@ sampleFile = "Sample.txt"
 mapfile = "Dracken-7-tracky_map1_bs_fit2_selected.txt"
 trainedData = "trained.pkl"
 kernel = 'rbf'  #Use either 'linear' or 'rbf' (for large number of features)
-showPlot = True
+showPlot = False
 
 f = open(mapfile, 'r')
 M = np.loadtxt(f, unpack =False)
@@ -39,7 +39,7 @@ try:
         clf = joblib.load(trainedData)
 except:
     print(' Retraining data...')
-    clf = svm.SVC(kernel = kernel, C = 1.0, decision_function_shape = 'ovr')
+    clf = svm.SVC(kernel = kernel, C = 1.0, decision_function_shape = 'ovr', probability=True)
     clf.fit(A,Cl)
     Z= clf.decision_function(A)
     print(' Number of classes = ' + str(Z.shape[1]))
@@ -53,7 +53,10 @@ R = R.reshape(1,-1)
 f.close()
 
 print('\n Predicted value = ' + str(clf.predict(R)[0]) + '\n')
+print(' Probabilities of this sample within each class: \n')
 
+for i in range(0,clf.classes_.shape[0]):
+    print(' ' + str(clf.classes_[i]) + ': ' + str(clf.predict_proba(R).reshape(-1,1)[i]))
 
 if showPlot == True:
     print(' Stand by: Plotting each datapoint from the map...\n')
