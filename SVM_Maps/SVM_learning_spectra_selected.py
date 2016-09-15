@@ -34,10 +34,13 @@ except:
         #print(M)
         #print(M.shape)
 
-        Cl = [round(x*100) for x in M[:,0]]
+        #Cl = [round(x*100) for x in M[:,0]]
+        Cl = ['{:.2f}'.format(x) for x in M[:,0]]
+        
+        print(type(Cl[0]))
         A = np.delete(M,np.s_[0:1],1)
-        print(A)
-        print(Cl)
+        #print(A)
+        #print(Cl)
         print(' Retraining data...\n')
         clf = svm.SVC(kernel = 'linear', C = 1.0)
         clf.fit(A,Cl)

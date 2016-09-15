@@ -45,7 +45,8 @@ except:
         f = open(clustfile, 'r')
         Cl = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(whichColumn-1,whichColumn))
         f.close()
-        Cl = [round(x*1000) for x in Cl]
+        #Cl = [round(x*1000) for x in Cl]
+        Cl = ['{:.2f}'.format(x) for x in M[:,0]]
         print(Cl)
         print(' Retraining data...\n')
         clf = svm.SVC(kernel = 'linear', C = 1.0)
