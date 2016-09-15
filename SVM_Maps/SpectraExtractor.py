@@ -4,7 +4,7 @@
 #
 # SpectraExtractor.py
 # Extract spectra of specific phases
-# version: 20160914a
+# version: 20160915a
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -15,7 +15,7 @@ from sklearn import svm
 from sklearn.externals import joblib
 
 phaseColumn = 8
-selPhase = 4
+selPhase = 6
 labelColumn = 2
 
 mapfile = "Dracken-7-tracky_map1_bs_fit2_despiked.txt"

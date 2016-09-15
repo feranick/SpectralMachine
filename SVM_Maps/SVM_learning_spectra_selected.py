@@ -38,7 +38,7 @@ except:
         #Cl = [round(x*100) for x in M[:,0]]
         Cl = ['{:.2f}'.format(x) for x in M[:,0]]
         
-        print(type(Cl[0]))
+        #print(type(Cl[0]))
         A = np.delete(M,np.s_[0:1],1)
         #print(A)
         #print(Cl)
