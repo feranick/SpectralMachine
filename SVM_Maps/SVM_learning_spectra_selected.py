@@ -16,14 +16,13 @@ if matplotlib.get_backend() == 'TkAgg':
 
 import numpy as np
 from sklearn import svm
-import sys, os.path, getopt
+import sys, os.path
 from sklearn.externals import joblib
 import matplotlib.pyplot as plt
 
 #**********************************************
 # Input/Output files
 #**********************************************
-#sampleFile = "Sample.txt"
 mapfile = "Dracken-7-tracky_map1_bs_fit2_selected.txt"
 trainedData = "trained.pkl"
 
@@ -55,8 +54,11 @@ def main():
         print(' Please specify sample file name...')
         sys.exit(2)
 
-
+#**********************************************
+# Learn and Predict
+#**********************************************
 def LearnPredict(sampleFile):
+    
     #**********************************************
     # Open and process training data
     #**********************************************
@@ -78,7 +80,6 @@ def LearnPredict(sampleFile):
 
     print(' Number of datapoints = ' + str(A.shape[0]))
     print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
-
 
     #**********************************************
     # Load trained files or retrain
