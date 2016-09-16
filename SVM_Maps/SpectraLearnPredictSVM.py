@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160916f
+* version: 20160916g
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -33,7 +33,7 @@ trainedData = "trained.pkl"
     Use either 'linear' or 'rbf'
     ('rbf' for large number of features) '''
 #**********************************************
-Cfactor = 5
+Cfactor = 1
 kernel = 'rbf'
 
 #**********************************************
@@ -46,18 +46,18 @@ YnormX = 534
 #**********************************************
 ''' Plotting options '''
 #**********************************************
-showProbPlot = False
-showTrainingDataPlot = False
+showProbPlot = True
+showTrainingDataPlot = True
 
 #**********************************************
 ''' Main '''
 #**********************************************
 def main():
-    try:
-        LearnPredict(sys.argv[1], sys.argv[2])
-    except:
-        usage()
-        sys.exit(2)
+    #try:
+    LearnPredict(sys.argv[1], sys.argv[2])
+            #except:
+            #    usage()
+#sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -67,34 +67,33 @@ def LearnPredict(mapFile, sampleFile):
     #**********************************************
     ''' Open and process training data '''
     #**********************************************
+    with open(mapFile, 'r') as f:
+        M = np.loadtxt(f, unpack =False)
+        
+    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+    M = np.delete(M,np.s_[0:1],0)
+    Cl = ['{:.2f}'.format(x) for x in M[:,0]]
+    A = np.delete(M,np.s_[0:1],1)
+    print(' Number of datapoints = ' + str(A.shape[0]))
+    print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
+
+    #**********************************************
+    ''' Normalize if flag is set '''
+    #**********************************************
+    if Ynorm == True:
+        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(En[YnormX]) + '\n')
+        for i in range(0,A.shape[0]):
+            A[i,:] = np.multiply(A[i,:], YnormTo/A[i,YnormX])
+
     try:
         with open(trainedData):
             print(" Opening training data...")
             clf = joblib.load(trainedData)
     except:
+        
         #**********************************************
         ''' Retrain data if not available'''
         #**********************************************
-        f = open(mapFile, 'r')
-        M = np.loadtxt(f, unpack =False)
-        f.close()
-        
-        En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-        M = np.delete(M,np.s_[0:1],0)
-        Cl = ['{:.2f}'.format(x) for x in M[:,0]]
-        A = np.delete(M,np.s_[0:1],1)
-
-        #**********************************************
-        ''' Normalize if flag is set '''
-        #**********************************************
-        if Ynorm == True:
-            print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(En[YnormX]) + '\n')
-            for i in range(0,A.shape[0]):
-                A[i,:] = np.multiply(A[i,:], YnormTo/A[i,YnormX])
-
-        print(' Number of datapoints = ' + str(A.shape[0]))
-        print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
-
         print(' Retraining data...')
         clf = svm.SVC(kernel = kernel, C = Cfactor, decision_function_shape = 'ovr', probability=True)
         clf.fit(A,Cl)
@@ -105,15 +104,14 @@ def LearnPredict(mapFile, sampleFile):
     #**********************************************
     ''' Run prediction '''
     #**********************************************
-    f = open(sampleFile, 'r')
-    R = np.loadtxt(f, unpack =True, usecols=range(1,2))
+    with open(sampleFile, 'r') as f:
+        R = np.loadtxt(f, unpack =True, usecols=range(1,2))
     R = R.reshape(1,-1)
-    f.close()
 
     if Ynorm == True:
             R[0,:] = np.multiply(R[0,:], YnormTo/R[0,YnormX])
 
-    print('\n Predicted value = ' + str(clf.predict(R)[0]) + '\n')
+    print('\n Predicted value = ' + str(clf.predict(R)[0]) +'\n')
     prob = clf.predict_proba(R)[0].tolist()
 
     #print(' Probabilities of this sample within each class: \n')
@@ -124,7 +122,7 @@ def LearnPredict(mapFile, sampleFile):
     ''' Plot results '''
     #********************
     if showProbPlot == True:
-        print('\n Stand by: Plotting probabilities for each class...')
+        print('\n Stand by: Plotting probabilities for each class... \n')
         plt.title('Probability density per class: ' + str(sampleFile))
         for i in range(0, clf.classes_.shape[0]):
             plt.scatter(clf.classes_[i], round(100*prob[i],2), label='probability', c = 'red')
@@ -134,7 +132,7 @@ def LearnPredict(mapFile, sampleFile):
         plt.show()
 
     if showTrainingDataPlot == True:
-        print(' Stand by: Plotting each datapoint from the map...')
+        print(' Stand by: Plotting each datapoint from the map...\n')
         if Ynorm ==True:
             plt.title("Normalized Training Data")
         else:
