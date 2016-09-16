@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # **************************************
 #
-# SpectraExtractor.py
+# SpectraExtractorSVM.py
 # Extract spectra of specific phases
 # version: 20160916d
 #

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #*********************************************
 #
-# SVM_learning_spectra_selected
+# SpectraLearnPredictSVM
 # Perform SVM machine learning on Raman maps.
 # version: 20160916c
 #

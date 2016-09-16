@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #*********************************************
 #
-# SVM_map_maker
+# MapMakerSVM
 # Adds spectra to map files
 # version: 20160916c
 #
