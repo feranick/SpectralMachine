@@ -1,5 +1,6 @@
 #!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
+'''
 # **************************************
 #
 # SpectraExtractorSVM.py
@@ -9,6 +10,8 @@
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
 #***************************************
+'''
+print(__doc__)
 
 import numpy as np
 from sklearn import svm
@@ -30,7 +33,7 @@ f = open(mapfile, 'r')
 A = np.loadtxt(f, unpack =False, skiprows=1)
 A = np.delete(A, np.s_[0:2], 1)
 f.close()
-print('\n Shape map: ' + str(A.shape))
+print(' Shape map: ' + str(A.shape))
 
 f = open(clustfile, 'r')
 Cl = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(phaseColumn-1,phaseColumn))

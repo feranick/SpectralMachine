@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+'''
 #*********************************************
 #
 # SpectraLearnPredictSVM
@@ -9,6 +10,8 @@
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
 #**********************************************
+'''
+print(__doc__)
 
 import matplotlib
 if matplotlib.get_backend() == 'TkAgg':
@@ -51,7 +54,7 @@ def main():
     try:
         LearnPredict(sys.argv[1])
     except:
-        print(' Please specify sample file name...')
+        print(' Please specify sample file name...\n')
         sys.exit(2)
 
 #**********************************************
@@ -73,7 +76,7 @@ def LearnPredict(sampleFile):
 
 
     if Ynorm == True:
-        print('\n Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(En[YnormX]) + '\n')
+        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(En[YnormX]) + '\n')
         for i in range(0,A.shape[0]):
             A[i,:] = np.multiply(A[i,:], YnormTo/A[i,YnormX])
 

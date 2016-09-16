@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+'''
 #*********************************************
 #
 # MapMakerSVM
@@ -9,6 +10,9 @@
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
 #**********************************************
+'''
+
+print(__doc__)
 
 import numpy as np
 from sklearn import svm
