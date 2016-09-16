@@ -4,7 +4,7 @@
 #
 # SVM_learning_spectra_selected
 # Perform SVM machine learning on Raman maps.
-# version: 20160916a
+# version: 20160916b
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -44,7 +44,7 @@ kernel = 'rbf'
 # Other
 #**********************************************
 showProbPlot = True
-showTrainingDataPlot = True
+showTrainingDataPlot = False
 
 #**********************************************
 # Open and process training data
@@ -66,7 +66,7 @@ if Ynorm == True:
 
 
 print(' Number of datapoints = ' + str(A.shape[0]))
-print(' Size of each datapoints = ' + str(A.shape[1]))
+print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
 
 
 #**********************************************
@@ -92,17 +92,14 @@ R = np.loadtxt(f, unpack =True, usecols=range(1,2))
 R = R.reshape(1,-1)
 f.close()
 
-print(R.shape)
-
 if Ynorm == True:
     R[0,:] = np.multiply(R[0,:], YnormTo/R[0,YnormX])
 
-print('\n Predicted value = ' + str(clf.predict(R)[0]) + '\n')
-print(' Probabilities of this sample within each class: \n')
-
+print('\n Predicted value = ' + str(clf.predict(R)[0]))
 prob = clf.predict_proba(R)[0].tolist()
-for i in range(0,clf.classes_.shape[0]):
-    print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
+#print(' Probabilities of this sample within each class: \n')
+#for i in range(0,clf.classes_.shape[0]):
+#   print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
 
 ################
 # Plot results
