@@ -113,7 +113,7 @@ def LearnPredict(mapFile, sampleFile):
     if Ynorm == True:
             R[0,:] = np.multiply(R[0,:], YnormTo/R[0,YnormX])
 
-    print('\n Predicted value = ' + str(clf.predict(R)[0]))
+    print('\n Predicted value = ' + str(clf.predict(R)[0]) + '\n')
     prob = clf.predict_proba(R)[0].tolist()
 
     #print(' Probabilities of this sample within each class: \n')
