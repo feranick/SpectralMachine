@@ -4,7 +4,7 @@
 #
 # SpectraExtractor.py
 # Extract spectra of specific phases
-# version: 20160915c
+# version: 20160916d
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -52,7 +52,7 @@ for i in range(0,A.shape[0]):
 print(' Shape new map: ' + str(phaseMap.shape) + '\n')
 #print(phaseMap)
 
-np.savetxt(newMapFile, phaseMap, delimiter=' ', fmt='%10.6f')
+np.savetxt(newMapFile, phaseMap, delimiter='\t', fmt='%10.6f')
 
 #f = open(newMapFile, 'r')
 #B = np.loadtxt(f, unpack =False)
