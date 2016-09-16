@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160916e
+* version: 20160916f
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -46,7 +46,7 @@ YnormX = 534
 #**********************************************
 ''' Plotting options '''
 #**********************************************
-showProbPlot = True
+showProbPlot = False
 showTrainingDataPlot = False
 
 #**********************************************
@@ -67,33 +67,34 @@ def LearnPredict(mapFile, sampleFile):
     #**********************************************
     ''' Open and process training data '''
     #**********************************************
-    f = open(mapFile, 'r')
-    M = np.loadtxt(f, unpack =False)
-    f.close()
-        
-    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(M,np.s_[0:1],0)
-    Cl = ['{:.2f}'.format(x) for x in M[:,0]]
-    A = np.delete(M,np.s_[0:1],1)
-
-
-    if Ynorm == True:
-        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(En[YnormX]) + '\n')
-        for i in range(0,A.shape[0]):
-            A[i,:] = np.multiply(A[i,:], YnormTo/A[i,YnormX])
-
-
-    print(' Number of datapoints = ' + str(A.shape[0]))
-    print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
-
-    #**********************************************
-    ''' Load trained files or retrain '''
-    #**********************************************
     try:
         with open(trainedData):
             print(" Opening training data...")
             clf = joblib.load(trainedData)
     except:
+        #**********************************************
+        ''' Retrain data if not available'''
+        #**********************************************
+        f = open(mapFile, 'r')
+        M = np.loadtxt(f, unpack =False)
+        f.close()
+        
+        En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+        M = np.delete(M,np.s_[0:1],0)
+        Cl = ['{:.2f}'.format(x) for x in M[:,0]]
+        A = np.delete(M,np.s_[0:1],1)
+
+        #**********************************************
+        ''' Normalize if flag is set '''
+        #**********************************************
+        if Ynorm == True:
+            print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(En[YnormX]) + '\n')
+            for i in range(0,A.shape[0]):
+                A[i,:] = np.multiply(A[i,:], YnormTo/A[i,YnormX])
+
+        print(' Number of datapoints = ' + str(A.shape[0]))
+        print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
+
         print(' Retraining data...')
         clf = svm.SVC(kernel = kernel, C = Cfactor, decision_function_shape = 'ovr', probability=True)
         clf.fit(A,Cl)
