@@ -27,18 +27,19 @@ mapfile = "Dracken-7-tracky_map1_bs_fit2_selected.txt"
 trainedData = "trained.pkl"
 
 #**********************************************
+# Training algorithm
+# Use either 'linear' or 'rbf'
+#   ('rbf' for large number of features)
+#**********************************************
+Cfactor = 5
+kernel = 'rbf'
+
+#**********************************************
 # Spectra normalization conditions
 #**********************************************
 Ynorm = True
 YnormTo = 10
 YnormX = 534
-
-#**********************************************
-# Training algorithm
-# Use either 'linear' or 'rbf'
-#   ('rbf' for large number of features)
-#**********************************************
-kernel = 'rbf'
 
 #**********************************************
 # Other
@@ -78,7 +79,7 @@ try:
         clf = joblib.load(trainedData)
 except:
     print(' Retraining data...')
-    clf = svm.SVC(kernel = kernel, C = 1.0, decision_function_shape = 'ovr', probability=True)
+    clf = svm.SVC(kernel = kernel, C = Cfactor, decision_function_shape = 'ovr', probability=True)
     clf.fit(A,Cl)
     Z= clf.decision_function(A)
     print(' Number of classes = ' + str(Z.shape[1]))
@@ -97,6 +98,7 @@ if Ynorm == True:
 
 print('\n Predicted value = ' + str(clf.predict(R)[0]))
 prob = clf.predict_proba(R)[0].tolist()
+
 #print(' Probabilities of this sample within each class: \n')
 #for i in range(0,clf.classes_.shape[0]):
 #   print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
@@ -109,6 +111,9 @@ if showProbPlot == True:
     plt.title("Probability density per class")
     for i in range(0, clf.classes_.shape[0]):
         plt.scatter(clf.classes_[i], round(100*prob[i],2), label='probability', c = 'red')
+    plt.grid(True)
+    plt.xlabel('Class')
+    plt.ylabel('Probability [%]')
     plt.show()
 
 if showTrainingDataPlot == True:
@@ -120,5 +125,7 @@ if showTrainingDataPlot == True:
     for i in range(0,A.shape[0]):
         plt.plot(En, A[i,:], label='Training data')
         plt.plot(En, R[0,:], linewidth = 2, label='Sample data')
+        plt.xlabel('Raman shift [1/cm]')
+        plt.ylabel('Raman Intensity [arb. units]')
     plt.show()
 
