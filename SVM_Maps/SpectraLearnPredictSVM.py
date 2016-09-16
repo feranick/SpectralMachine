@@ -67,7 +67,7 @@ def LearnPredict(mapFile, sampleFile):
     #**********************************************
     ''' Open and process training data '''
     #**********************************************
-    f = open(mapfile, 'r')
+    f = open(mapFile, 'r')
     M = np.loadtxt(f, unpack =False)
     f.close()
         
