@@ -1,15 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 '''
-#*********************************************
-#
-# SpectraLearnPredictSVM
-# Perform SVM machine learning on Raman maps.
-# version: 20160916d
-#
-# By: Nicola Ferralis <feranick@hotmail.com>
-#
-#**********************************************
+*********************************************
+*
+* SpectraLearnPredictSVM
+* Perform SVM machine learning on Raman maps.
+* version: 20160916e
+*
+* By: Nicola Ferralis <feranick@hotmail.com>
+*
+**********************************************
 '''
 print(__doc__)
 
@@ -24,31 +24,34 @@ from sklearn.externals import joblib
 import matplotlib.pyplot as plt
 
 #**********************************************
-# Input/Output files
+''' Input/Output files '''
 #**********************************************
 trainedData = "trained.pkl"
 
 #**********************************************
-# Training algorithm
-# Use either 'linear' or 'rbf'
-#   ('rbf' for large number of features)
+''' Training algorithm
+    Use either 'linear' or 'rbf'
+    ('rbf' for large number of features) '''
 #**********************************************
 Cfactor = 5
 kernel = 'rbf'
 
 #**********************************************
-# Spectra normalization conditions
+''' Spectra normalization conditions '''
 #**********************************************
 Ynorm = True
 YnormTo = 10
 YnormX = 534
 
 #**********************************************
-# main
+''' Plotting options '''
 #**********************************************
 showProbPlot = True
 showTrainingDataPlot = False
 
+#**********************************************
+''' Main '''
+#**********************************************
 def main():
     try:
         LearnPredict(sys.argv[1], sys.argv[2])
@@ -57,12 +60,12 @@ def main():
         sys.exit(2)
 
 #**********************************************
-# Learn and Predict
+''' Learn and Predict '''
 #**********************************************
 def LearnPredict(mapFile, sampleFile):
     
     #**********************************************
-    # Open and process training data
+    ''' Open and process training data '''
     #**********************************************
     f = open(mapfile, 'r')
     M = np.loadtxt(f, unpack =False)
@@ -84,7 +87,7 @@ def LearnPredict(mapFile, sampleFile):
     print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
 
     #**********************************************
-    # Load trained files or retrain
+    ''' Load trained files or retrain '''
     #**********************************************
     try:
         with open(trainedData):
@@ -99,7 +102,7 @@ def LearnPredict(mapFile, sampleFile):
         joblib.dump(clf, trainedData)
 
     #**********************************************
-    # Run prediction
+    ''' Run prediction '''
     #**********************************************
     f = open(sampleFile, 'r')
     R = np.loadtxt(f, unpack =True, usecols=range(1,2))
@@ -116,9 +119,9 @@ def LearnPredict(mapFile, sampleFile):
     #for i in range(0,clf.classes_.shape[0]):
     #   print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
 
-    ################
-    # Plot results
-    ################
+    #********************
+    ''' Plot results '''
+    #********************
     if showProbPlot == True:
         print('\n Stand by: Plotting probabilities for each class...')
         plt.title('Probability density per class: ' + str(sampleFile))
@@ -142,15 +145,15 @@ def LearnPredict(mapFile, sampleFile):
             plt.ylabel('Raman Intensity [arb. units]')
         plt.show()
 
-####################################################################
+#************************************
 ''' Lists the program usage '''
-####################################################################
+#************************************
 def usage():
     print('\n Usage:')
     print('  python SpectraLearnPredictSVM.py <mapfile> <spectrafile> \n')
 
-####################################################################
+#************************************
 ''' Main initialization routine '''
-####################################################################
+#************************************
 if __name__ == "__main__":
     sys.exit(main())

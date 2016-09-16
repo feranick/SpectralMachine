@@ -1,15 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 '''
-#*********************************************
-#
-# MapMakerSVM
-# Adds spectra to map files
-# version: 20160916d
-#
-# By: Nicola Ferralis <feranick@hotmail.com>
-#
-#**********************************************
+*********************************************
+*
+* MapMakerSVM
+* Adds spectra to map files
+* version: 20160916e
+*
+* By: Nicola Ferralis <feranick@hotmail.com>
+*
+***********************************************
 '''
 
 print(__doc__)
@@ -19,7 +19,7 @@ from sklearn import svm
 import sys, os.path
 
 #**********************************************
-# main
+''' main '''
 #**********************************************
 
 def main():
@@ -30,12 +30,12 @@ def main():
         sys.exit(2)
 
 #**********************************************
-# Learn and Predict
+''' Make Map file '''
 #**********************************************
 def makeFile(mapFile, sampleFile, param):
     
     #**********************************************
-    # Open and process training data
+    ''' Open and process training data '''
     #**********************************************
 
     with open(sampleFile, 'r') as f:
@@ -56,15 +56,15 @@ def makeFile(mapFile, sampleFile, param):
         np.savetxt(f, newMap, delimiter='\t', fmt='%10.6f')
 
 
-####################################################################
+#************************************
 ''' Lists the program usage '''
-####################################################################
+#************************************
 def usage():
     print('\n Usage:')
     print('  python MapMakerSVM.py <mapfile> <spectrafile> <parameter> \n')
 
-####################################################################
+#************************************
 ''' Main initialization routine '''
-####################################################################
+#************************************
 if __name__ == "__main__":
     sys.exit(main())
