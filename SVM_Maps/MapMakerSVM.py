@@ -5,7 +5,7 @@
 #
 # MapMakerSVM
 # Adds spectra to map files
-# version: 20160916c
+# version: 20160916d
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -61,7 +61,7 @@ def makeFile(mapFile, sampleFile, param):
 ####################################################################
 def usage():
     print('\n Usage:')
-    print('  python SVN_map_maker.py <mapfile> <spectrafile> <parameter> \n')
+    print('  python MapMakerSVM.py <mapfile> <spectrafile> <parameter> \n')
 
 ####################################################################
 ''' Main initialization routine '''

@@ -5,7 +5,7 @@
 #
 # SpectraLearnPredictSVM
 # Perform SVM machine learning on Raman maps.
-# version: 20160916c
+# version: 20160916d
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -26,7 +26,6 @@ import matplotlib.pyplot as plt
 #**********************************************
 # Input/Output files
 #**********************************************
-mapfile = "Dracken-7-tracky_map1_bs_fit2_selected.txt"
 trainedData = "trained.pkl"
 
 #**********************************************
@@ -52,15 +51,15 @@ showTrainingDataPlot = False
 
 def main():
     try:
-        LearnPredict(sys.argv[1])
+        LearnPredict(sys.argv[1], sys.argv[2])
     except:
-        print(' Please specify sample file name...\n')
+        usage()
         sys.exit(2)
 
 #**********************************************
 # Learn and Predict
 #**********************************************
-def LearnPredict(sampleFile):
+def LearnPredict(mapFile, sampleFile):
     
     #**********************************************
     # Open and process training data
@@ -143,10 +142,15 @@ def LearnPredict(sampleFile):
             plt.ylabel('Raman Intensity [arb. units]')
         plt.show()
 
+####################################################################
+''' Lists the program usage '''
+####################################################################
+def usage():
+    print('\n Usage:')
+    print('  python SpectraLearnPredictSVM.py <mapfile> <spectrafile> \n')
 
 ####################################################################
 ''' Main initialization routine '''
 ####################################################################
-
 if __name__ == "__main__":
     sys.exit(main())
