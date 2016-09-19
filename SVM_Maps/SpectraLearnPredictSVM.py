@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160919c
+* version: 20160919d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -56,11 +56,11 @@ showTrainingDataPlot = True
 ''' Main '''
 #**********************************************
 def main():
-    try:
+    #try:
         LearnPredict(sys.argv[1], sys.argv[2])
-    except:
-        usage()
-        sys.exit(2)
+            #except:
+            #usage()
+#sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -86,13 +86,13 @@ def LearnPredict(mapFile, sampleFile):
 
     Amax = np.empty([A.shape[0],1])
     print(' Number of datapoints = ' + str(A.shape[0]))
-    print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
+    print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
 
     #**********************************************
     ''' Normalize if flag is set '''
     #**********************************************
     if Ynorm == True:
-        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(YnormX) + '\n')
+        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']\n')
         for i in range(0,A.shape[0]):
             Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
             A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
@@ -115,9 +115,14 @@ def LearnPredict(mapFile, sampleFile):
     #**********************************************
     ''' Run prediction '''
     #**********************************************
+    print(' Opening sample data for prediction...')
     with open(sampleFile, 'r') as f:
         R = np.loadtxt(f, unpack =True, usecols=range(1,2))
     R = R.reshape(1,-1)
+
+    if(R.shape[1] != A.shape[1]):
+        print('\033[1m' + '\n WARNING: Prediction aborted. Different number of datapoints\n for the energy axis for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[1]) + ') data.\n Reformat sample data with ' + str(A.shape[1]) + ' X-datapoints.\n' + '\033[0m')
+        return
 
     if Ynorm == True:
         Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
