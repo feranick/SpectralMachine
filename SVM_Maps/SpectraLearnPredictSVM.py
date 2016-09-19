@@ -33,7 +33,7 @@ trainedData = "trained.pkl"
     Use either 'linear' or 'rbf'
     ('rbf' for large number of features) '''
 #**********************************************
-Cfactor = 1
+Cfactor = 10
 kernel = 'rbf'
 
 #**********************************************
@@ -50,7 +50,7 @@ fullYnorm = False
 ''' Plotting options '''
 #**********************************************
 showProbPlot = True
-showTrainingDataPlot = False
+showTrainingDataPlot = True
 
 #**********************************************
 ''' Main '''
@@ -121,7 +121,6 @@ def LearnPredict(mapFile, sampleFile):
 
     if Ynorm == True:
         Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
-        print(Rmax)
         R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
 
     print('\n Predicted value = ' + str(clf.predict(R)[0]) +'\n')
