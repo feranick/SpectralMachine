@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160919d
+* version: 20160919e
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -50,17 +50,17 @@ fullYnorm = False
 ''' Plotting options '''
 #**********************************************
 showProbPlot = True
-showTrainingDataPlot = True
+showTrainingDataPlot = False
 
 #**********************************************
 ''' Main '''
 #**********************************************
 def main():
-    #try:
+    try:
         LearnPredict(sys.argv[1], sys.argv[2])
-            #except:
-            #usage()
-#sys.exit(2)
+    except:
+        usage()
+        sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -70,9 +70,13 @@ def LearnPredict(mapFile, sampleFile):
     #**********************************************
     ''' Open and process training data '''
     #**********************************************
-    with open(mapFile, 'r') as f:
-        M = np.loadtxt(f, unpack =False)
-        
+    try:
+        with open(mapFile, 'r') as f:
+            M = np.loadtxt(f, unpack =False)
+    except:
+        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
+        return
+
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
@@ -115,9 +119,14 @@ def LearnPredict(mapFile, sampleFile):
     #**********************************************
     ''' Run prediction '''
     #**********************************************
-    print(' Opening sample data for prediction...')
-    with open(sampleFile, 'r') as f:
-        R = np.loadtxt(f, unpack =True, usecols=range(1,2))
+    try:
+        with open(sampleFile, 'r') as f:
+            print(' Opening sample data for prediction...')
+            R = np.loadtxt(f, unpack =True, usecols=range(1,2))
+    except:
+        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
+        return
+
     R = R.reshape(1,-1)
 
     if(R.shape[1] != A.shape[1]):

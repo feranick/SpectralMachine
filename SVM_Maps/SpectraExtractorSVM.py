@@ -5,7 +5,7 @@
 *
 * SpectraExtractorSVM.py
 * Extract spectra of specific phases
-* version: 20160916e
+* version: 20160919e
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -36,7 +36,6 @@ def main():
         usage()
         sys.exit(2)
 
-
 #**********************************************
 ''' Spectra Extractor '''
 #**********************************************
@@ -45,24 +44,31 @@ def spectraExtractor(mapFile, clustFile, newMapFile):
     #**********************************************
     ''' Read input data files '''
     #**********************************************
-    print(' Reading data and cluster files... \n')
-    with open(mapFile, 'r') as f:
-        En = np.array(f.readline().split(), dtype=np.dtype(float))
 
-    f = open(mapFile, 'r')
-    A = np.loadtxt(f, unpack =False, skiprows=1)
+    print(' Reading data and cluster files... \n')
+
+    try:
+        with open(mapFile, 'r') as f:
+            En = np.array(f.readline().split(), dtype=np.dtype(float))
+            A = np.loadtxt(f, unpack =False)
+    except:
+        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
+        return
+    
     A = np.delete(A, np.s_[0:2], 1)
-    f.close()
     print(' Shape map: ' + str(A.shape))
 
-    f = open(clustFile, 'r')
-    Cl = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(phaseColumn-1,phaseColumn))
-    f.close()
-    print(' Shape cluster vector: ' + str(Cl.shape))
+    try:
+        with open(clustFile, 'r') as f:
+            Cl = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(phaseColumn-1,phaseColumn))
+    except:
+        print('\033[1m' + '\n Cluster data file not found \n' + '\033[0m')
+        return
 
-    f = open(clustFile, 'r')
-    L = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(labelColumn-1,labelColumn))
-    f.close()
+    with open(clustFile, 'r') as f:
+        L = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(labelColumn-1,labelColumn))
+
+    print(' Shape cluster vector: ' + str(Cl.shape))
     print(' Shape label vector: ' + str(L.shape))
 
     #**********************************************

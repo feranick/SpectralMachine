@@ -5,7 +5,7 @@
 *
 * MapMakerSVM
 * Adds spectra to map files
-* version: 20160916e
+* version: 20160919e
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -32,17 +32,25 @@ def main():
 #**********************************************
 ''' Make Map file '''
 #**********************************************
-def makeFile(mapFile, sampleFile, param):
+def makeFile(mapFile, param, sampleFile):
     
     #**********************************************
     ''' Open and process training data '''
     #**********************************************
-
-    with open(sampleFile, 'r') as f:
-        En = np.loadtxt(f, unpack = True, usecols=range(0,1))
     
-    with open(sampleFile, 'r') as f:
-        R = np.loadtxt(f, unpack = True, usecols=range(1,2))
+    try:
+        with open(sampleFile, 'r') as f:
+            En = np.loadtxt(f, unpack = True, usecols=range(0,1))
+    except:
+        print(" Map data file not found \n")
+        return
+
+    try:
+        with open(sampleFile, 'r') as f:
+            R = np.loadtxt(f, unpack = True, usecols=range(1,2))
+    except:
+        print(" Sample data file not found \n")
+        return
 
     if os.path.exists(mapFile):
         print('\n Adding spectra to ' + mapFile + '\n')
