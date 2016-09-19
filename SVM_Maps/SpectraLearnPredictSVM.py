@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160919a
+* version: 20160919c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -42,12 +42,15 @@ kernel = 'rbf'
 Ynorm = True
 YnormTo = 1
 YnormX = 1604
+YnormXdelta = 30
+# Normalize from the full spectra (False: recommended)
+fullYnorm = False 
 
 #**********************************************
 ''' Plotting options '''
 #**********************************************
 showProbPlot = True
-showTrainingDataPlot = True
+showTrainingDataPlot = False
 
 #**********************************************
 ''' Main '''
@@ -71,14 +74,17 @@ def LearnPredict(mapFile, sampleFile):
         M = np.loadtxt(f, unpack =False)
         
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-
-    # Find index corresponding to energy value to be used for Y normalization
-    YnormXdelta = (En[1]-En[0])/2
-    YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0][0]
-
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
     A = np.delete(M,np.s_[0:1],1)
+
+    # Find index corresponding to energy value to be used for Y normalization
+    if fullYnorm == False:
+        YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
+    else:
+        YnormXind = np.where(En>0)[0].tolist()
+
+    Amax = np.empty([A.shape[0],1])
     print(' Number of datapoints = ' + str(A.shape[0]))
     print(' Size of each datapoints = ' + str(A.shape[1]) + '\n')
 
@@ -86,10 +92,10 @@ def LearnPredict(mapFile, sampleFile):
     ''' Normalize if flag is set '''
     #**********************************************
     if Ynorm == True:
-        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormXind) + ') = ' + str(En[YnormXind]) + '\n')
+        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(YnormX) + '\n')
         for i in range(0,A.shape[0]):
-            A[i,:] = np.multiply(A[i,:], YnormTo/A[i,YnormXind])
-
+            Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
+            A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
     try:
         with open(trainedData):
             print(" Opening training data...")
@@ -114,7 +120,9 @@ def LearnPredict(mapFile, sampleFile):
     R = R.reshape(1,-1)
 
     if Ynorm == True:
-            R[0,:] = np.multiply(R[0,:], YnormTo/R[0,YnormXind])
+        Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
+        print(Rmax)
+        R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
 
     print('\n Predicted value = ' + str(clf.predict(R)[0]) +'\n')
     prob = clf.predict_proba(R)[0].tolist()
