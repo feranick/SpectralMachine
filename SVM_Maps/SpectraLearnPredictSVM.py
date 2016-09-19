@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160916h
+* version: 20160919a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -40,8 +40,8 @@ kernel = 'rbf'
 ''' Spectra normalization conditions '''
 #**********************************************
 Ynorm = True
-YnormTo = 10
-YnormX = 534
+YnormTo = 1
+YnormX = 1604
 
 #**********************************************
 ''' Plotting options '''
@@ -71,6 +71,11 @@ def LearnPredict(mapFile, sampleFile):
         M = np.loadtxt(f, unpack =False)
         
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+
+    # Find index corresponding to energy value to be used for Y normalization
+    YnormXdelta = (En[1]-En[0])/2
+    YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0][0]
+
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
     A = np.delete(M,np.s_[0:1],1)
@@ -81,9 +86,9 @@ def LearnPredict(mapFile, sampleFile):
     ''' Normalize if flag is set '''
     #**********************************************
     if Ynorm == True:
-        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormX) + ') = ' + str(En[YnormX]) + '\n')
+        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En(' + str(YnormXind) + ') = ' + str(En[YnormXind]) + '\n')
         for i in range(0,A.shape[0]):
-            A[i,:] = np.multiply(A[i,:], YnormTo/A[i,YnormX])
+            A[i,:] = np.multiply(A[i,:], YnormTo/A[i,YnormXind])
 
     try:
         with open(trainedData):
@@ -109,7 +114,7 @@ def LearnPredict(mapFile, sampleFile):
     R = R.reshape(1,-1)
 
     if Ynorm == True:
-            R[0,:] = np.multiply(R[0,:], YnormTo/R[0,YnormX])
+            R[0,:] = np.multiply(R[0,:], YnormTo/R[0,YnormXind])
 
     print('\n Predicted value = ' + str(clf.predict(R)[0]) +'\n')
     prob = clf.predict_proba(R)[0].tolist()
