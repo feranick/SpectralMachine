@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160919e
+* version: 20160919f
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 ''' Input/Output files '''
 #**********************************************
 trainedData = "trained.pkl"
+alwaysRetrain = False
 
 #**********************************************
 ''' Training algorithm
@@ -49,7 +50,7 @@ fullYnorm = False
 #**********************************************
 ''' Plotting options '''
 #**********************************************
-showProbPlot = True
+showProbPlot = False
 showTrainingDataPlot = False
 
 #**********************************************
@@ -100,10 +101,14 @@ def LearnPredict(mapFile, sampleFile):
         for i in range(0,A.shape[0]):
             Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
             A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
+    
     try:
-        with open(trainedData):
-            print(" Opening training data...")
-            clf = joblib.load(trainedData)
+        if alwaysRetrain == False:
+            with open(trainedData):
+                print(" Opening training data...")
+                clf = joblib.load(trainedData)
+        else:
+            raise ValueError('Force retraining.')
     except:
         
         #**********************************************
