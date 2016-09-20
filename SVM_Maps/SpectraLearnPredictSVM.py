@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 ''' Input/Output files '''
 #**********************************************
 trainedData = "trained.pkl"
-alwaysRetrain = False
+alwaysRetrain = True
 
 #**********************************************
 ''' Training algorithm
@@ -36,6 +36,7 @@ alwaysRetrain = False
 #**********************************************
 Cfactor = 10
 kernel = 'rbf'
+showClasses = False
 
 #**********************************************
 ''' Spectra normalization conditions '''
@@ -57,11 +58,11 @@ showTrainingDataPlot = False
 ''' Main '''
 #**********************************************
 def main():
-    try:
+    #try:
         LearnPredict(sys.argv[1], sys.argv[2])
-    except:
-        usage()
-        sys.exit(2)
+            #except:
+            #    usage()
+#   sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -120,6 +121,8 @@ def LearnPredict(mapFile, sampleFile):
         Z= clf.decision_function(A)
         print(' Number of classes = ' + str(Z.shape[1]))
         joblib.dump(clf, trainedData)
+        if showClasses == True:
+            print(' List of classes: ' + str(clf.classes_))
 
     #**********************************************
     ''' Run prediction '''
