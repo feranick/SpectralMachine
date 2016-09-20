@@ -5,7 +5,7 @@
 *
 * MapMakerSVM
 * Adds spectra to map files
-* version: 20160919e
+* version: 20160919f
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -23,11 +23,11 @@ import sys, os.path
 #**********************************************
 
 def main():
-    try:
+    #try:
         makeFile(sys.argv[1], sys.argv[2], sys.argv[3])
-    except:
-        usage()
-        sys.exit(2)
+            #except:
+            #usage()
+#sys.exit(2)
 
 #**********************************************
 ''' Make Map file '''
@@ -41,16 +41,25 @@ def makeFile(mapFile, param, sampleFile):
     try:
         with open(sampleFile, 'r') as f:
             En = np.loadtxt(f, unpack = True, usecols=range(0,1))
+            print(' Number of points in the sample dataset: ' + str(En.shape[0]))
     except:
-        print(" Map data file not found \n")
+        print('\033[1m' + ' Sample data file not found \n' + '\033[0m')
         return
 
+    with open(sampleFile, 'r') as f:
+        R = np.loadtxt(f, unpack = True, usecols=range(1,2))
+
     try:
-        with open(sampleFile, 'r') as f:
-            R = np.loadtxt(f, unpack = True, usecols=range(1,2))
+        with open(mapFile, 'r') as f:
+            if len(f.readline().split('\t'))-1 == En.shape[0]:
+                print(' Number of points in the map dataset: ' + str(len(f.readline().split('\t'))-1))
+            else:
+                print('\033[1m' + ' Mismatch in datapoints: map: ' + str(len(f.readline().split('\t'))-1) + '; sample = ' +  str(En.shape[0]) + '\033[0m' + '\n')
+                return
     except:
-        print(" Sample data file not found \n")
+        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
         return
+
 
     if os.path.exists(mapFile):
         print('\n Adding spectra to ' + mapFile + '\n')
