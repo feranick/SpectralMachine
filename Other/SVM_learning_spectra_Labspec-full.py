@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+'''
 #*********************************************
 #
 # SVM_learning_spectra_Labspec-full
@@ -10,7 +10,9 @@
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
 #**********************************************
-
+'''
+print(__doc__)
+    
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import style
