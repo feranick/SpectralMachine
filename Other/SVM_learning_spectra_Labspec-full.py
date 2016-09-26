@@ -5,7 +5,7 @@
 #
 # SVM_learning_spectra_Labspec-full
 # Perform SVM machine learning on Raman maps.
-# version: 20160915b
+# version: 20160926a
 #
 # By: Nicola Ferralis <feranick@hotmail.com>
 #
@@ -22,8 +22,8 @@ from sklearn.externals import joblib
 sampleFile = "Sample.txt"
 whichColumn = 2
 
-mapfile = "Dracken-7-tracky_map1_bs_fit2_despiked.txt"
-clustfile = "Draken_map1_fit3-den_ratio-d1g-col-clust-all.txt"
+mapfile = "map.txt"
+clustfile = "clust.txt"
 trainedData = "trained.pkl"
 kernel = 'rbf'  #Use either 'linear' or 'rbf' (for large number of features)
 
@@ -47,7 +47,7 @@ except:
         Cl = np.loadtxt(f, unpack =False, skiprows=1, usecols = range(whichColumn-1,whichColumn))
         f.close()
         #Cl = [round(x*1000) for x in Cl]
-        Cl = ['{:.2f}'.format(x) for x in M[:,0]]
+        Cl = ['{:.2f}'.format(x) for x in Cl]
         print(Cl)
 
         print(' Retraining data...\n')
