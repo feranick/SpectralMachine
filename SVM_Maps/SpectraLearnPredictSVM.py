@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160919f
+* version: 20160926a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -22,6 +22,7 @@ from sklearn import svm
 import sys, os.path
 from sklearn.externals import joblib
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA, RandomizedPCA
 
 #**********************************************
 ''' Input/Output files '''
@@ -55,14 +56,20 @@ showProbPlot = False
 showTrainingDataPlot = False
 
 #**********************************************
+''' Principal component analysis (PCA) '''
+#**********************************************
+runPCA = False
+numPCAcomp = 5
+
+#**********************************************
 ''' Main '''
 #**********************************************
 def main():
-    #try:
+    try:
         LearnPredict(sys.argv[1], sys.argv[2])
-            #except:
-            #    usage()
-#   sys.exit(2)
+    except:
+        usage()
+        sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -151,6 +158,23 @@ def LearnPredict(mapFile, sampleFile):
     #print(' Probabilities of this sample within each class: \n')
     #for i in range(0,clf.classes_.shape[0]):
     #   print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
+
+
+    #********************
+    ''' Run PCA '''
+    #********************
+    if runPCA == True:
+        print(' Running PCA...\n')
+        pca = PCA(n_components=numPCAcomp)
+        pca.fit_transform(A)
+        for i in range(0,pca.components_.shape[0]):
+            plt.plot(En, pca.components_[i,:], label=i)
+        #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
+        plt.xlabel('Raman shift [1/cm]')
+        plt.ylabel('PCA')
+        plt.legend()
+        plt.show()
+
 
     #********************
     ''' Plot results '''
