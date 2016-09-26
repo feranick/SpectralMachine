@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160926a
+* version: 20160926b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -47,7 +47,15 @@ YnormTo = 1
 YnormX = 1604
 YnormXdelta = 30
 # Normalize from the full spectra (False: recommended)
-fullYnorm = False 
+fullYnorm = False
+
+#**********************************************
+''' Energy normalization range '''
+''' 150-250: D5; 450-550: G '''
+#**********************************************
+enRestrictRegion = False
+enLim1 = 450    # for now use indexes rather than actual Energy
+enLim2 = 550    # for now use indexes rather than actual Energy
 
 #**********************************************
 ''' Plotting options '''
@@ -65,11 +73,11 @@ numPCAcomp = 5
 ''' Main '''
 #**********************************************
 def main():
-    try:
+    #try:
         LearnPredict(sys.argv[1], sys.argv[2])
-    except:
-        usage()
-        sys.exit(2)
+            #except:
+            #    usage()
+#    sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -90,6 +98,7 @@ def LearnPredict(mapFile, sampleFile):
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
     A = np.delete(M,np.s_[0:1],1)
+    AmaxIndex = A.shape[1]
 
     # Find index corresponding to energy value to be used for Y normalization
     if fullYnorm == False:
@@ -109,7 +118,17 @@ def LearnPredict(mapFile, sampleFile):
         for i in range(0,A.shape[0]):
             Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
             A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
-    
+
+    #**********************************************
+    ''' Energy normalization range '''
+    #**********************************************
+    if enRestrictRegion == True:
+        A = A[:,range(enLim1, enLim2)]
+        En = En[range(enLim1, enLim2)]
+        print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+    else:
+        print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+
     try:
         if alwaysRetrain == False:
             with open(trainedData):
@@ -144,13 +163,16 @@ def LearnPredict(mapFile, sampleFile):
 
     R = R.reshape(1,-1)
 
-    if(R.shape[1] != A.shape[1]):
-        print('\033[1m' + '\n WARNING: Prediction aborted. Different number of datapoints\n for the energy axis for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[1]) + ') data.\n Reformat sample data with ' + str(A.shape[1]) + ' X-datapoints.\n' + '\033[0m')
+    if(R.shape[1] != AmaxIndex):
+        print('\033[1m' + '\n WARNING: Prediction aborted. Different number of datapoints\n for the energy axis for training (' + str(AmaxIndex) + ') and sample (' + str(R.shape[1]) + ') data.\n Reformat sample data with ' + str(A.shape[1]) + ' X-datapoints.\n' + '\033[0m')
         return
 
     if Ynorm == True:
         Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
         R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
+
+    if enRestrictRegion == True:
+        R = R[:,range(enLim1, enLim2)]
 
     print('\n Predicted value = ' + str(clf.predict(R)[0]) +'\n')
     prob = clf.predict_proba(R)[0].tolist()
