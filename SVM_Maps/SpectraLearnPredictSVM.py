@@ -73,11 +73,11 @@ numPCAcomp = 5
 ''' Main '''
 #**********************************************
 def main():
-    #try:
+    try:
         LearnPredict(sys.argv[1], sys.argv[2])
-            #except:
-            #    usage()
-#    sys.exit(2)
+    except:
+        usage()
+        sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
