@@ -3,9 +3,11 @@
 '''
 *********************************************
 *
-* SpectraLearnPredictSVM
-* Perform SVM machine learning on Raman maps.
-* version: 20160928b-tensorflow
+* SpectraLearnPredict
+* Perform Machine Mearning on Raman data.
+* version: 20160929a
+*
+* Uses: PCA, SVM, TensorFlow
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -22,8 +24,6 @@ from sklearn import svm
 import sys, os.path
 from sklearn.externals import joblib
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA, RandomizedPCA
-import tensorflow as tf
 
 #**********************************************
 ''' Input/Output files '''
@@ -48,7 +48,7 @@ YnormTo = 1
 YnormX = 1600
 YnormXdelta = 30
 # Normalize from the full spectra (False: recommended)
-fullYnorm = True
+fullYnorm = False
 
 #**********************************************
 ''' Energy normalization range '''
@@ -69,6 +69,11 @@ showTrainingDataPlot = False
 #**********************************************
 runPCA = False
 numPCAcomp = 5
+
+#**********************************************
+''' TensorFlow '''
+#**********************************************
+runTF = False
 
 #**********************************************
 ''' Main '''
@@ -175,7 +180,7 @@ def LearnPredict(mapFile, sampleFile):
     if enRestrictRegion == True:
         R = R[:,range(enLim1, enLim2)]
 
-    print('\n Predicted value = ' + str(clf.predict(R)[0]) +'\n')
+    print('\033[1m' + '\n Predicted value = ' + str(clf.predict(R)[0]) +'\n' + '\033[0m' )
     prob = clf.predict_proba(R)[0].tolist()
 
     #print(' Probabilities of this sample within each class: \n')
@@ -184,57 +189,15 @@ def LearnPredict(mapFile, sampleFile):
 
     #********************
     ''' Tensorflow '''
-    ''' https://www.tensorflow.org/versions/r0.10/tutorials/mnist/beginners/index.html'''
     #********************
-
-    print( ' Formatting training cluster data...\n')
-    Cl2 = np.zeros((np.array(Cl).shape[0], np.unique(Cl).shape[0]))
-
-    for i in range(np.array(Cl).shape[0]):
-        for j in range(np.array(np.unique(Cl).shape[0])):
-            if np.array(Cl)[i] == np.unique(Cl)[j]:
-                np.put(Cl2, [i, j], 1)
-            else:
-                np.put(Cl2, [i, j], 0)
-
-    print(' Initializing TensorFlow...\n')
-    x = tf.placeholder(tf.float32, [None, A.shape[1]])
-    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
-    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]))
-    y = tf.nn.softmax(tf.matmul(x, W) + b)
-
-    print(' Training TensorFlow...\n')
-    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
-    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
-    init = tf.initialize_all_variables()
-    sess = tf.Session()
-    sess.run(init)
-
-    sess.run(train_step, feed_dict={x: A, y_: Cl2})
-    res1 = sess.run(y, feed_dict={x: R})
-    res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
-    #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
-    print(' Prediction (TF): ' + str(clf.classes_[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n')
+    if runTF == True:
+        runTensorFlow(A,Cl,clf.classes_,R)
 
     #********************
     ''' Run PCA '''
     #********************
     if runPCA == True:
-        print(' Running PCA...\n')
-        pca = PCA(n_components=numPCAcomp)
-        pca.fit_transform(A)
-        for i in range(0,pca.components_.shape[0]):
-            plt.plot(En, pca.components_[i,:], label=i)
-        #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
-        plt.xlabel('Raman shift [1/cm]')
-        plt.ylabel('PCA')
-        plt.legend()
-        plt.show()
-
+        runPCAmain(En, A)
 
     #********************
     ''' Plot results '''
@@ -261,6 +224,71 @@ def LearnPredict(mapFile, sampleFile):
             plt.xlabel('Raman shift [1/cm]')
             plt.ylabel('Raman Intensity [arb. units]')
         plt.show()
+
+#********************
+''' Tensorflow '''
+''' https://www.tensorflow.org/versions/r0.10/tutorials/mnist/beginners/index.html'''
+#********************
+def runTensorFlow(A, Cl, Cl_label, R):
+    import tensorflow as tf
+    formatClassfile = "tfFormatClass.txt"
+
+    try:
+        with open(formatClassfile) as f:
+            print(' Opening format class data...\n')
+            Cl2 = np.loadtxt(f, unpack =False)
+    except:
+        print( ' Formatting training cluster data...\n')
+        Cl2 = np.zeros((np.array(Cl).shape[0], np.unique(Cl).shape[0]))
+        
+        for i in range(np.array(Cl).shape[0]):
+            for j in range(np.array(np.unique(Cl).shape[0])):
+                if np.array(Cl)[i] == np.unique(Cl)[j]:
+                    np.put(Cl2, [i, j], 1)
+                else:
+                    np.put(Cl2, [i, j], 0)
+        
+                np.savetxt(formatClassfile, Cl2, delimiter='\t', fmt='%10.6f')
+
+
+    print(' Initializing TensorFlow...\n')
+    x = tf.placeholder(tf.float32, [None, A.shape[1]])
+    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
+    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]))
+    y = tf.nn.softmax(tf.matmul(x, W) + b)
+    
+    print(' Training TensorFlow...\n')
+    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    
+    init = tf.initialize_all_variables()
+    sess = tf.Session()
+    sess.run(init)
+    
+    sess.run(train_step, feed_dict={x: A, y_: Cl2})
+    res1 = sess.run(y, feed_dict={x: R})
+    res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
+    #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
+    print('\033[1m' + ' Prediction (TF): ' + str(Cl_label[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
+
+#********************
+''' Run PCA '''
+#********************
+def runPCAmain(En, A):
+    from sklearn.decomposition import PCA, RandomizedPCA
+    print(' Running PCA...\n')
+    pca = PCA(n_components=numPCAcomp)
+    pca.fit_transform(A)
+    for i in range(0,pca.components_.shape[0]):
+        plt.plot(En, pca.components_[i,:], label=i)
+    #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
+    plt.xlabel('Raman shift [1/cm]')
+    plt.ylabel('PCA')
+    plt.legend()
+    plt.show()
 
 #************************************
 ''' Lists the program usage '''
