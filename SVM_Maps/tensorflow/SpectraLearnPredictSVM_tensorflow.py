@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredictSVM
 * Perform SVM machine learning on Raman maps.
-* version: 20160926b-tensorflow
+* version: 20160928b-tensorflow
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -29,7 +29,7 @@ import tensorflow as tf
 ''' Input/Output files '''
 #**********************************************
 trainedData = "trained.pkl"
-alwaysRetrain = True
+alwaysRetrain = False
 
 #**********************************************
 ''' Training algorithm
@@ -38,17 +38,17 @@ alwaysRetrain = True
 #**********************************************
 Cfactor = 10
 kernel = 'rbf'
-showClasses = True
+showClasses = False
 
 #**********************************************
 ''' Spectra normalization conditions '''
 #**********************************************
 Ynorm = True
 YnormTo = 1
-YnormX = 1604
+YnormX = 1600
 YnormXdelta = 30
 # Normalize from the full spectra (False: recommended)
-fullYnorm = False
+fullYnorm = True
 
 #**********************************************
 ''' Energy normalization range '''
@@ -74,11 +74,11 @@ numPCAcomp = 5
 ''' Main '''
 #**********************************************
 def main():
-    #try:
+    try:
         LearnPredict(sys.argv[1], sys.argv[2])
-            #except:
-            #   usage()
-#sys.exit(2)
+    except:
+        usage()
+        sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -98,7 +98,6 @@ def LearnPredict(mapFile, sampleFile):
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
-    print(Cl)
     A = np.delete(M,np.s_[0:1],1)
     AmaxIndex = A.shape[1]
 
@@ -189,23 +188,23 @@ def LearnPredict(mapFile, sampleFile):
     #********************
 
     print( ' Formatting training cluster data...\n')
-    Cl2 = np.zeros((np.array(Cl).shape[0], np.array(clf.classes_).shape[0]))
+    Cl2 = np.zeros((np.array(Cl).shape[0], np.unique(Cl).shape[0]))
 
     for i in range(np.array(Cl).shape[0]):
-        for j in range(np.array(clf.classes_).shape[0]):
-            if np.array(Cl)[i] == np.array(clf.classes_)[j]:
+        for j in range(np.array(np.unique(Cl).shape[0])):
+            if np.array(Cl)[i] == np.unique(Cl)[j]:
                 np.put(Cl2, [i, j], 1)
             else:
                 np.put(Cl2, [i, j], 0)
 
     print(' Initializing TensorFlow...\n')
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
-    W = tf.Variable(tf.zeros([A.shape[1], Z.shape[1]]))
-    b = tf.Variable(tf.zeros(Z.shape[1]))
+    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
+    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]))
     y = tf.nn.softmax(tf.matmul(x, W) + b)
 
     print(' Training TensorFlow...\n')
-    y_ = tf.placeholder(tf.float32, [None, Z.shape[1]])
+    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
     train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
@@ -218,7 +217,7 @@ def LearnPredict(mapFile, sampleFile):
     sess.run(train_step, feed_dict={x: A, y_: Cl2})
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
-    print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
+    #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
     print(' Prediction (TF): ' + str(clf.classes_[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n')
 
     #********************
