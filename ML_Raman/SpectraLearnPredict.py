@@ -5,9 +5,9 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20160929a
+* version: 20161006a
 *
-* Uses: PCA, SVM, TensorFlow
+* Uses: PCA, SVM, Neural Networks, TensorFlow
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -20,25 +20,7 @@ if matplotlib.get_backend() == 'TkAgg':
     matplotlib.use('Agg')
 
 import numpy as np
-from sklearn import svm
 import sys, os.path
-from sklearn.externals import joblib
-import matplotlib.pyplot as plt
-
-#**********************************************
-''' Input/Output files '''
-#**********************************************
-trainedData = "trained.pkl"
-alwaysRetrain = False
-
-#**********************************************
-''' Training algorithm
-    Use either 'linear' or 'rbf'
-    ('rbf' for large number of features) '''
-#**********************************************
-Cfactor = 10
-kernel = 'rbf'
-showClasses = False
 
 #**********************************************
 ''' Spectra normalization conditions '''
@@ -59,10 +41,29 @@ enLim1 = 450    # for now use indexes rather than actual Energy
 enLim2 = 550    # for now use indexes rather than actual Energy
 
 #**********************************************
-''' Plotting options '''
+''' Support Vector Classification'''
 #**********************************************
+runSVM = True
+
+''' Input/Output files '''
+trainedData = "trained.pkl"
+alwaysRetrain = False
+
+''' Training algorithm
+Use either 'linear' or 'rbf'
+('rbf' for large number of features) '''
+
+Cfactor = 10
+kernel = 'rbf'
+showClasses = False
+
 showProbPlot = False
 showTrainingDataPlot = False
+
+#**********************************************
+''' Neural Networks'''
+#**********************************************
+runNN = True
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -135,6 +136,61 @@ def LearnPredict(mapFile, sampleFile):
     else:
         print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
 
+    #**********************************************
+    ''' Open prediction file '''
+    #**********************************************
+    try:
+        with open(sampleFile, 'r') as f:
+            print(' Opening sample data for prediction...')
+            R = np.loadtxt(f, unpack =True, usecols=range(1,2))
+    except:
+        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
+        return
+
+    R = R.reshape(1,-1)
+    if(R.shape[1] != AmaxIndex):
+        print('\033[1m' + '\n WARNING: Prediction aborted. Different number of datapoints\n for the energy axis for training (' + str(AmaxIndex) + ') and sample (' + str(R.shape[1]) + ') data.\n Reformat sample data with ' + str(A.shape[1]) + ' X-datapoints.\n' + '\033[0m')
+        return
+
+    if Ynorm == True:
+        Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
+        R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
+
+    if enRestrictRegion == True:
+        R = R[:,range(enLim1, enLim2)]
+
+    #***********************************
+    ''' Run Support Vector Machines '''
+    #***********************************
+    if runSVM == True:
+        runSVMmain(A, Cl, R)
+
+    #********************
+    ''' Run PCA '''
+    #********************
+    if runPCA == True:
+        runPCAmain(En, A)
+    
+    #******************************
+    ''' Run Neural Network '''
+    #******************************
+    if runNN == True:
+        runNNmain(A, Cl, R)
+
+    #********************
+    ''' Tensorflow '''
+    #********************
+    if runTF == True:
+        runTensorFlow(A,Cl,clf.classes_,R)
+
+
+#********************
+''' Run SVM '''
+#********************
+def runSVMmain(A, Cl, R):
+    from sklearn import svm
+    from sklearn.externals import joblib
+    print('\n Running Support Vector Machine...')
     try:
         if alwaysRetrain == False:
             with open(trainedData):
@@ -143,7 +199,6 @@ def LearnPredict(mapFile, sampleFile):
         else:
             raise ValueError('Force retraining.')
     except:
-        
         #**********************************************
         ''' Retrain data if not available'''
         #**********************************************
@@ -156,30 +211,6 @@ def LearnPredict(mapFile, sampleFile):
         if showClasses == True:
             print(' List of classes: ' + str(clf.classes_))
 
-    #**********************************************
-    ''' Run prediction '''
-    #**********************************************
-    try:
-        with open(sampleFile, 'r') as f:
-            print(' Opening sample data for prediction...')
-            R = np.loadtxt(f, unpack =True, usecols=range(1,2))
-    except:
-        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
-        return
-
-    R = R.reshape(1,-1)
-
-    if(R.shape[1] != AmaxIndex):
-        print('\033[1m' + '\n WARNING: Prediction aborted. Different number of datapoints\n for the energy axis for training (' + str(AmaxIndex) + ') and sample (' + str(R.shape[1]) + ') data.\n Reformat sample data with ' + str(A.shape[1]) + ' X-datapoints.\n' + '\033[0m')
-        return
-
-    if Ynorm == True:
-        Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
-        R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
-
-    if enRestrictRegion == True:
-        R = R[:,range(enLim1, enLim2)]
-
     print('\033[1m' + '\n Predicted value = ' + str(clf.predict(R)[0]) +'\n' + '\033[0m' )
     prob = clf.predict_proba(R)[0].tolist()
 
@@ -188,21 +219,10 @@ def LearnPredict(mapFile, sampleFile):
     #   print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
 
     #********************
-    ''' Tensorflow '''
-    #********************
-    if runTF == True:
-        runTensorFlow(A,Cl,clf.classes_,R)
-
-    #********************
-    ''' Run PCA '''
-    #********************
-    if runPCA == True:
-        runPCAmain(En, A)
-
-    #********************
     ''' Plot results '''
     #********************
     if showProbPlot == True:
+        import matplotlib.pyplot as plt
         print('\n Stand by: Plotting probabilities for each class... \n')
         plt.title('Probability density per class: ' + str(sampleFile))
         for i in range(0, clf.classes_.shape[0]):
@@ -213,6 +233,7 @@ def LearnPredict(mapFile, sampleFile):
         plt.show()
 
     if showTrainingDataPlot == True:
+        import matplotlib.pyplot as plt
         print(' Stand by: Plotting each datapoint from the map...\n')
         if Ynorm ==True:
             plt.title("Normalized Training Data")
@@ -225,6 +246,34 @@ def LearnPredict(mapFile, sampleFile):
             plt.ylabel('Raman Intensity [arb. units]')
         plt.show()
 
+#*************************
+''' Run Neural Network '''
+#*************************
+def runNNmain(A, Cl, R):
+    from sklearn.neural_network import MLPClassifier
+    print('\n Running Neural Network: multi-layer perceptron (MLP)...')
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+    clf.fit(A, Cl)
+    print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) +'\n' + '\033[0m' )
+
+#********************
+''' Run PCA '''
+#********************
+def runPCAmain(En, A):
+    from sklearn.decomposition import PCA, RandomizedPCA
+    import matplotlib.pyplot as plt
+    print(' Running PCA...\n')
+    pca = PCA(n_components=numPCAcomp)
+    pca.fit_transform(A)
+    for i in range(0,pca.components_.shape[0]):
+        plt.plot(En, pca.components_[i,:], label=i)
+    #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
+    plt.xlabel('Raman shift [1/cm]')
+    plt.ylabel('PCA')
+    plt.legend()
+    plt.show()
+
+
 #********************
 ''' Tensorflow '''
 ''' https://www.tensorflow.org/versions/r0.10/tutorials/mnist/beginners/index.html'''
@@ -232,7 +281,7 @@ def LearnPredict(mapFile, sampleFile):
 def runTensorFlow(A, Cl, Cl_label, R):
     import tensorflow as tf
     formatClassfile = "tfFormatClass.txt"
-
+    
     try:
         with open(formatClassfile) as f:
             print(' Opening format class data...\n')
@@ -247,9 +296,8 @@ def runTensorFlow(A, Cl, Cl_label, R):
                     np.put(Cl2, [i, j], 1)
                 else:
                     np.put(Cl2, [i, j], 0)
-        
+                
                 np.savetxt(formatClassfile, Cl2, delimiter='\t', fmt='%10.6f')
-
 
     print(' Initializing TensorFlow...\n')
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
@@ -273,22 +321,6 @@ def runTensorFlow(A, Cl, Cl_label, R):
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
     #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
     print('\033[1m' + ' Prediction (TF): ' + str(Cl_label[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
-
-#********************
-''' Run PCA '''
-#********************
-def runPCAmain(En, A):
-    from sklearn.decomposition import PCA, RandomizedPCA
-    print(' Running PCA...\n')
-    pca = PCA(n_components=numPCAcomp)
-    pca.fit_transform(A)
-    for i in range(0,pca.components_.shape[0]):
-        plt.plot(En, pca.components_[i,:], label=i)
-    #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
-    plt.xlabel('Raman shift [1/cm]')
-    plt.ylabel('PCA')
-    plt.legend()
-    plt.show()
 
 #************************************
 ''' Lists the program usage '''

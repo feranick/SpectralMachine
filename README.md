@@ -1,7 +1,11 @@
 # SpectralMachine
 Machine learning software for rapid analysis of Raman spectra.
 
-PCA, SVM, TensorFlow
+Supported algorithms:
+Principal component analysis - PCA
+Support Vector Machine - SVM
+Neural Network -  multi-layer perceptron (MLP)
+TensorFlow
 
 Note
 =====
