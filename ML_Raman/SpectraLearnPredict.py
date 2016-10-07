@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007i
+* version: 20161007j
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -97,11 +97,11 @@ showTrainingDataPlot = False
 ''' Main '''
 #**********************************************
 def main():
-    try:
-        LearnPredict(sys.argv[1], sys.argv[2])
-    except:
-        usage()
-        sys.exit(2)
+    #try:
+    LearnPredict(sys.argv[1], sys.argv[2])
+            #except:
+            #usage()
+#sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -140,15 +140,20 @@ def LearnPredict(mapFile, sampleFile):
     try:
         with open(sampleFile, 'r') as f:
             print(' Opening sample data for prediction...')
-            R = np.loadtxt(f, unpack =True, usecols=range(1,2))
+            Rtot = np.loadtxt(f, unpack =True)
+            R=Rtot[1,:]
+            Rx=Rtot[0,:]
     except:
         print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
         return
     
+    #**********************************************************************************
+    ''' Reformat x-axis in case it does not match that of the training data '''
+    #**********************************************************************************
+    if(R.shape[0] != AmaxIndex):
+        print('\033[1m' + '\n WARNING: Different number of datapoints for the x-axis\n for training (' + str(AmaxIndex) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
+        R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
-    if(R.shape[1] != AmaxIndex):
-        print('\033[1m' + '\n WARNING: Prediction aborted. Different number of datapoints\n for the energy axis for training (' + str(AmaxIndex) + ') and sample (' + str(R.shape[1]) + ') data.\n Reformat sample data with ' + str(A.shape[1]) + ' X-datapoints.\n' + '\033[0m')
-        return
 
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
