@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161006a
+* version: 20161007b
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -163,7 +163,7 @@ def LearnPredict(mapFile, sampleFile):
     ''' Run Support Vector Machines '''
     #***********************************
     if runSVM == True:
-        runSVMmain(A, Cl, R)
+        runSVMmain(A, Cl, En, R)
 
     #********************
     ''' Run PCA '''
@@ -187,7 +187,7 @@ def LearnPredict(mapFile, sampleFile):
 #********************
 ''' Run SVM '''
 #********************
-def runSVMmain(A, Cl, R):
+def runSVMmain(A, Cl, En, R):
     from sklearn import svm
     from sklearn.externals import joblib
     print('\n Running Support Vector Machine...')
