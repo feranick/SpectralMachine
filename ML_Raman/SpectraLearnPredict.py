@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007j
+* version: 20161007k
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -85,7 +85,7 @@ numPCAcomp = 5
 #**********************************************
 ''' TensorFlow '''
 #**********************************************
-runTF = False
+runTF = True
 
 #**********************************************
 ''' Plotting '''
@@ -216,7 +216,7 @@ def LearnPredict(mapFile, sampleFile):
     ''' Tensorflow '''
     #********************
     if runTF == True:
-        runTensorFlow(A,Cl,clf.classes_,R)
+        runTensorFlow(A,Cl,R)
 
     #***************************
     ''' Plot Training Data '''
@@ -234,8 +234,6 @@ def LearnPredict(mapFile, sampleFile):
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Raman Intensity [arb. units]')
         plt.show()
-
-
 
 #********************
 ''' Run SVM '''
@@ -342,17 +340,17 @@ def runPCAmain(En, A):
     plt.show()
 
 
-#********************
-''' Tensorflow '''
+#********************************************************************************
+''' Tensorflow (Experimental)'''
 ''' https://www.tensorflow.org/versions/r0.10/tutorials/mnist/beginners/index.html'''
-#********************
-def runTensorFlow(A, Cl, Cl_label, R):
+#********************************************************************************
+def runTensorFlow(A, Cl, R):
     import tensorflow as tf
     formatClassfile = "tfFormatClass.txt"
     
     try:
         with open(formatClassfile) as f:
-            print(' Opening format class data...\n')
+            print(' Opening TensorFlow format class data...\n')
             Cl2 = np.loadtxt(f, unpack =False)
     except:
         print( ' Formatting training cluster data...\n')
@@ -388,7 +386,7 @@ def runTensorFlow(A, Cl, Cl_label, R):
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
     #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
-    print('\033[1m' + ' Prediction (TF): ' + str(Cl_label[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
+    print('\033[1m' + ' Prediction (TF): ' + str(np.unique(Cl)[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
 
 #************************************
 ''' Plot Probabilities '''
