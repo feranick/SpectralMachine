@@ -250,10 +250,7 @@ def runSVMmain(A, Cl, En, R):
         ''' Retrain data if not available'''
         #**********************************************
         print('\n Retraining data...')
-        if showProbPlot == True:
-            clf = svm.SVC(C = Cfactor, decision_function_shape = 'ovr', probability=True)
-        else:
-            clf = svm.SVC(C = Cfactor, decision_function_shape = 'ovr')
+        clf = svm.SVC(C = Cfactor, decision_function_shape = 'ovr', probability=True)
         clf.fit(A,Cl)
         Z= clf.decision_function(A)
         print(' Number of classes = ' + str(Z.shape[1]))
@@ -262,7 +259,9 @@ def runSVMmain(A, Cl, En, R):
             print(' List of classes: ' + str(clf.classes_))
 
     R_pred = clf.predict(R)
-    print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) +'\n' + '\033[0m' )
+    prob = clf.predict_proba(R)[0].tolist()
+    print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) + '\033[0m' + ' (probability = ' +
+          str(round(100*max(prob),1)) + '%)\n')
     
     #**************************************
     ''' SVM Classification Report '''
@@ -289,7 +288,9 @@ def runNNmain(A, Cl, R):
     print('\n Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnSolver + ')...')
     clf = MLPClassifier(solver=nnSolver, alpha=1e-5, hidden_layer_sizes=(nnNeurons,), random_state=1)
     clf.fit(A, Cl)
-    print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) +'\n' + '\033[0m' )
+    prob = clf.predict_proba(R)[0].tolist()
+    print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) + '\033[0m' +
+          ' (probability = ' + str(round(100*max(prob),1)) + '%)\n')
 
     #**************************************
     ''' Neural Networks Classification Report '''
@@ -373,7 +374,9 @@ def runTensorFlow(A, Cl, Cl_label, R):
     #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
     print('\033[1m' + ' Prediction (TF): ' + str(Cl_label[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
 
-
+#************************************
+''' Plot Probabilities '''
+#************************************
 def plotProb(clf, R):
     prob = clf.predict_proba(R)[0].tolist()
     print(' Probabilities of this sample within each class: \n')
