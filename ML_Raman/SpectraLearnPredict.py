@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007g
+* version: 20161007h
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -62,9 +62,6 @@ Cfactor = 20
 kernel = 'rbf'
 showClasses = False
 
-showProbPlot = False
-showTrainingDataPlot = False
-
 #**********************************************
 ''' Neural Networks'''
 #**********************************************
@@ -88,6 +85,12 @@ numPCAcomp = 5
 ''' TensorFlow '''
 #**********************************************
 runTF = False
+
+#**********************************************
+''' Plotting '''
+#**********************************************
+showProbPlot = False
+showTrainingDataPlot = False
 
 #**********************************************
 ''' Main '''
@@ -209,6 +212,25 @@ def LearnPredict(mapFile, sampleFile):
     if runTF == True:
         runTensorFlow(A,Cl,clf.classes_,R)
 
+    #***************************
+    ''' Plot Training Data '''
+    #***************************
+    if showTrainingDataPlot == True:
+        import matplotlib.pyplot as plt
+        print(' Stand by: Plotting each datapoint from the map...\n')
+        if Ynorm ==True:
+            plt.title("Normalized Training Data")
+        else:
+            plt.title("Training Data")
+        for i in range(0,A.shape[0]):
+            plt.plot(En, A[i,:], label='Training data')
+        plt.plot(En, R[0,:], linewidth = 2, label='Sample data')
+        plt.xlabel('Raman shift [1/cm]')
+        plt.ylabel('Raman Intensity [arb. units]')
+        plt.show()
+
+
+
 #********************
 ''' Run SVM '''
 #********************
@@ -252,37 +274,12 @@ def runSVMmain(A, Cl, En, R):
         print(classification_report(Cl, y_pred, target_names=clf.classes_))
         infoClassReport()
 
-    #********************
-    ''' Plot results '''
-    #********************
+    #*************************
+    ''' Plot probabilities '''
+    #*************************
     if showProbPlot == True:
-        prob = clf.predict_proba(R)[0].tolist()
-        print(' Probabilities of this sample within each class: \n')
-        for i in range(0,clf.classes_.shape[0]):
-            print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
-        import matplotlib.pyplot as plt
-        print('\n Stand by: Plotting probabilities for each class... \n')
-        plt.title('Probability density per class')
-        for i in range(0, clf.classes_.shape[0]):
-            plt.scatter(clf.classes_[i], round(100*prob[i],2), label='probability', c = 'red')
-        plt.grid(True)
-        plt.xlabel('Class')
-        plt.ylabel('Probability [%]')
-        plt.show()
+        plotProb(clf, R)
 
-    if showTrainingDataPlot == True:
-        import matplotlib.pyplot as plt
-        print(' Stand by: Plotting each datapoint from the map...\n')
-        if Ynorm ==True:
-            plt.title("Normalized Training Data")
-        else:
-            plt.title("Training Data")
-        for i in range(0,A.shape[0]):
-            plt.plot(En, A[i,:], label='Training data')
-            plt.plot(En, R[0,:], linewidth = 2, label='Sample data')
-            plt.xlabel('Raman shift [1/cm]')
-            plt.ylabel('Raman Intensity [arb. units]')
-        plt.show()
 
 #*************************
 ''' Run Neural Network '''
@@ -303,6 +300,12 @@ def runNNmain(A, Cl, R):
         y_pred = clf.predict(A)
         print(classification_report(Cl, y_pred, target_names=clf.classes_))
         infoClassReport()
+
+    #*************************
+    ''' Plot probabilities '''
+    #*************************
+    if showProbPlot == True:
+        plotProb(clf, R)
 
 #********************
 ''' Run PCA '''
@@ -369,6 +372,22 @@ def runTensorFlow(A, Cl, Cl_label, R):
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
     #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
     print('\033[1m' + ' Prediction (TF): ' + str(Cl_label[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
+
+
+def plotProb(clf, R):
+    prob = clf.predict_proba(R)[0].tolist()
+    print(' Probabilities of this sample within each class: \n')
+    for i in range(0,clf.classes_.shape[0]):
+        print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
+    import matplotlib.pyplot as plt
+    print('\n Stand by: Plotting probabilities for each class... \n')
+    plt.title('Probability density per class')
+    for i in range(0, clf.classes_.shape[0]):
+        plt.scatter(clf.classes_[i], round(100*prob[i],2), label='probability', c = 'red')
+    plt.grid(True)
+    plt.xlabel('Class')
+    plt.ylabel('Probability [%]')
+    plt.show()
 
 #************************************
 ''' Lists the program usage '''
