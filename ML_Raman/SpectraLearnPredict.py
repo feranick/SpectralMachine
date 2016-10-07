@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007h
+* version: 20161007i
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -50,9 +50,8 @@ percentCrossValid = 0.05
 runSVM = True
 svmClassReport = False
 
-''' Input/Output files '''
-trainedData = "trained.pkl"
-alwaysRetrain = True
+svmTrainedData = "svmTrained.pkl"
+svmAlwaysRetrain = True
 
 ''' Training algorithm for SVM
 Use either 'linear' or 'rbf'
@@ -66,14 +65,16 @@ showClasses = False
 ''' Neural Networks'''
 #**********************************************
 runNN = True
+nnClassReport = False
+
+nnTrainedData = "nnTrained.pkl"
+nnAlwaysRetrain = True
 
 ''' Solver for NN
     lbfgs preferred for small datasets
     (alternatives: 'adam' or 'sgd') '''
 nnSolver = 'lbfgs'
 nnNeurons = 100  #default = 100
-
-nnClassReport = False
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -239,22 +240,22 @@ def runSVMmain(A, Cl, En, R):
     from sklearn.externals import joblib
     print('\n Running Support Vector Machine (kernel: ' + kernel + ')...')
     try:
-        if alwaysRetrain == False:
-            with open(trainedData):
-                print(" Opening training data...")
-                clf = joblib.load(trainedData)
+        if svmAlwaysRetrain == False:
+            with open(svmTrainedData):
+                print(' Opening SVM training data...')
+                clf = joblib.load(svmTrainedData)
         else:
-            raise ValueError('Force retraining.')
+            raise ValueError('Force retraining SVM data')
     except:
         #**********************************************
-        ''' Retrain data if not available'''
+        ''' Retrain NN data if not available'''
         #**********************************************
-        print('\n Retraining data...')
+        print('\n Retraining SVM data...')
         clf = svm.SVC(C = Cfactor, decision_function_shape = 'ovr', probability=True)
         clf.fit(A,Cl)
         Z= clf.decision_function(A)
         print(' Number of classes = ' + str(Z.shape[1]))
-        joblib.dump(clf, trainedData)
+        joblib.dump(clf, svmTrainedData)
         if showClasses == True:
             print(' List of classes: ' + str(clf.classes_))
 
@@ -268,10 +269,7 @@ def runSVMmain(A, Cl, En, R):
     #**************************************
     if svmClassReport == True:
         print(' SVM Classification Report \n')
-        from sklearn.metrics import classification_report
-        y_pred = clf.predict(A)
-        print(classification_report(Cl, y_pred, target_names=clf.classes_))
-        infoClassReport()
+        runClassReport(clf, A, Cl)
 
     #*************************
     ''' Plot probabilities '''
@@ -280,14 +278,30 @@ def runSVMmain(A, Cl, En, R):
         plotProb(clf, R)
 
 
+
 #*************************
 ''' Run Neural Network '''
 #*************************
 def runNNmain(A, Cl, R):
     from sklearn.neural_network import MLPClassifier
+    from sklearn.externals import joblib
     print('\n Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnSolver + ')...')
-    clf = MLPClassifier(solver=nnSolver, alpha=1e-5, hidden_layer_sizes=(nnNeurons,), random_state=1)
-    clf.fit(A, Cl)
+    try:
+        if nnAlwaysRetrain == False:
+            with open(nnTrainedData):
+                print(' Opening NN training data...')
+                clf = joblib.load(nnTrainedData)
+        else:
+            raise ValueError('Force NN retraining.')
+    except:
+        #**********************************************
+        ''' Retrain data if not available'''
+        #**********************************************
+        print('\n Retraining NN data...')
+        clf = MLPClassifier(solver=nnSolver, alpha=1e-5, hidden_layer_sizes=(nnNeurons,), random_state=1)
+        clf.fit(A, Cl)
+        joblib.dump(clf, nnTrainedData)
+
     prob = clf.predict_proba(R)[0].tolist()
     print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) + '\033[0m' +
           ' (probability = ' + str(round(100*max(prob),1)) + '%)\n')
@@ -297,10 +311,7 @@ def runNNmain(A, Cl, R):
     #**************************************
     if nnClassReport == True:
         print(' Neural Networks Classification Report\n')
-        from sklearn.metrics import classification_report
-        y_pred = clf.predict(A)
-        print(classification_report(Cl, y_pred, target_names=clf.classes_))
-        infoClassReport()
+        runClassReport(clf, A, Cl)
 
     #*************************
     ''' Plot probabilities '''
@@ -402,7 +413,10 @@ def usage():
 #************************************
 ''' Info on Classification Report '''
 #************************************
-def infoClassReport():
+def runClassReport(clf, A, Cl):
+    from sklearn.metrics import classification_report
+    y_pred = clf.predict(A)
+    print(classification_report(Cl, y_pred, target_names=clf.classes_))
     print(' Precision is the probability that, given a classification result for a sample,\n' +
           ' the sample actually belongs to that class. Recall (Accuracy) is the probability that a \n' +
           ' sample will be correctly classified for a given class. F1 score combines both \n' +
