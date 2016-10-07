@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007c
+* version: 20161007d
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -48,6 +48,7 @@ percentCrossValid = 0.05
 ''' Support Vector Classification'''
 #**********************************************
 runSVM = True
+svmClassReport = True
 
 ''' Input/Output files '''
 trainedData = "trained.pkl"
@@ -200,7 +201,6 @@ def LearnPredict(mapFile, sampleFile):
     if runTF == True:
         runTensorFlow(A,Cl,clf.classes_,R)
 
-
 #********************
 ''' Run SVM '''
 #********************
@@ -220,7 +220,7 @@ def runSVMmain(A, Cl, En, R):
         ''' Retrain data if not available'''
         #**********************************************
         print('\n Retraining data...')
-        clf = svm.SVC(kernel = kernel, C = Cfactor, decision_function_shape = 'ovr', probability=True)
+        clf = svm.SVC(C = Cfactor, decision_function_shape = 'ovr', probability=True)
         clf.fit(A,Cl)
         Z= clf.decision_function(A)
         print(' Number of classes = ' + str(Z.shape[1]))
@@ -228,12 +228,20 @@ def runSVMmain(A, Cl, En, R):
         if showClasses == True:
             print(' List of classes: ' + str(clf.classes_))
 
-    print('\033[1m' + '\n Predicted value = ' + str(clf.predict(R)[0]) +'\n' + '\033[0m' )
-    prob = clf.predict_proba(R)[0].tolist()
+    R_pred = clf.predict(R)
+    print('\033[1m' + '\n Predicted value = ' + str(R_pred[0]) +'\n' + '\033[0m' )
 
-    #print(' Probabilities of this sample within each class: \n')
-    #for i in range(0,clf.classes_.shape[0]):
-    #   print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
+    '''
+    print(' Probabilities of this sample within each class: \n')
+    prob = clf.predict_proba(R)[0].tolist()
+    for i in range(0,clf.classes_.shape[0]):
+       print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
+    '''
+
+    if svmClassReport ==True:
+        from sklearn.metrics import classification_report
+        y_pred = clf.predict(A)
+        print(classification_report(Cl, y_pred, target_names=clf.classes_))
 
     #********************
     ''' Plot results '''
