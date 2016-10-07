@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007d
+* version: 20161007e
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -25,14 +25,14 @@ import sys, os.path
 #**********************************************
 ''' Spectra normalization, preprocessing '''
 #**********************************************
-Ynorm = True
+Ynorm = True   # True recommended
 YnormTo = 1
 YnormX = 1600
 YnormXdelta = 30
-# Normalize from the full spectra (False: recommended)
-fullYnorm = False
 
-preProcess = False
+fullYnorm = False  # Normalize full spectra (False: recommended)
+
+preProcess = True  # True recommended
 
 enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
@@ -41,7 +41,7 @@ enLim2 = 550    # for now use indexes rather than actual Energy
 #**********************************************
 ''' Model selection for training '''
 #**********************************************
-modelSelection = True
+modelSelection = False
 percentCrossValid = 0.05
 
 #**********************************************
@@ -58,7 +58,7 @@ alwaysRetrain = True
 Use either 'linear' or 'rbf'
 ('rbf' for large number of features) '''
 
-Cfactor = 10
+Cfactor = 20
 kernel = 'rbf'
 showClasses = False
 
@@ -230,10 +230,10 @@ def runSVMmain(A, Cl, En, R):
 
     R_pred = clf.predict(R)
     print('\033[1m' + '\n Predicted value = ' + str(R_pred[0]) +'\n' + '\033[0m' )
+    prob = clf.predict_proba(R)[0].tolist()
 
     '''
     print(' Probabilities of this sample within each class: \n')
-    prob = clf.predict_proba(R)[0].tolist()
     for i in range(0,clf.classes_.shape[0]):
        print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
     '''
@@ -249,7 +249,7 @@ def runSVMmain(A, Cl, En, R):
     if showProbPlot == True:
         import matplotlib.pyplot as plt
         print('\n Stand by: Plotting probabilities for each class... \n')
-        plt.title('Probability density per class: ' + str(sampleFile))
+        plt.title('Probability density per class')
         for i in range(0, clf.classes_.shape[0]):
             plt.scatter(clf.classes_[i], round(100*prob[i],2), label='probability', c = 'red')
         plt.grid(True)
