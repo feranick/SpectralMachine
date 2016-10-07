@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007e
+* version: 20161007f
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -69,6 +69,7 @@ showTrainingDataPlot = False
 ''' Neural Networks'''
 #**********************************************
 runNN = False
+nnClassReport = True
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -237,8 +238,12 @@ def runSVMmain(A, Cl, En, R):
     for i in range(0,clf.classes_.shape[0]):
        print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
     '''
-
-    if svmClassReport ==True:
+    
+    #**************************************
+    ''' SVM Classification Report '''
+    #**************************************
+    if svmClassReport == True:
+        print(' SVM Classification Report \n')
         from sklearn.metrics import classification_report
         y_pred = clf.predict(A)
         print(classification_report(Cl, y_pred, target_names=clf.classes_))
@@ -280,6 +285,15 @@ def runNNmain(A, Cl, R):
     clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
     clf.fit(A, Cl)
     print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) +'\n' + '\033[0m' )
+
+    #**************************************
+    ''' Neural Networks Classification Report '''
+    #**************************************
+    if nnClassReport == True:
+        print(' Neural Networks Classification Report\n')
+        from sklearn.metrics import classification_report
+        y_pred = clf.predict(A)
+        print(classification_report(Cl, y_pred, target_names=clf.classes_))
 
 #********************
 ''' Run PCA '''
