@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007b
+* version: 20161007c
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -23,7 +23,7 @@ import numpy as np
 import sys, os.path
 
 #**********************************************
-''' Spectra normalization conditions '''
+''' Spectra normalization, preprocessing '''
 #**********************************************
 Ynorm = True
 YnormTo = 1
@@ -34,13 +34,15 @@ fullYnorm = False
 
 preProcess = False
 
-#**********************************************
-''' Energy normalization range '''
-''' 150-250: D5; 450-550: G '''
-#**********************************************
 enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
 enLim2 = 550    # for now use indexes rather than actual Energy
+
+#**********************************************
+''' Model selection for training '''
+#**********************************************
+modelSelection = True
+percentCrossValid = 0.05
 
 #**********************************************
 ''' Support Vector Classification'''
@@ -49,7 +51,7 @@ runSVM = True
 
 ''' Input/Output files '''
 trainedData = "trained.pkl"
-alwaysRetrain = False
+alwaysRetrain = True
 
 ''' Training algorithm
 Use either 'linear' or 'rbf'
@@ -82,11 +84,11 @@ runTF = False
 ''' Main '''
 #**********************************************
 def main():
-    try:
-        LearnPredict(sys.argv[1], sys.argv[2])
-    except:
-        usage()
-        sys.exit(2)
+    #try:
+    LearnPredict(sys.argv[1], sys.argv[2])
+            #except:
+            #usage()
+#sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -120,30 +122,6 @@ def LearnPredict(mapFile, sampleFile):
     print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
 
     #**********************************************
-    ''' Normalize/preprocess if flags are set '''
-    #**********************************************
-    if Ynorm == True:
-        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']\n')
-        for i in range(0,A.shape[0]):
-            Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
-            A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
-    
-    if preProcess == True:
-        from sklearn.preprocessing import StandardScaler
-        scaler = StandardScaler().fit(A)
-        A = scaler.transform(A)
-
-    #**********************************************
-    ''' Energy normalization range '''
-    #**********************************************
-    if enRestrictRegion == True:
-        A = A[:,range(enLim1, enLim2)]
-        En = En[range(enLim1, enLim2)]
-        print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
-    else:
-        print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
-
-    #**********************************************
     ''' Open prediction file '''
     #**********************************************
     try:
@@ -153,18 +131,50 @@ def LearnPredict(mapFile, sampleFile):
     except:
         print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
         return
-
+    
     R = R.reshape(1,-1)
     if(R.shape[1] != AmaxIndex):
         print('\033[1m' + '\n WARNING: Prediction aborted. Different number of datapoints\n for the energy axis for training (' + str(AmaxIndex) + ') and sample (' + str(R.shape[1]) + ') data.\n Reformat sample data with ' + str(A.shape[1]) + ' X-datapoints.\n' + '\033[0m')
         return
 
+    #**********************************************
+    ''' Normalize/preprocess if flags are set '''
+    #**********************************************
     if Ynorm == True:
+        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']\n')
+        for i in range(0,A.shape[0]):
+            Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
+            A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
         Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
         R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
+    
+    if preProcess == True:
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler().fit(A)
+        A = scaler.transform(A)
+        R = scaler.transform(R)
 
+    #**********************************************
+    ''' Select subset of training data for cross validation '''
+    #**********************************************
+    if modelSelection == True:
+        from sklearn.model_selection import train_test_split
+        print(' Selecting subset (' +  str(percentCrossValid*100) + '%) of training data for cross validation...\n')
+        A_train, A_cv, Cl_train, Cl_cv = \
+        train_test_split(A, Cl, test_size=percentCrossValid, random_state=42)
+        A=A_train
+        Cl=Cl_train
+
+    #**********************************************
+    ''' Energy normalization range '''
+    #**********************************************
     if enRestrictRegion == True:
+        A = A[:,range(enLim1, enLim2)]
+        En = En[range(enLim1, enLim2)]
         R = R[:,range(enLim1, enLim2)]
+        print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']')
+    else:
+        print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']')
 
     #***********************************
     ''' Run Support Vector Machines '''
@@ -209,7 +219,7 @@ def runSVMmain(A, Cl, En, R):
         #**********************************************
         ''' Retrain data if not available'''
         #**********************************************
-        print(' Retraining data...')
+        print('\n Retraining data...')
         clf = svm.SVC(kernel = kernel, C = Cfactor, decision_function_shape = 'ovr', probability=True)
         clf.fit(A,Cl)
         Z= clf.decision_function(A)
