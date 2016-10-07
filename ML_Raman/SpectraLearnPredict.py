@@ -32,6 +32,8 @@ YnormXdelta = 30
 # Normalize from the full spectra (False: recommended)
 fullYnorm = False
 
+preProcess = False
+
 #**********************************************
 ''' Energy normalization range '''
 ''' 150-250: D5; 450-550: G '''
@@ -63,7 +65,7 @@ showTrainingDataPlot = False
 #**********************************************
 ''' Neural Networks'''
 #**********************************************
-runNN = True
+runNN = False
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -118,13 +120,18 @@ def LearnPredict(mapFile, sampleFile):
     print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
 
     #**********************************************
-    ''' Normalize if flag is set '''
+    ''' Normalize/preprocess if flags are set '''
     #**********************************************
     if Ynorm == True:
         print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']\n')
         for i in range(0,A.shape[0]):
             Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
             A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
+    
+    if preProcess == True:
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler().fit(A)
+        A = scaler.transform(A)
 
     #**********************************************
     ''' Energy normalization range '''
