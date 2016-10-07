@@ -84,11 +84,11 @@ runTF = False
 ''' Main '''
 #**********************************************
 def main():
-    #try:
-    LearnPredict(sys.argv[1], sys.argv[2])
-            #except:
-            #usage()
-#sys.exit(2)
+    try:
+        LearnPredict(sys.argv[1], sys.argv[2])
+    except:
+        usage()
+        sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
