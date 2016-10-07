@@ -48,13 +48,13 @@ percentCrossValid = 0.05
 ''' Support Vector Classification'''
 #**********************************************
 runSVM = True
-svmClassReport = True
+svmClassReport = False
 
 ''' Input/Output files '''
 trainedData = "trained.pkl"
 alwaysRetrain = True
 
-''' Training algorithm
+''' Training algorithm for SVM
 Use either 'linear' or 'rbf'
 ('rbf' for large number of features) '''
 
@@ -68,8 +68,15 @@ showTrainingDataPlot = False
 #**********************************************
 ''' Neural Networks'''
 #**********************************************
-runNN = False
-nnClassReport = True
+runNN = True
+
+''' Solver for NN
+    lbfgs preferred for small datasets
+    (alternatives: 'adam' or 'sgd') '''
+nnSolver = 'lbfgs'
+nnNeurons = 100  #default = 100
+
+nnClassReport = False
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -208,7 +215,7 @@ def LearnPredict(mapFile, sampleFile):
 def runSVMmain(A, Cl, En, R):
     from sklearn import svm
     from sklearn.externals import joblib
-    print('\n Running Support Vector Machine...')
+    print('\n Running Support Vector Machine (kernel: ' + kernel + ')...')
     try:
         if alwaysRetrain == False:
             with open(trainedData):
@@ -233,7 +240,7 @@ def runSVMmain(A, Cl, En, R):
             print(' List of classes: ' + str(clf.classes_))
 
     R_pred = clf.predict(R)
-    print('\033[1m' + '\n Predicted value = ' + str(R_pred[0]) +'\n' + '\033[0m' )
+    print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) +'\n' + '\033[0m' )
     
     #**************************************
     ''' SVM Classification Report '''
@@ -282,8 +289,8 @@ def runSVMmain(A, Cl, En, R):
 #*************************
 def runNNmain(A, Cl, R):
     from sklearn.neural_network import MLPClassifier
-    print('\n Running Neural Network: multi-layer perceptron (MLP)...')
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+    print('\n Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnSolver + ')...')
+    clf = MLPClassifier(solver=nnSolver, alpha=1e-5, hidden_layer_sizes=(nnNeurons,), random_state=1)
     clf.fit(A, Cl)
     print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) +'\n' + '\033[0m' )
 
