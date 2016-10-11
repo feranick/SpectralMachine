@@ -116,6 +116,7 @@ def main():
             except:
                 usage()
                 sys.exit(2)
+
         if o in ("-m" , "--map"):
             try:
                 print(' NOT IMPLEMENTED YET')
@@ -131,88 +132,18 @@ def LearnPredictFile(learnFile, sampleFile):
     #**********************************************
     ''' Open and process training data '''
     #**********************************************
-    try:
-        with open(learnFile, 'r') as f:
-            M = np.loadtxt(f, unpack =False)
-    except:
-        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
-        return
-
-    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(M,np.s_[0:1],0)
-    Cl = ['{:.2f}'.format(x) for x in M[:,0]]
-    A = np.delete(M,np.s_[0:1],1)
-    AmaxIndex = A.shape[1]
-
-    # Find index corresponding to energy value to be used for Y normalization
-    if fullYnorm == False:
-        YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
-    else:
-        YnormXind = np.where(En>0)[0].tolist()
-
-    Amax = np.empty([A.shape[0],1])
-    print(' Number of datapoints = ' + str(A.shape[0]))
-    print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
+    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
 
     #**********************************************
     ''' Open prediction file '''
     #**********************************************
-    try:
-        with open(sampleFile, 'r') as f:
-            print(' Opening sample data for prediction...')
-            Rtot = np.loadtxt(f, unpack =True)
-            R=Rtot[1,:]
-            Rx=Rtot[0,:]
-    except:
-        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
-        return
+    R, Rx = readPredFile(sampleFile)
     
     #**********************************************************************************
-    ''' Reformat x-axis in case it does not match that of the training data '''
+    ''' Preprocess prediction data '''
     #**********************************************************************************
-    if(R.shape[0] != AmaxIndex):
-        print('\033[1m' + '\n WARNING: Different number of datapoints for the x-axis\n for training (' + str(AmaxIndex) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
-        R = np.interp(En, Rx, R)
-    R = R.reshape(1,-1)
-
-    #**********************************************
-    ''' Normalize/preprocess if flags are set '''
-    #**********************************************
-    if Ynorm == True:
-        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']\n')
-        for i in range(0,A.shape[0]):
-            Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
-            A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
-        Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
-        R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
+    A, Cl, En, R = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind)
     
-    if preProcess == True:
-        from sklearn.preprocessing import StandardScaler
-        scaler = StandardScaler().fit(A)
-        A = scaler.transform(A)
-        R = scaler.transform(R)
-
-    #**********************************************
-    ''' Select subset of training data for cross validation '''
-    #**********************************************
-    if modelSelection == True:
-        from sklearn.model_selection import train_test_split
-        print(' Selecting subset (' +  str(percentCrossValid*100) + '%) of training data for cross validation...\n')
-        A_train, A_cv, Cl_train, Cl_cv = \
-        train_test_split(A, Cl, test_size=percentCrossValid, random_state=42)
-        A=A_train
-        Cl=Cl_train
-
-    #**********************************************
-    ''' Energy normalization range '''
-    #**********************************************
-    if enRestrictRegion == True:
-        A = A[:,range(enLim1, enLim2)]
-        En = En[range(enLim1, enLim2)]
-        R = R[:,range(enLim1, enLim2)]
-        print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']')
-    else:
-        print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']')
 
     #***********************************
     ''' Run Support Vector Machines '''
@@ -242,18 +173,9 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Plot Training Data '''
     #***************************
     if showTrainingDataPlot == True:
-        import matplotlib.pyplot as plt
-        print(' Stand by: Plotting each datapoint from the map...\n')
-        if Ynorm ==True:
-            plt.title("Normalized Training Data")
-        else:
-            plt.title("Training Data")
-        for i in range(0,A.shape[0]):
-            plt.plot(En, A[i,:], label='Training data')
-        plt.plot(En, R[0,:], linewidth = 2, label='Sample data')
-        plt.xlabel('Raman shift [1/cm]')
-        plt.ylabel('Raman Intensity [arb. units]')
-        plt.show()
+        plotTrainData(A, En, R)
+
+
 
 #********************
 ''' Run SVM '''
@@ -409,7 +331,7 @@ def runTensorFlow(A, Cl, R):
     print('\033[1m' + ' Prediction (TF): ' + str(np.unique(Cl)[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
 
 #************************************
-''' Plot Probabilities '''
+''' Plot Probabilities'''
 #************************************
 def plotProb(clf, R):
     prob = clf.predict_proba(R)[0].tolist()
@@ -426,6 +348,122 @@ def plotProb(clf, R):
     plt.ylabel('Probability [%]')
     plt.show()
 
+#************************************
+''' Plot Training data'''
+#************************************
+def plotTrainData(A, En, R):
+    import matplotlib.pyplot as plt
+    print(' Stand by: Plotting each datapoint from the map...\n')
+    if Ynorm ==True:
+        plt.title("Normalized Training Data")
+    else:
+        plt.title("Training Data")
+    for i in range(0,A.shape[0]):
+        plt.plot(En, A[i,:], label='Training data')
+    plt.plot(En, R[0,:], linewidth = 2, label='Sample data')
+    plt.xlabel('Raman shift [1/cm]')
+    plt.ylabel('Raman Intensity [arb. units]')
+    plt.show()
+
+#**********************************************************************************
+''' Preprocess prediction data '''
+#**********************************************************************************
+def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind):
+    #**********************************************************************************
+    ''' Reformat x-axis in case it does not match that of the training data '''
+    #**********************************************************************************
+
+    if(R.shape[0] != A.shape[1]):
+        print('\033[1m' + '\n WARNING: Different number of datapoints for the x-axis\n for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
+        R = np.interp(En, Rx, R)
+    R = R.reshape(1,-1)
+    
+    #**********************************************
+    ''' Normalize/preprocess if flags are set '''
+    #**********************************************
+    if Ynorm == True:
+        print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']\n')
+        for i in range(0,A.shape[0]):
+            Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
+            A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
+        Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
+        R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
+
+    if preProcess == True:
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler().fit(A)
+        A = scaler.transform(A)
+        R = scaler.transform(R)
+    
+    #**********************************************
+    ''' Select subset of training data for cross validation '''
+    #**********************************************
+    if modelSelection == True:
+        from sklearn.model_selection import train_test_split
+        print(' Selecting subset (' +  str(percentCrossValid*100) + '%) of training data for cross validation...\n')
+        A_train, A_cv, Cl_train, Cl_cv = \
+        train_test_split(A, Cl, test_size=percentCrossValid, random_state=42)
+        A=A_train
+        Cl=Cl_train
+
+    #**********************************************
+    ''' Energy normalization range '''
+    #**********************************************
+    if enRestrictRegion == True:
+        A = A[:,range(enLim1, enLim2)]
+        En = En[range(enLim1, enLim2)]
+        R = R[:,range(enLim1, enLim2)]
+        print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']')
+    else:
+        print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']')
+
+    return A, Cl, En, R
+
+
+#************************************
+''' Read Learning file '''
+#************************************
+def readLearnFile(learnFile):
+    try:
+        with open(learnFile, 'r') as f:
+            M = np.loadtxt(f, unpack =False)
+    except:
+        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
+        return
+
+    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+    M = np.delete(M,np.s_[0:1],0)
+    Cl = ['{:.2f}'.format(x) for x in M[:,0]]
+    A = np.delete(M,np.s_[0:1],1)
+    #AmaxIndex = A.shape[1]
+    
+    # Find index corresponding to energy value to be used for Y normalization
+    if fullYnorm == False:
+        YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
+    else:
+        YnormXind = np.where(En>0)[0].tolist()
+    
+    Amax = np.empty([A.shape[0],1])
+    print(' Number of datapoints = ' + str(A.shape[0]))
+    print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
+
+    return En, Cl, A, Amax, YnormXind
+
+#**********************************************
+''' Open prediction file '''
+#**********************************************
+def readPredFile(sampleFile):
+    try:
+        with open(sampleFile, 'r') as f:
+            print(' Opening sample data for prediction...')
+            Rtot = np.loadtxt(f, unpack =True)
+    except:
+        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
+        return
+
+    R=Rtot[1,:]
+    Rx=Rtot[0,:]
+    return R, Rx
 
 ####################################################################
 ''' Read map files '''
