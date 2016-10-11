@@ -112,7 +112,7 @@ def main():
     for o, a in opts:
         if o in ("-f" , "--file"):
             try:
-                LearnPredict(sys.argv[2], sys.argv[3])
+                LearnPredictFile(sys.argv[2], sys.argv[3])
             except:
                 usage()
                 sys.exit(2)
@@ -126,13 +126,13 @@ def main():
 #**********************************************
 ''' Learn and Predict '''
 #**********************************************
-def LearnPredict(mapFile, sampleFile):
+def LearnPredictFile(learnFile, sampleFile):
     
     #**********************************************
     ''' Open and process training data '''
     #**********************************************
     try:
-        with open(mapFile, 'r') as f:
+        with open(learnFile, 'r') as f:
             M = np.loadtxt(f, unpack =False)
     except:
         print('\033[1m' + ' Map data file not found \n' + '\033[0m')
