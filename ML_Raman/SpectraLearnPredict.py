@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data.
-* version: 20161007k
+* version: 20161010a
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -20,7 +20,9 @@ if matplotlib.get_backend() == 'TkAgg':
     matplotlib.use('Agg')
 
 import numpy as np
-import sys, os.path
+import sys, os.path, getopt, glob, csv
+from os.path import exists
+from os import rename
 
 #**********************************************
 ''' Spectra normalization, preprocessing '''
@@ -97,11 +99,29 @@ showTrainingDataPlot = False
 ''' Main '''
 #**********************************************
 def main():
-    #try:
-    LearnPredict(sys.argv[1], sys.argv[2])
-            #except:
-            #usage()
-#sys.exit(2)
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "fmh:", ["file", "map", "help"])
+    except:
+        usage()
+        sys.exit(2)
+
+    if opts == []:
+        usage()
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ("-f" , "--file"):
+            try:
+                LearnPredict(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
+        if o in ("-m" , "--map"):
+            try:
+                print(' NOT IMPLEMENTED YET')
+            except:
+                usage()
+                sys.exit(2)
 
 #**********************************************
 ''' Learn and Predict '''
@@ -406,12 +426,45 @@ def plotProb(clf, R):
     plt.ylabel('Probability [%]')
     plt.show()
 
+
+####################################################################
+''' Read map files '''
+####################################################################
+def readMap(mapFile):
+    try:
+        with open(mapFile, 'r') as f:
+            En = np.array(f.readline().split(), dtype=np.dtype(float))
+            A = np.loadtxt(f, unpack =False)
+        A = np.delete(A, np.s_[0:2], 1)
+        print(' Shape map: ' + str(A.shape))
+        return A, En
+    except:
+        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
+        return
+
+####################################################################
+''' Save map files '''
+####################################################################
+def saveMap(file, out, extension, s, x1, y1):
+    inputFile = os.path.splitext(file)[0] + '_' + extension + '_map.csv'
+    with open(inputFile, "a") as coord_file:
+        coord_file.write('{:},'.format(x1))
+        coord_file.write('{:},'.format(y1))
+        if (out.success == True and out.redchi < defPar.redchi):
+            coord_file.write('{:}\n'.format(s))
+        else:
+            coord_file.write('{:}\n'.format(defPar.outliar))
+        coord_file.close()
+
 #************************************
 ''' Lists the program usage '''
 #************************************
 def usage():
     print('\n Usage:')
-    print('  python SpectraLearnPredictSVM.py <mapfile> <spectrafile> \n')
+    print(' single files: ')
+    print('  python SpectraLearnPredictSVM.py -f <learningfile> <spectrafile> \n')
+    print(' maps: ')
+    print('  python SpectraLearnPredictSVM.py -m <learningfile> <spectramap> \n')
 
 #************************************
 ''' Info on Classification Report '''
