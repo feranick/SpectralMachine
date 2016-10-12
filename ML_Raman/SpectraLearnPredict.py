@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161010b
+* version: 20161010c
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -23,6 +23,7 @@ import numpy as np
 import sys, os.path, getopt, glob, csv
 from os.path import exists
 from os import rename
+from datetime import datetime, date
 
 
 #**********************************************
@@ -103,7 +104,7 @@ showTrainingDataPlot = False
 #**********************************************
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "fmh:", ["file", "map", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "fmbh:", ["file", "map", "batch", "help"])
     except:
         usage()
         sys.exit(2)
@@ -123,6 +124,13 @@ def main():
         if o in ("-m" , "--map"):
             try:
                 LearnPredictMap(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
+
+        if o in ("-b" , "--batch"):
+            try:
+                LearnPredictBatch(sys.argv[2])
             except:
                 usage()
                 sys.exit(2)
@@ -160,6 +168,45 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Plot Training Data '''
     if showTrainingDataPlot == True:
         plotTrainData(A, En, R)
+
+#**********************************************
+''' Learn and Predict - Batch'''
+#**********************************************
+def LearnPredictBatch(learnFile):
+    summary_filename = 'summary' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
+    
+    makeHeaderSummary(summary_filename, learnFile)
+    ''' Open and process training data '''
+    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+
+    for f in glob.glob('*.txt'):
+        if (f != learnFile):
+            R, Rx = readPredFile(f)
+            summaryFile = [f]
+            ''' Preprocess prediction data '''
+            A, Cl, En, R = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    
+            ''' Run Support Vector Machines '''
+            if runSVM == True:
+                svmPred, svmProb = runSVMmain(A, Cl, En, R)
+                summaryFile.extend([svmPred, svmProb])
+                svmDef.svmAlwaysRetrain = False
+
+            ''' Run Neural Network '''
+            if runNN == True:
+                nnPred, nnProb = runNNmain(A, Cl, R)
+                summaryFile.extend([nnPred, nnProb])
+                nnDef.nnAlwaysRetrain = False
+        
+            ''' Tensorflow '''
+            if runTF == True:
+                tfPred, tfProb = runTensorFlow(A,Cl,R)
+                summaryFile.extend([tfPred, tfProb])
+
+            with open(summary_filename, "a") as sum_file:
+                csv_out=csv.writer(sum_file)
+                csv_out.writerow(summaryFile)
+                sum_file.close()
 
 
 #**********************************************
@@ -242,7 +289,7 @@ def runSVMmain(A, Cl, En, R):
     if showProbPlot == True:
         plotProb(clf, R)
 
-    return R_pred[0]
+    return R_pred[0], round(100*max(prob),1)
 
 
 #*************************
@@ -285,7 +332,7 @@ def runNNmain(A, Cl, R):
     if showProbPlot == True:
         plotProb(clf, R)
 
-    return clf.predict(R)[0]
+    return clf.predict(R)[0], round(100*max(prob),1)
 
 #********************
 ''' Run PCA '''
@@ -352,7 +399,7 @@ def runTensorFlow(A, Cl, R):
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
     #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
     print('\033[1m' + ' Prediction (TF): ' + str(np.unique(Cl)[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
-    return np.unique(Cl)[res2][0]
+    return np.unique(Cl)[res2][0], res1[0][res2][0]*100
 
 #************************************
 ''' Plot Probabilities'''
@@ -522,6 +569,19 @@ def saveMap(file, type, extension, s, x1, y1):
         coord_file.write('{:}\n'.format(s))
         coord_file.close()
 
+####################################################################
+''' Make header, if absent, for the summary file '''
+####################################################################
+def makeHeaderSummary(file, learnFile):
+    if os.path.isfile(file) == False:
+        summaryHeader1 = ['Training File:', learnFile]
+        summaryHeader2 = ['File','SVM-HC','SVM-Prob%', 'NN-HC', 'NN-Prob%', 'TF-HC', 'TF-Prob%']
+        with open(file, "a") as sum_file:
+            csv_out=csv.writer(sum_file)
+            csv_out.writerow(summaryHeader1)
+            csv_out.writerow(summaryHeader2)
+            sum_file.close()
+
 #************************************
 ''' Lists the program usage '''
 #************************************
@@ -531,6 +591,8 @@ def usage():
     print('  python SpectraLearnPredictSVM.py -f <learningfile> <spectrafile> \n')
     print(' maps (formatted for Horiba LabSpec): ')
     print('  python SpectraLearnPredictSVM.py -m <learningfile> <spectramap> \n')
+    print(' batch txt files: ')
+    print('  python SpectraLearnPredictSVM.py -b <learningfile> \n')
 
 #************************************
 ''' Info on Classification Report '''
