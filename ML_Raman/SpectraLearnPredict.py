@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161010c
+* version: 20161010d
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -24,7 +24,6 @@ import sys, os.path, getopt, glob, csv
 from os.path import exists
 from os import rename
 from datetime import datetime, date
-
 
 #**********************************************
 ''' Spectra normalization, preprocessing '''
@@ -100,6 +99,11 @@ showProbPlot = False
 showTrainingDataPlot = False
 
 #**********************************************
+''' Multiprocessing '''
+#**********************************************
+multiproc = False
+
+#**********************************************
 ''' Main '''
 #**********************************************
 def main():
@@ -172,41 +176,55 @@ def LearnPredictFile(learnFile, sampleFile):
 #**********************************************
 ''' Learn and Predict - Batch'''
 #**********************************************
+
+def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename):
+    print(f)
+    R, Rx = readPredFile(f)
+    summaryFile = [f]
+    ''' Preprocess prediction data '''
+    A, Cl, En, R = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+            
+    ''' Run Support Vector Machines '''
+    if runSVM == True:
+        svmPred, svmProb = runSVMmain(A, Cl, En, R)
+        summaryFile.extend([svmPred, svmProb])
+        svmDef.svmAlwaysRetrain = False
+            
+    ''' Run Neural Network '''
+    if runNN == True:
+        nnPred, nnProb = runNNmain(A, Cl, R)
+        summaryFile.extend([nnPred, nnProb])
+        nnDef.nnAlwaysRetrain = False
+            
+    ''' Tensorflow '''
+    if runTF == True:
+        tfPred, tfProb = runTensorFlow(A,Cl,R)
+        summaryFile.extend([tfPred, tfProb])
+            
+    with open(summary_filename, "a") as sum_file:
+        csv_out=csv.writer(sum_file)
+        csv_out.writerow(summaryFile)
+        sum_file.close()
+
+
 def LearnPredictBatch(learnFile):
     summary_filename = 'summary' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
-    
     makeHeaderSummary(summary_filename, learnFile)
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-
-    for f in glob.glob('*.txt'):
-        if (f != learnFile):
-            R, Rx = readPredFile(f)
-            summaryFile = [f]
-            ''' Preprocess prediction data '''
-            A, Cl, En, R = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
-    
-            ''' Run Support Vector Machines '''
-            if runSVM == True:
-                svmPred, svmProb = runSVMmain(A, Cl, En, R)
-                summaryFile.extend([svmPred, svmProb])
-                svmDef.svmAlwaysRetrain = False
-
-            ''' Run Neural Network '''
-            if runNN == True:
-                nnPred, nnProb = runNNmain(A, Cl, R)
-                summaryFile.extend([nnPred, nnProb])
-                nnDef.nnAlwaysRetrain = False
-        
-            ''' Tensorflow '''
-            if runTF == True:
-                tfPred, tfProb = runTensorFlow(A,Cl,R)
-                summaryFile.extend([tfPred, tfProb])
-
-            with open(summary_filename, "a") as sum_file:
-                csv_out=csv.writer(sum_file)
-                csv_out.writerow(summaryFile)
-                sum_file.close()
+    if multiproc == True:
+        from multiprocessing import Pool
+        import multiprocessing as mp
+        p = mp.Pool()
+        for f in glob.glob('*.txt'):
+            if (f != learnFile):
+                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, YnormXind, summary_filename))
+        p.close()
+        p.join()
+    else:
+        for f in glob.glob('*.txt'):
+            if (f != learnFile):
+                processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename)
 
 
 #**********************************************
