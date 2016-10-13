@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161010d
+* version: 20161013a
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
@@ -53,7 +53,7 @@ percentCrossValid = 0.05
 runSVM = True
 svmClassReport = False
 
-svmTrainedData = "svmTrained.pkl"
+svmTrainedData = "svmModel.pkl"
 class svmDef:
     svmAlwaysRetrain = True
 
@@ -71,7 +71,7 @@ showClasses = False
 runNN = True
 nnClassReport = False
 
-nnTrainedData = "nnTrained.pkl"
+nnTrainedData = "nnModel.pkl"
 class nnDef:
     nnAlwaysRetrain = True
 
@@ -82,15 +82,19 @@ nnSolver = 'lbfgs'
 nnNeurons = 100  #default = 100
 
 #**********************************************
+''' TensorFlow '''
+#**********************************************
+runTF = True
+
+tfTrainedData = "tfmodel.ckpt"
+class tfDef:
+    tfAlwaysRetrain = True
+
+#**********************************************
 ''' Principal component analysis (PCA) '''
 #**********************************************
 runPCA = False
 numPCAcomp = 5
-
-#**********************************************
-''' TensorFlow '''
-#**********************************************
-runTF = False
 
 #**********************************************
 ''' Plotting '''
@@ -119,11 +123,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+                    #except:
+                    #usage()
+                    #sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -272,15 +276,15 @@ def runSVMmain(A, Cl, En, R):
     try:
         if svmDef.svmAlwaysRetrain == False:
             with open(svmTrainedData):
-                print(' Opening SVM training data...')
+                print(' Opening SVM training model...')
                 clf = joblib.load(svmTrainedData)
         else:
-            raise ValueError('Force retraining SVM data')
+            raise ValueError('Force retraining SVM model')
     except:
         #**********************************************
         ''' Retrain NN data if not available'''
         #**********************************************
-        print('\n Retraining SVM data...')
+        print(' Retraining SVM data...')
         clf = svm.SVC(C = Cfactor, decision_function_shape = 'ovr', probability=True)
         clf.fit(A,Cl)
         Z= clf.decision_function(A)
@@ -320,7 +324,7 @@ def runNNmain(A, Cl, R):
     try:
         if nnDef.nnAlwaysRetrain == False:
             with open(nnTrainedData):
-                print(' Opening NN training data...')
+                print(' Opening NN training model...')
                 clf = joblib.load(nnTrainedData)
         else:
             raise ValueError('Force NN retraining.')
@@ -328,7 +332,7 @@ def runNNmain(A, Cl, R):
         #**********************************************
         ''' Retrain data if not available'''
         #**********************************************
-        print('\n Retraining NN data...')
+        print(' Retraining NN model...')
         clf = MLPClassifier(solver=nnSolver, alpha=1e-5, hidden_layer_sizes=(nnNeurons,), random_state=1)
         clf.fit(A, Cl)
         joblib.dump(clf, nnTrainedData)
@@ -352,6 +356,74 @@ def runNNmain(A, Cl, R):
 
     return clf.predict(R)[0], round(100*max(prob),1)
 
+
+#********************************************************************************
+''' Tensorflow '''
+''' https://www.tensorflow.org/versions/r0.10/tutorials/mnist/beginners/index.html'''
+#********************************************************************************
+def runTensorFlow(A, Cl, R):
+    import tensorflow as tf
+    formatClassfile = "tfFormatClass.txt"
+    
+    try:
+        with open(formatClassfile) as f:
+            print('\n Opening TensorFlow format class data...')
+            Cl2 = np.loadtxt(f, unpack =False)
+    except:
+        print( '\n Formatting training cluster data...')
+        Cl2 = np.zeros((np.array(Cl).shape[0], np.unique(Cl).shape[0]))
+        
+        for i in range(np.array(Cl).shape[0]):
+            for j in range(np.array(np.unique(Cl).shape[0])):
+                if np.array(Cl)[i] == np.unique(Cl)[j]:
+                    np.put(Cl2, [i, j], 1)
+                else:
+                    np.put(Cl2, [i, j], 0)
+                
+                np.savetxt(formatClassfile, Cl2, delimiter='\t', fmt='%10.6f')
+
+    print(' Initializing TensorFlow...')
+    x = tf.placeholder(tf.float32, [None, A.shape[1]])
+    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
+    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]))
+    y = tf.nn.softmax(tf.matmul(x, W) + b)
+    
+    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    
+    
+    try:
+        if tfDef.tfAlwaysRetrain == False:
+            with open(tfTrainedData):
+                print(' Opening TF training model from:', tfTrainedData)
+                saver = tf.train.Saver()
+                sess = tf.Session()
+                saver.restore(sess, tfTrainedData)
+                print(' Model restored. \n')
+        else:
+            raise ValueError(' Force TF model retraining.')
+    except:
+        print(' Retraining TF model...')
+        init = tf.initialize_all_variables()
+        saver = tf.train.Saver()
+        sess = tf.Session()
+        sess.run(init)
+        sess.run(train_step, feed_dict={x: A, y_: Cl2})
+
+        save_path = saver.save(sess, tfTrainedData)
+        print(' Model saved in file: %s\n' % save_path)
+
+    res1 = sess.run(y, feed_dict={x: R})
+    res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
+    
+    #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
+    print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
+    return np.unique(Cl)[res2][0], res1[0][res2][0]*100
+
+
 #********************
 ''' Run PCA '''
 #********************
@@ -368,56 +440,6 @@ def runPCAmain(En, A):
     plt.ylabel('PCA')
     plt.legend()
     plt.show()
-
-
-#********************************************************************************
-''' Tensorflow (Experimental)'''
-''' https://www.tensorflow.org/versions/r0.10/tutorials/mnist/beginners/index.html'''
-#********************************************************************************
-def runTensorFlow(A, Cl, R):
-    import tensorflow as tf
-    formatClassfile = "tfFormatClass.txt"
-    
-    try:
-        with open(formatClassfile) as f:
-            print(' Opening TensorFlow format class data...\n')
-            Cl2 = np.loadtxt(f, unpack =False)
-    except:
-        print( ' Formatting training cluster data...\n')
-        Cl2 = np.zeros((np.array(Cl).shape[0], np.unique(Cl).shape[0]))
-        
-        for i in range(np.array(Cl).shape[0]):
-            for j in range(np.array(np.unique(Cl).shape[0])):
-                if np.array(Cl)[i] == np.unique(Cl)[j]:
-                    np.put(Cl2, [i, j], 1)
-                else:
-                    np.put(Cl2, [i, j], 0)
-                
-                np.savetxt(formatClassfile, Cl2, delimiter='\t', fmt='%10.6f')
-
-    print(' Initializing TensorFlow...\n')
-    x = tf.placeholder(tf.float32, [None, A.shape[1]])
-    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
-    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]))
-    y = tf.nn.softmax(tf.matmul(x, W) + b)
-    
-    print(' Training TensorFlow...\n')
-    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
-    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    
-    init = tf.initialize_all_variables()
-    sess = tf.Session()
-    sess.run(init)
-    
-    sess.run(train_step, feed_dict={x: A, y_: Cl2})
-    res1 = sess.run(y, feed_dict={x: R})
-    res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
-    #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
-    print('\033[1m' + ' Prediction (TF): ' + str(np.unique(Cl)[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
-    return np.unique(Cl)[res2][0], res1[0][res2][0]*100
 
 #************************************
 ''' Plot Probabilities'''
@@ -472,7 +494,7 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
     #**********************************************
     if Ynorm == True:
         if type == 0:
-            print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']\n')
+            print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
         for i in range(0,A.shape[0]):
             Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
             A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
@@ -505,10 +527,10 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
         En = En[range(enLim1, enLim2)]
         R = R[:,range(enLim1, enLim2)]
         if type == 0:
-            print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']')
+            print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
         if type == 0:
-            print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']')
+            print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
 
     return A, Cl, En, R
 
