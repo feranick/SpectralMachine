@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
 **********************************************
 *
 * SpectraExtractorSVM.py
 * Extract spectra of specific phases
-* version: 20160919e
+* version: 20161014a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *

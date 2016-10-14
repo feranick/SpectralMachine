@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
 *********************************************
 *
 * MapMakerSVM
 * Adds spectra to map files
-* version: 20160919f
+* version: 20161014a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *

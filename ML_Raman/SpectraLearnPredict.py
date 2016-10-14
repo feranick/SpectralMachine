@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
 **********************************************************
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161013a
+* version: 20161014a
 *
 * Uses: PCA, SVM, Neural Networks, TensorFlow
 *
