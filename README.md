@@ -2,10 +2,29 @@
 Machine learning software for rapid analysis of Raman spectra.
 
 Supported algorithms:
-Principal component analysis - PCA
-Support Vector Machine - SVM
-Neural Network -  multi-layer perceptron (MLP)
-TensorFlow
+ - Support Vector Machine - SVM
+ - Neural Network -  multi-layer perceptron (MLP)
+ - TensorFlow
+
+Additional multivariate analysis:
+- Principal component analysis
+
+Usage
+======
+
+- single files: 
+  python SpectraLearnPredictSVM.py -f <learningfile> <spectrafile> 
+
+- maps (formatted for Horiba LabSpec): 
+  python SpectraLearnPredictSVM.py -m <learningfile> <spectramap> 
+
+- batch txt files: 
+  python SpectraLearnPredictSVM.py -b <learningfile> 
+
+
+Training data
+=============
+Loosely based on Ferralis et al. Carbon 108 (2016) 440.
 
 Note
 =====
