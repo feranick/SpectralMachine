@@ -24,12 +24,12 @@ Usage
 
 Training data
 =============
-Loosely based on Ferralis et al. Carbon 108 (2016) 440.
+Loosely based on Ferralis et al. [Carbon 108 (2016) 440](http://dx.doi.org/10.1016/j.carbon.2016.07.039).
 
 Note
 =====
-This package requires scikit-learn, numpy and matplotlib.
-TensorFlow is needed only if flag is activated.
+This package requires [scikit-learn](http://scikit-learn.org/stable/), numpy and matplotlib.
+[TensorFlow](https://github.com/tensorflow/tensorflow) is needed only if flag is activated.
 
 
 
