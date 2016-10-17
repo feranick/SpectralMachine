@@ -22,15 +22,15 @@ This package requires [scikit-learn](http://scikit-learn.org/stable/), numpy and
 Usage
 ======
 
-- Single files: 
+Single files: 
   
     python SpectraLearnPredictSVM.py -f learningfile spectrafile 
 
-- Maps (formatted for Horiba LabSpec): 
+Maps (formatted for Horiba LabSpec): 
   
     python SpectraLearnPredictSVM.py -m learningfile spectramap 
 
-- Batch txt files:
+Batch txt files:
 
     python SpectraLearnPredictSVM.py -b learningfile 
 
