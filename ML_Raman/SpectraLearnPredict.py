@@ -5,9 +5,9 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161014a
+* version: 20161017a
 *
-* Uses: PCA, SVM, Neural Networks, TensorFlow
+* Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -97,6 +97,14 @@ runPCA = False
 numPCAcomp = 5
 
 #**********************************************
+''' K-means '''
+#**********************************************
+runKM = True
+customNumKMComp = False
+numKMcomp = 12
+plotKM = True
+
+#**********************************************
 ''' Plotting '''
 #**********************************************
 showProbPlot = False
@@ -161,10 +169,6 @@ def LearnPredictFile(learnFile, sampleFile):
     if runSVM == True:
         runSVMmain(A, Cl, En, R)
 
-    ''' Run PCA '''
-    if runPCA == True:
-        runPCAmain(En, A)
-    
     ''' Run Neural Network '''
     if runNN == True:
         runNNmain(A, Cl, R)
@@ -177,8 +181,17 @@ def LearnPredictFile(learnFile, sampleFile):
     if showTrainingDataPlot == True:
         plotTrainData(A, En, R)
 
+    ''' Run PCA '''
+    if runPCA == True:
+        runPCAmain(En, A)
+
+    ''' Run K-Means '''
+    if runKM == True:
+        runKMmain(A, Cl, En, R)
+
+
 #**********************************************
-''' Learn and Predict - Batch'''
+''' Process - Batch'''
 #**********************************************
 
 def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename):
@@ -211,6 +224,9 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename):
         sum_file.close()
 
 
+#**********************************************
+''' Learn and Predict - Batch'''
+#**********************************************
 def LearnPredictBatch(learnFile):
     summary_filename = 'summary' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
     makeHeaderSummary(summary_filename, learnFile)
@@ -440,6 +456,35 @@ def runPCAmain(En, A):
     plt.ylabel('PCA')
     plt.legend()
     plt.show()
+
+#********************
+''' Run K-Means '''
+#********************
+def runKMmain(A, Cl, En, R):
+    from sklearn.cluster import KMeans
+    import matplotlib.pyplot as plt
+    print('\n Running K-Means...')
+    print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
+    if customNumKMComp == False:
+        numKMcomp = np.unique(Cl).shape[0]
+    kmeans = KMeans(n_clusters=numKMcomp, random_state=0).fit(A)
+    for i in range(0, numKMcomp):
+        print('\n Class: ' + str(i) + '\n  ',end="")
+        for j in range(0,kmeans.labels_.shape[0]):
+            if kmeans.labels_[j] == i:
+                print(' ' + str(Cl[j]), end="")
+    print('\033[1m' + '\n\n Predicted class (K-Means) = ' + str(kmeans.predict(R)[0]) + '\033[0m \n')
+    if plotKM == True:
+        for j in range(0,kmeans.labels_.shape[0]):
+            if kmeans.labels_[j] == kmeans.predict(R)[0]:
+                plt.plot(En, A[j,:])
+        plt.plot(En, R[0,:], linewidth = 2, label='Predict')
+        plt.title('K-Means')
+        plt.xlabel('Raman shift [1/cm]')
+        plt.ylabel('Intensity')
+        plt.legend()
+        plt.show()
+
 
 #************************************
 ''' Plot Probabilities'''
