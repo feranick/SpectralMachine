@@ -7,6 +7,7 @@ Supported algorithms:
  - TensorFlow
 
 Additional multivariate analysis:
+- K-Means
 - Principal component analysis
 
 Installation
@@ -51,6 +52,7 @@ More on Machine Learning tools used
 
 - [Support Vector Classification](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html)
 - [Neural Networks](http://scikit-learn.org/stable/modules/neural_networks_supervised.html)
-- [TensorFlow](https://www.tensorflow.org/)
+- [TensorFlow](https://www.tensorflow.org)
+- [K-Means](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
 - [Principal Component Analysis](http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
 
