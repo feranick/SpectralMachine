@@ -24,15 +24,15 @@ Usage
 
 - Single files: 
   
-    python SpectraLearnPredictSVM.py -f <learningfile> <spectrafile> 
+    python SpectraLearnPredictSVM.py -f learningfile spectrafile 
 
 - Maps (formatted for Horiba LabSpec): 
   
-    python SpectraLearnPredictSVM.py -m <learningfile> <spectramap> 
+    python SpectraLearnPredictSVM.py -m learningfile spectramap 
 
 - Batch txt files:
 
-    python SpectraLearnPredictSVM.py -b <learningfile> 
+    python SpectraLearnPredictSVM.py -b learningfile 
 
 
 Training data
