@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161017a
+* version: 20161017b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -94,14 +94,15 @@ class tfDef:
 ''' Principal component analysis (PCA) '''
 #**********************************************
 runPCA = False
-numPCAcomp = 5
+customNumPCAComp = False
+numPCAcomponents = 5
 
 #**********************************************
 ''' K-means '''
 #**********************************************
-runKM = True
+runKM = False
 customNumKMComp = False
-numKMcomp = 12
+numKMcomponents = 20
 plotKM = True
 
 #**********************************************
@@ -131,11 +132,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-                    #except:
-                    #usage()
-                    #sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -163,7 +164,7 @@ def LearnPredictFile(learnFile, sampleFile):
     R, Rx = readPredFile(sampleFile)
     
     ''' Preprocess prediction data '''
-    A, Cl, En, R = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
     
     ''' Run Support Vector Machines '''
     if runSVM == True:
@@ -183,11 +184,11 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Run PCA '''
     if runPCA == True:
-        runPCAmain(En, A)
+        runPCAmain(A, Cl, En, R)
 
     ''' Run K-Means '''
     if runKM == True:
-        runKMmain(A, Cl, En, R)
+        runKMmain(A, Cl, En, R, Aorig, Rorig)
 
 
 #**********************************************
@@ -199,7 +200,7 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename):
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
-    A, Cl, En, R = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    A, Cl, En, R, Aorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
             
     ''' Run Support Vector Machines '''
     if runSVM == True:
@@ -260,7 +261,7 @@ def LearnPredictMap(learnFile, mapFile):
     type = 0
     i = 0;
     for r in R[:]:
-        A, Cl, En, r = preProcessNormData(r, Rx, A, En, Cl, Amax, YnormXind, type)
+        A, Cl, En, r, Aorig = preProcessNormData(r, Rx, A, En, Cl, Amax, YnormXind, type)
         type = 1
         print('\n Preprocessing map\n')
 
@@ -443,30 +444,39 @@ def runTensorFlow(A, Cl, R):
 #********************
 ''' Run PCA '''
 #********************
-def runPCAmain(En, A):
+def runPCAmain(A, Cl, En, R):
     from sklearn.decomposition import PCA, RandomizedPCA
     import matplotlib.pyplot as plt
     print(' Running PCA...\n')
+    print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
+    if customNumPCAComp == False:
+        numPCAcomp = np.unique(Cl).shape[0]
+    else:
+        numPCAcomp = numPCAcomponents
     pca = PCA(n_components=numPCAcomp)
     pca.fit_transform(A)
     for i in range(0,pca.components_.shape[0]):
-        plt.plot(En, pca.components_[i,:], label=i)
+        plt.plot(En, pca.components_[i,:])
+    #plt.plot(En, R[0,:], linewidth = 2, label='Predict')
     #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('PCA')
     plt.legend()
     plt.show()
 
+
 #********************
 ''' Run K-Means '''
 #********************
-def runKMmain(A, Cl, En, R):
+def runKMmain(A, Cl, En, R, Aorig, Rorig):
     from sklearn.cluster import KMeans
     import matplotlib.pyplot as plt
     print('\n Running K-Means...')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
     if customNumKMComp == False:
         numKMcomp = np.unique(Cl).shape[0]
+    else:
+        numKMcomp = numKMcomponents
     kmeans = KMeans(n_clusters=numKMcomp, random_state=0).fit(A)
     for i in range(0, numKMcomp):
         print('\n Class: ' + str(i) + '\n  ',end="")
@@ -477,8 +487,8 @@ def runKMmain(A, Cl, En, R):
     if plotKM == True:
         for j in range(0,kmeans.labels_.shape[0]):
             if kmeans.labels_[j] == kmeans.predict(R)[0]:
-                plt.plot(En, A[j,:])
-        plt.plot(En, R[0,:], linewidth = 2, label='Predict')
+                plt.plot(En, Aorig[j,:])
+        plt.plot(En, Rorig[0,:], linewidth = 2, label='Predict')
         plt.title('K-Means')
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Intensity')
@@ -533,6 +543,8 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
             print('\033[1m' + '\n WARNING: Different number of datapoints for the x-axis\n for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
+    Aorig = A
+    Rorig = R
 
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
@@ -571,13 +583,15 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
         A = A[:,range(enLim1, enLim2)]
         En = En[range(enLim1, enLim2)]
         R = R[:,range(enLim1, enLim2)]
+        Aorig = Aorig[:,range(enLim1, enLim2)]
+        Rorig = Rorig[:,range(enLim1, enLim2)]
         if type == 0:
             print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
         if type == 0:
             print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
 
-    return A, Cl, En, R
+    return A, Cl, En, R, Aorig, Rorig
 
 
 #************************************
