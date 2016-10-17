@@ -16,7 +16,7 @@ This software requires Python (2.6 or higher, 3.3 or higher). It has been tested
 
 This package requires:
 
-    [scikit-learn](http://scikit-learn.org/stable/)
+    scikit-learn
     numpy
     matplotlib 
 
