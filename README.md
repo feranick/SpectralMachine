@@ -14,7 +14,13 @@ Installation
 
 This software requires Python (2.6 or higher, 3.3 or higher). It has been tested with Python 3.5 which is the recommended platform.
 
-This package requires [scikit-learn](http://scikit-learn.org/stable/), numpy and matplotlib. These are found in Unix based systems using common repositories (apt-get for Debian/Ubuntu Linux, or MacPorts for MacOS). More details in the [scikit-learn installation page](http://scikit-learn.org/stable/install.html).
+This package requires:
+
+    [scikit-learn](http://scikit-learn.org/stable/)
+    numpy
+    matplotlib 
+
+These are found in Unix based systems using common repositories (apt-get for Debian/Ubuntu Linux, or MacPorts for MacOS). More details in the [scikit-learn installation page](http://scikit-learn.org/stable/install.html).
 
 [TensorFlow](https://github.com/tensorflow/tensorflow) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html). Pip installation is the easiest way to get going.
 
