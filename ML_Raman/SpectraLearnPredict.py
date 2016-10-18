@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161018a
+* version: 20161018b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -100,7 +100,7 @@ numPCAcomponents = 5
 #**********************************************
 ''' K-means '''
 #**********************************************
-runKM = True
+runKM = False
 customNumKMComp = False
 numKMcomponents = 20
 
@@ -123,7 +123,7 @@ multiproc = False
 #**********************************************
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "fmbh:", ["file", "map", "batch", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "fmbkh:", ["file", "map", "batch", "kmaps", "help"])
     except:
         usage()
         sys.exit(2)
@@ -150,6 +150,18 @@ def main():
         if o in ("-b" , "--batch"):
             try:
                 LearnPredictBatch(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
+
+        if o in ("-k" , "--kmaps"):
+            try:
+                if len(sys.argv) > 3:
+                    numKMcomp = sys.argv[3]
+                else:
+                    numKMcomp = numKMcomponents
+                KmMap(sys.argv[2], numKMcomp)
+            
             except:
                 usage()
                 sys.exit(2)
@@ -277,26 +289,26 @@ def LearnPredictMap(learnFile, mapFile):
         ''' Run Support Vector Machines '''
         if runSVM == True:
             svmPred = runSVMmain(A, Cl, En, r)
-            saveMap(mapFile, 'svm', 'HC', svmPred, X[i], Y[i])
+            saveMap(mapFile, 'svm', 'HC', svmPred, X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
     
         ''' Run Neural Network '''
         if runNN == True:
             nnPred = runNNmain(A, Cl, r)
-            saveMap(mapFile, 'NN', 'HC', nnPred, X[i], Y[i])
+            saveMap(mapFile, 'NN', 'HC', nnPred, X[i], Y[i], True)
             nnDef.nnAlwaysRetrain = False
     
         ''' Tensorflow '''
         if runTF == True:
             tfPred = runTensorFlow(A,Cl,r)
-            saveMap(mapFile, 'TF', 'HC', tfPred, X[i], Y[i])
+            saveMap(mapFile, 'TF', 'HC', tfPred, X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
         
         ''' Run K-Means '''
         if runKM == True:
             kmDef.plotKM = False
             kmPred = runKMmain(A, Cl, En, r, Aorig, rorig)
-            saveMap(mapFile, 'KM', 'HC', kmPred, X[i], Y[i])
+            saveMap(mapFile, 'KM', 'HC', kmPred, X[i], Y[i], True)
         
         i = i+1
 
@@ -513,6 +525,50 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
         plt.show()
     return kmeans.predict(R)[0]
 
+#**********************************************
+''' K-Means - Maps'''
+#**********************************************
+def KmMap(mapFile, numKMcomp):
+    
+    ''' Open prediction map '''
+    X, Y, R, Rx = readPredMap(mapFile)
+    type = 0
+    i = 0;
+    
+    R, Rx, Rorig = preProcessNormMap(R, Rx, type)
+    
+    from sklearn.cluster import KMeans
+    print(' Running K-Means...')
+    print(' Number of classes: ' + str(numKMcomp))
+    kmeans = KMeans(n_clusters=numKMcomponents, random_state=0).fit(R)
+    
+    kmPred = np.empty([R.shape[0]])
+    
+    for i in range(0, R.shape[0]):
+        kmPred[i] = kmeans.predict(R[i,:].reshape(1,-1))[0]
+        saveMap(mapFile, 'KM', 'Class', int(kmPred[i]), X[i], Y[i], True)
+        if kmPred[i] in kmeans.labels_:
+            if os.path.isfile(saveMapName(mapFile, 'KM', 'Class_'+ str(int(kmPred[i]))+'-'+str(np.unique(kmeans.labels_).shape[0]), False)) == False:
+                saveMap(mapFile, 'KM', 'Class_'+ str(int(kmPred[i])) + '-'+str(np.unique(kmeans.labels_).shape[0]) , '\t'.join(map(str, Rx)), ' ', ' ', False)
+            saveMap(mapFile, 'KM', 'Class_'+ str(int(kmPred[i])) + '-'+str(np.unique(kmeans.labels_).shape[0]) , '\t'.join(map(str, R[1,:])), X[i], Y[i], False)
+
+    if kmDef.plotKM == True:
+        print(' Plotting K-Means Map...\n')
+        import scipy.interpolate
+        xi = np.linspace(min(X), max(X))
+        yi = np.linspace(min(Y), max(Y))
+        xi, yi = np.meshgrid(xi, yi)
+        
+        rbf = scipy.interpolate.Rbf(Y, -X, kmPred, function='linear')
+        zi = rbf(xi, yi)
+        import matplotlib.pyplot as plt
+        plt.imshow(zi, vmin=kmPred.min(), vmax=kmPred.max(), origin='lower',label='data',
+                    extent=[X.min(), X.max(), Y.min(), Y.max()])
+        plt.title('K-Means Map')
+        plt.xlabel('X [um]')
+        plt.ylabel('Y [um]')
+        plt.show()
+
 
 #************************************
 ''' Plot Probabilities'''
@@ -612,6 +668,54 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
     return A, Cl, En, R, Aorig, Rorig
 
 
+#**********************************************************************************
+''' Preprocess prediction data '''
+#**********************************************************************************
+def preProcessNormMap(A, En, type):
+    #**********************************************************************************
+    ''' Reformat x-axis in case it does not match that of the training data '''
+    #**********************************************************************************
+    
+    # Find index corresponding to energy value to be used for Y normalization
+    if fullYnorm == False:
+        YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
+    else:
+        YnormXind = np.where(En>0)[0].tolist()
+    
+    Amax = np.empty([A.shape[0],1])
+    Aorig = A
+    
+    #**********************************************
+    ''' Normalize/preprocess if flags are set '''
+    #**********************************************
+    if Ynorm == True:
+        if type == 0:
+            print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
+        for i in range(0,A.shape[0]):
+            Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
+            A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
+
+
+    if preProcess == True:
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler().fit(A)
+        A = scaler.transform(A)
+    
+    #**********************************************
+    ''' Energy normalization range '''
+    #**********************************************
+    if enRestrictRegion == True:
+        A = A[:,range(enLim1, enLim2)]
+        En = En[range(enLim1, enLim2)]
+        Aorig = Aorig[:,range(enLim1, enLim2)]
+        if type == 0:
+            print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+    else:
+        if type == 0:
+            print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+    
+    return A, En, Aorig
+
 #************************************
 ''' Read Learning file '''
 #************************************
@@ -678,13 +782,26 @@ def readPredMap(mapFile):
 ####################################################################
 ''' Save map files '''
 ####################################################################
-def saveMap(file, type, extension, s, x1, y1):
-    inputFile = os.path.splitext(file)[0] + '_' + type + '-' + extension + '_map.csv'
+def saveMap(file, type, extension, s, x1, y1, comma):
+    
+    inputFile = saveMapName(file, type, extension, comma)
+    
     with open(inputFile, "a") as coord_file:
-        coord_file.write('{:},'.format(x1))
-        coord_file.write('{:},'.format(y1))
+        if comma==True:
+            coord_file.write('{:},'.format(x1))
+            coord_file.write('{:},'.format(y1))
+        else:
+            coord_file.write('{:}\t'.format(x1))
+            coord_file.write('{:}\t'.format(y1))
         coord_file.write('{:}\n'.format(s))
         coord_file.close()
+
+def saveMapName(file, type, extension, comma):
+    if comma==True:
+        extension2 = '_map.csv'
+    else:
+        extension2 = '_map.txt'
+    return os.path.splitext(file)[0] + '_' + type + '-' + extension + extension2
 
 ####################################################################
 ''' Make header, if absent, for the summary file '''
@@ -710,6 +827,8 @@ def usage():
     print('  python SpectraLearnPredictSVM.py -m <learningfile> <spectramap> \n')
     print(' batch txt files: ')
     print('  python SpectraLearnPredictSVM.py -b <learningfile> \n')
+    print(' k-means on maps: ')
+    print('  python SpectraLearnPredictSVM.py -k <spectramap> <number_of_classes>\n')
 
 #************************************
 ''' Info on Classification Report '''

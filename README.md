@@ -41,6 +41,10 @@ Batch txt files:
 
     python SpectraLearnPredictSVM.py -b learningfile 
 
+K-means on Raman maps:
+    
+    python SpectraLearnPredictSVM.py -k spectramap number_of_classes
+
 
 Training data
 =============
