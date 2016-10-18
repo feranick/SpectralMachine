@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161018b
+* version: 20161018c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -56,6 +56,7 @@ svmClassReport = False
 svmTrainedData = "svmModel.pkl"
 class svmDef:
     svmAlwaysRetrain = True
+    plotSVM = True
 
 ''' Training algorithm for SVM
 Use either 'linear' or 'rbf'
@@ -68,12 +69,13 @@ showClasses = False
 #**********************************************
 ''' Neural Networks'''
 #**********************************************
-runNN = True
+runNN = False
 nnClassReport = False
 
 nnTrainedData = "nnModel.pkl"
 class nnDef:
     nnAlwaysRetrain = True
+    plotNN = True
 
 ''' Solver for NN
     lbfgs preferred for small datasets
@@ -84,11 +86,12 @@ nnNeurons = 100  #default = 100
 #**********************************************
 ''' TensorFlow '''
 #**********************************************
-runTF = True
+runTF = False
 
 tfTrainedData = "tfmodel.ckpt"
 class tfDef:
     tfAlwaysRetrain = True
+    plotTF = True
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -161,7 +164,6 @@ def main():
                 else:
                     numKMcomp = numKMcomponents
                 KmMap(sys.argv[2], numKMcomp)
-            
             except:
                 usage()
                 sys.exit(2)
@@ -247,29 +249,6 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename):
 
 
 #**********************************************
-''' Learn and Predict - Batch'''
-#**********************************************
-def LearnPredictBatch(learnFile):
-    summary_filename = 'summary' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
-    makeHeaderSummary(summary_filename, learnFile)
-    ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    if multiproc == True:
-        from multiprocessing import Pool
-        import multiprocessing as mp
-        p = mp.Pool()
-        for f in glob.glob('*.txt'):
-            if (f != learnFile):
-                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, YnormXind, summary_filename))
-        p.close()
-        p.join()
-    else:
-        for f in glob.glob('*.txt'):
-            if (f != learnFile):
-                processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename)
-
-
-#**********************************************
 ''' Learn and Predict - Maps'''
 #**********************************************
 def LearnPredictMap(learnFile, mapFile):
@@ -289,28 +268,34 @@ def LearnPredictMap(learnFile, mapFile):
         ''' Run Support Vector Machines '''
         if runSVM == True:
             svmPred = runSVMmain(A, Cl, En, r)
-            saveMap(mapFile, 'svm', 'HC', svmPred, X[i], Y[i], True)
+            saveMap(mapFile, 'svm', 'HC', svmPred[0], X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
     
         ''' Run Neural Network '''
         if runNN == True:
             nnPred = runNNmain(A, Cl, r)
-            saveMap(mapFile, 'NN', 'HC', nnPred, X[i], Y[i], True)
+            saveMap(mapFile, 'NN', 'HC', nnPred[0], X[i], Y[i], True)
             nnDef.nnAlwaysRetrain = False
     
         ''' Tensorflow '''
         if runTF == True:
             tfPred = runTensorFlow(A,Cl,r)
-            saveMap(mapFile, 'TF', 'HC', tfPred, X[i], Y[i], True)
+            saveMap(mapFile, 'TF', 'HC', tfPred[0], X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
         
         ''' Run K-Means '''
         if runKM == True:
             kmDef.plotKM = False
             kmPred = runKMmain(A, Cl, En, r, Aorig, rorig)
-            saveMap(mapFile, 'KM', 'HC', kmPred, X[i], Y[i], True)
+            saveMap(mapFile, 'KM', 'HC', kmPred[0], X[i], Y[i], True)
         
         i = i+1
+    if svmDef.plotSVM == True and runSVM == True:
+        plotMaps(X, Y, svmPred[0], 'SVM')
+    if nnDef.plotNN == True and runNN == True:
+        plotMaps(X, Y, nnPred[0], 'Neural netowrks')
+    if tfDef.plotTF == True and runTF == True:
+        plotMaps(X, Y, tfPred[0], 'TensorFlow')
 
 #********************
 ''' Run SVM '''
@@ -553,21 +538,7 @@ def KmMap(mapFile, numKMcomp):
             saveMap(mapFile, 'KM', 'Class_'+ str(int(kmPred[i])) + '-'+str(np.unique(kmeans.labels_).shape[0]) , '\t'.join(map(str, R[1,:])), X[i], Y[i], False)
 
     if kmDef.plotKM == True:
-        print(' Plotting K-Means Map...\n')
-        import scipy.interpolate
-        xi = np.linspace(min(X), max(X))
-        yi = np.linspace(min(Y), max(Y))
-        xi, yi = np.meshgrid(xi, yi)
-        
-        rbf = scipy.interpolate.Rbf(Y, -X, kmPred, function='linear')
-        zi = rbf(xi, yi)
-        import matplotlib.pyplot as plt
-        plt.imshow(zi, vmin=kmPred.min(), vmax=kmPred.max(), origin='lower',label='data',
-                    extent=[X.min(), X.max(), Y.min(), Y.max()])
-        plt.title('K-Means Map')
-        plt.xlabel('X [um]')
-        plt.ylabel('Y [um]')
-        plt.show()
+        plotMaps(X, Y, kmPred, 'K-Means')
 
 
 #************************************
@@ -604,6 +575,49 @@ def plotTrainData(A, En, R):
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
     plt.show()
+
+#************************************
+''' Plot Processed Maps'''
+#************************************
+def plotMaps(X, Y, A, label):
+    print(' Plotting ' + label + ' Map...\n')
+    import scipy.interpolate
+    xi = np.linspace(min(X), max(X))
+    yi = np.linspace(min(Y), max(Y))
+    xi, yi = np.meshgrid(xi, yi)
+        
+    rbf = scipy.interpolate.Rbf(Y, -X, A, function='linear')
+    zi = rbf(xi, yi)
+    import matplotlib.pyplot as plt
+    plt.imshow(zi, vmin=A.min(), vmax=A.max(), origin='lower',label='data',
+                   extent=[X.min(), X.max(), Y.min(), Y.max()])
+    plt.title(label)
+    plt.xlabel('X [um]')
+    plt.ylabel('Y [um]')
+    plt.show()
+
+#**********************************************
+''' Learn and Predict - Batch'''
+#**********************************************
+def LearnPredictBatch(learnFile):
+    summary_filename = 'summary' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
+    makeHeaderSummary(summary_filename, learnFile)
+    ''' Open and process training data '''
+    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    if multiproc == True:
+        from multiprocessing import Pool
+        import multiprocessing as mp
+        p = mp.Pool()
+        for f in glob.glob('*.txt'):
+            if (f != learnFile):
+                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, YnormXind, summary_filename))
+        p.close()
+        p.join()
+    else:
+        for f in glob.glob('*.txt'):
+            if (f != learnFile):
+                processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename)
+
 
 #**********************************************************************************
 ''' Preprocess prediction data '''
