@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161017b
+* version: 20161018a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -100,10 +100,12 @@ numPCAcomponents = 5
 #**********************************************
 ''' K-means '''
 #**********************************************
-runKM = False
+runKM = True
 customNumKMComp = False
 numKMcomponents = 20
-plotKM = True
+
+class kmDef:
+    plotKM = True
 
 #**********************************************
 ''' Plotting '''
@@ -200,7 +202,7 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename):
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
-    A, Cl, En, R, Aorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
             
     ''' Run Support Vector Machines '''
     if runSVM == True:
@@ -218,6 +220,13 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename):
     if runTF == True:
         tfPred, tfProb = runTensorFlow(A,Cl,R)
         summaryFile.extend([tfPred, tfProb])
+        tfDef.tfAlwaysRetrain = False
+    
+    ''' Run K-Means '''
+    if runKM == True:
+        kmDef.plotKM = False
+        kmPred = runKMmain(A, Cl, En, R, Aorig, Rorig)
+        summaryFile.extend([kmPred])
             
     with open(summary_filename, "a") as sum_file:
         csv_out=csv.writer(sum_file)
@@ -261,7 +270,7 @@ def LearnPredictMap(learnFile, mapFile):
     type = 0
     i = 0;
     for r in R[:]:
-        A, Cl, En, r, Aorig = preProcessNormData(r, Rx, A, En, Cl, Amax, YnormXind, type)
+        A, Cl, En, r, Aorig, rorig = preProcessNormData(r, Rx, A, En, Cl, Amax, YnormXind, type)
         type = 1
         print('\n Preprocessing map\n')
 
@@ -281,6 +290,14 @@ def LearnPredictMap(learnFile, mapFile):
         if runTF == True:
             tfPred = runTensorFlow(A,Cl,r)
             saveMap(mapFile, 'TF', 'HC', tfPred, X[i], Y[i])
+            tfDef.tfAlwaysRetrain = False
+        
+        ''' Run K-Means '''
+        if runKM == True:
+            kmDef.plotKM = False
+            kmPred = runKMmain(A, Cl, En, r, Aorig, rorig)
+            saveMap(mapFile, 'KM', 'HC', kmPred, X[i], Y[i])
+        
         i = i+1
 
 #********************
@@ -484,7 +501,7 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
             if kmeans.labels_[j] == i:
                 print(' ' + str(Cl[j]), end="")
     print('\033[1m' + '\n\n Predicted class (K-Means) = ' + str(kmeans.predict(R)[0]) + '\033[0m \n')
-    if plotKM == True:
+    if kmDef.plotKM == True:
         for j in range(0,kmeans.labels_.shape[0]):
             if kmeans.labels_[j] == kmeans.predict(R)[0]:
                 plt.plot(En, Aorig[j,:])
@@ -494,6 +511,7 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
         plt.ylabel('Intensity')
         plt.legend()
         plt.show()
+    return kmeans.predict(R)[0]
 
 
 #************************************
