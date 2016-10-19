@@ -17,8 +17,8 @@ This software requires Python (2.6 or higher, 3.3 or higher). It has been tested
 
 This package requires:
 
-    scikit-learn
     numpy
+    scikit-learn (>=0.18)
     matplotlib 
 
 These are found in Unix based systems using common repositories (apt-get for Debian/Ubuntu Linux, or MacPorts for MacOS). More details in the [scikit-learn installation page](http://scikit-learn.org/stable/install.html).
