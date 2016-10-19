@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161018d
+* version: 20161018e
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -109,6 +109,7 @@ numKMcomponents = 20
 
 class kmDef:
     plotKM = True
+    plotKMmaps = True
 
 #**********************************************
 ''' Plotting '''
@@ -260,42 +261,47 @@ def LearnPredictMap(learnFile, mapFile):
     X, Y, R, Rx = readPredMap(mapFile)
     type = 0
     i = 0;
+    
+    svmPred = nnPred = tfPred = kmPred = np.empty([X.shape[0]])
+    print(' Processing map...' )
     for r in R[:]:
         A, Cl, En, r, Aorig, rorig = preProcessNormData(r, Rx, A, En, Cl, Amax, YnormXind, type)
         type = 1
-        print('\n Preprocessing map\n')
 
         ''' Run Support Vector Machines '''
         if runSVM == True:
-            svmPred = runSVMmain(A, Cl, En, r)
-            saveMap(mapFile, 'svm', 'HC', svmPred[0], X[i], Y[i], True)
+            svmPred[i] = runSVMmain(A, Cl, En, r)
+            saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
     
         ''' Run Neural Network '''
         if runNN == True:
             nnPred = runNNmain(A, Cl, r)
-            saveMap(mapFile, 'NN', 'HC', nnPred[0], X[i], Y[i], True)
+            saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
             nnDef.nnAlwaysRetrain = False
     
         ''' Tensorflow '''
         if runTF == True:
             tfPred = runTensorFlow(A,Cl,r)
-            saveMap(mapFile, 'TF', 'HC', tfPred[0], X[i], Y[i], True)
+            saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
         
         ''' Run K-Means '''
         if runKM == True:
             kmDef.plotKM = False
-            kmPred = runKMmain(A, Cl, En, r, Aorig, rorig)
-            saveMap(mapFile, 'KM', 'HC', kmPred, X[i], Y[i], True)
+            kmPred[i] = runKMmain(A, Cl, En, r, Aorig, rorig)
+            saveMap(mapFile, 'KM', 'HC', kmPred[i], X[i], Y[i], True)
         
         i = i+1
+
     if svmDef.plotSVM == True and runSVM == True:
-        plotMaps(X, Y, svmPred[0], 'SVM')
+        plotMaps(X, Y, svmPred, 'SVM')
     if nnDef.plotNN == True and runNN == True:
-        plotMaps(X, Y, nnPred[0], 'Neural netowrks')
+        plotMaps(X, Y, nnPred, 'Neural netowrks')
     if tfDef.plotTF == True and runTF == True:
-        plotMaps(X, Y, tfPred[0], 'TensorFlow')
+        plotMaps(X, Y, tfPred, 'TensorFlow')
+    if kmDef.plotKMmaps == True and runKM == True:
+        plotMaps(X, Y, kmPred, 'K-Means Prediction')
 
 #********************
 ''' Run SVM '''
@@ -484,7 +490,6 @@ def runPCAmain(A, Cl, En, R):
 #********************
 def runKMmain(A, Cl, En, R, Aorig, Rorig):
     from sklearn.cluster import KMeans
-    import matplotlib.pyplot as plt
     print('\n Running K-Means...')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
     if customNumKMComp == False:
@@ -499,6 +504,7 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
                 print(' ' + str(Cl[j]), end="")
     print('\033[1m' + '\n\n Predicted class (K-Means) = ' + str(kmeans.predict(R)[0]) + '\033[0m \n')
     if kmDef.plotKM == True:
+        import matplotlib.pyplot as plt
         for j in range(0,kmeans.labels_.shape[0]):
             if kmeans.labels_[j] == kmeans.predict(R)[0]:
                 plt.plot(En, Aorig[j,:])
@@ -580,6 +586,8 @@ def plotTrainData(A, En, R):
 ''' Plot Processed Maps'''
 #************************************
 def plotMaps(X, Y, A, label):
+    print(X.shape)
+    print(Y.shape)
     print(' Plotting ' + label + ' Map...\n')
     import scipy.interpolate
     xi = np.linspace(min(X), max(X))
@@ -745,8 +753,7 @@ def readLearnFile(learnFile):
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
     A = np.delete(M,np.s_[0:1],1)
-    #AmaxIndex = A.shape[1]
-    
+
     # Find index corresponding to energy value to be used for Y normalization
     if fullYnorm == False:
         YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
