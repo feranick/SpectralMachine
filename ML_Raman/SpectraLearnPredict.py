@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161018c
+* version: 20161018d
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -69,7 +69,7 @@ showClasses = False
 #**********************************************
 ''' Neural Networks'''
 #**********************************************
-runNN = False
+runNN = True
 nnClassReport = False
 
 nnTrainedData = "nnModel.pkl"
@@ -86,7 +86,7 @@ nnNeurons = 100  #default = 100
 #**********************************************
 ''' TensorFlow '''
 #**********************************************
-runTF = False
+runTF = True
 
 tfTrainedData = "tfmodel.ckpt"
 class tfDef:
@@ -287,7 +287,7 @@ def LearnPredictMap(learnFile, mapFile):
         if runKM == True:
             kmDef.plotKM = False
             kmPred = runKMmain(A, Cl, En, r, Aorig, rorig)
-            saveMap(mapFile, 'KM', 'HC', kmPred[0], X[i], Y[i], True)
+            saveMap(mapFile, 'KM', 'HC', kmPred, X[i], Y[i], True)
         
         i = i+1
     if svmDef.plotSVM == True and runSVM == True:
