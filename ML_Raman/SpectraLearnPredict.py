@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161018e
+* version: 20161018f
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -261,7 +261,6 @@ def LearnPredictMap(learnFile, mapFile):
     X, Y, R, Rx = readPredMap(mapFile)
     type = 0
     i = 0;
-    
     svmPred = nnPred = tfPred = kmPred = np.empty([X.shape[0]])
     print(' Processing map...' )
     for r in R[:]:
@@ -270,19 +269,19 @@ def LearnPredictMap(learnFile, mapFile):
 
         ''' Run Support Vector Machines '''
         if runSVM == True:
-            svmPred[i] = runSVMmain(A, Cl, En, r)
+            svmPred[i], temp = runSVMmain(A, Cl, En, r)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
     
         ''' Run Neural Network '''
         if runNN == True:
-            nnPred = runNNmain(A, Cl, r)
+            nnPred[i], temp = runNNmain(A, Cl, r)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
             nnDef.nnAlwaysRetrain = False
     
         ''' Tensorflow '''
         if runTF == True:
-            tfPred = runTensorFlow(A,Cl,r)
+            tfPred[i], temp = runTensorFlow(A,Cl,r)
             saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
         
@@ -291,8 +290,7 @@ def LearnPredictMap(learnFile, mapFile):
             kmDef.plotKM = False
             kmPred[i] = runKMmain(A, Cl, En, r, Aorig, rorig)
             saveMap(mapFile, 'KM', 'HC', kmPred[i], X[i], Y[i], True)
-        
-        i = i+1
+        i+=1
 
     if svmDef.plotSVM == True and runSVM == True:
         plotMaps(X, Y, svmPred, 'SVM')
@@ -586,8 +584,6 @@ def plotTrainData(A, En, R):
 ''' Plot Processed Maps'''
 #************************************
 def plotMaps(X, Y, A, label):
-    print(X.shape)
-    print(Y.shape)
     print(' Plotting ' + label + ' Map...\n')
     import scipy.interpolate
     xi = np.linspace(min(X), max(X))
