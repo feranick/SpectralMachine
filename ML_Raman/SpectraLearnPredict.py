@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161018f
+* version: 20161018g
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -90,7 +90,7 @@ runTF = True
 
 tfTrainedData = "tfmodel.ckpt"
 class tfDef:
-    tfAlwaysRetrain = True
+    tfAlwaysRetrain = False
     plotTF = True
 
 #**********************************************
@@ -437,11 +437,11 @@ def runTensorFlow(A, Cl, R):
                 saver = tf.train.Saver()
                 sess = tf.Session()
                 saver.restore(sess, tfTrainedData)
-                print(' Model restored. \n')
+                print(' Model restored.')
         else:
             raise ValueError(' Force TF model retraining.')
     except:
-        print(' Retraining TF model...')
+        print(' Improving TF model...')
         init = tf.initialize_all_variables()
         saver = tf.train.Saver()
         sess = tf.Session()
@@ -449,12 +449,12 @@ def runTensorFlow(A, Cl, R):
         sess.run(train_step, feed_dict={x: A, y_: Cl2})
 
         save_path = saver.save(sess, tfTrainedData)
-        print(' Model saved in file: %s\n' % save_path)
+        print(' Model saved in file: %s' % save_path)
 
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
     
-    #print(sess.run(accuracy, feed_dict={x: R, y_: Cl2}))
+    print(' Accuracy: ' + str(sess.run(accuracy, feed_dict={x: R, y_: Cl2})) + '\%\n')
     print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
     return np.unique(Cl)[res2][0], res1[0][res2][0]*100
 
