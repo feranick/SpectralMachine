@@ -29,7 +29,7 @@ from datetime import datetime, date
 #**********************************************
 ''' Calculation by limited number of points '''
 #**********************************************
-cherryPickEnPoint = True
+cherryPickEnPoint = False
 
 enSel = [1050, 1150, 1250, 1330, 1450, 1590]
 enSelDelta = 2
