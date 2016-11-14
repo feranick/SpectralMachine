@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161114a
+* version: 20161114b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -27,6 +27,19 @@ from datetime import datetime, date
 
 
 #**********************************************
+''' Calculation by limited number of points '''
+#**********************************************
+cherryPickEnPoint = True
+
+enSel = [1050, 1150, 1250, 1330, 1450, 1590]
+enSelDelta = 2
+
+if(cherryPickEnPoint == True):
+    enRestrictRegion = False
+    print(' Calculation by limited number of points: ENABLED ')
+    print(' Restricted range: DISABLED \n')
+
+#**********************************************
 ''' Spectra normalization, preprocessing '''
 #**********************************************
 Ynorm = True   # True recommended
@@ -41,20 +54,6 @@ preProcess = True  # True recommended
 enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
 enLim2 = 550    # for now use indexes rather than actual Energy
-
-
-#**********************************************
-''' Calculation by limited number of points '''
-#**********************************************
-cherryPickEnPoint = True
-
-enPoints = [53, 157, 272, 344, 469, 616]  #index of energy points
-#corresponds to: 1050, 1150, 1250, 1330, 1450, 1590
-
-if(cherryPickEnPoint == True):
-    enRestrictRegion = False
-    print(' Calculation by limited number of points: ENABLED ')
-    print(' Restricted range: DISABLED \n')
 
 #**********************************************
 ''' Model selection for training '''
@@ -153,11 +152,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+                    #except:
+                    #usage()
+                    #sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -697,7 +696,11 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
             print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
         if type == 0:
-            print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+            if(cherryPickEnPoint == True):
+                print( ' Using selected spectral points:')
+                print(En)
+            else:
+                print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
 
     return A, Cl, En, R, Aorig, Rorig
 
@@ -767,6 +770,10 @@ def readLearnFile(learnFile):
     A = np.delete(M,np.s_[0:1],1)
 
     if cherryPickEnPoint == True and enRestrictRegion == False:
+        enPoints = enSel
+        for i in range(0, len(enSel)):
+            enPoints[i] = int(np.average(np.where((En<float(enSel[i]+enSelDelta)) & (En>float(enSel[i]-enSelDelta)))[0].tolist()))
+        
         A = A[:,enPoints]
         En = En[enPoints]
         
