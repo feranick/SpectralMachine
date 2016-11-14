@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161018g
+* version: 20161114a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -25,6 +25,7 @@ from os.path import exists
 from os import rename
 from datetime import datetime, date
 
+
 #**********************************************
 ''' Spectra normalization, preprocessing '''
 #**********************************************
@@ -40,6 +41,20 @@ preProcess = True  # True recommended
 enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
 enLim2 = 550    # for now use indexes rather than actual Energy
+
+
+#**********************************************
+''' Calculation by limited number of points '''
+#**********************************************
+cherryPickEnPoint = True
+
+enPoints = [53, 157, 272, 344, 469, 616]  #index of energy points
+#corresponds to: 1050, 1150, 1250, 1330, 1450, 1590
+
+if(cherryPickEnPoint == True):
+    enRestrictRegion = False
+    print(' Calculation by limited number of points: ENABLED ')
+    print(' Restricted range: DISABLED \n')
 
 #**********************************************
 ''' Model selection for training '''
@@ -677,6 +692,7 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
         R = R[:,range(enLim1, enLim2)]
         Aorig = Aorig[:,range(enLim1, enLim2)]
         Rorig = Rorig[:,range(enLim1, enLim2)]
+
         if type == 0:
             print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
@@ -750,15 +766,23 @@ def readLearnFile(learnFile):
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
     A = np.delete(M,np.s_[0:1],1)
 
+    if cherryPickEnPoint == True and enRestrictRegion == False:
+        A = A[:,enPoints]
+        En = En[enPoints]
+        
+        if type == 0:
+            print( ' Cheery picking\n')
+
     # Find index corresponding to energy value to be used for Y normalization
     if fullYnorm == False:
         YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
     else:
         YnormXind = np.where(En>0)[0].tolist()
-    
+
     Amax = np.empty([A.shape[0],1])
     print(' Number of datapoints = ' + str(A.shape[0]))
     print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
+
 
     return En, Cl, A, Amax, YnormXind
 
