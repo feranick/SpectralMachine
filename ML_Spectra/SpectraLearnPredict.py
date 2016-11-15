@@ -4,7 +4,7 @@
 **********************************************************
 *
 * SpectraLearnPredict
-* Perform Machine Mearning on Raman data/maps.
+* Perform Machine Learning on Raman data/maps.
 * version: 20161115b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
