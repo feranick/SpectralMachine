@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161114b
+* version: 20161114c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -32,12 +32,13 @@ from datetime import datetime, date
 cherryPickEnPoint = False
 
 enSel = [1050, 1150, 1250, 1330, 1450, 1590]
-enSelDelta = 2
+enSelDelta = [2, 2, 2, 10, 2, 10]
 
 if(cherryPickEnPoint == True):
     enRestrictRegion = False
     print(' Calculation by limited number of points: ENABLED ')
-    print(' Restricted range: DISABLED \n')
+    print(' THIS IS AN EXPERIMENTAL FEATURE \n')
+    print(' Restricted range: DISABLED')
 
 #**********************************************
 ''' Spectra normalization, preprocessing '''
@@ -768,17 +769,24 @@ def readLearnFile(learnFile):
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
     A = np.delete(M,np.s_[0:1],1)
+    Atemp = A[:,range(len(enSel))]
 
     if cherryPickEnPoint == True and enRestrictRegion == False:
         enPoints = enSel
+        enRange = enSel
         for i in range(0, len(enSel)):
-            enPoints[i] = int(np.average(np.where((En<float(enSel[i]+enSelDelta)) & (En>float(enSel[i]-enSelDelta)))[0].tolist()))
-        
-        A = A[:,enPoints]
+            #enPoints[i] = int(np.average(np.where((En<float(enSel[i]+enSelDelta)) & (En>float(enSel[i]-enSelDelta)))[0].tolist()))
+            enRange[i] = np.where((En<float(enSel[i]+enSelDelta[i])) & (En>float(enSel[i]-enSelDelta[i])))[0].tolist()
+            
+            for j in range(0, A.shape[0]):
+                Atemp[j,i] = A[j,A[j,enRange[i]].tolist().index(max(A[j, enRange[i]].tolist()))+enRange[i][0]]
+            
+            enPoints[i] = int(np.average(enRange[i]))
+        A = Atemp
         En = En[enPoints]
-        
+
         if type == 0:
-            print( ' Cheery picking\n')
+            print( ' Cheery picking points in the spectra\n')
 
     # Find index corresponding to energy value to be used for Y normalization
     if fullYnorm == False:
