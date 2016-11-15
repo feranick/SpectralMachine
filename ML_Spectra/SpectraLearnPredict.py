@@ -29,10 +29,10 @@ from datetime import datetime, date
 #**********************************************
 ''' Calculation by limited number of points '''
 #**********************************************
-cherryPickEnPoint = False
+cherryPickEnPoint = False  # False recommended
 
-enSel = [1050, 1150, 1250, 1330, 1450, 1590]
-enSelDelta = [2, 2, 2, 10, 2, 10]
+enSel = [1050, 1150, 1220, 1270, 1330, 1410, 1480, 1590, 1620, 1650]
+enSelDelta = [2, 2, 2, 2, 10, 2, 2, 15, 5, 2]
 
 if(cherryPickEnPoint == True):
     enRestrictRegion = False
@@ -153,11 +153,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-                    #except:
-                    #usage()
-                    #sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -577,19 +577,19 @@ def readLearnFile(learnFile):
     Atemp = A[:,range(len(enSel))]
 
     if cherryPickEnPoint == True and enRestrictRegion == False:
-        enPoints = enSel
-        enRange = enSel
+        enPoints = list(enSel)
+        enRange = list(enSel)
+
         for i in range(0, len(enSel)):
-            #enPoints[i] = int(np.average(np.where((En<float(enSel[i]+enSelDelta)) & (En>float(enSel[i]-enSelDelta)))[0].tolist()))
             enRange[i] = np.where((En<float(enSel[i]+enSelDelta[i])) & (En>float(enSel[i]-enSelDelta[i])))[0].tolist()
-            
+
             for j in range(0, A.shape[0]):
                 Atemp[j,i] = A[j,A[j,enRange[i]].tolist().index(max(A[j, enRange[i]].tolist()))+enRange[i][0]]
             
             enPoints[i] = int(np.average(enRange[i]))
         A = Atemp
         En = En[enPoints]
-        
+
         if type == 0:
             print( ' Cheery picking points in the spectra\n')
 
@@ -598,12 +598,10 @@ def readLearnFile(learnFile):
         YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
     else:
         YnormXind = np.where(En>0)[0].tolist()
-
     Amax = np.empty([A.shape[0],1])
+
     print(' Number of datapoints = ' + str(A.shape[0]))
     print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
-    
-    
     return En, Cl, A, Amax, YnormXind
 
 #**********************************************
@@ -617,9 +615,22 @@ def readPredFile(sampleFile):
     except:
         print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
         return
-    
+
     R=Rtot[1,:]
     Rx=Rtot[0,:]
+
+    if cherryPickEnPoint == True and enRestrictRegion == False:
+        Rtemp = R[range(len(enSel))]
+        enPoints = list(enSel)
+        enRange = list(enSel)
+        for i in range(0, len(enSel)):
+            enRange[i] = np.where((Rx<float(enSel[i]+enSelDelta[i])) & (Rx>float(enSel[i]-enSelDelta[i])))[0].tolist()
+            Rtemp[i] = R[R[enRange[i]].tolist().index(max(R[enRange[i]].tolist()))+enRange[i][0]]
+
+            enPoints[i] = int(np.average(enRange[i]))
+        R = Rtemp
+        Rx = Rx[enPoints]
+
     return R, Rx
 
 
@@ -835,7 +846,7 @@ def plotTrainData(A, En, R):
         plt.title("Training Data")
     for i in range(0,A.shape[0]):
         plt.plot(En, A[i,:], label='Training data')
-    plt.plot(En, R[0,:], linewidth = 2, label='Sample data')
+    plt.plot(En, R[0,:], linewidth = 4, label='Sample data')
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
     plt.show()
