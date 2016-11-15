@@ -576,8 +576,8 @@ def readLearnFile(learnFile):
     A = np.delete(M,np.s_[0:1],1)
     Atemp = A[:,range(len(enSel))]
 
-if cherryPickEnPoint == True and enRestrictRegion == False:
-    enPoints = enSel
+    if cherryPickEnPoint == True and enRestrictRegion == False:
+        enPoints = enSel
         enRange = enSel
         for i in range(0, len(enSel)):
             #enPoints[i] = int(np.average(np.where((En<float(enSel[i]+enSelDelta)) & (En>float(enSel[i]-enSelDelta)))[0].tolist()))
@@ -587,19 +587,19 @@ if cherryPickEnPoint == True and enRestrictRegion == False:
                 Atemp[j,i] = A[j,A[j,enRange[i]].tolist().index(max(A[j, enRange[i]].tolist()))+enRange[i][0]]
             
             enPoints[i] = int(np.average(enRange[i]))
-    A = Atemp
+        A = Atemp
         En = En[enPoints]
         
         if type == 0:
             print( ' Cheery picking points in the spectra\n')
 
-# Find index corresponding to energy value to be used for Y normalization
-if fullYnorm == False:
-    YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
+    # Find index corresponding to energy value to be used for Y normalization
+    if fullYnorm == False:
+        YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
     else:
         YnormXind = np.where(En>0)[0].tolist()
 
-Amax = np.empty([A.shape[0],1])
+    Amax = np.empty([A.shape[0],1])
     print(' Number of datapoints = ' + str(A.shape[0]))
     print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
     
@@ -855,10 +855,10 @@ def plotMaps(X, Y, A, label):
     import matplotlib.pyplot as plt
     plt.imshow(zi, vmin=A.min(), vmax=A.max(), origin='lower',label='data',
                extent=[X.min(), X.max(), Y.min(), Y.max()])
-               plt.title(label)
-               plt.xlabel('X [um]')
-               plt.ylabel('Y [um]')
-               plt.show()
+    plt.title(label)
+    plt.xlabel('X [um]')
+    plt.ylabel('Y [um]')
+    plt.show()
 
 
 ####################################################################
