@@ -29,7 +29,7 @@ from datetime import datetime, date
 #**********************************************
 ''' Calculation by limited number of points '''
 #**********************************************
-cherryPickEnPoint = True  # False recommended
+cherryPickEnPoint = False  # False recommended
 
 enSel = [1050, 1150, 1220, 1270, 1330, 1410, 1480, 1590, 1620, 1650]
 enSelDelta = [2, 2, 2, 2, 10, 2, 2, 15, 5, 2]
@@ -153,11 +153,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-                #except:
-                #usage()
-                #sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
