@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161115a
+* version: 20161115b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -29,7 +29,7 @@ from datetime import datetime, date
 #**********************************************
 ''' Calculation by limited number of points '''
 #**********************************************
-cherryPickEnPoint = False  # False recommended
+cherryPickEnPoint = True  # False recommended
 
 enSel = [1050, 1150, 1220, 1270, 1330, 1410, 1480, 1590, 1620, 1650]
 enSelDelta = [2, 2, 2, 2, 10, 2, 2, 15, 5, 2]
@@ -153,11 +153,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+                #except:
+                #usage()
+                #sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -669,8 +669,8 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
             print('\033[1m' + '\n WARNING: Different number of datapoints for the x-axis\n for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
-    Aorig = A
-    Rorig = R
+    Aorig = np.copy(A)
+    Rorig = np.copy(R)
 
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
@@ -740,7 +740,7 @@ def preProcessNormMap(A, En, type):
         YnormXind = np.where(En>0)[0].tolist()
     
     Amax = np.empty([A.shape[0],1])
-    Aorig = A
+    Aorig = np.copy(A)
     
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
