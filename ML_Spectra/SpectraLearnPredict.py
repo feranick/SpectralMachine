@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Mearning on Raman data/maps.
-* version: 20161114c
+* version: 20161115a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -559,61 +559,69 @@ def KmMap(mapFile, numKMcomp):
     if kmDef.plotKM == True:
         plotMaps(X, Y, kmPred, 'K-Means')
 
+#************************************
+''' Read Learning file '''
+#************************************
+def readLearnFile(learnFile):
+    try:
+        with open(learnFile, 'r') as f:
+            M = np.loadtxt(f, unpack =False)
+    except:
+        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
+        return
+    
+    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+    M = np.delete(M,np.s_[0:1],0)
+    Cl = ['{:.2f}'.format(x) for x in M[:,0]]
+    A = np.delete(M,np.s_[0:1],1)
+    Atemp = A[:,range(len(enSel))]
 
-#************************************
-''' Plot Probabilities'''
-#************************************
-def plotProb(clf, R):
-    prob = clf.predict_proba(R)[0].tolist()
-    print(' Probabilities of this sample within each class: \n')
-    for i in range(0,clf.classes_.shape[0]):
-        print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
-    import matplotlib.pyplot as plt
-    print('\n Stand by: Plotting probabilities for each class... \n')
-    plt.title('Probability density per class')
-    for i in range(0, clf.classes_.shape[0]):
-        plt.scatter(clf.classes_[i], round(100*prob[i],2), label='probability', c = 'red')
-    plt.grid(True)
-    plt.xlabel('Class')
-    plt.ylabel('Probability [%]')
-    plt.show()
-
-#************************************
-''' Plot Training data'''
-#************************************
-def plotTrainData(A, En, R):
-    import matplotlib.pyplot as plt
-    print(' Stand by: Plotting each datapoint from the map...\n')
-    if Ynorm ==True:
-        plt.title("Normalized Training Data")
-    else:
-        plt.title("Training Data")
-    for i in range(0,A.shape[0]):
-        plt.plot(En, A[i,:], label='Training data')
-    plt.plot(En, R[0,:], linewidth = 2, label='Sample data')
-    plt.xlabel('Raman shift [1/cm]')
-    plt.ylabel('Raman Intensity [arb. units]')
-    plt.show()
-
-#************************************
-''' Plot Processed Maps'''
-#************************************
-def plotMaps(X, Y, A, label):
-    print(' Plotting ' + label + ' Map...\n')
-    import scipy.interpolate
-    xi = np.linspace(min(X), max(X))
-    yi = np.linspace(min(Y), max(Y))
-    xi, yi = np.meshgrid(xi, yi)
+if cherryPickEnPoint == True and enRestrictRegion == False:
+    enPoints = enSel
+        enRange = enSel
+        for i in range(0, len(enSel)):
+            #enPoints[i] = int(np.average(np.where((En<float(enSel[i]+enSelDelta)) & (En>float(enSel[i]-enSelDelta)))[0].tolist()))
+            enRange[i] = np.where((En<float(enSel[i]+enSelDelta[i])) & (En>float(enSel[i]-enSelDelta[i])))[0].tolist()
+            
+            for j in range(0, A.shape[0]):
+                Atemp[j,i] = A[j,A[j,enRange[i]].tolist().index(max(A[j, enRange[i]].tolist()))+enRange[i][0]]
+            
+            enPoints[i] = int(np.average(enRange[i]))
+    A = Atemp
+        En = En[enPoints]
         
-    rbf = scipy.interpolate.Rbf(Y, -X, A, function='linear')
-    zi = rbf(xi, yi)
-    import matplotlib.pyplot as plt
-    plt.imshow(zi, vmin=A.min(), vmax=A.max(), origin='lower',label='data',
-                   extent=[X.min(), X.max(), Y.min(), Y.max()])
-    plt.title(label)
-    plt.xlabel('X [um]')
-    plt.ylabel('Y [um]')
-    plt.show()
+        if type == 0:
+            print( ' Cheery picking points in the spectra\n')
+
+# Find index corresponding to energy value to be used for Y normalization
+if fullYnorm == False:
+    YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
+    else:
+        YnormXind = np.where(En>0)[0].tolist()
+
+Amax = np.empty([A.shape[0],1])
+    print(' Number of datapoints = ' + str(A.shape[0]))
+    print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
+    
+    
+    return En, Cl, A, Amax, YnormXind
+
+#**********************************************
+''' Open prediction file '''
+#**********************************************
+def readPredFile(sampleFile):
+    try:
+        with open(sampleFile, 'r') as f:
+            print(' Opening sample data for prediction...')
+            Rtot = np.loadtxt(f, unpack =True)
+    except:
+        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
+        return
+    
+    R=Rtot[1,:]
+    Rx=Rtot[0,:]
+    return R, Rx
+
 
 #**********************************************
 ''' Learn and Predict - Batch'''
@@ -754,69 +762,6 @@ def preProcessNormMap(A, En, type):
     
     return A, En, Aorig
 
-#************************************
-''' Read Learning file '''
-#************************************
-def readLearnFile(learnFile):
-    try:
-        with open(learnFile, 'r') as f:
-            M = np.loadtxt(f, unpack =False)
-    except:
-        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
-        return
-
-    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(M,np.s_[0:1],0)
-    Cl = ['{:.2f}'.format(x) for x in M[:,0]]
-    A = np.delete(M,np.s_[0:1],1)
-    Atemp = A[:,range(len(enSel))]
-
-    if cherryPickEnPoint == True and enRestrictRegion == False:
-        enPoints = enSel
-        enRange = enSel
-        for i in range(0, len(enSel)):
-            #enPoints[i] = int(np.average(np.where((En<float(enSel[i]+enSelDelta)) & (En>float(enSel[i]-enSelDelta)))[0].tolist()))
-            enRange[i] = np.where((En<float(enSel[i]+enSelDelta[i])) & (En>float(enSel[i]-enSelDelta[i])))[0].tolist()
-            
-            for j in range(0, A.shape[0]):
-                Atemp[j,i] = A[j,A[j,enRange[i]].tolist().index(max(A[j, enRange[i]].tolist()))+enRange[i][0]]
-            
-            enPoints[i] = int(np.average(enRange[i]))
-        A = Atemp
-        En = En[enPoints]
-
-        if type == 0:
-            print( ' Cheery picking points in the spectra\n')
-
-    # Find index corresponding to energy value to be used for Y normalization
-    if fullYnorm == False:
-        YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
-    else:
-        YnormXind = np.where(En>0)[0].tolist()
-
-    Amax = np.empty([A.shape[0],1])
-    print(' Number of datapoints = ' + str(A.shape[0]))
-    print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
-
-
-    return En, Cl, A, Amax, YnormXind
-
-#**********************************************
-''' Open prediction file '''
-#**********************************************
-def readPredFile(sampleFile):
-    try:
-        with open(sampleFile, 'r') as f:
-            print(' Opening sample data for prediction...')
-            Rtot = np.loadtxt(f, unpack =True)
-    except:
-        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
-        return
-
-    R=Rtot[1,:]
-    Rx=Rtot[0,:]
-    return R, Rx
-
 ####################################################################
 ''' Open map files '''
 ####################################################################
@@ -858,6 +803,63 @@ def saveMapName(file, type, extension, comma):
     else:
         extension2 = '_map.txt'
     return os.path.splitext(file)[0] + '_' + type + '-' + extension + extension2
+
+
+#************************************
+''' Plot Probabilities'''
+#************************************
+def plotProb(clf, R):
+    prob = clf.predict_proba(R)[0].tolist()
+    print(' Probabilities of this sample within each class: \n')
+    for i in range(0,clf.classes_.shape[0]):
+        print(' ' + str(clf.classes_[i]) + ': ' + str(round(100*prob[i],2)) + '%')
+    import matplotlib.pyplot as plt
+    print('\n Stand by: Plotting probabilities for each class... \n')
+    plt.title('Probability density per class')
+    for i in range(0, clf.classes_.shape[0]):
+        plt.scatter(clf.classes_[i], round(100*prob[i],2), label='probability', c = 'red')
+    plt.grid(True)
+    plt.xlabel('Class')
+    plt.ylabel('Probability [%]')
+    plt.show()
+
+#************************************
+''' Plot Training data'''
+#************************************
+def plotTrainData(A, En, R):
+    import matplotlib.pyplot as plt
+    print(' Stand by: Plotting each datapoint from the map...\n')
+    if Ynorm ==True:
+        plt.title("Normalized Training Data")
+    else:
+        plt.title("Training Data")
+    for i in range(0,A.shape[0]):
+        plt.plot(En, A[i,:], label='Training data')
+    plt.plot(En, R[0,:], linewidth = 2, label='Sample data')
+    plt.xlabel('Raman shift [1/cm]')
+    plt.ylabel('Raman Intensity [arb. units]')
+    plt.show()
+
+#************************************
+''' Plot Processed Maps'''
+#************************************
+def plotMaps(X, Y, A, label):
+    print(' Plotting ' + label + ' Map...\n')
+    import scipy.interpolate
+    xi = np.linspace(min(X), max(X))
+    yi = np.linspace(min(Y), max(Y))
+    xi, yi = np.meshgrid(xi, yi)
+    
+    rbf = scipy.interpolate.Rbf(Y, -X, A, function='linear')
+    zi = rbf(xi, yi)
+    import matplotlib.pyplot as plt
+    plt.imshow(zi, vmin=A.min(), vmax=A.max(), origin='lower',label='data',
+               extent=[X.min(), X.max(), Y.min(), Y.max()])
+               plt.title(label)
+               plt.xlabel('X [um]')
+               plt.ylabel('Y [um]')
+               plt.show()
+
 
 ####################################################################
 ''' Make header, if absent, for the summary file '''
