@@ -506,14 +506,30 @@ def runPCAmain(A, Cl, En):
         numPCAcomp = np.unique(Cl).shape[0]
     else:
         numPCAcomp = numPCAcomponents
+    print(' Number of Principal components: ' + str(numPCAcomp) + '\n')
     pca = PCA(n_components=numPCAcomp)
-    pca.fit_transform(A)
+    A_r = pca.fit_transform(A)
+
     for i in range(0,pca.components_.shape[0]):
-        plt.plot(En, pca.components_[i,:], label='PC' + str(i))
+        print(' Score PCA ' + str(i) + ': ' + '{0:.0f}%'.format(pca.explained_variance_ratio_[i] * 100))
+        plt.plot(En, pca.components_[i,:], label='PC' + str(i) + ' ({0:.0f}%)'.format(pca.explained_variance_ratio_[i] * 100))
+    print('\n')
     #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('PCA')
     plt.legend()
+    plt.figure()
+
+    target_names = Cl
+    for i, target_name in zip(range(len(Cl)), target_names):
+        plt.scatter(A_r[i,0], A_r[i,1], alpha=.8, label=target_name)
+    plt.xlabel('PCA0 ({0:.0f}%)'.format(pca.explained_variance_ratio_[0] * 100))
+    plt.ylabel('PCA1 ({0:.0f}%)'.format(pca.explained_variance_ratio_[1] * 100))
+    plt.figure()
+
+    plt.scatter(pca.components_[0,:], pca.components_[1,:])
+    plt.xlabel('PCA0 ({0:.0f}%)'.format(pca.explained_variance_ratio_[0] * 100))
+    plt.ylabel('PCA1 ({0:.0f}%)'.format(pca.explained_variance_ratio_[1] * 100))
     plt.show()
 
 
