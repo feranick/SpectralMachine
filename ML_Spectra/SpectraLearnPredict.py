@@ -50,7 +50,7 @@ YnormXdelta = 30
 
 fullYnorm = False  # Normalize full spectra (False: recommended)
 
-preProcess = False  # True recommended
+preProcess = True  # True recommended
 
 enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
@@ -112,8 +112,8 @@ class tfDef:
 ''' Principal component analysis (PCA) '''
 #**********************************************
 runPCA = False
-customNumPCAComp = False
-numPCAcomponents = 5
+customNumPCAComp = True
+numPCAcomponents = 2
 
 #**********************************************
 ''' K-means '''
