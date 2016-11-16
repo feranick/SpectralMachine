@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman data/maps.
-* version: 20161115b
+* version: 20161116a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -489,7 +489,7 @@ def runPCAmain(A, Cl, En, R):
     pca = PCA(n_components=numPCAcomp)
     pca.fit_transform(A)
     for i in range(0,pca.components_.shape[0]):
-        plt.plot(En, pca.components_[i,:])
+        plt.plot(En, pca.components_[i,:], label='PC' + str(i))
     #plt.plot(En, R[0,:], linewidth = 2, label='Predict')
     #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
     plt.xlabel('Raman shift [1/cm]')
