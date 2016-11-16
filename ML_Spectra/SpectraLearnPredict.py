@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman data/maps.
-* version: 20161116a
+* version: 20161116b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -174,11 +174,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--pca"):
-            try:
-                PCA(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            PCA(sys.argv[2])
+#except:
+#usage()
+#sys.exit(2)
 
         if o in ("-k" , "--kmaps"):
             try:
@@ -500,6 +500,8 @@ def runTensorFlow(A, Cl, R):
 def runPCAmain(A, Cl, En):
     from sklearn.decomposition import PCA, RandomizedPCA
     import matplotlib.pyplot as plt
+    from matplotlib import cm
+    
     print(' Running PCA...\n')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
     if customNumPCAComp == False:
@@ -508,7 +510,7 @@ def runPCAmain(A, Cl, En):
         numPCAcomp = numPCAcomponents
     print(' Number of Principal components: ' + str(numPCAcomp) + '\n')
     pca = PCA(n_components=numPCAcomp)
-    A_r = pca.fit_transform(A)
+    A_r = pca.fit(A).transform(A)
 
     for i in range(0,pca.components_.shape[0]):
         print(' Score PCA ' + str(i) + ': ' + '{0:.0f}%'.format(pca.explained_variance_ratio_[i] * 100))
@@ -520,9 +522,22 @@ def runPCAmain(A, Cl, En):
     plt.legend()
     plt.figure()
 
-    target_names = Cl
-    for i, target_name in zip(range(len(Cl)), target_names):
-        plt.scatter(A_r[i,0], A_r[i,1], alpha=.8, label=target_name)
+    Cl_ind = np.zeros(len(Cl))
+    Cl_labels = np.zeros(0)
+    ind = np.zeros(np.unique(Cl).shape[0])
+
+    for i in range(len(Cl)):
+        if (np.in1d(Cl[i], Cl_labels, invert=True)):
+            Cl_labels = np.append(Cl_labels, Cl[i])
+
+    for i in range(len(Cl)):
+        Cl_ind[i] = np.where(Cl_labels == Cl[i])[0][0]
+
+        colors = [ cm.jet(x) for x in np.linspace(0, 1, ind.shape[0]) ]
+
+    for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
+        plt.scatter(A_r[Cl_ind==i,0], A_r[Cl_ind==i,1], color=color, alpha=.8, lw=2, label=target_name)
+
     plt.xlabel('PCA0 ({0:.0f}%)'.format(pca.explained_variance_ratio_[0] * 100))
     plt.ylabel('PCA1 ({0:.0f}%)'.format(pca.explained_variance_ratio_[1] * 100))
     plt.figure()
