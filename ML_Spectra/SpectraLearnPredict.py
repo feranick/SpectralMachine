@@ -142,7 +142,7 @@ multiproc = False
 #**********************************************
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "fmbkh:", ["file", "map", "batch", "kmaps", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "fmbkph:", ["file", "map", "batch", "kmaps", "pca", "help"])
     except:
         usage()
         sys.exit(2)
@@ -173,6 +173,13 @@ def main():
                 usage()
                 sys.exit(2)
 
+        if o in ("-p" , "--pca"):
+            try:
+                PCA(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
+
         if o in ("-k" , "--kmaps"):
             try:
                 if len(sys.argv) > 3:
@@ -192,12 +199,12 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
 
-    ''' Open prediction file '''
-    R, Rx = readPredFile(sampleFile)
-    
     ''' Run PCA '''
     if runPCA == True:
-        runPCAmain(A, Cl, En, R)
+        runPCAmain(A, Cl, En)
+
+    ''' Open prediction file '''
+    R, Rx = readPredFile(sampleFile)
     
     ''' Preprocess prediction data '''
     A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
@@ -315,6 +322,19 @@ def LearnPredictMap(learnFile, mapFile):
         plotMaps(X, Y, tfPred, 'TensorFlow')
     if kmDef.plotKMmaps == True and runKM == True:
         plotMaps(X, Y, kmPred, 'K-Means Prediction')
+
+
+#**********************************************
+''' Learn and Predict - File'''
+#**********************************************
+def PCA(learnFile):
+    
+    ''' Open and process training data '''
+    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    
+    ''' Run PCA '''
+    runPCAmain(A, Cl, En)
+
 
 #********************
 ''' Run SVM '''
@@ -477,7 +497,7 @@ def runTensorFlow(A, Cl, R):
 #********************
 ''' Run PCA '''
 #********************
-def runPCAmain(A, Cl, En, R):
+def runPCAmain(A, Cl, En):
     from sklearn.decomposition import PCA, RandomizedPCA
     import matplotlib.pyplot as plt
     print(' Running PCA...\n')
@@ -490,7 +510,6 @@ def runPCAmain(A, Cl, En, R):
     pca.fit_transform(A)
     for i in range(0,pca.components_.shape[0]):
         plt.plot(En, pca.components_[i,:], label='PC' + str(i))
-    #plt.plot(En, R[0,:], linewidth = 2, label='Predict')
     #plt.plot(En, pca.components_[1,:]-pca.components_[0,:], label='Difference')
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('PCA')
@@ -898,6 +917,8 @@ def usage():
     print('  python SpectraLearnPredictSVM.py -b <learningfile> \n')
     print(' k-means on maps: ')
     print('  python SpectraLearnPredictSVM.py -k <spectramap> <number_of_classes>\n')
+    print(' Principal component analysis only: ')
+    print('  python SpectraLearnPredictSVM.py -p <spectramap>\n')
 
 #************************************
 ''' Info on Classification Report '''
