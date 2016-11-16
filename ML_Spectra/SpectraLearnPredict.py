@@ -50,7 +50,7 @@ YnormXdelta = 30
 
 fullYnorm = False  # Normalize full spectra (False: recommended)
 
-preProcess = True  # True recommended
+preProcess = False  # True recommended
 
 enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
@@ -195,6 +195,10 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Open prediction file '''
     R, Rx = readPredFile(sampleFile)
     
+    ''' Run PCA '''
+    if runPCA == True:
+        runPCAmain(A, Cl, En, R)
+    
     ''' Preprocess prediction data '''
     A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
     
@@ -213,10 +217,6 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Plot Training Data '''
     if showTrainingDataPlot == True:
         plotTrainData(A, En, R)
-
-    ''' Run PCA '''
-    if runPCA == True:
-        runPCAmain(A, Cl, En, R)
 
     ''' Run K-Means '''
     if runKM == True:
