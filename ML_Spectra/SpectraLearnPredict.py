@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman data/maps.
-* version: 20161116b
+* version: 20161116c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -527,15 +527,22 @@ def runPCAmain(A, Cl, En):
 
     if showPCAPlots == True:
         print(' Plotting Loadings and score plots... \n')
+        
+        #***************************
+        ''' Plotting Loadings '''
+        #***************************
         for i in range(0,pca.components_.shape[0]):
             plt.plot(En, pca.components_[i,:], label='PC' + str(i) + ' ({0:.0f}%)'.format(pca.explained_variance_ratio_[i] * 100))
-
+        plt.plot((En[0], En[En.shape[0]-1]), (0.0, 0.0), 'k--')
         plt.title('Loadings plot')
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Principal component')
         plt.legend()
         plt.figure()
 
+        #***************************
+        ''' Plotting Scores '''
+        #***************************
         Cl_ind = np.zeros(len(Cl))
         Cl_labels = np.zeros(0)
         ind = np.zeros(np.unique(Cl).shape[0])
@@ -555,8 +562,18 @@ def runPCAmain(A, Cl, En):
         plt.title('Score plot')
         plt.xlabel('PC 0 ({0:.0f}%)'.format(pca.explained_variance_ratio_[0] * 100))
         plt.ylabel('PC 1 ({0:.0f}%)'.format(pca.explained_variance_ratio_[1] * 100))
-        plt.show()
+        plt.figure()
 
+        #******************************
+        ''' Plotting Scores vs H:C '''
+        #******************************
+        for j in range(2):
+            for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
+                plt.scatter(np.asarray(Cl)[Cl_ind==i], A_r[Cl_ind==i,j], color=color, alpha=.8, lw=2, label=target_name)
+            plt.xlabel('H:C elemental ratio')
+            plt.ylabel('PC ' + str(j) + ' ({0:.0f}%)'.format(pca.explained_variance_ratio_[j] * 100))
+            plt.figure()
+        plt.show()
 
 #********************
 ''' Run K-Means '''
