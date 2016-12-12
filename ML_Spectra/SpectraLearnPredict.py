@@ -430,7 +430,7 @@ def runNNmain(A, Cl, R):
 
 #********************************************************************************
 ''' Tensorflow '''
-''' https://www.tensorflow.org/versions/r0.10/tutorials/mnist/beginners/index.html'''
+''' https://www.tensorflow.org/versions/r0.12/tutorials/mnist/beginners/index.html'''
 #********************************************************************************
 def runTensorFlow(A, Cl, R):
     import tensorflow as tf
