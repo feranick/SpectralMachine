@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman data/maps.
-* version: 20161116c
+* version: 20161212a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -478,7 +478,7 @@ def runTensorFlow(A, Cl, R):
             raise ValueError(' Force TF model retraining.')
     except:
         print(' Improving TF model...')
-        init = tf.initialize_all_variables()
+        init = tf.global_variables_initializer()
         saver = tf.train.Saver()
         sess = tf.Session()
         sess.run(init)
