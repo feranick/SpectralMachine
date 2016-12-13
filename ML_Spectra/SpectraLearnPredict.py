@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman data/maps.
-* version: 20161213a
+* version: 20161213b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -105,8 +105,10 @@ runTF = True
 
 tfTrainedData = "tfmodel.ckpt"
 class tfDef:
-    tfAlwaysRetrain = False
+    tfAlwaysRetrain = True
     plotTF = True
+    percentTFCrossValid = 0.1
+    trainingIter = 1000
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -154,11 +156,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+                    #except:
+                    #usage()
+                    #sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -455,6 +457,7 @@ def runTensorFlow(A, Cl, R):
                 
                 np.savetxt(formatClassfile, Cl2, delimiter='\t', fmt='%10.6f')
 
+
     print(' Initializing TensorFlow...')
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
     W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
@@ -484,7 +487,10 @@ def runTensorFlow(A, Cl, R):
         saver = tf.train.Saver()
         sess = tf.Session()
         sess.run(init)
-        sess.run(train_step, feed_dict={x: A, y_: Cl2})
+        print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
+        for i in range(tfDef.trainingIter):
+            A, Cl2 = formatSubset(A, Cl2, tfDef.percentTFCrossValid)
+            sess.run(train_step, feed_dict={x: A, y_: Cl2})
 
         save_path = saver.save(sess, tfTrainedData)
         print(' Model saved in file: %s' % save_path)
@@ -773,13 +779,7 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
     ''' Select subset of training data for cross validation '''
     #**********************************************
     if modelSelection == True:
-        from sklearn.model_selection import train_test_split
-        if type == 0:
-            print(' Selecting subset (' +  str(percentCrossValid*100) + '%) of training data for cross validation...\n')
-        A_train, A_cv, Cl_train, Cl_cv = \
-        train_test_split(A, Cl, test_size=percentCrossValid, random_state=42)
-        A=A_train
-        Cl=Cl_train
+        A, Cl = formatSubset(A, Cl, percentCrossValid)
 
     #**********************************************
     ''' Energy normalization range '''
@@ -851,6 +851,16 @@ def preProcessNormMap(A, En, type):
             print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     
     return A, En, Aorig
+
+
+####################################################################
+''' Format subset of training data '''
+####################################################################
+def formatSubset(A, Cl, percent):
+    from sklearn.model_selection import train_test_split
+    A_train, A_cv, Cl_train, Cl_cv = \
+    train_test_split(A, Cl, test_size=percent, random_state=42)
+    return A_train, Cl_train
 
 ####################################################################
 ''' Open map files '''
