@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman data/maps.
-* version: 20161213b
+* version: 20161213c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -105,10 +105,13 @@ runTF = True
 
 tfTrainedData = "tfmodel.ckpt"
 class tfDef:
-    tfAlwaysRetrain = True
+    tfAlwaysRetrain = False
     plotTF = True
+    
+    singleIter = False
     percentTFCrossValid = 0.1
     trainingIter = 1000
+
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -156,11 +159,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-                    #except:
-                    #usage()
-                    #sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -470,7 +473,6 @@ def runTensorFlow(A, Cl, R):
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     
-    
     try:
         if tfDef.tfAlwaysRetrain == False:
             with open(tfTrainedData):
@@ -487,10 +489,13 @@ def runTensorFlow(A, Cl, R):
         saver = tf.train.Saver()
         sess = tf.Session()
         sess.run(init)
-        print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
-        for i in range(tfDef.trainingIter):
-            A, Cl2 = formatSubset(A, Cl2, tfDef.percentTFCrossValid)
-            sess.run(train_step, feed_dict={x: A, y_: Cl2})
+        if tfDef.singleIter == True:
+            print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
+            for i in range(tfDef.trainingIter):
+                As, Cl2s = formatSubset(A, Cl2, tfDef.percentTFCrossValid)
+                sess.run(train_step, feed_dict={x: As, y_: Cl2s})
+        else:
+                sess.run(train_step, feed_dict={x: A, y_: Cl2})
 
         save_path = saver.save(sess, tfTrainedData)
         print(' Model saved in file: %s' % save_path)
