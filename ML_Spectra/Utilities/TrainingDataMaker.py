@@ -3,9 +3,9 @@
 '''
 *********************************************
 *
-* MapMakerSVM
-* Adds spectra to map files
-* version: 20161014a
+* TrainingDataMaker
+* Adds spectra to Training File
+* version: 20170110a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -23,11 +23,11 @@ import sys, os.path
 #**********************************************
 
 def main():
-    #try:
+    try:
         makeFile(sys.argv[1], sys.argv[2], sys.argv[3])
-            #except:
-            #usage()
-#sys.exit(2)
+    except:
+        usage()
+    sys.exit(2)
 
 #**********************************************
 ''' Make Map file '''
@@ -78,7 +78,7 @@ def makeFile(mapFile, param, sampleFile):
 #************************************
 def usage():
     print('\n Usage:')
-    print('  python MapMakerSVM.py <mapfile> <spectrafile> <parameter> \n')
+    print('  python TrainingDataMaker.py <trainingfile> <parameter> <spectrafile> \n')
 
 #************************************
 ''' Main initialization routine '''
