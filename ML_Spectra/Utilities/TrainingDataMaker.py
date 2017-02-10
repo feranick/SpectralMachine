@@ -5,7 +5,7 @@
 *
 * TrainingDataMaker
 * Adds spectra to Training File
-* version: 20170110b
+* version: 20170120a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -32,7 +32,7 @@ def main():
 #**********************************************
 ''' Make Map file '''
 #**********************************************
-def makeFile(mapFile, param, sampleFile):
+def makeFile(mapFile, sampleFile, param):
     
     #**********************************************
     ''' Open and process training data '''
@@ -81,7 +81,7 @@ def makeFile(mapFile, param, sampleFile):
 #************************************
 def usage():
     print('\n Usage:')
-    print('  python TrainingDataMaker.py <trainingfile> <parameter> <spectrafile> \n')
+    print('  python TrainingDataMaker.py <trainingfile> <spectrafile> <parameter>\n')
 
 #************************************
 ''' Main initialization routine '''
