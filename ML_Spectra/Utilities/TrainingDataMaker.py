@@ -5,7 +5,7 @@
 *
 * TrainingDataMaker
 * Adds spectra to Training File
-* version: 20170110a
+* version: 20170110b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -51,11 +51,14 @@ def makeFile(mapFile, param, sampleFile):
 
     try:
         with open(mapFile, 'r') as f:
-            if len(f.readline().split('\t'))-1 == En.shape[0]:
-                print(' Number of points in the map dataset: ' + str(len(f.readline().split('\t'))-1))
+            M = np.loadtxt(f, unpack =False)
+            EnT = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+            if EnT.shape[0] == En.shape[0]:
+                print(' Number of points in the map dataset: ' + str(EnT.shape[0]))
             else:
-                print('\033[1m' + ' Mismatch in datapoints: map: ' + str(len(f.readline().split('\t'))-1) + '; sample = ' +  str(En.shape[0]) + '\033[0m' + '\n')
-                return
+                print('\033[1m' + ' Mismatch in datapoints: map: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
+                R = np.interp(EnT, En, R)
+                print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
     except:
         print('\033[1m' + ' Map data file not found \n' + '\033[0m')
         return
