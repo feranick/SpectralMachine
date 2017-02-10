@@ -12,3 +12,7 @@ AIDP
 coal
 GKF
 gkp
+Svalbard (BD43-3) row 152-156
+Svalbard (J1646-174) row 157-164
+Svalbard (PD5-98) row 165-171
+Svalbard (S1B-G1643) row 172-181
