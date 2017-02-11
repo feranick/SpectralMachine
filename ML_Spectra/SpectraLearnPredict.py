@@ -4,8 +4,8 @@
 **********************************************************
 *
 * SpectraLearnPredict
-* Perform Machine Learning on Raman data/maps.
-* version: 20161213c
+* Perform Machine Learning on Raman spectra.
+* version: 20170210b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -159,11 +159,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+                #except:
+                #usage()
+                #sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -473,21 +473,18 @@ def runTensorFlow(A, Cl, R):
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     
+    sess = tf.Session()
+    saver = tf.train.Saver()
     try:
         if tfDef.tfAlwaysRetrain == False:
-            with open(tfTrainedData):
-                print(' Opening TF training model from:', tfTrainedData)
-                saver = tf.train.Saver()
-                sess = tf.Session()
-                saver.restore(sess, tfTrainedData)
-                print(' Model restored.')
+            print(' Opening TF training model from:', tfTrainedData)
+            saver.restore(sess, './' + tfTrainedData)
+            print(' Model restored.')
         else:
             raise ValueError(' Force TF model retraining.')
     except:
-        print(' Improving TF model...')
+        print('\n Rebuildind/improving TF model...')
         init = tf.global_variables_initializer()
-        saver = tf.train.Saver()
-        sess = tf.Session()
         sess.run(init)
         if tfDef.singleIter == True:
             print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
