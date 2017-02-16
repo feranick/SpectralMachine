@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170210b
+* version: 20170215a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -468,7 +468,7 @@ def runTensorFlow(A, Cl, R):
     y = tf.nn.softmax(tf.matmul(x, W) + b)
     
     y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
     train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
