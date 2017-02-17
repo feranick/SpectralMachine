@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170215a
+* version: 20170217a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -108,8 +108,8 @@ class tfDef:
     tfAlwaysRetrain = False
     plotTF = True
     
-    singleIter = False
-    percentTFCrossValid = 0.1
+    singleIter = True
+    percentTFCrossValid = 0.3
     trainingIter = 1000
 
 
