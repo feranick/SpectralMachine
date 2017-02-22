@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170217a
+* version: 20170222a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -458,7 +458,7 @@ def runTensorFlow(A, Cl, R):
                 else:
                     np.put(Cl2, [i, j], 0)
                 
-                np.savetxt(formatClassfile, Cl2, delimiter='\t', fmt='%10.6f')
+        np.savetxt(formatClassfile, Cl2, delimiter='\t', fmt='%10.6f')
 
 
     print(' Initializing TensorFlow...')
