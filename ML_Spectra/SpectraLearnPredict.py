@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170223b
+* version: 20170223c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -508,10 +508,9 @@ def runTensorFlow(A, Cl, R):
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
     
-    print(' Accuracy (BETA): ' + str(sess.run(accuracy, feed_dict={x: R, y_: Cl2})) + '%\n')
-    #print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
-    print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + '\n' + '\033[0m' )
-    return np.unique(Cl)[res2][0], res1[0][res2][0]*100
+    print(' Accuracy: ' + str(100*sess.run(accuracy, feed_dict={x: R, y_: Cl2})) + '%\n')
+    print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
+    return np.unique(Cl)[res2][0], res1[0][res2][0]
 
 
 #********************
