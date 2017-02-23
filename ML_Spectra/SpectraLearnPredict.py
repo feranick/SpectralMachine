@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170222b
+* version: 20170223a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -435,7 +435,7 @@ def runNNmain(A, Cl, R):
 
 #********************************************************************************
 ''' Tensorflow '''
-''' https://www.tensorflow.org/versions/r0.12/tutorials/mnist/beginners/index.html'''
+''' https://www.tensorflow.org/get_started/mnist/beginners'''
 #********************************************************************************
 def runTensorFlow(A, Cl, R):
     import tensorflow as tf

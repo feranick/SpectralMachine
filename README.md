@@ -23,7 +23,7 @@ This package requires:
 
 These are found in Unix based systems using common repositories (apt-get for Debian/Ubuntu Linux, or MacPorts for MacOS). More details in the [scikit-learn installation page](http://scikit-learn.org/stable/install.html).
 
-[TensorFlow](https://github.com/tensorflow/tensorflow) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/versions/r0.12/get_started/os_setup.html). Pip installation is the easiest way to get going. Tested with TensorFlow v.1.0 (not compatible with v.0.12 and below).
+[TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow v.1.0 (not compatible with v.0.12 and below).
 
 
 Usage
