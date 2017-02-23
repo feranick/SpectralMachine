@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170222a
+* version: 20170222b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -450,15 +450,16 @@ def runTensorFlow(A, Cl, R):
     except:
         print( '\n Formatting training cluster data...')
         Cl2 = np.zeros((np.array(Cl).shape[0], np.unique(Cl).shape[0]))
-        
         for i in range(np.array(Cl).shape[0]):
-            for j in range(np.array(np.unique(Cl).shape[0])):
+            for j in range(np.unique(Cl).shape[0]):
                 if np.array(Cl)[i] == np.unique(Cl)[j]:
                     np.put(Cl2, [i, j], 1)
+                    #Cl2[i,j] = 1
                 else:
                     np.put(Cl2, [i, j], 0)
-                
-        np.savetxt(formatClassfile, Cl2, delimiter='\t', fmt='%10.6f')
+                    #Cl2[i,j] = 0
+
+        np.savetxt(formatClassfile, Cl2, delimiter=' ', fmt='%d')
 
 
     print(' Initializing TensorFlow...')
@@ -499,6 +500,8 @@ def runTensorFlow(A, Cl, R):
 
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
+    print(res1)
+    print(res2)
     
     print(' Accuracy: ' + str(sess.run(accuracy, feed_dict={x: R, y_: Cl2})) + '%\n')
     print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (' + str('{:.1f}'.format(res1[0][res2][0]*100)) + '%)\n' + '\033[0m' )
