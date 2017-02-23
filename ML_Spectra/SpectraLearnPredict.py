@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170223a
+* version: 20170223b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -453,11 +453,11 @@ def runTensorFlow(A, Cl, R):
         for i in range(np.array(Cl).shape[0]):
             for j in range(np.unique(Cl).shape[0]):
                 if np.array(Cl)[i] == np.unique(Cl)[j]:
-                    np.put(Cl2, [i, j], 1)
-                    #Cl2[i,j] = 1
+                    #np.put(Cl2, [i, j], 1)
+                    Cl2[i,j] = 1
                 else:
-                    np.put(Cl2, [i, j], 0)
-                    #Cl2[i,j] = 0
+                    #np.put(Cl2, [i, j], 0)
+                    Cl2[i,j] = 0
 
         np.savetxt(formatClassfile, Cl2, delimiter=' ', fmt='%d')
 
@@ -466,16 +466,23 @@ def runTensorFlow(A, Cl, R):
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
     W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
     b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]))
-    y = tf.nn.softmax(tf.matmul(x, W) + b)
-    
     y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
+
+    # The raw formulation of cross-entropy can be numerically unstable
+    #y = tf.nn.softmax(tf.matmul(x, W) + b)
+    #cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
+
+    # So here we use tf.nn.softmax_cross_entropy_with_logits on the raw
+    # outputs of 'y', and then average across the batch.
+    y = tf.matmul(x,W) + b
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+
     train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     
-    sess = tf.Session()
+    sess = tf.InteractiveSession()
+    tf.global_variables_initializer().run()
     saver = tf.train.Saver()
+
     try:
         if tfDef.tfAlwaysRetrain == False:
             print(' Opening TF training model from:', tfTrainedData)
@@ -497,6 +504,9 @@ def runTensorFlow(A, Cl, R):
 
         save_path = saver.save(sess, tfTrainedData)
         print(' Model saved in file: %s' % save_path)
+
+    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
