@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170223c
+* version: 20170223d
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -106,6 +106,7 @@ runTF = True
 tfTrainedData = "tfmodel.ckpt"
 class tfDef:
     tfAlwaysRetrain = False
+    tfAlwaysImprove = False
     plotTF = True
     
     singleIter = True
@@ -488,9 +489,15 @@ def runTensorFlow(A, Cl, R):
         else:
             raise ValueError(' Force TF model retraining.')
     except:
-        print('\n Rebuildind/improving TF model...')
         init = tf.global_variables_initializer()
         sess.run(init)
+
+        if os.path.isfile(tfTrainedData + '.meta') & tfDef.tfAlwaysImprove == True:
+            print('\n Improving TF model...')
+            saver.restore(sess, './' + tfTrainedData)
+        else:
+            print('\n Rebuildind TF model...')
+
         if tfDef.singleIter == True:
             print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
             for i in range(tfDef.trainingIter):
