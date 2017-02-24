@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170224c
+* version: 20170224d
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -116,7 +116,6 @@ class tfDef:
     percentTFCrossValid = 0.3
     trainingIter = 1000
 
-
 #**********************************************
 ''' Principal component analysis (PCA) '''
 #**********************************************
@@ -166,8 +165,8 @@ def main():
             try:
                 LearnPredictFile(sys.argv[2], sys.argv[3])
             except:
-                #usage()
-                #sys.exit(2)
+                usage()
+                sys.exit(2)
                 
         if o in ("-t" , "--traintf"):
             try:
@@ -340,15 +339,25 @@ def LearnPredictMap(learnFile, mapFile):
     if kmDef.plotKMmaps == True and runKM == True:
         plotMaps(X, Y, kmPred, 'K-Means Prediction')
 
-
-#**********************************************
-''' Learn and Predict - File'''
-#**********************************************
-def PCA(learnFile):
-    
+#********************************************************************************
+''' Setup training-only via TensorFlow '''
+#********************************************************************************
+def TrainTF(learnFile):
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    
+    ''' Preprocess prediction data '''
+    A, Cl, En, R, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
+    print(" Using random spectra from training dataset as evaluation file ")
+    ''' Tensorflow '''
+    runTensorFlow(A,Cl,R)
+
+
+#**********************************************
+''' Setup and Run PCA'''
+#**********************************************
+def PCA(learnFile):
+    ''' Open and process training data '''
+    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
     ''' Run PCA '''
     runPCAmain(A, Cl, En)
 
@@ -472,8 +481,9 @@ def formatClass(formatClassfile, Cl):
         np.savetxt(formatClassfile, Cl2, delimiter=' ', fmt='%d')
     return Cl2
 
+
 #********************************************************************************
-''' Run evaluation via TensorFlow '''
+''' Run model training and evaluation via TensorFlow '''
 #********************************************************************************
 def runTensorFlow(A, Cl, R):
     import tensorflow as tf
@@ -541,23 +551,6 @@ def runTensorFlow(A, Cl, R):
 
 
 #********************************************************************************
-''' Run evaluation via TensorFlow '''
-#********************************************************************************
-def TrainTF(learnFile):
-    
-    ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    
-    ''' Preprocess prediction data '''
-    A, Cl, En, R, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
-    
-    print(" Using random spectra from training dataset as evaluation file ")
-    
-    ''' Tensorflow '''
-    runTensorFlow(A,Cl,R)
-
-
-#********************************************************************************
 ''' Run PCA '''
 ''' Transform data:
     pca.fit(data).transform(data)
@@ -567,8 +560,6 @@ def TrainTF(learnFile):
     pca.explained_variance_ratio
     '''
 #********************************************************************************
-
-
 def runPCAmain(A, Cl, En):
     from sklearn.decomposition import PCA
     import matplotlib.pyplot as plt
@@ -639,6 +630,7 @@ def runPCAmain(A, Cl, En):
             plt.figure()
         plt.show()
 
+
 #********************
 ''' Run K-Means '''
 #********************
@@ -670,6 +662,7 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
         plt.show()
     return kmeans.predict(R)[0]
 
+
 #**********************************************
 ''' K-Means - Maps'''
 #**********************************************
@@ -699,6 +692,7 @@ def KmMap(mapFile, numKMcomp):
 
     if kmDef.plotKM == True:
         plotMaps(X, Y, kmPred, 'K-Means')
+
 
 #************************************
 ''' Read Learning file '''
@@ -921,6 +915,7 @@ def formatSubset(A, Cl, percent):
     train_test_split(A, Cl, test_size=percent, random_state=42)
     return A_train, Cl_train
 
+
 ####################################################################
 ''' Open map files '''
 ####################################################################
@@ -938,6 +933,7 @@ def readPredMap(mapFile):
     A = np.delete(A, np.s_[0:2], 1)
     print(' Shape map: ' + str(A.shape))
     return X, Y, A, En
+
 
 ####################################################################
 ''' Save map files '''
@@ -982,6 +978,7 @@ def plotProb(clf, R):
     plt.ylabel('Probability [%]')
     plt.show()
 
+
 #************************************
 ''' Plot Training data'''
 #************************************
@@ -998,6 +995,7 @@ def plotTrainData(A, En, R):
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
     plt.show()
+
 
 #************************************
 ''' Plot Processed Maps'''
@@ -1033,6 +1031,7 @@ def makeHeaderSummary(file, learnFile):
             csv_out.writerow(summaryHeader2)
             sum_file.close()
 
+
 #************************************
 ''' Lists the program usage '''
 #************************************
@@ -1049,6 +1048,7 @@ def usage():
     print(' Principal component analysis only: ')
     print('  python SpectraLearnPredictSVM.py -p <spectramap>\n')
 
+
 #************************************
 ''' Info on Classification Report '''
 #************************************
@@ -1061,14 +1061,15 @@ def runClassReport(clf, A, Cl):
           ' sample will be correctly classified for a given class. F1 score combines both \n' +
           ' accuracy and precision to give a single measure of relevancy of the classifier results.\n')
 
+
 #************************************
 ''' Introduce Noise in Data '''
-''' EXPERIMENTAL '''
 #************************************
 def scrambleNoise(A, offset):
     from random import uniform
     for i in range(A.shape[1]):
         A[:,i] += offset*uniform(-1,1)
+
 
 #************************************
 ''' Main initialization routine '''
