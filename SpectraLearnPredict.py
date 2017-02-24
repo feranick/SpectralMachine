@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170223d
+* version: 20170224a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -163,11 +163,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+                #except:
+                #usage()
+                #sys.exit(2)
                     
         if o in ("-m" , "--map"):
             try:
@@ -441,14 +441,16 @@ def runNNmain(A, Cl, R):
 ''' Tensorflow '''
 ''' https://www.tensorflow.org/get_started/mnist/beginners'''
 #********************************************************************************
-def runTensorFlow(A, Cl, R):
-    import tensorflow as tf
-    formatClassfile = "tfFormatClass.txt"
-    
+
+#********************************************************************************
+    ''' Format vectors of unique labels '''
+#********************************************************************************
+def formatClass(formatClassfile, Cl):
     try:
         with open(formatClassfile) as f:
             print('\n Opening TensorFlow format class data...')
             Cl2 = np.loadtxt(f, unpack =False)
+            print(Cl2.shape)
             if len(Cl2) != len(Cl):
                 raise ValueError(' WARNING: format class has different length')
     except:
@@ -460,8 +462,16 @@ def runTensorFlow(A, Cl, R):
                     Cl2[i,j] = 1
                 else:
                     Cl2[i,j] = 0
-
         np.savetxt(formatClassfile, Cl2, delimiter=' ', fmt='%d')
+    return Cl2
+
+#********************************************************************************
+''' Run evaluation via TensorFlow '''
+#********************************************************************************
+def runTensorFlow(A, Cl, R):
+    import tensorflow as tf
+    formatClassfile = "tfFormatClass.txt"
+    Cl2 = formatClass(formatClassfile, Cl)
 
     print(' Initializing TensorFlow...')
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
