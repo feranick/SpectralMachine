@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170224a
+* version: 20170224c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -24,7 +24,7 @@ import sys, os.path, getopt, glob, csv
 from os.path import exists
 from os import rename
 from datetime import datetime, date
-
+import random
 
 #**********************************************
 ''' Calculation by limited number of points '''
@@ -152,7 +152,7 @@ multiproc = False
 #**********************************************
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "fmbkph:", ["file", "map", "batch", "kmaps", "pca", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "ftmbkph:", ["file", "traintf", "map", "batch", "kmaps", "pca", "help"])
     except:
         usage()
         sys.exit(2)
@@ -163,12 +163,19 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-                #except:
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
                 #usage()
                 #sys.exit(2)
-                    
+                
+        if o in ("-t" , "--traintf"):
+            try:
+                TrainTF(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
+        
         if o in ("-m" , "--map"):
             try:
                 LearnPredictMap(sys.argv[2], sys.argv[3])
@@ -533,7 +540,24 @@ def runTensorFlow(A, Cl, R):
     return np.unique(Cl)[res2][0], res1[0][res2][0]
 
 
-#********************
+#********************************************************************************
+''' Run evaluation via TensorFlow '''
+#********************************************************************************
+def TrainTF(learnFile):
+    
+    ''' Open and process training data '''
+    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    
+    ''' Preprocess prediction data '''
+    A, Cl, En, R, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
+    
+    print(" Using random spectra from training dataset as evaluation file ")
+    
+    ''' Tensorflow '''
+    runTensorFlow(A,Cl,R)
+
+
+#********************************************************************************
 ''' Run PCA '''
 ''' Transform data:
     pca.fit(data).transform(data)
@@ -542,7 +566,9 @@ def runTensorFlow(A, Cl, R):
     Eigenvalues:
     pca.explained_variance_ratio
     '''
-#********************
+#********************************************************************************
+
+
 def runPCAmain(A, Cl, En):
     from sklearn.decomposition import PCA
     import matplotlib.pyplot as plt
