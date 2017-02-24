@@ -56,6 +56,9 @@ enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
 enLim2 = 550    # for now use indexes rather than actual Energy
 
+scrambleNoise = False # Adds random noise to spectra (False: recommended)
+scrambleNoiseOffset = 0.1
+
 #**********************************************
 ''' Model selection for training '''
 #**********************************************
@@ -106,7 +109,7 @@ runTF = True
 tfTrainedData = "tfmodel.ckpt"
 class tfDef:
     tfAlwaysRetrain = False
-    tfAlwaysImprove = False
+    tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
     plotTF = True
     
     singleIter = True
@@ -771,6 +774,9 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
             print('\033[1m' + '\n WARNING: Different number of datapoints for the x-axis\n for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
+
+    if scrambleNoise == True:
+        scrambleNoise(A, scambleNoiseOffset)
     Aorig = np.copy(A)
     Rorig = np.copy(R)
 
@@ -1018,6 +1024,15 @@ def runClassReport(clf, A, Cl):
           ' the sample actually belongs to that class. Recall (Accuracy) is the probability that a \n' +
           ' sample will be correctly classified for a given class. F1 score combines both \n' +
           ' accuracy and precision to give a single measure of relevancy of the classifier results.\n')
+
+#************************************
+''' Introduce Noise in Data '''
+''' EXPERIMENTAL '''
+#************************************
+def scrambleNoise(A, offset):
+    from random import uniform
+    for i in range(A.shape[1]):
+        A[:,i] += offset*uniform(-1,1)
 
 #************************************
 ''' Main initialization routine '''
