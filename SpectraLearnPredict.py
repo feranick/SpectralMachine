@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170224d
+* version: 20170225a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -466,7 +466,6 @@ def formatClass(formatClassfile, Cl):
         with open(formatClassfile) as f:
             print('\n Opening TensorFlow format class data...')
             Cl2 = np.loadtxt(f, unpack =False)
-            print(Cl2.shape)
             if len(Cl2) != len(Cl):
                 raise ValueError(' WARNING: format class has different length')
     except:
