@@ -296,6 +296,8 @@ def LearnPredictMap(learnFile, mapFile):
     
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    
+    learnFileRoot = os.path.splitext(learnFile)[0]
 
     ''' Open prediction map '''
     X, Y, R, Rx = readPredMap(mapFile)
@@ -309,19 +311,19 @@ def LearnPredictMap(learnFile, mapFile):
 
         ''' Run Support Vector Machines '''
         if runSVM == True:
-            svmPred[i], temp = runSVMmain(A, Cl, En, r)
+            svmPred[i], temp = runSVMmain(A, Cl, En, r, learnFileRoot)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
     
         ''' Run Neural Network '''
         if runNN == True:
-            nnPred[i], temp = runNNmain(A, Cl, r)
+            nnPred[i], temp = runNNmain(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
             nnDef.nnAlwaysRetrain = False
     
         ''' Tensorflow '''
         if runTF == True:
-            tfPred[i], temp = runTensorFlow(A,Cl,r)
+            tfPred[i], temp = runTensorFlow(A,Cl,r, learnFileRoot)
             saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
         
