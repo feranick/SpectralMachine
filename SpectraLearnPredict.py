@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170225b
+* version: 20170226a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -21,7 +21,7 @@ if matplotlib.get_backend() == 'TkAgg':
 
 import numpy as np
 import sys, os.path, getopt, glob, csv
-from os.path import exists
+from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
 import random
@@ -71,7 +71,7 @@ percentCrossValid = 0.05
 runSVM = True
 svmClassReport = False
 
-svmTrainedData = "svmModel.pkl"
+#svmTrainedData = "svmModel.pkl"
 class svmDef:
     svmAlwaysRetrain = False
     plotSVM = True
@@ -90,7 +90,7 @@ showClasses = False
 runNN = True
 nnClassReport = False
 
-nnTrainedData = "nnModel.pkl"
+#nnTrainedData = "nnModel.pkl"
 class nnDef:
     nnAlwaysRetrain = False
     plotNN = True
@@ -106,7 +106,6 @@ nnNeurons = 100  #default = 100
 #**********************************************
 runTF = True
 
-tfTrainedData = "tfmodel.ckpt"
 class tfDef:
     tfAlwaysRetrain = False
     tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
@@ -162,11 +161,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+                #except:
+                #usage()
+                #sys.exit(2)
                 
         if o in ("-t" , "--traintf"):
             try:
@@ -214,6 +213,8 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    
+    learnFileRoot = os.path.splitext(learnFile)[0]
 
     ''' Run PCA '''
     if runPCA == True:
@@ -227,15 +228,15 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Run Support Vector Machines '''
     if runSVM == True:
-        runSVMmain(A, Cl, En, R)
+        runSVMmain(A, Cl, En, R, learnFileRoot)
 
     ''' Run Neural Network '''
     if runNN == True:
-        runNNmain(A, Cl, R)
+        runNNmain(A, Cl, R, learnFileRoot)
 
     ''' Tensorflow '''
     if runTF == True:
-        runTensorFlow(A,Cl,R)
+        runTensorFlow(A,Cl,R, learnFileRoot)
 
     ''' Plot Training Data '''
     if showTrainingDataPlot == True:
@@ -349,7 +350,8 @@ def TrainTF(learnFile):
     A, Cl, En, R, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
     print(" Using random spectra from training dataset as evaluation file ")
     ''' Tensorflow '''
-    runTensorFlow(A,Cl,R)
+    learnFileRoot = os.path.splitext(learnFile)[0]
+    runTensorFlow(A,Cl,R,learnFileRoot)
 
 
 #**********************************************
@@ -365,9 +367,10 @@ def PCA(learnFile):
 #********************
 ''' Run SVM '''
 #********************
-def runSVMmain(A, Cl, En, R):
+def runSVMmain(A, Cl, En, R, Root):
     from sklearn import svm
     from sklearn.externals import joblib
+    svmTrainedData = Root + '.svmModel.pkl'
     print('\n Running Support Vector Machine (kernel: ' + kernel + ')...')
     try:
         if svmDef.svmAlwaysRetrain == False:
@@ -413,9 +416,11 @@ def runSVMmain(A, Cl, En, R):
 #*************************
 ''' Run Neural Network '''
 #*************************
-def runNNmain(A, Cl, R):
+def runNNmain(A, Cl, R, Root):
     from sklearn.neural_network import MLPClassifier
     from sklearn.externals import joblib
+    nnTrainedData = Root + '.nnModel.pkl'
+    
     print('\n Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnSolver + ')...')
     try:
         if nnDef.nnAlwaysRetrain == False:
@@ -484,10 +489,12 @@ def formatClass(formatClassfile, Cl):
 #********************************************************************************
 ''' Run model training and evaluation via TensorFlow '''
 #********************************************************************************
-def runTensorFlow(A, Cl, R):
+def runTensorFlow(A, Cl, R, Root):
     import tensorflow as tf
-    formatClassfile = "tfFormatClass.txt"
+    formatClassfile = Root + '.tfclass.txt'
+    tfTrainedData = Root + '.tfmodel'
     Cl2 = formatClass(formatClassfile, Cl)
+
 
     print(' Initializing TensorFlow...')
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
