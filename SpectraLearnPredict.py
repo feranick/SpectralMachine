@@ -251,7 +251,7 @@ def LearnPredictFile(learnFile, sampleFile):
 #**********************************************
 
 def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile):
-    print(f)
+    print(' Processing file: \033[1m' + f + '\033[0m\n')
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
@@ -494,12 +494,12 @@ def formatClass(formatClassfile, Cl):
 #********************************************************************************
 def runTensorFlow(A, Cl, R, Root):
     import tensorflow as tf
-    formatClassfile = Root + '.tfclass.txt'
+    formatClassfile = Root + '.tfclass'
     tfTrainedData = Root + '.tfmodel'
     Cl2 = formatClass(formatClassfile, Cl)
 
 
-    print(' Initializing TensorFlow...')
+    print(' Initializing TensorFlow...\n')
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
     W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
     b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]))
@@ -522,7 +522,7 @@ def runTensorFlow(A, Cl, R, Root):
 
     try:
         if tfDef.tfAlwaysRetrain == False:
-            print(' Opening TF training model from:', tfTrainedData)
+            print('\n Opening TF training model from:', tfTrainedData)
             saver.restore(sess, './' + tfTrainedData)
             print(' Model restored.')
         else:
