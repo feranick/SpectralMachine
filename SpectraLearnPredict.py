@@ -498,7 +498,6 @@ def runTensorFlow(A, Cl, R, Root):
     tfTrainedData = Root + '.tfmodel'
     Cl2 = formatClass(formatClassfile, Cl)
 
-
     print(' Initializing TensorFlow...\n')
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
     W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
