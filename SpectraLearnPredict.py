@@ -71,7 +71,6 @@ percentCrossValid = 0.05
 runSVM = True
 svmClassReport = False
 
-#svmTrainedData = "svmModel.pkl"
 class svmDef:
     svmAlwaysRetrain = False
     plotSVM = True
@@ -161,11 +160,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-                #except:
-                #usage()
-                #sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
                 
         if o in ("-t" , "--traintf"):
             try:
@@ -182,11 +181,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-b" , "--batch"):
-            try:
-                LearnPredictBatch(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictBatch(sys.argv[2])
+                #except:
+                #usage()
+                #sys.exit(2)
 
         if o in ("-p" , "--pca"):
             try:
@@ -251,28 +250,30 @@ def LearnPredictFile(learnFile, sampleFile):
 ''' Process - Batch'''
 #**********************************************
 
-def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename):
+def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile):
     print(f)
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
     A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    
+    learnFileRoot = os.path.splitext(learnFile)[0]
             
     ''' Run Support Vector Machines '''
     if runSVM == True:
-        svmPred, svmProb = runSVMmain(A, Cl, En, R)
+        svmPred, svmProb = runSVMmain(A, Cl, En, R, learnFileRoot)
         summaryFile.extend([svmPred, svmProb])
         svmDef.svmAlwaysRetrain = False
             
     ''' Run Neural Network '''
     if runNN == True:
-        nnPred, nnProb = runNNmain(A, Cl, R)
+        nnPred, nnProb = runNNmain(A, Cl, R, learnFileRoot)
         summaryFile.extend([nnPred, nnProb])
         nnDef.nnAlwaysRetrain = False
             
     ''' Tensorflow '''
     if runTF == True:
-        tfPred, tfProb = runTensorFlow(A,Cl,R)
+        tfPred, tfProb = runTensorFlow(A,Cl,R, learnFileRoot)
         summaryFile.extend([tfPred, tfProb])
         tfDef.tfAlwaysRetrain = False
     
@@ -789,13 +790,13 @@ def LearnPredictBatch(learnFile):
         p = mp.Pool()
         for f in glob.glob('*.txt'):
             if (f != learnFile):
-                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, YnormXind, summary_filename))
+                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile))
         p.close()
         p.join()
     else:
         for f in glob.glob('*.txt'):
             if (f != learnFile):
-                processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename)
+                processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile)
 
 
 #**********************************************************************************
