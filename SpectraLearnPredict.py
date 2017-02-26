@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170225a
+* version: 20170225b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -73,7 +73,7 @@ svmClassReport = False
 
 svmTrainedData = "svmModel.pkl"
 class svmDef:
-    svmAlwaysRetrain = True
+    svmAlwaysRetrain = False
     plotSVM = True
 
 ''' Training algorithm for SVM
@@ -92,7 +92,7 @@ nnClassReport = False
 
 nnTrainedData = "nnModel.pkl"
 class nnDef:
-    nnAlwaysRetrain = True
+    nnAlwaysRetrain = False
     plotNN = True
 
 ''' Solver for NN
