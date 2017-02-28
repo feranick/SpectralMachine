@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170226a
+* version: 20170228a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -56,7 +56,7 @@ enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
 enLim2 = 550    # for now use indexes rather than actual Energy
 
-scrambleNoise = False # Adds random noise to spectra (False: recommended)
+scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
 scrambleNoiseOffset = 0.1
 
 #**********************************************
@@ -181,11 +181,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-b" , "--batch"):
-            #try:
-            LearnPredictBatch(sys.argv[2])
-                #except:
-                #usage()
-                #sys.exit(2)
+            try:
+                LearnPredictBatch(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-p" , "--pca"):
             try:
@@ -813,8 +813,9 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
 
-    if scrambleNoise == True:
-        scrambleNoise(A, scambleNoiseOffset)
+    if scrambleNoiseFlag == True:
+        print(' Adding random noise to training set \n')
+        scrambleNoise(A, scrambleNoiseOffset)
     Aorig = np.copy(A)
     Rorig = np.copy(R)
 
