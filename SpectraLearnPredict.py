@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170228a
+* version: 20170228b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -249,6 +249,24 @@ def LearnPredictFile(learnFile, sampleFile):
 #**********************************************
 ''' Process - Batch'''
 #**********************************************
+def LearnPredictBatch(learnFile):
+    summary_filename = 'summary' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
+    makeHeaderSummary(summary_filename, learnFile)
+    ''' Open and process training data '''
+    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    if multiproc == True:
+        from multiprocessing import Pool
+        import multiprocessing as mp
+        p = mp.Pool()
+        for f in glob.glob('*.txt'):
+            if (f != learnFile):
+                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile))
+        p.close()
+        p.join()
+    else:
+        for f in glob.glob('*.txt'):
+            if (f != learnFile):
+                processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile)
 
 def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile):
     print(' Processing file: \033[1m' + f + '\033[0m\n')
@@ -287,7 +305,6 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFil
         csv_out=csv.writer(sum_file)
         csv_out.writerow(summaryFile)
         sum_file.close()
-
 
 #**********************************************
 ''' Learn and Predict - Maps'''
@@ -775,30 +792,6 @@ def readPredFile(sampleFile):
         Rx = Rx[enPoints]
 
     return R, Rx
-
-
-#**********************************************
-''' Learn and Predict - Batch'''
-#**********************************************
-def LearnPredictBatch(learnFile):
-    summary_filename = 'summary' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
-    makeHeaderSummary(summary_filename, learnFile)
-    ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    if multiproc == True:
-        from multiprocessing import Pool
-        import multiprocessing as mp
-        p = mp.Pool()
-        for f in glob.glob('*.txt'):
-            if (f != learnFile):
-                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile))
-        p.close()
-        p.join()
-    else:
-        for f in glob.glob('*.txt'):
-            if (f != learnFile):
-                processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile)
-
 
 #**********************************************************************************
 ''' Preprocess prediction data '''
