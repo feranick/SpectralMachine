@@ -168,8 +168,12 @@ def main():
                 sys.exit(2)
                 
         if o in ("-t" , "--traintf"):
+            if len(sys.argv) > 3:
+                numRuns = int(sys.argv[3])
+            else:
+                numRuns = 1
             try:
-                TrainTF(sys.argv[2])
+                TrainTF(sys.argv[2], int(numRuns))
             except:
                 usage()
                 sys.exit(2)
@@ -368,19 +372,28 @@ def LearnPredictMap(learnFile, mapFile):
 #********************************************************************************
 ''' Setup training-only via TensorFlow '''
 #********************************************************************************
-def TrainTF(learnFile):
+def TrainTF(learnFile, numRuns):
+    tfDef.tfAlwaysRetrain = True
+    
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    ''' Preprocess prediction data '''
-    A, Cl, En, R, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
-    print(" Using random spectra from training dataset as evaluation file ")
-    ''' Tensorflow '''
-    learnFileRoot = os.path.splitext(learnFile)[0]
-    runTensorFlow(A,Cl,R,learnFileRoot)
+    En_temp = En
+    Cl_temp = Cl
+    A_temp = A
+    
+    for i in range(numRuns):
+        print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
+        ''' Preprocess prediction data '''
+        A_temp, Cl_temp, En_temp, R_temp, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
+        print(' Using random spectra from training dataset as evaluation file ')
+        learnFileRoot = os.path.splitext(learnFile)[0]
+        runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
 
-#********************
+    print(' Completed ' + str(numRuns) + ' Training iterations. \n')
+
+#********************************************************************************
 ''' Run SVM '''
-#********************
+#********************************************************************************
 def runSVMmain(A, Cl, En, R, Root):
     from sklearn import svm
     from sklearn.externals import joblib
@@ -427,9 +440,9 @@ def runSVMmain(A, Cl, En, R, Root):
     return R_pred[0], round(100*max(prob),1)
 
 
-#*************************
+#********************************************************************************
 ''' Run Neural Network '''
-#*************************
+#********************************************************************************
 def runNNmain(A, Cl, R, Root):
     from sklearn.neural_network import MLPClassifier
     from sklearn.externals import joblib
@@ -533,7 +546,7 @@ def runTensorFlow(A, Cl, R, Root):
 
     try:
         if tfDef.tfAlwaysRetrain == False:
-            print('\n Opening TF training model from:', tfTrainedData)
+            print(' Opening TF training model from:', tfTrainedData)
             saver.restore(sess, './' + tfTrainedData)
             print(' Model restored.')
         else:
@@ -543,10 +556,10 @@ def runTensorFlow(A, Cl, R, Root):
         sess.run(init)
 
         if os.path.isfile(tfTrainedData + '.meta') & tfDef.tfAlwaysImprove == True:
-            print('\n Improving TF model...')
+            print(' Improving TF model...')
             saver.restore(sess, './' + tfTrainedData)
         else:
-            print('\n Rebuildind TF model...')
+            print(' Rebuildind TF model...')
 
         if tfDef.singleIter == True:
             print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
