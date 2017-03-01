@@ -21,11 +21,11 @@ import sys, os.path, glob
 #**********************************************
 
 def main():
-    #try:
-    processMultiFile(sys.argv[1])
-        #except:
-        #usage()
-#sys.exit(2)
+    try:
+        processMultiFile(sys.argv[1])
+    except:
+        usage()
+    sys.exit(2)
 
 #**********************************************
 ''' Open and process inividual files '''
