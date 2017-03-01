@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170228c
+* version: 20170301a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -649,7 +649,7 @@ def runPCAmain(A, Cl, En):
         #******************************
         ''' Plotting Scores vs H:C '''
         #******************************
-        for j in range(2):
+        for j in range(numPCAcomponents):
             for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
                 plt.scatter(np.asarray(Cl)[Cl_ind==i], A_r[Cl_ind==i,j], color=color, alpha=.8, lw=2, label=target_name)
             plt.xlabel('H:C elemental ratio')
