@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170301d
+* version: 20170301e
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -89,7 +89,6 @@ showClasses = False
 runNN = True
 nnClassReport = False
 
-#nnTrainedData = "nnModel.pkl"
 class nnDef:
     nnAlwaysRetrain = False
     plotNN = True
@@ -177,7 +176,7 @@ def main():
             except:
                 usage()
                 sys.exit(2)
-        
+
         if o in ("-m" , "--map"):
             try:
                 LearnPredictMap(sys.argv[2], sys.argv[3])
@@ -300,8 +299,8 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFil
             
     ''' Tensorflow '''
     if runTF == True:
-        tfPred, tfProb = runTensorFlow(A,Cl,R, learnFileRoot)
-        summaryFile.extend([tfPred, tfProb])
+        tfPred, tfProb, tfAccur = runTensorFlow(A,Cl,R, learnFileRoot)
+        summaryFile.extend([tfPred, tfProb, tfAccur])
         tfDef.tfAlwaysRetrain = False
     
     ''' Run K-Means '''
@@ -349,7 +348,7 @@ def LearnPredictMap(learnFile, mapFile):
     
         ''' Tensorflow '''
         if runTF == True:
-            tfPred[i], temp = runTensorFlow(A,Cl,r, learnFileRoot)
+            tfPred[i], temp, temp = runTensorFlow(A,Cl,r, learnFileRoot)
             saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
         
@@ -373,6 +372,8 @@ def LearnPredictMap(learnFile, mapFile):
 ''' Setup training-only via TensorFlow '''
 #********************************************************************************
 def TrainTF(learnFile, numRuns):
+    learnFileRoot = os.path.splitext(learnFile)[0]
+    summary_filename = learnFileRoot + '_summary-TF-training' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
     tfDef.tfAlwaysRetrain = True
     
     ''' Open and process training data '''
@@ -380,15 +381,20 @@ def TrainTF(learnFile, numRuns):
     En_temp = En
     Cl_temp = Cl
     A_temp = A
+    summaryFile = [["iteration","Accuracy %"]]
     
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
         ''' Preprocess prediction data '''
         A_temp, Cl_temp, En_temp, R_temp, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
         print(' Using random spectra from training dataset as evaluation file ')
-        learnFileRoot = os.path.splitext(learnFile)[0]
-        runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
+        tfPred, tfProb, tfAccur = runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
+        summaryFile.append([i, tfAccur])
 
+    with open(summary_filename, "a") as sum_file:
+        csv_out=csv.writer(sum_file)
+        csv_out.writerows(summaryFile)
+        sum_file.close()
     print(' Completed ' + str(numRuns) + ' Training iterations. \n')
 
 #********************************************************************************
@@ -577,11 +583,12 @@ def runTensorFlow(A, Cl, R, Root):
 
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
+    accur = 100*sess.run(accuracy, feed_dict={x: R, y_: Cl2})
     
-    print(' Accuracy: ' + str(100*sess.run(accuracy, feed_dict={x: R, y_: Cl2})) + '%\n')
+    print(' Accuracy: ' + str(accur) + '%\n')
     sess.close()
     print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
-    return np.unique(Cl)[res2][0], res1[0][res2][0]
+    return np.unique(Cl)[res2][0], res1[0][res2][0],accur
 
 
 #********************************************************************************
@@ -1046,7 +1053,7 @@ def plotMaps(X, Y, A, label):
 def makeHeaderSummary(file, learnFile):
     if os.path.isfile(file) == False:
         summaryHeader1 = ['Training File:', learnFile]
-        summaryHeader2 = ['File','SVM-HC','SVM-Prob%', 'NN-HC', 'NN-Prob%', 'TF-HC', 'TF-Prob%']
+        summaryHeader2 = ['File','SVM-HC','SVM-Prob%', 'NN-HC', 'NN-Prob%', 'TF-HC', 'TF-Prob%', 'TF-Accuracy%']
         with open(file, "a") as sum_file:
             csv_out=csv.writer(sum_file)
             csv_out.writerow(summaryHeader1)
