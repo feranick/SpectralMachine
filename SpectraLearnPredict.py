@@ -615,6 +615,7 @@ def runPCAmain(A, Cl, En):
         #***************************
         for i in range(0,pca.components_.shape[0]):
             plt.plot(En, pca.components_[i,:], label='PC' + str(i) + ' ({0:.0f}%)'.format(pca.explained_variance_ratio_[i] * 100))
+            print(pca.components_[i,:])
         plt.plot((En[0], En[En.shape[0]-1]), (0.0, 0.0), 'k--')
         plt.title('Loadings plot')
         plt.xlabel('Raman shift [1/cm]')
