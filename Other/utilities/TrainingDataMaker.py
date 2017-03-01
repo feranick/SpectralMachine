@@ -5,7 +5,7 @@
 *
 * TrainingDataMaker
 * Adds spectra to Training File
-* version: 20170120a
+* version: 20170301b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -30,9 +30,9 @@ def main():
     sys.exit(2)
 
 #**********************************************
-''' Make Map file '''
+''' Make Training file '''
 #**********************************************
-def makeFile(mapFile, sampleFile, param):
+def makeFile(trainFile, sampleFile, param):
     
     #**********************************************
     ''' Open and process training data '''
@@ -50,30 +50,30 @@ def makeFile(mapFile, sampleFile, param):
         R = np.loadtxt(f, unpack = True, usecols=range(1,2))
 
     try:
-        with open(mapFile, 'r') as f:
+        with open(trainFile, 'r') as f:
             M = np.loadtxt(f, unpack =False)
             EnT = np.delete(np.array(M[0,:]),np.s_[0:1],0)
             if EnT.shape[0] == En.shape[0]:
                 print(' Number of points in the map dataset: ' + str(EnT.shape[0]))
             else:
-                print('\033[1m' + ' Mismatch in datapoints: map: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
+                print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
                 R = np.interp(EnT, En, R)
                 print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
     except:
-        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
+        print('\033[1m' + ' Train data file not found \n' + '\033[0m')
         return
 
 
-    if os.path.exists(mapFile):
+    if os.path.exists(trainFile):
         print('\n Adding spectra to ' + mapFile + '\n')
-        newMap = np.append(float(param),R).reshape(1,-1)
+        newTrain = np.append(float(param),R).reshape(1,-1)
     else:
-        print('\n' + mapFile + ' does not exist. Creating...' + '\n')
-        newMap = np.append([0], En)
-        newMap = np.vstack((newMap, np.append(float(param),R)))
+        print('\n' + trainFile + ' does not exist. Creating...' + '\n')
+        newTrain = np.append([0], En)
+        newTrain = np.vstack((newMap, np.append(float(param),R)))
 
-    with open(mapFile, 'ab') as f:
-        np.savetxt(f, newMap, delimiter='\t', fmt='%10.6f')
+    with open(trainFile, 'ab') as f:
+        np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
 
 
 #************************************
