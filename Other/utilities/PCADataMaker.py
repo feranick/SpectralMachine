@@ -5,7 +5,7 @@
 *
 * PCADataMaker
 * Adds spectra to single file for PCA
-* version: 20170301b
+* version: 20170301c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -42,7 +42,7 @@ def makeFile(sampleFile, pcaFile):
     try:
         with open(sampleFile, 'r') as f:
             En = np.loadtxt(f, unpack = True, usecols=range(0,1))
-            print(' Number of points in the sample dataset: ' + str(En.shape[0]))
+            print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
     except:
         print('\033[1m' + ' Sample data file not found \n' + '\033[0m')
         return
@@ -56,17 +56,17 @@ def makeFile(sampleFile, pcaFile):
             M = np.loadtxt(f, unpack =False)
             EnT = np.delete(np.array(M[0,:]),np.s_[0:1],0)
             if EnT.shape[0] == En.shape[0]:
-                print(' Number of points in the map dataset: ' + str(EnT.shape[0]))
+                print(' Number of points in the pca dataset: ' + str(EnT.shape[0]))
             else:
                 print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
                 R = np.interp(EnT, En, R)
                 print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
-            print('\n Added spectra to ' + pcaFile + '\n')
+            print('\n Added spectra to \"' + pcaFile + '\"\n')
             newTrain = np.append(float(param),R).reshape(1,-1)
     else:
         print('\n\033[1m' + ' Train data file not found. Creating...' + '\033[0m')
         newTrain = np.append([0], En)
-        print(' Added spectra to ' + pcaFile + '\n')
+        print(' Added spectra to \"' + pcaFile + '\"\n')
         newTrain = np.vstack((newTrain, np.append(float(param),R)))
 
     with open(pcaFile, 'ab') as f:
