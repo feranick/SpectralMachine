@@ -23,11 +23,11 @@ import sys, os.path
 #**********************************************
 
 def main():
-    #try:
-    makeFile(sys.argv[1], sys.argv[2], sys.argv[3])
-        #except:
-        #usage()
-#sys.exit(2)
+    try:
+        makeFile(sys.argv[1], sys.argv[2], sys.argv[3])
+    except:
+        usage()
+    sys.exit(2)
 
 #**********************************************
 ''' Make Training file '''
