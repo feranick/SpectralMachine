@@ -120,8 +120,7 @@ class tfDef:
 runPCA = False
 customNumPCAComp = True
 
-class pcaDef:
-    numPCAcomponents = 3
+numPCAcomponents = 2
 
 #**********************************************
 ''' K-means '''
@@ -191,19 +190,21 @@ def main():
 
         if o in ("-p" , "--pca"):
             if len(sys.argv) > 3:
-                pcaDef.numPCAcomponents = int(sys.argv[3])
-                try:
-                    PCA(sys.argv[2])
-                except:
-                    usage()
-                    sys.exit(2)
+                numPCAcomp = int(sys.argv[3])
+            else:
+                numPCAcomp = numPCAcomponents
+            try:
+                runPCA(sys.argv[2], numPCAcomp)
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-k" , "--kmaps"):
+            if len(sys.argv) > 3:
+                numKMcomp = int(sys.argv[3])
+            else:
+                numKMcomp = numKMcomponents
             try:
-                if len(sys.argv) > 3:
-                    numKMcomp = int(sys.argv[3])
-                else:
-                    numKMcomp = numKMcomponents
                 KmMap(sys.argv[2], numKMcomp)
             except:
                 usage()
@@ -376,17 +377,6 @@ def TrainTF(learnFile):
     ''' Tensorflow '''
     learnFileRoot = os.path.splitext(learnFile)[0]
     runTensorFlow(A,Cl,R,learnFileRoot)
-
-
-#**********************************************
-''' Setup and Run PCA'''
-#**********************************************
-def PCA(learnFile):
-    ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    ''' Run PCA '''
-    runPCAmain(A, Cl, En)
-
 
 #********************
 ''' Run SVM '''
@@ -591,17 +581,20 @@ def runTensorFlow(A, Cl, R, Root):
     pca.explained_variance_ratio
     '''
 #********************************************************************************
-def runPCAmain(A, Cl, En):
+def runPCA(learnFile, numPCAcomponents):
     from sklearn.decomposition import PCA
     import matplotlib.pyplot as plt
     from matplotlib import cm
+    
+    ''' Open and process training data '''
+    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
     
     print(' Running PCA...\n')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
     if customNumPCAComp == False:
         numPCAcomp = np.unique(Cl).shape[0]
     else:
-        numPCAcomp = pcaDef.numPCAcomponents
+        numPCAcomp = numPCAcomponents
     print(' Number of Principal components: ' + str(numPCAcomp) + '\n')
     pca = PCA(n_components=numPCAcomp)
     A_r = pca.fit(A).transform(A)
