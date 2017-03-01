@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170301a
+* version: 20170301d
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -119,7 +119,9 @@ class tfDef:
 #**********************************************
 runPCA = False
 customNumPCAComp = True
-numPCAcomponents = 2
+
+class pcaDef:
+    numPCAcomponents = 3
 
 #**********************************************
 ''' K-means '''
@@ -188,16 +190,18 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--pca"):
-            try:
-                PCA(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            if len(sys.argv) > 3:
+                pcaDef.numPCAcomponents = int(sys.argv[3])
+                try:
+                    PCA(sys.argv[2])
+                except:
+                    usage()
+                    sys.exit(2)
 
         if o in ("-k" , "--kmaps"):
             try:
                 if len(sys.argv) > 3:
-                    numKMcomp = sys.argv[3]
+                    numKMcomp = int(sys.argv[3])
                 else:
                     numKMcomp = numKMcomponents
                 KmMap(sys.argv[2], numKMcomp)
@@ -597,11 +601,10 @@ def runPCAmain(A, Cl, En):
     if customNumPCAComp == False:
         numPCAcomp = np.unique(Cl).shape[0]
     else:
-        numPCAcomp = numPCAcomponents
+        numPCAcomp = pcaDef.numPCAcomponents
     print(' Number of Principal components: ' + str(numPCAcomp) + '\n')
     pca = PCA(n_components=numPCAcomp)
     A_r = pca.fit(A).transform(A)
-
 
     for i in range(0,pca.components_.shape[0]):
         print(' Score PC ' + str(i) + ': ' + '{0:.0f}%'.format(pca.explained_variance_ratio_[i] * 100))
