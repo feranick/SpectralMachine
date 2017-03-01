@@ -604,7 +604,7 @@ def runPCAmain(A, Cl, En):
 
 
     for i in range(0,pca.components_.shape[0]):
-        print(' Score PCA ' + str(i) + ': ' + '{0:.0f}%'.format(pca.explained_variance_ratio_[i] * 100))
+        print(' Score PC ' + str(i) + ': ' + '{0:.0f}%'.format(pca.explained_variance_ratio_[i] * 100))
     print('')
 
     if showPCAPlots == True:
@@ -646,10 +646,19 @@ def runPCAmain(A, Cl, En):
         plt.ylabel('PC 1 ({0:.0f}%)'.format(pca.explained_variance_ratio_[1] * 100))
         plt.figure()
 
+        plt.title('Score box plot')
+        plt.xlabel('Principal Component')
+        plt.ylabel('Score')
+        for j in range(pca.components_.shape[0]):
+            for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
+                plt.scatter([j+1]*len(A_r[Cl_ind==i,j]), A_r[Cl_ind==i,j], color=color, alpha=.8, lw=2, label=target_name)
+        plt.boxplot(A_r)
+        plt.figure()
+
         #******************************
         ''' Plotting Scores vs H:C '''
         #******************************
-        for j in range(numPCAcomponents):
+        for j in range(pca.components_.shape[0]):
             for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
                 plt.scatter(np.asarray(Cl)[Cl_ind==i], A_r[Cl_ind==i,j], color=color, alpha=.8, lw=2, label=target_name)
             plt.xlabel('H:C elemental ratio')
