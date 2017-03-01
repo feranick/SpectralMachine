@@ -1061,8 +1061,10 @@ def usage():
     print('  python SpectraLearnPredictSVM.py -b <learningfile> \n')
     print(' k-means on maps: ')
     print('  python SpectraLearnPredictSVM.py -k <spectramap> <number_of_classes>\n')
-    print(' Principal component analysis only: ')
-    print('  python SpectraLearnPredictSVM.py -p <spectramap>\n')
+    print(' Principal component analysis on spectral collection files: ')
+    print('  python SpectraLearnPredictSVM.py -p <spectrafile> <#comp>\n')
+    print(' Run tensorflow training only: ')
+    print('  python SpectraLearnPredictSVM.py -t <learningfile>\n')
 
 
 #************************************
