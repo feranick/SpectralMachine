@@ -11,11 +11,9 @@
 *
 ***********************************************
 '''
-
 print(__doc__)
 
 import numpy as np
-from sklearn import svm
 import sys, os.path
 
 #**********************************************
