@@ -5,7 +5,7 @@
 *
 * PCADataMaker
 * Adds spectra to single file for PCA
-* version: 20170301c
+* version: 20170301d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -21,8 +21,13 @@ import sys, os.path, glob
 #**********************************************
 
 def main():
+    if len(sys.argv) < 3:
+        param = 0.0
+    else:
+        param = sys.argv[2]
+
     try:
-        processMultiFile(sys.argv[1])
+        processMultiFile(sys.argv[1], param)
     except:
         usage()
     sys.exit(2)
@@ -30,15 +35,15 @@ def main():
 #**********************************************
 ''' Open and process inividual files '''
 #**********************************************
-def processMultiFile(pcaFile):
+def processMultiFile(pcaFile, param):
     for f in glob.glob('*.txt'):
         if (f != pcaFile):
-            makeFile(f, pcaFile)
+            makeFile(f, pcaFile, param)
     
 #**********************************************
 ''' Add data to PCA file '''
 #**********************************************
-def makeFile(sampleFile, pcaFile):
+def makeFile(sampleFile, pcaFile, param):
     try:
         with open(sampleFile, 'r') as f:
             En = np.loadtxt(f, unpack = True, usecols=range(0,1))
@@ -50,7 +55,6 @@ def makeFile(sampleFile, pcaFile):
     with open(sampleFile, 'r') as f:
         R = np.loadtxt(f, unpack = True, usecols=range(1,2))
 
-    param = 0.0
     if os.path.exists(pcaFile):
         with open(pcaFile, 'r') as f:
             M = np.loadtxt(f, unpack =False)
@@ -77,7 +81,10 @@ def makeFile(sampleFile, pcaFile):
 #************************************
 def usage():
     print('\n Usage:')
-    print('  python PCADataMaker.py <pcafile>\n')
+    print('  python PCADataMaker.py <pcafile> <parameter>\n')
+    print('  Note: a default <parameter> = 0 is used if not declared\n')
+    print('  <parameter> is useful for differentiate between different')
+    print('  datasets within PCA. \n')
 
 #************************************
 ''' Main initialization routine '''
