@@ -1070,7 +1070,7 @@ def usage():
     print(' Principal component analysis on spectral collection files: ')
     print('  python SpectraLearnPredictSVM.py -p <spectrafile> <#comp>\n')
     print(' Run tensorflow training only: ')
-    print('  python SpectraLearnPredictSVM.py -t <learningfile>\n')
+    print('  python SpectraLearnPredictSVM.py -t <learningfile> <# iterations>\n')
 
 
 #************************************
