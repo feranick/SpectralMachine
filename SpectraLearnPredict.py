@@ -1073,13 +1073,13 @@ def makeHeaderSummary(file, learnFile):
 #************************************
 def usage():
     print('\n Usage:')
-    print(' single files: ')
+    print(' Single files: ')
     print('  python SpectraLearnPredict.py -f <learningfile> <spectrafile> \n')
-    print(' maps (formatted for Horiba LabSpec): ')
+    print(' Maps (formatted for Horiba LabSpec): ')
     print('  python SpectraLearnPredict.py -m <learningfile> <spectramap> \n')
-    print(' batch txt files: ')
+    print(' Batch txt files: ')
     print('  python SpectraLearnPredict.py -b <learningfile> \n')
-    print(' k-means on maps: ')
+    print(' K-means on maps: ')
     print('  python SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
     print(' Principal component analysis on spectral collection files: ')
     print('  python SpectraLearnPredict.py -p <spectrafile> <#comp>\n')
