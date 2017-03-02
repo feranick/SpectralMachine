@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170301f
+* version: 20170301g
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -109,7 +109,7 @@ class tfDef:
     tfAlwaysRetrain = False
     tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
     plotTF = True
-    
+
     singleIter = True
     percentTFCrossValid = 0.3
     trainingIter = 1000
@@ -166,7 +166,7 @@ def main():
             except:
                 usage()
                 sys.exit(2)
-                
+
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
                 numRuns = int(sys.argv[3])
@@ -218,10 +218,9 @@ def main():
 ''' Learn and Predict - File'''
 #**********************************************
 def LearnPredictFile(learnFile, sampleFile):
-    
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    
+
     learnFileRoot = os.path.splitext(learnFile)[0]
 
     ''' Run PCA '''
@@ -230,10 +229,10 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Open prediction file '''
     R, Rx = readPredFile(sampleFile)
-    
+
     ''' Preprocess prediction data '''
     A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
-    
+
     ''' Run Support Vector Machines '''
     if runSVM == True:
         runSVMmain(A, Cl, En, R, learnFileRoot)
@@ -283,33 +282,33 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFil
     summaryFile = [f]
     ''' Preprocess prediction data '''
     A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
-    
+
     learnFileRoot = os.path.splitext(learnFile)[0]
-            
+
     ''' Run Support Vector Machines '''
     if runSVM == True:
         svmPred, svmProb = runSVMmain(A, Cl, En, R, learnFileRoot)
         summaryFile.extend([svmPred, svmProb])
         svmDef.svmAlwaysRetrain = False
-            
+
     ''' Run Neural Network '''
     if runNN == True:
         nnPred, nnProb = runNNmain(A, Cl, R, learnFileRoot)
         summaryFile.extend([nnPred, nnProb])
         nnDef.nnAlwaysRetrain = False
-            
+
     ''' Tensorflow '''
     if runTF == True:
         tfPred, tfProb, tfAccur = runTensorFlow(A,Cl,R, learnFileRoot)
         summaryFile.extend([tfPred, tfProb, tfAccur])
         tfDef.tfAlwaysRetrain = False
-    
+
     ''' Run K-Means '''
     if runKM == True:
         kmDef.plotKM = False
         kmPred = runKMmain(A, Cl, En, R, Aorig, Rorig)
         summaryFile.extend([kmPred])
-            
+
     with open(summary_filename, "a") as sum_file:
         csv_out=csv.writer(sum_file)
         csv_out.writerow(summaryFile)
@@ -319,10 +318,9 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFil
 ''' Learn and Predict - Maps'''
 #**********************************************
 def LearnPredictMap(learnFile, mapFile):
-    
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    
+
     learnFileRoot = os.path.splitext(learnFile)[0]
 
     ''' Open prediction map '''
@@ -340,19 +338,19 @@ def LearnPredictMap(learnFile, mapFile):
             svmPred[i], temp = runSVMmain(A, Cl, En, r, learnFileRoot)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
-    
+
         ''' Run Neural Network '''
         if runNN == True:
             nnPred[i], temp = runNNmain(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
             nnDef.nnAlwaysRetrain = False
-    
+
         ''' Tensorflow '''
         if runTF == True:
             tfPred[i], temp, temp = runTensorFlow(A,Cl,r, learnFileRoot)
             saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
-        
+
         ''' Run K-Means '''
         if runKM == True:
             kmDef.plotKM = False
@@ -376,8 +374,9 @@ def TrainTF(learnFile, numRuns):
     learnFileRoot = os.path.splitext(learnFile)[0]
     summary_filename = learnFileRoot + '_summary-TF-training' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
     tfDef.tfAlwaysRetrain = True
+    tfDef.tfAlwaysImprove = True
     preprocDef.scrambleNoiseFlag = True
-    
+
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
     En_temp = En
@@ -387,7 +386,7 @@ def TrainTF(learnFile, numRuns):
         sum_file.write(str(datetime.now().strftime('Training started: %Y-%m-%d %H:%M:%S\n')))
         sum_file.write(' Using Noise scrambler (offset: ' + str(preprocDef.scrambleNoiseOffset) + ')\n\n')
         sum_file.write('Iteration\tAccuracy %\n')
-    
+
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
         ''' Preprocess prediction data '''
@@ -400,7 +399,6 @@ def TrainTF(learnFile, numRuns):
 
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('\nTraining ended: %Y-%m-%d %H:%M:%S\n')))
-
 
     print(' Completed ' + str(numRuns) + ' Training iterations. \n')
 
@@ -436,7 +434,7 @@ def runSVMmain(A, Cl, En, R, Root):
     prob = clf.predict_proba(R)[0].tolist()
     print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) + '\033[0m' + ' (probability = ' +
           str(round(100*max(prob),1)) + '%)\n')
-          
+
     #**************************************
     ''' SVM Classification Report '''
     #**************************************
@@ -460,7 +458,7 @@ def runNNmain(A, Cl, R, Root):
     from sklearn.neural_network import MLPClassifier
     from sklearn.externals import joblib
     nnTrainedData = Root + '.nnModel.pkl'
-    
+
     print('\n Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnSolver + ')...')
     try:
         if nnDef.nnAlwaysRetrain == False:
@@ -552,7 +550,7 @@ def runTensorFlow(A, Cl, R, Root):
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
 
     train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-    
+
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
     saver = tf.train.Saver()
@@ -612,10 +610,10 @@ def runPCA(learnFile, numPCAcomponents):
     from sklearn.decomposition import PCA
     import matplotlib.pyplot as plt
     from matplotlib import cm
-    
+
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    
+
     print(' Running PCA...\n')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
     if customNumPCAComp == False:
@@ -632,7 +630,7 @@ def runPCA(learnFile, numPCAcomponents):
 
     if showPCAPlots == True:
         print(' Plotting Loadings and score plots... \n')
-        
+
         #***************************
         ''' Plotting Loadings '''
         #***************************
@@ -726,21 +724,18 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
 ''' K-Means - Maps'''
 #**********************************************
 def KmMap(mapFile, numKMcomp):
-    
     ''' Open prediction map '''
     X, Y, R, Rx = readPredMap(mapFile)
     type = 0
     i = 0;
-    
     R, Rx, Rorig = preProcessNormMap(R, Rx, type)
-    
+
     from sklearn.cluster import KMeans
     print(' Running K-Means...')
     print(' Number of classes: ' + str(numKMcomp))
     kmeans = KMeans(n_clusters=numKMcomponents, random_state=0).fit(R)
-    
     kmPred = np.empty([R.shape[0]])
-    
+
     for i in range(0, R.shape[0]):
         kmPred[i] = kmeans.predict(R[i,:].reshape(1,-1))[0]
         saveMap(mapFile, 'KM', 'Class', int(kmPred[i]), X[i], Y[i], True)
@@ -752,7 +747,6 @@ def KmMap(mapFile, numKMcomp):
     if kmDef.plotKM == True:
         plotMaps(X, Y, kmPred, 'K-Means')
 
-
 #************************************
 ''' Read Learning file '''
 #************************************
@@ -763,7 +757,7 @@ def readLearnFile(learnFile):
     except:
         print('\033[1m' + ' Map data file not found \n' + '\033[0m')
         return
-    
+
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
@@ -779,7 +773,7 @@ def readLearnFile(learnFile):
 
             for j in range(0, A.shape[0]):
                 Atemp[j,i] = A[j,A[j,enRange[i]].tolist().index(max(A[j, enRange[i]].tolist()))+enRange[i][0]]
-            
+
             enPoints[i] = int(np.average(enRange[i]))
         A = Atemp
         En = En[enPoints]
@@ -863,7 +857,7 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
         scaler = StandardScaler().fit(A)
         A = scaler.transform(A)
         R = scaler.transform(R)
-    
+
     #**********************************************
     ''' Select subset of training data for cross validation '''
     #**********************************************
@@ -900,16 +894,16 @@ def preProcessNormMap(A, En, type):
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
     #**********************************************************************************
-    
+
     # Find index corresponding to energy value to be used for Y normalization
     if fullYnorm == False:
         YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
     else:
         YnormXind = np.where(En>0)[0].tolist()
-    
+
     Amax = np.empty([A.shape[0],1])
     Aorig = np.copy(A)
-    
+
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
     #**********************************************
@@ -925,7 +919,7 @@ def preProcessNormMap(A, En, type):
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler().fit(A)
         A = scaler.transform(A)
-    
+
     #**********************************************
     ''' Energy normalization range '''
     #**********************************************
@@ -938,7 +932,7 @@ def preProcessNormMap(A, En, type):
     else:
         if type == 0:
             print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
-    
+
     return A, En, Aorig
 
 
@@ -975,9 +969,8 @@ def readPredMap(mapFile):
 ''' Save map files '''
 ####################################################################
 def saveMap(file, type, extension, s, x1, y1, comma):
-    
     inputFile = saveMapName(file, type, extension, comma)
-    
+
     with open(inputFile, "a") as coord_file:
         if comma==True:
             coord_file.write('{:},'.format(x1))
@@ -1042,7 +1035,7 @@ def plotMaps(X, Y, A, label):
     xi = np.linspace(min(X), max(X))
     yi = np.linspace(min(Y), max(Y))
     xi, yi = np.meshgrid(xi, yi)
-    
+
     rbf = scipy.interpolate.Rbf(Y, -X, A, function='linear')
     zi = rbf(xi, yi)
     import matplotlib.pyplot as plt
@@ -1099,7 +1092,6 @@ def runClassReport(clf, A, Cl):
           ' sample will be correctly classified for a given class. F1 score combines both \n' +
           ' accuracy and precision to give a single measure of relevancy of the classifier results.\n')
 
-
 #************************************
 ''' Introduce Noise in Data '''
 #************************************
@@ -1107,7 +1099,6 @@ def scrambleNoise(A, offset):
     from random import uniform
     for i in range(A.shape[1]):
         A[:,i] += offset*uniform(-1,1)
-
 
 #************************************
 ''' Main initialization routine '''
