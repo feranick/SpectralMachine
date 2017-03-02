@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170301e
+* version: 20170301f
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -56,8 +56,9 @@ enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
 enLim2 = 550    # for now use indexes rather than actual Energy
 
-scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
-scrambleNoiseOffset = 0.1
+class preprocDef:
+    scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
+    scrambleNoiseOffset = 0.1
 
 #**********************************************
 ''' Model selection for training '''
@@ -373,15 +374,19 @@ def LearnPredictMap(learnFile, mapFile):
 #********************************************************************************
 def TrainTF(learnFile, numRuns):
     learnFileRoot = os.path.splitext(learnFile)[0]
-    summary_filename = learnFileRoot + '_summary-TF-training' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
+    summary_filename = learnFileRoot + '_summary-TF-training' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
     tfDef.tfAlwaysRetrain = True
+    preprocDef.scrambleNoiseFlag = True
     
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
     En_temp = En
     Cl_temp = Cl
     A_temp = A
-    summaryFile = [["iteration","Accuracy %"]]
+    with open(summary_filename, "a") as sum_file:
+        sum_file.write(str(datetime.now().strftime('Training started: %Y-%m-%d %H:%M:%S\n')))
+        sum_file.write(' Using Noise scrambler (offset: ' + str(preprocDef.scrambleNoiseOffset) + ')\n\n')
+        sum_file.write('Iteration\tAccuracy %\n')
     
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
@@ -389,12 +394,14 @@ def TrainTF(learnFile, numRuns):
         A_temp, Cl_temp, En_temp, R_temp, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
         print(' Using random spectra from training dataset as evaluation file ')
         tfPred, tfProb, tfAccur = runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
-        summaryFile.append([i, tfAccur])
+
+        with open(summary_filename, "a") as sum_file:
+            sum_file.write(str(i+1) + '\t{:10.2f}\n'.format(tfAccur))
 
     with open(summary_filename, "a") as sum_file:
-        csv_out=csv.writer(sum_file)
-        csv_out.writerows(summaryFile)
-        sum_file.close()
+        sum_file.write(str(datetime.now().strftime('\nTraining ended: %Y-%m-%d %H:%M:%S\n')))
+
+
     print(' Completed ' + str(numRuns) + ' Training iterations. \n')
 
 #********************************************************************************
@@ -833,9 +840,9 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
 
-    if scrambleNoiseFlag == True:
+    if preprocDef.scrambleNoiseFlag == True:
         print(' Adding random noise to training set \n')
-        scrambleNoise(A, scrambleNoiseOffset)
+        scrambleNoise(A, preprocDef.scrambleNoiseOffset)
     Aorig = np.copy(A)
     Rorig = np.copy(R)
 
