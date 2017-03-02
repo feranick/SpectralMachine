@@ -1074,17 +1074,17 @@ def makeHeaderSummary(file, learnFile):
 def usage():
     print('\n Usage:')
     print(' single files: ')
-    print('  python SpectraLearnPredictSVM.py -f <learningfile> <spectrafile> \n')
+    print('  python SpectraLearnPredict.py -f <learningfile> <spectrafile> \n')
     print(' maps (formatted for Horiba LabSpec): ')
-    print('  python SpectraLearnPredictSVM.py -m <learningfile> <spectramap> \n')
+    print('  python SpectraLearnPredict.py -m <learningfile> <spectramap> \n')
     print(' batch txt files: ')
-    print('  python SpectraLearnPredictSVM.py -b <learningfile> \n')
+    print('  python SpectraLearnPredict.py -b <learningfile> \n')
     print(' k-means on maps: ')
-    print('  python SpectraLearnPredictSVM.py -k <spectramap> <number_of_classes>\n')
+    print('  python SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
     print(' Principal component analysis on spectral collection files: ')
-    print('  python SpectraLearnPredictSVM.py -p <spectrafile> <#comp>\n')
+    print('  python SpectraLearnPredict.py -p <spectrafile> <#comp>\n')
     print(' Run tensorflow training only: ')
-    print('  python SpectraLearnPredictSVM.py -t <learningfile> <# iterations>\n')
+    print('  python SpectraLearnPredict.py -t <learningfile> <# iterations>\n')
 
 
 #************************************

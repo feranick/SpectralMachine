@@ -13,7 +13,7 @@ Additional multivariate analysis:
 Installation
 =============
 
-This software requires Python (2.6 or higher, 3.3 or higher). It has been tested with Python 3.5 which is the recommended platform.
+This software requires Python (3.3 or higher). It has been tested with Python 3.5 or hiher which is the recommended platform. It is not compatible with python 2.x.
 
 This package requires:
 
@@ -31,19 +31,27 @@ Usage
 
 Single files: 
   
-    python SpectraLearnPredictSVM.py -f learningfile spectrafile 
+    python SpectraLearnPredict.py -f learningfile spectrafile 
 
 Maps (formatted for Horiba LabSpec): 
   
-    python SpectraLearnPredictSVM.py -m learningfile spectramap 
+    python SpectraLearnPredict.py -m learningfile spectramap 
 
 Batch txt files:
 
-    python SpectraLearnPredictSVM.py -b learningfile 
+    python SpectraLearnPredict.py -b learningfile 
 
 K-means on Raman maps:
     
-    python SpectraLearnPredictSVM.py -k spectramap number_of_classes
+    python SpectraLearnPredict.py -k spectramap number_of_classes
+
+Principal component analysis on spectral collection files:
+    
+    python SpectraLearnPredict.py -p spectrafile #comp
+
+Run tensorflow training only:
+
+    python SpectraLearnPredict.py -t learningfile #iterations
 
 
 Training data
