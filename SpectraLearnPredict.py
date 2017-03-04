@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170301g
+* version: 20170304a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -390,7 +390,7 @@ def TrainTF(learnFile, numRuns):
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
         ''' Preprocess prediction data '''
-        A_temp, Cl_temp, En_temp, R_temp, Aorig, Rorig = preProcessNormData(A[random.randint(1,A.shape[0]),:], En, A, En, Cl, Amax, YnormXind, 0)
+        A_temp, Cl_temp, En_temp, R_temp, Aorig, Rorig = preProcessNormData(A[random.randint(0,A.shape[0]-1),:], En, A, En, Cl, Amax, YnormXind, 0)
         print(' Using random spectra from training dataset as evaluation file ')
         tfPred, tfProb, tfAccur = runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
 
