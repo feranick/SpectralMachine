@@ -5,7 +5,7 @@
 *
 * ClassDataMaker
 * Adds spectra to single file for classification
-* version: 20170306a
+* version: 20170306c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -51,14 +51,15 @@ def makeFile(sampleFile, learnFile, param):
     try:
         with open(sampleFile, 'r') as f:
             En = np.loadtxt(f, unpack = True, skiprows = 10, usecols=range(0,1))
-            print(En)
-            print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
+            if(En.size == 0):
+                print('\n Empty file \n' )
+                return
+        with open(sampleFile, 'r') as f:
+            R = np.loadtxt(f, unpack = True, usecols=range(1,2))
+        print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
     except:
         print('\033[1m' + ' Sample data file not found \n' + '\033[0m')
         return
-
-    with open(sampleFile, 'r') as f:
-        R = np.loadtxt(f, unpack = True, usecols=range(1,2))
 
     if os.path.exists(learnFile):
         with open(learnFile, 'r') as f:

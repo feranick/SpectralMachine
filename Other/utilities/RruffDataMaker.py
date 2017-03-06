@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170306b
+* version: 20170306c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -32,7 +32,6 @@ def main():
         enStep = sys.argv[4]
     try:
         processMultiFile(sys.argv[1], enInit, enFin, enStep)
-        print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
     except:
         usage()
     sys.exit(2)
@@ -52,6 +51,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
             index = index + 1
             with open(summary_filename, "a") as sum_file:
                 sum_file.write(str(index) + '\t' + f +'\n')
+    print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
 
 #**********************************************
 ''' Add data to Training file '''
@@ -60,9 +60,12 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep):
     try:
         with open(sampleFile, 'r') as f:
             En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
+            if(En.size == 0):
+                print('\n Empty file \n' )
+                return
         with open(sampleFile, 'r') as f:
             R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = ',', skiprows = 10)
-            print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
+        print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
     except:
         print('\033[1m' + ' Sample data file not found \n' + '\033[0m')
         return
