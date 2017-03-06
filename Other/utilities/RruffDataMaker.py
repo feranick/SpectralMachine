@@ -32,10 +32,9 @@ def main():
         enStep = sys.argv[4]
     try:
         processMultiFile(sys.argv[1], enInit, enFin, enStep)
+        print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
     except:
         usage()
-
-    print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
     sys.exit(2)
 
 #**********************************************
