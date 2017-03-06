@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170306a
+* version: 20170306b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -21,18 +21,27 @@ from datetime import datetime, date
 #**********************************************
 ''' main '''
 #**********************************************
-
 def main():
+    if len(sys.argv) < 5:
+        enInit = 100
+        enFin = 1500
+        enStep = 0.5
+    else:
+        enInit = sys.argv[2]
+        enFin =  sys.argv[3]
+        enStep = sys.argv[4]
     try:
-        processMultiFile(sys.argv[1])
+        processMultiFile(sys.argv[1], enInit, enFin, enStep)
     except:
         usage()
+
+    print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
     sys.exit(2)
 
 #**********************************************
 ''' Open and process inividual files '''
 #**********************************************
-def processMultiFile(learnFile):
+def processMultiFile(learnFile, enInit, enFin, enStep):
     index = 0
     learnFileRoot = os.path.splitext(learnFile)[0]
     summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
@@ -40,7 +49,7 @@ def processMultiFile(learnFile):
         sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S\n')))
     for f in glob.glob('*.txt'):
         if (f != learnFile):
-            makeFile(f, learnFile, index)
+            makeFile(f, learnFile, index, enInit, enFin, enStep)
             index = index + 1
             with open(summary_filename, "a") as sum_file:
                 sum_file.write(str(index) + '\t' + f +'\n')
@@ -48,7 +57,7 @@ def processMultiFile(learnFile):
 #**********************************************
 ''' Add data to Training file '''
 #**********************************************
-def makeFile(sampleFile, learnFile, param):
+def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep):
     try:
         with open(sampleFile, 'r') as f:
             En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
@@ -59,12 +68,12 @@ def makeFile(sampleFile, learnFile, param):
         print('\033[1m' + ' Sample data file not found \n' + '\033[0m')
         return
 
-    EnT = np.arange(100, 1500, 1, dtype=np.float)
+    EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
     if EnT.shape[0] == En.shape[0]:
         print(' Number of points in the learning dataset: ' + str(EnT.shape[0]))
     else:
         print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
-        R = np.interp(EnT, En, R)
+        R = np.interp(EnT, En, R, left = 0, right = 0)
         print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
 
 
@@ -84,7 +93,7 @@ def makeFile(sampleFile, learnFile, param):
 #************************************
 def usage():
     print('\n Usage:')
-    print('  python ClassDataMaker.py <learnfile>\n')
+    print('  python ClassDataMaker.py <learnfile> <enInitial> <enFinal> <enStep> \n')
 
 #************************************
 ''' Main initialization routine '''

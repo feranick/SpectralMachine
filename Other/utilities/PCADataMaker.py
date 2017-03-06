@@ -5,7 +5,7 @@
 *
 * PCADataMaker
 * Adds spectra to single file for PCA
-* version: 20170301d
+* version: 20170306b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -63,7 +63,7 @@ def makeFile(sampleFile, pcaFile, param):
                 print(' Number of points in the pca dataset: ' + str(EnT.shape[0]))
             else:
                 print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
-                R = np.interp(EnT, En, R)
+                R = np.interp(EnT, En, R, left = 0, right = 0)
                 print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
             print('\n Added spectra to \"' + pcaFile + '\"\n')
             newTrain = np.append(float(param),R).reshape(1,-1)
