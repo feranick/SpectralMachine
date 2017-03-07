@@ -173,6 +173,7 @@ def main():
                 numRuns = int(sys.argv[3])
             else:
                 numRuns = 1
+            preprocDef.scrambleNoiseFlag = False
             try:
                 TrainTF(sys.argv[2], int(numRuns))
             except:
@@ -376,7 +377,6 @@ def TrainTF(learnFile, numRuns):
     summary_filename = learnFileRoot + '_summary-TF-training' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
     tfDef.tfAlwaysRetrain = True
     tfDef.tfAlwaysImprove = True
-    preprocDef.scrambleNoiseFlag = False
 
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
