@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170304a
+* version: 20170307a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -27,6 +27,27 @@ from datetime import datetime, date
 import random
 
 #**********************************************
+''' Spectra normalization, preprocessing '''
+#**********************************************
+Ynorm = True   # Normalize spectra (True: recommended)
+normToMax = False  # True: norm to the max intensity point for any spectra; False, max at specified YnormX (default)
+
+YnormTo = 1
+YnormX = 1600
+YnormXdelta = 30
+
+fullYnorm = False  # Normalize full spectra (False: recommended)
+preProcess = True  # True recommended
+
+enRestrictRegion = False
+enLim1 = 450    # for now use indexes rather than actual Energy
+enLim2 = 550    # for now use indexes rather than actual Energy
+
+class preprocDef:
+    scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
+    scrambleNoiseOffset = 0.1
+
+#**********************************************
 ''' Calculation by limited number of points '''
 #**********************************************
 cherryPickEnPoint = False  # False recommended
@@ -39,26 +60,6 @@ if(cherryPickEnPoint == True):
     print(' Calculation by limited number of points: ENABLED ')
     print(' THIS IS AN EXPERIMENTAL FEATURE \n')
     print(' Restricted range: DISABLED')
-
-#**********************************************
-''' Spectra normalization, preprocessing '''
-#**********************************************
-Ynorm = True   # True recommended
-YnormTo = 1
-YnormX = 1600
-YnormXdelta = 30
-
-fullYnorm = False  # Normalize full spectra (False: recommended)
-
-preProcess = True  # True recommended
-
-enRestrictRegion = False
-enLim1 = 450    # for now use indexes rather than actual Energy
-enLim2 = 550    # for now use indexes rather than actual Energy
-
-class preprocDef:
-    scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
-    scrambleNoiseOffset = 0.1
 
 #**********************************************
 ''' Model selection for training '''
@@ -375,7 +376,7 @@ def TrainTF(learnFile, numRuns):
     summary_filename = learnFileRoot + '_summary-TF-training' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
     tfDef.tfAlwaysRetrain = True
     tfDef.tfAlwaysImprove = True
-    preprocDef.scrambleNoiseFlag = True
+    preprocDef.scrambleNoiseFlag = False
 
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
@@ -845,10 +846,18 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
     #**********************************************
     if Ynorm == True:
         if type == 0:
-            print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
+            if normToMax == False:
+                print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
+            else:
+                print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
+            if normToMax == True:
+                YnormXind = np.where(A[i] == np.amax(A[i]))[0].tolist()
             Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
             A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
+
+        if normToMax == True:
+               YnormXind = np.where(R[0] == np.amax(R[0]))[0].tolist()
         Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
         R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
 
