@@ -50,7 +50,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
             makeFile(f, learnFile, index, enInit, enFin, enStep)
             index = index + 1
             with open(summary_filename, "a") as sum_file:
-                sum_file.write(str(index) + '\t' + f +'\n')
+                sum_file.write(str(index) + '\t\t' + f +'\n')
     print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
 
 #**********************************************
