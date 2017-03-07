@@ -95,7 +95,7 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep):
 #************************************
 def usage():
     print('\n Usage:')
-    print('  python ClassDataMaker.py <learnfile> <enInitial> <enFinal> <enStep> \n')
+    print('  python RruffDataMaker.py <learnfile> <enInitial> <enFinal> <enStep> \n')
 
 #************************************
 ''' Main initialization routine '''
