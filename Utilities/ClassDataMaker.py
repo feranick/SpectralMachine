@@ -5,7 +5,7 @@
 *
 * ClassDataMaker
 * Adds spectra to single file for classification
-* version: 20170306c
+* version: 20170309a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -32,17 +32,21 @@ def main():
 ''' Open and process inividual files '''
 #**********************************************
 def processMultiFile(leearnFile):
-    index = 0
+    index = 1
+    success = False
     learnFileRoot = os.path.splitext(learnFile)[0]
     summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S\n')))
     for f in glob.glob('*.txt'):
         if (f != learnFile):
-            makeFile(f, learnFile, index)
-            index = index + 1
+            success = makeFile(f, learnFile, index)
             with open(summary_filename, "a") as sum_file:
-                sum_file.write(str(index) + '\t' + f +'\n')
+                if success == True:
+                    sum_file.write(str(index) + '\t\t' + f +'\n')
+                else:
+                    sum_file.write(str(index) + '\tNO\t' + f +'\n')
+            index = index + 1
 
 #**********************************************
 ''' Add data to Training file '''
@@ -53,13 +57,13 @@ def makeFile(sampleFile, learnFile, param):
             En = np.loadtxt(f, unpack = True, skiprows = 10, usecols=range(0,1))
             if(En.size == 0):
                 print('\n Empty file \n' )
-                return
+                return False
         with open(sampleFile, 'r') as f:
             R = np.loadtxt(f, unpack = True, usecols=range(1,2))
         print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
     except:
         print('\033[1m' + ' Sample data file not found \n' + '\033[0m')
-        return
+        return False
 
     if os.path.exists(learnFile):
         with open(learnFile, 'r') as f:
@@ -81,6 +85,8 @@ def makeFile(sampleFile, learnFile, param):
 
     with open(learnFile, 'ab') as f:
         np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
+
+    return True
 
 #************************************
 ''' Lists the program usage '''
