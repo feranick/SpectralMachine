@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170309f
+* version: 20170309g
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -394,7 +394,8 @@ def TrainTF(learnFile, numRuns):
     A_temp = A
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('Training started: %Y-%m-%d %H:%M:%S\n')))
-        sum_file.write(' Using Noise scrambler (offset: ' + str(preprocDef.scrambleNoiseOffset) + ')\n\n')
+        if preprocDef.scrambleNoiseFlag == True:
+            sum_file.write(' Using Noise scrambler (offset: ' + str(preprocDef.scrambleNoiseOffset) + ')\n\n')
         sum_file.write('Iteration\tAccuracy %\n')
 
     if preprocDef.scrambleNoiseFlag == False:
