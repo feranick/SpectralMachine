@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170309a
+* version: 20170309b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -852,15 +852,17 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
             else:
                 print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
-            if normToMax == True:
-                YnormXind = np.where(A[i] == np.amax(A[i]))[0].tolist()
-            Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
-            A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
+            if(np.amax(A[i]) > 0):
+                if normToMax == True:
+                    YnormXind = np.where(A[i] == np.amax(A[i]))[0].tolist()
+                A[i,:] = np.multiply(A[i,:], YnormTo/np.amax(A[i]))
+            else:
+                print(' \n Spectra max below zero detected')
 
-        if normToMax == True:
+        if(np.amax(R) > 0):
+            if normToMax == True:
                YnormXind = np.where(R[0] == np.amax(R[0]))[0].tolist()
-        Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
-        R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
+            R[0,:] = np.multiply(R[0,:], YnormTo/np.amax(R))
 
     if preProcess == True & preprocDef.StandardScalerFlag == True:
         print('\n Using StandardScaler from sklearn \n')
@@ -890,10 +892,10 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
     else:
         if type == 0:
             if(cherryPickEnPoint == True):
-                print( ' Using selected spectral points:')
+                print( '\n Using selected spectral points:')
                 print(En)
             else:
-                print( ' Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+                print( '\n Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
 
     return A, Cl, En, R, Aorig, Rorig
 
