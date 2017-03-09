@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170309d
+* version: 20170309e
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -167,11 +167,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+                    #except:
+                    #usage()
+                    #sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -179,11 +179,11 @@ def main():
             else:
                 numRuns = 1
             preprocDef.scrambleNoiseFlag = False
-            try:
-                TrainTF(sys.argv[2], int(numRuns))
-            except:
-                usage()
-                sys.exit(2)
+                #try:
+            TrainTF(sys.argv[2], int(numRuns))
+                #except:
+                #usage()
+                #sys.exit(2)
 
         if o in ("-m" , "--map"):
             try:
@@ -270,26 +270,27 @@ def LearnPredictBatch(learnFile):
     makeHeaderSummary(summary_filename, learnFile)
     ''' Open and process training data '''
     En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
+    
     if multiproc == True:
         from multiprocessing import Pool
         import multiprocessing as mp
         p = mp.Pool()
         for f in glob.glob('*.txt'):
             if (f != learnFile):
-                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile))
+                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, Aorig, YnormXind, summary_filename, learnFile))
         p.close()
         p.join()
     else:
         for f in glob.glob('*.txt'):
             if (f != learnFile):
-                processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile)
+                processSingleBatch(f, En, Cl, A, Amax, Aorig, YnormXind, summary_filename, learnFile)
 
-def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFile):
+def processSingleBatch(f, En, Cl, A, Amax, Aorig, YnormXind, summary_filename, learnFile):
     print(' Processing file: \033[1m' + f + '\033[0m\n')
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
-    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
     R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
 
     learnFileRoot = os.path.splitext(learnFile)[0]
@@ -337,9 +338,9 @@ def LearnPredictMap(learnFile, mapFile):
     type = 0
     i = 0;
     svmPred = nnPred = tfPred = kmPred = np.empty([X.shape[0]])
+    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, type)
     print(' Processing map...' )
     for r in R[:]:
-        A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, type)
         r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, Amax, YnormXind, type)
         type = 1
 
