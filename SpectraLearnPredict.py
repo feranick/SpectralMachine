@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170309b
+* version: 20170309c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -867,8 +867,9 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
     if preProcess == True & preprocDef.StandardScalerFlag == True:
         print('\n Using StandardScaler from sklearn')
         from sklearn.preprocessing import StandardScaler
-        scaler = StandardScaler().fit(A)
-        A = scaler.transform(A)
+        scaler = StandardScaler()
+        print('changed scaler')
+        A = scaler.fit_transform(A)
         R = scaler.transform(R)
 
     #**********************************************
