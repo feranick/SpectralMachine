@@ -865,7 +865,7 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
             R[0,:] = np.multiply(R[0,:], YnormTo/np.amax(R))
 
     if preProcess == True & preprocDef.StandardScalerFlag == True:
-        print('\n Using StandardScaler from sklearn \n')
+        print('\n Using StandardScaler from sklearn')
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler().fit(A)
         A = scaler.transform(A)
