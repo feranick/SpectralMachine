@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170309c
+* version: 20170309d
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -47,6 +47,10 @@ class preprocDef:
     scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
     scrambleNoiseOffset = 0.1
     StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
+
+    if StandardScalerFlag ==True:
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler()
 
 #**********************************************
 ''' Calculation by limited number of points '''
@@ -234,7 +238,8 @@ def LearnPredictFile(learnFile, sampleFile):
     R, Rx = readPredFile(sampleFile)
 
     ''' Preprocess prediction data '''
-    A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
+    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
 
     ''' Run Support Vector Machines '''
     if runSVM == True:
@@ -284,7 +289,8 @@ def processSingleBatch(f, En, Cl, A, Amax, YnormXind, summary_filename, learnFil
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
-    A, Cl, En, R, Aorig, Rorig = preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
+    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
 
     learnFileRoot = os.path.splitext(learnFile)[0]
 
@@ -333,7 +339,8 @@ def LearnPredictMap(learnFile, mapFile):
     svmPred = nnPred = tfPred = kmPred = np.empty([X.shape[0]])
     print(' Processing map...' )
     for r in R[:]:
-        A, Cl, En, r, Aorig, rorig = preProcessNormData(r, Rx, A, En, Cl, Amax, YnormXind, type)
+        A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, type)
+        r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, Amax, YnormXind, type)
         type = 1
 
         ''' Run Support Vector Machines '''
@@ -389,10 +396,15 @@ def TrainTF(learnFile, numRuns):
         sum_file.write(' Using Noise scrambler (offset: ' + str(preprocDef.scrambleNoiseOffset) + ')\n\n')
         sum_file.write('Iteration\tAccuracy %\n')
 
+    if preprocDef.scrambleNoiseFlag == False:
+        A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
+
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
         ''' Preprocess prediction data '''
-        A_temp, Cl_temp, En_temp, R_temp, Aorig, Rorig = preProcessNormData(A[random.randint(0,A.shape[0]-1),:], En, A, En, Cl, Amax, YnormXind, 0)
+        if preprocDef.scrambleNoiseFlag == True:
+            A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
+        R_temp = preProcessNormPredData(A[random.randint(0,A.shape[0]-1),:], En, A_temp, En_temp, Cl_temp, Amax, YnormXind, 0)
         print(' Using random spectra from training dataset as evaluation file ')
         tfPred, tfProb, tfAccur = runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
 
@@ -824,23 +836,17 @@ def readPredFile(sampleFile):
     return R, Rx
 
 #**********************************************************************************
-''' Preprocess prediction data '''
+''' Preprocess Learning data '''
 #**********************************************************************************
-def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
+def preProcessNormLearningData(A, En, Cl, Amax, YnormXind, type):
+    print(' Processing Training data file... ')
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
     #**********************************************************************************
-    if(R.shape[0] != A.shape[1]):
-        if type == 0:
-            print('\033[1m' + '\n WARNING: Different number of datapoints for the x-axis\n for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
-        R = np.interp(En, Rx, R)
-    R = R.reshape(1,-1)
-
     if preprocDef.scrambleNoiseFlag == True:
         print(' Adding random noise to training set \n')
         scrambleNoise(A, preprocDef.scrambleNoiseOffset)
     Aorig = np.copy(A)
-    Rorig = np.copy(R)
 
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
@@ -848,29 +854,20 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
     if Ynorm == True:
         if type == 0:
             if normToMax == False:
-                print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
+                print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
             else:
-                print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
+                print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
             if(np.amax(A[i]) > 0):
                 if normToMax == True:
                     YnormXind = np.where(A[i] == np.amax(A[i]))[0].tolist()
                 A[i,:] = np.multiply(A[i,:], YnormTo/np.amax(A[i]))
             else:
-                print(' \n Spectra max below zero detected')
-
-        if(np.amax(R) > 0):
-            if normToMax == True:
-               YnormXind = np.where(R[0] == np.amax(R[0]))[0].tolist()
-            R[0,:] = np.multiply(R[0,:], YnormTo/np.amax(R))
+                print('  Spectra max below zero detected')
 
     if preProcess == True & preprocDef.StandardScalerFlag == True:
-        print('\n Using StandardScaler from sklearn')
-        from sklearn.preprocessing import StandardScaler
-        scaler = StandardScaler()
-        print('changed scaler')
-        A = scaler.fit_transform(A)
-        R = scaler.transform(R)
+        print('  Using StandardScaler from sklearn ')
+        A = preprocDef.scaler.fit_transform(A)
 
     #**********************************************
     ''' Select subset of training data for cross validation '''
@@ -884,22 +881,72 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
     if enRestrictRegion == True:
         A = A[:,range(enLim1, enLim2)]
         En = En[range(enLim1, enLim2)]
-        R = R[:,range(enLim1, enLim2)]
         Aorig = Aorig[:,range(enLim1, enLim2)]
-        Rorig = Rorig[:,range(enLim1, enLim2)]
 
         if type == 0:
-            print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+            print( '  Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
         if type == 0:
             if(cherryPickEnPoint == True):
-                print( '\n Using selected spectral points:')
+                print( '  Using selected spectral points:')
                 print(En)
             else:
-                print( '\n Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+                print( '  Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
 
-    return A, Cl, En, R, Aorig, Rorig
+    return A, Cl, En, Aorig
 
+#**********************************************************************************
+''' Preprocess Prediction data '''
+#**********************************************************************************
+def preProcessNormPredData(R, Rx, A, En, Cl, Amax, YnormXind, type):
+    print(' Processing Prediction data file... ')
+    #**********************************************************************************
+    ''' Reformat x-axis in case it does not match that of the training data '''
+    #**********************************************************************************
+    if(R.shape[0] != A.shape[1]):
+        if type == 0:
+            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
+        R = np.interp(En, Rx, R)
+    R = R.reshape(1,-1)
+    Rorig = np.copy(R)
+
+    #**********************************************
+    ''' Normalize/preprocess if flags are set '''
+    #**********************************************
+    if Ynorm == True:
+        if type == 0:
+            if normToMax == False:
+                print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
+            else:
+                print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
+    
+        if(np.amax(R) > 0):
+            if normToMax == True:
+                YnormXind = np.where(R[0] == np.amax(R[0]))[0].tolist()
+            R[0,:] = np.multiply(R[0,:], YnormTo/np.amax(R))
+
+    if preProcess == True & preprocDef.StandardScalerFlag == True:
+        print('  Using StandardScaler from sklearn ')
+        R = preprocDef.scaler.transform(R)
+    
+    #**********************************************
+    ''' Energy normalization range '''
+    #**********************************************
+    if enRestrictRegion == True:
+        A = A[:,range(enLim1, enLim2)]
+        En = En[range(enLim1, enLim2)]
+        R = R[:,range(enLim1, enLim2)]
+        
+        if type == 0:
+            print( '  Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+    else:
+        if type == 0:
+            if(cherryPickEnPoint == True):
+                print( '  Using selected spectral points:')
+                print(En)
+            else:
+                print( '  Using full energy range: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
+    return R, Rorig
 
 #**********************************************************************************
 ''' Preprocess prediction data '''
