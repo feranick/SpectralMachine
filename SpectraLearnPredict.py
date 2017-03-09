@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170307a
+* version: 20170309a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -46,6 +46,7 @@ enLim2 = 550    # for now use indexes rather than actual Energy
 class preprocDef:
     scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
     scrambleNoiseOffset = 0.1
+    StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
 
 #**********************************************
 ''' Calculation by limited number of points '''
@@ -861,7 +862,8 @@ def preProcessNormData(R, Rx, A, En, Cl, Amax, YnormXind, type):
         Rmax = R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]]
         R[0,:] = np.multiply(R[0,:], YnormTo/Rmax)
 
-    if preProcess == True:
+    if preProcess == True & preprocDef.StandardScalerFlag == True:
+        print('\n Using StandardScaler from sklearn \n')
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler().fit(A)
         A = scaler.transform(A)
