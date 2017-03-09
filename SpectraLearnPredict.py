@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170309e
+* version: 20170309f
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -167,11 +167,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-                    #except:
-                    #usage()
-                    #sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -179,11 +179,11 @@ def main():
             else:
                 numRuns = 1
             preprocDef.scrambleNoiseFlag = False
-                #try:
-            TrainTF(sys.argv[2], int(numRuns))
-                #except:
-                #usage()
-                #sys.exit(2)
+            try:
+                TrainTF(sys.argv[2], int(numRuns))
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-m" , "--map"):
             try:
@@ -226,7 +226,7 @@ def main():
 #**********************************************
 def LearnPredictFile(learnFile, sampleFile):
     ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    En, Cl, A, YnormXind = readLearnFile(learnFile)
 
     learnFileRoot = os.path.splitext(learnFile)[0]
 
@@ -238,8 +238,8 @@ def LearnPredictFile(learnFile, sampleFile):
     R, Rx = readPredFile(sampleFile)
 
     ''' Preprocess prediction data '''
-    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
-    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
+    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
 
     ''' Run Support Vector Machines '''
     if runSVM == True:
@@ -269,8 +269,8 @@ def LearnPredictBatch(learnFile):
     summary_filename = 'summary' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
     makeHeaderSummary(summary_filename, learnFile)
     ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
-    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
+    En, Cl, A, YnormXind = readLearnFile(learnFile)
+    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
     
     if multiproc == True:
         from multiprocessing import Pool
@@ -278,20 +278,20 @@ def LearnPredictBatch(learnFile):
         p = mp.Pool()
         for f in glob.glob('*.txt'):
             if (f != learnFile):
-                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Amax, Aorig, YnormXind, summary_filename, learnFile))
+                p.apply_async(processSingleBatch, args=(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFile))
         p.close()
         p.join()
     else:
         for f in glob.glob('*.txt'):
             if (f != learnFile):
-                processSingleBatch(f, En, Cl, A, Amax, Aorig, YnormXind, summary_filename, learnFile)
+                processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFile)
 
-def processSingleBatch(f, En, Cl, A, Amax, Aorig, YnormXind, summary_filename, learnFile):
+def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFile):
     print(' Processing file: \033[1m' + f + '\033[0m\n')
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
-    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, Amax, YnormXind, 0)
+    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
 
     learnFileRoot = os.path.splitext(learnFile)[0]
 
@@ -329,7 +329,7 @@ def processSingleBatch(f, En, Cl, A, Amax, Aorig, YnormXind, summary_filename, l
 #**********************************************
 def LearnPredictMap(learnFile, mapFile):
     ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    En, Cl, A, YnormXind = readLearnFile(learnFile)
 
     learnFileRoot = os.path.splitext(learnFile)[0]
 
@@ -338,10 +338,10 @@ def LearnPredictMap(learnFile, mapFile):
     type = 0
     i = 0;
     svmPred = nnPred = tfPred = kmPred = np.empty([X.shape[0]])
-    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, type)
+    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, type)
     print(' Processing map...' )
     for r in R[:]:
-        r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, Amax, YnormXind, type)
+        r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
         type = 1
 
         ''' Run Support Vector Machines '''
@@ -388,7 +388,7 @@ def TrainTF(learnFile, numRuns):
     tfDef.tfAlwaysImprove = True
 
     ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    En, Cl, A, YnormXind = readLearnFile(learnFile)
     En_temp = En
     Cl_temp = Cl
     A_temp = A
@@ -398,14 +398,14 @@ def TrainTF(learnFile, numRuns):
         sum_file.write('Iteration\tAccuracy %\n')
 
     if preprocDef.scrambleNoiseFlag == False:
-        A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
+        A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
 
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
         ''' Preprocess prediction data '''
         if preprocDef.scrambleNoiseFlag == True:
-            A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, Amax, YnormXind, 0)
-        R_temp = preProcessNormPredData(A[random.randint(0,A.shape[0]-1),:], En, A_temp, En_temp, Cl_temp, Amax, YnormXind, 0)
+            A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
+        R_temp = preProcessNormPredData(A[random.randint(0,A.shape[0]-1),:], En, A_temp, En_temp, Cl_temp, YnormXind, 0)
         print(' Using random spectra from training dataset as evaluation file ')
         tfPred, tfProb, tfAccur = runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
 
@@ -627,7 +627,7 @@ def runPCA(learnFile, numPCAcomponents):
     from matplotlib import cm
 
     ''' Open and process training data '''
-    En, Cl, A, Amax, YnormXind = readLearnFile(learnFile)
+    En, Cl, A, YnormXind = readLearnFile(learnFile)
 
     print(' Running PCA...\n')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
@@ -801,11 +801,10 @@ def readLearnFile(learnFile):
         YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
     else:
         YnormXind = np.where(En>0)[0].tolist()
-    Amax = np.empty([A.shape[0],1])
 
     print(' Number of datapoints = ' + str(A.shape[0]))
     print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
-    return En, Cl, A, Amax, YnormXind
+    return En, Cl, A, YnormXind
 
 #**********************************************
 ''' Open prediction file '''
@@ -839,7 +838,7 @@ def readPredFile(sampleFile):
 #**********************************************************************************
 ''' Preprocess Learning data '''
 #**********************************************************************************
-def preProcessNormLearningData(A, En, Cl, Amax, YnormXind, type):
+def preProcessNormLearningData(A, En, Cl, YnormXind, type):
     print(' Processing Training data file... ')
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
@@ -899,7 +898,7 @@ def preProcessNormLearningData(A, En, Cl, Amax, YnormXind, type):
 #**********************************************************************************
 ''' Preprocess Prediction data '''
 #**********************************************************************************
-def preProcessNormPredData(R, Rx, A, En, Cl, Amax, YnormXind, type):
+def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
     print(' Processing Prediction data file... ')
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
@@ -962,8 +961,6 @@ def preProcessNormMap(A, En, type):
         YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
     else:
         YnormXind = np.where(En>0)[0].tolist()
-
-    Amax = np.empty([A.shape[0],1])
     Aorig = np.copy(A)
 
     #**********************************************
@@ -973,8 +970,7 @@ def preProcessNormMap(A, En, type):
         if type == 0:
             print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
         for i in range(0,A.shape[0]):
-            Amax[i] = A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]]
-            A[i,:] = np.multiply(A[i,:], YnormTo/Amax[i])
+            A[i,:] = np.multiply(A[i,:], YnormTo/np.amax(A[i]))
 
 
     if preProcess == True:
