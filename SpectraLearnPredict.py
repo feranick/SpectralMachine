@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170310b
+* version: 20170310c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -30,13 +30,11 @@ import random
 ''' Spectra normalization, preprocessing '''
 #**********************************************
 Ynorm = True   # Normalize spectra (True: recommended)
-normToMax = False  # True: norm to the max intensity point for any spectra; False, max at specified YnormX (default)
+fullYnorm = False  # Normalize considering full range (False: recommended)
 
 YnormTo = 1
 YnormX = 1600
 YnormXdelta = 30
-
-fullYnorm = False  # Normalize full spectra (False: recommended)
 
 enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
@@ -167,11 +165,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -859,15 +857,13 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
     #**********************************************
     if Ynorm == True:
         if type == 0:
-            if normToMax == False:
+            if fullYnorm == False:
                 print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
             else:
                 print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
             if(np.amax(A[i]) > 0):
-                if normToMax == True:
-                    YnormXind = np.where(A[i] == np.amax(A[i]))[0].tolist()
-                A[i,:] = np.multiply(A[i,:], YnormTo/np.amax(A[i]))
+                A[i,:] = np.multiply(A[i,:], YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
             else:
                 print('  Spectra max below zero detected')
 
@@ -921,15 +917,15 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
     #**********************************************
     if Ynorm == True:
         if type == 0:
-            if normToMax == False:
+            if fullYnorm == False:
                 print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
             else:
                 print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
     
         if(np.amax(R) > 0):
-            if normToMax == True:
-                YnormXind = np.where(R[0] == np.amax(R[0]))[0].tolist()
-            R[0,:] = np.multiply(R[0,:], YnormTo/np.amax(R))
+            R[0,:] = np.multiply(R[0,:], YnormTo/R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]])
+        else:
+            print('  Spectra max below zero detected')
 
     if preprocDef.StandardScalerFlag == True:
         print('  Using StandardScaler from sklearn ')
