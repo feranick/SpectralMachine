@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170309i
+* version: 20170309j
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -46,6 +46,7 @@ def main():
 def processMultiFile(learnFile, enInit, enFin, enStep):
     index = 1
     success = False
+    size = 0
     learnFileRoot = os.path.splitext(learnFile)[0]
     summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
     with open(summary_filename, "a") as sum_file:
@@ -57,12 +58,12 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
             with open(summary_filename, "a") as sum_file:
                 if success == True:
                     sum_file.write(str(index) + '\t\t' + f +'\n')
+                    size = size + 1
                 else:
                     sum_file.write(str(index) + '\tNO\t' + f +'\n')
             index = index + 1
     print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
 
-    size = index - 1
     Cl2 = np.zeros((size, size))
     for i in range(size):
         np.put(Cl2[i], i, 1)
