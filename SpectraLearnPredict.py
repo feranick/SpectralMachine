@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170309h
+* version: 20170310a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -47,6 +47,7 @@ class preprocDef:
     scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
     scrambleNoiseOffset = 0.1
     StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
+    linearFormatClass = False  # if true, create FormatClass for TF on the spot (don't rely on saved file)
 
     if StandardScalerFlag ==True:
         from sklearn.preprocessing import StandardScaler
@@ -75,7 +76,7 @@ percentCrossValid = 0.05
 #**********************************************
 ''' Support Vector Classification'''
 #**********************************************
-runSVM = True
+runSVM = False
 svmClassReport = False
 
 class svmDef:
@@ -93,7 +94,7 @@ showClasses = False
 #**********************************************
 ''' Neural Networks'''
 #**********************************************
-runNN = True
+runNN = False
 nnClassReport = False
 
 class nnDef:
@@ -521,6 +522,14 @@ def runNNmain(A, Cl, R, Root):
 ''' Format vectors of unique labels '''
 #********************************************************************************
 def formatClass(formatClassfile, Cl):
+    if preprocDef.linearFormatClass == True:
+        print('\n Creating TensorFlow format class data...')
+        size = np.unique(Cl).shape[0]
+        Cl2 = np.zeros((size, size))
+        for i in range(size):
+            np.put(Cl2[i], i, 1)
+        return Cl2
+
     try:
         with open(formatClassfile) as f:
             print('\n Opening TensorFlow format class data...')
@@ -536,7 +545,6 @@ def formatClass(formatClassfile, Cl):
                     Cl2[i,j] = 1
         np.savetxt(formatClassfile, Cl2, delimiter=' ', fmt='%d')
     return Cl2
-
 
 #********************************************************************************
 ''' Run model training and evaluation via TensorFlow '''
@@ -904,7 +912,7 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
     #**********************************************************************************
     if(R.shape[0] != A.shape[1]):
         if type == 0:
-            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n Reformatting x-axis of sample data...\n' + '\033[0m')
+            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
     Rorig = np.copy(R)
