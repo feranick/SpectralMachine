@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170309a
+* version: 20170309h
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -21,6 +21,10 @@ from datetime import datetime, date
 #**********************************************
 ''' main '''
 #**********************************************
+
+class defParam:
+    saveFormatClass = False
+
 def main():
     if len(sys.argv) < 5:
         enInit = 100
@@ -46,6 +50,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
     summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S\n')))
+    
     for f in glob.glob('*.txt'):
         if (f != learnFile):
             success = makeFile(f, learnFile, index, enInit, enFin, enStep)
@@ -56,6 +61,16 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
                     sum_file.write(str(index) + '\tNO\t' + f +'\n')
             index = index + 1
     print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
+
+    Cl2 = np.zeros((index, index))
+    for i in range(index):
+        np.put(Cl2[i], i, 1)
+
+    if saveFormatClass == True:
+        tfclass_filename = learnFileRoot + '.tfclass'
+        print(' Saving class file...\n')
+        with open(tfclass_filename, 'ab') as f:
+            np.savetxt(f, Cl2, delimiter='\t', fmt='%10.6f')
 
 #**********************************************
 ''' Add data to Training file '''
