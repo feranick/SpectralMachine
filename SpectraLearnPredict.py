@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170310a
+* version: 20170310b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -37,7 +37,6 @@ YnormX = 1600
 YnormXdelta = 30
 
 fullYnorm = False  # Normalize full spectra (False: recommended)
-preProcess = True  # True recommended
 
 enRestrictRegion = False
 enLim1 = 450    # for now use indexes rather than actual Energy
@@ -872,7 +871,7 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
             else:
                 print('  Spectra max below zero detected')
 
-    if preProcess == True & preprocDef.StandardScalerFlag == True:
+    if preprocDef.StandardScalerFlag == True:
         print('  Using StandardScaler from sklearn ')
         A = preprocDef.scaler.fit_transform(A)
 
@@ -932,7 +931,7 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
                 YnormXind = np.where(R[0] == np.amax(R[0]))[0].tolist()
             R[0,:] = np.multiply(R[0,:], YnormTo/np.amax(R))
 
-    if preProcess == True & preprocDef.StandardScalerFlag == True:
+    if preprocDef.StandardScalerFlag == True:
         print('  Using StandardScaler from sklearn ')
         R = preprocDef.scaler.transform(R)
     
@@ -980,10 +979,9 @@ def preProcessNormMap(A, En, type):
             A[i,:] = np.multiply(A[i,:], YnormTo/np.amax(A[i]))
 
 
-    if preProcess == True:
-        from sklearn.preprocessing import StandardScaler
-        scaler = StandardScaler().fit(A)
-        A = scaler.transform(A)
+    if preprocDef.StandardScalerFlag == True:
+        print('  Using StandardScaler from sklearn ')
+        A = preprocDef.scaler.fit_transform(A)
 
     #**********************************************
     ''' Energy normalization range '''
