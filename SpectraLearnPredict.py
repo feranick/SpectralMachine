@@ -534,8 +534,6 @@ def formatClass(formatClassfile, Cl):
             for j in range(np.unique(Cl).shape[0]):
                 if np.array(Cl)[i] == np.unique(Cl)[j]:
                     Cl2[i,j] = 1
-                else:
-                    Cl2[i,j] = 0
         np.savetxt(formatClassfile, Cl2, delimiter=' ', fmt='%d')
     return Cl2
 
