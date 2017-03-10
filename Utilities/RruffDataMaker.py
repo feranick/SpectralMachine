@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170309h
+* version: 20170309i
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -23,7 +23,7 @@ from datetime import datetime, date
 #**********************************************
 
 class defParam:
-    saveFormatClass = False
+    saveFormatClass = True
 
 def main():
     if len(sys.argv) < 5:
@@ -62,11 +62,12 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
             index = index + 1
     print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
 
-    Cl2 = np.zeros((index, index))
-    for i in range(index):
+    size = index - 1
+    Cl2 = np.zeros((size, size))
+    for i in range(size):
         np.put(Cl2[i], i, 1)
 
-    if saveFormatClass == True:
+    if defParam.saveFormatClass == True:
         tfclass_filename = learnFileRoot + '.tfclass'
         print(' Saving class file...\n')
         with open(tfclass_filename, 'ab') as f:
