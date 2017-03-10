@@ -76,7 +76,7 @@ percentCrossValid = 0.05
 #**********************************************
 ''' Support Vector Classification'''
 #**********************************************
-runSVM = False
+runSVM = True
 svmClassReport = False
 
 class svmDef:
@@ -94,7 +94,7 @@ showClasses = False
 #**********************************************
 ''' Neural Networks'''
 #**********************************************
-runNN = False
+runNN = True
 nnClassReport = False
 
 class nnDef:
