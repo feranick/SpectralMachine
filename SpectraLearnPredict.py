@@ -405,7 +405,7 @@ def TrainTF(learnFile, numRuns):
         A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
         ''' Plot Training Data '''
         if plotDef.showTrainingDataPlot == True:
-            plotTrainData(A, En, A[random.randint(0,A.shape[0]-1),:], plotDef.plotAllSpectra)
+            plotTrainData(A, En, A[random.randint(0,A.shape[0]-1)].reshape(1,-1), plotDef.plotAllSpectra)
 
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
