@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170310c
+* version: 20170313a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -46,7 +46,7 @@ class preprocDef:
     StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
     linearFormatClass = False  # if true, create FormatClass for TF on the spot (don't rely on saved file)
 
-    if StandardScalerFlag ==True:
+    if StandardScalerFlag == True:
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
 
@@ -140,9 +140,14 @@ class kmDef:
 #**********************************************
 ''' Plotting '''
 #**********************************************
-showProbPlot = False
-showTrainingDataPlot = False
-showPCAPlots = True
+class plotDef:
+    showProbPlot = False
+    showPCAPlots = True
+    showTrainingDataPlot = False
+    plotAllSpectra = True  # Set to false for extremely large training sets
+    
+    if plotAllSpectra == False:
+        stepSpectraPlot = 100  # steps in the number of spectra to be plotted
 
 #**********************************************
 ''' Multiprocessing '''
@@ -165,11 +170,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -252,8 +257,8 @@ def LearnPredictFile(learnFile, sampleFile):
         runTensorFlow(A,Cl,R, learnFileRoot)
 
     ''' Plot Training Data '''
-    if showTrainingDataPlot == True:
-        plotTrainData(A, En, R)
+    if plotDef.showTrainingDataPlot == True:
+        plotTrainData(A, En, R, plotDef.plotAllSpectra)
 
     ''' Run K-Means '''
     if runKM == True:
@@ -398,6 +403,9 @@ def TrainTF(learnFile, numRuns):
 
     if preprocDef.scrambleNoiseFlag == False:
         A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
+        ''' Plot Training Data '''
+        if plotDef.showTrainingDataPlot == True:
+            plotTrainData(A, En, A[random.randint(0,A.shape[0]-1),:], plotDef.plotAllSpectra)
 
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
@@ -459,7 +467,7 @@ def runSVMmain(A, Cl, En, R, Root):
     #*************************
     ''' Plot probabilities '''
     #*************************
-    if showProbPlot == True:
+    if plotDef.showProbPlot == True:
         plotProb(clf, R)
 
     return R_pred[0], round(100*max(prob),1)
@@ -504,7 +512,7 @@ def runNNmain(A, Cl, R, Root):
     #*************************
     ''' Plot probabilities '''
     #*************************
-    if showProbPlot == True:
+    if plotDef.showProbPlot == True:
         plotProb(clf, R)
 
     return clf.predict(R)[0], round(100*max(prob),1)
@@ -647,7 +655,7 @@ def runPCA(learnFile, numPCAcomponents):
         print(' Score PC ' + str(i) + ': ' + '{0:.0f}%'.format(pca.explained_variance_ratio_[i] * 100))
     print('')
 
-    if showPCAPlots == True:
+    if plotDef.showPCAPlots == True:
         print(' Plotting Loadings and score plots... \n')
 
         #***************************
@@ -1070,14 +1078,18 @@ def plotProb(clf, R):
 #************************************
 ''' Plot Training data'''
 #************************************
-def plotTrainData(A, En, R):
+def plotTrainData(A, En, R, plotAllSpectra):
     import matplotlib.pyplot as plt
+    if plotDef.plotAllSpectra == True:
+        step = 1
+    else:
+        step = plotDef.stepSpectraPlot
     print(' Stand by: Plotting each datapoint from the map...\n')
     if Ynorm ==True:
         plt.title("Normalized Training Data")
     else:
         plt.title("Training Data")
-    for i in range(0,A.shape[0]):
+    for i in range(0,A.shape[0], step):
         plt.plot(En, A[i,:], label='Training data')
     plt.plot(En, R[0,:], linewidth = 4, label='Sample data')
     plt.xlabel('Raman shift [1/cm]')
