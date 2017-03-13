@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170313b
+* version: 20170313c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -871,7 +871,7 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
                 print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
             if(np.amin(A[i]) <= 0):
-                print('  Spectra max below zero detected')
+                print('  Spectra #' + str(i) + ' (Class: ' + str(Cl[i]) + '): min below zero detected' )
                 A[i,:] = A[i,:] - np.amin(A[i,:]) + 0.00001
             A[i,:] = np.multiply(A[i,:], YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
 
