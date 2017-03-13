@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170313a
+* version: 20170313b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -870,10 +870,10 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
             else:
                 print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
-            if(np.amax(A[i]) > 0):
-                A[i,:] = np.multiply(A[i,:], YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
-            else:
+            if(np.amin(A[i]) <= 0):
                 print('  Spectra max below zero detected')
+                A[i,:] = A[i,:] - np.amin(A[i,:]) + 0.00001
+            A[i,:] = np.multiply(A[i,:], YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
 
     if preprocDef.StandardScalerFlag == True:
         print('  Using StandardScaler from sklearn ')
@@ -930,10 +930,10 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
             else:
                 print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
     
-        if(np.amax(R) > 0):
-            R[0,:] = np.multiply(R[0,:], YnormTo/R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]])
-        else:
+        if(np.amin(R) <= 0):
             print('  Spectra max below zero detected')
+            R[0,:] = R[0,:] - np.amin(R[0,:]) + 0.00001
+        R[0,:] = np.multiply(R[0,:], YnormTo/R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]])
 
     if preprocDef.StandardScalerFlag == True:
         print('  Using StandardScaler from sklearn ')
