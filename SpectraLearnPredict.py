@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170315b
+* version: 20170315c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -402,25 +402,28 @@ def TrainTF(learnFile, numRuns):
         sum_file.write(str(datetime.now().strftime('Training started: %Y-%m-%d %H:%M:%S\n')))
         if preprocDef.scrambleNoiseFlag == True:
             sum_file.write(' Using Noise scrambler (offset: ' + str(preprocDef.scrambleNoiseOffset) + ')\n\n')
-        sum_file.write('Iteration\tAccuracy %\n')
+        sum_file.write('\nIteration\tAccuracy %\t Prediction\t Probability %\n')
 
     if preprocDef.scrambleNoiseFlag == False:
         A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
         ''' Plot Training Data '''
         if plotDef.showTrainingDataPlot == True:
             plotTrainData(A, En, A[random.randint(0,A.shape[0]-1)].reshape(1,-1), plotDef.plotAllSpectra)
+    
+    index = random.randint(0,A.shape[0]-1)
+    R = A[index,:]
 
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
         ''' Preprocess prediction data '''
         if preprocDef.scrambleNoiseFlag == True:
             A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
-        R_temp, Rorig = preProcessNormPredData(A[random.randint(0,A.shape[0]-1),:], En, A_temp, En_temp, Cl_temp, YnormXind, 0)
+        R_temp, Rorig = preProcessNormPredData(R, En, A_temp, En_temp, Cl_temp, YnormXind, 0)
         print(' Using random spectra from training dataset as evaluation file ')
         tfPred, tfProb, tfAccur = runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
 
         with open(summary_filename, "a") as sum_file:
-            sum_file.write(str(i+1) + '\t{:10.2f}\n'.format(tfAccur))
+            sum_file.write(str(i+1) + '\t{:10.2f}\t'.format(tfAccur) + str(tfPred) + '\t{:10.2f}\n'.format(tfProb))
 
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('\nTraining ended: %Y-%m-%d %H:%M:%S\n')))
