@@ -629,12 +629,13 @@ def runTensorFlow(A, Cl, R, Root):
 
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
-    accur = 100*sess.run(accuracy, feed_dict={x: R, y_: Cl2})
+    #accur = 100*sess.run(accuracy, feed_dict={x: R, y_: Cl2})
+    accur = 100*accuracy.eval(feed_dict={x:R, y_:Cl2})
     
     print(' Accuracy: ' + str(accur) + '%\n')
     sess.close()
     print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
-    return np.unique(Cl)[res2][0], res1[0][res2][0],accur
+    return np.unique(Cl)[res2][0], res1[0][res2][0], accur
 
 
 #********************************************************************************
