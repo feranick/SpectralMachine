@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170315a
+* version: 20170315b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -114,9 +114,9 @@ class tfDef:
     tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
     plotTF = True
 
-    singleIter = True
+    subsetIterLearn = True
     percentTFCrossValid = 0.3
-    trainingIter = 1000
+    trainingIter = 100
 
     decayLearnRate = True
     learnRate = 0.75
@@ -610,7 +610,7 @@ def runTensorFlow(A, Cl, R, Root):
         else:
             print(' Rebuildind TF model...')
 
-        if tfDef.singleIter == True:
+        if tfDef.subsetIterLearn == True:
             print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
             for i in range(tfDef.trainingIter):
                 As, Cl2s = formatSubset(A, Cl2, tfDef.percentTFCrossValid)
