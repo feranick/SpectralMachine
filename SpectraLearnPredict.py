@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170313c
+* version: 20170315a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -117,6 +117,9 @@ class tfDef:
     singleIter = True
     percentTFCrossValid = 0.3
     trainingIter = 1000
+
+    decayLearnRate = True
+    learnRate = 0.75
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -560,7 +563,7 @@ def runTensorFlow(A, Cl, R, Root):
     tfTrainedData = Root + '.tfmodel'
     Cl2 = formatClass(formatClassfile, Cl)
 
-    print(' Initializing TensorFlow...\n')
+    print(' Initializing TensorFlow...')
     tf.reset_default_graph()
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
     W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
@@ -576,7 +579,15 @@ def runTensorFlow(A, Cl, R, Root):
     y = tf.matmul(x,W) + b
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
 
-    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+    if tfDef.decayLearnRate == True:
+        print(' Using decaying learning rate, start at:',tfDef.learnRate, '\n')
+        global_step = tf.Variable(0, trainable=False)
+        starter_learning_rate = tfDef.learnRate
+        learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step, 100000, 0.96, staircase=True)
+        train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
+    else:
+        print(' Using fix learning rate:', tfDef.learnRate, '\n')
+        train_step = tf.train.GradientDescentOptimizer(tfDef.learnRate).minimize(cross_entropy)
 
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
