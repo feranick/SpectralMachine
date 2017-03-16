@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170316a
+* version: 20170316b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -26,21 +26,21 @@ from os import rename
 from datetime import datetime, date
 import random
 
-#**********************************************
-''' Spectra normalization, preprocessing '''
-#**********************************************
-Ynorm = True   # Normalize spectra (True: recommended)
-fullYnorm = False  # Normalize considering full range (False: recommended)
-
-YnormTo = 1
-YnormX = 1600
-YnormXdelta = 30
-
-enRestrictRegion = False
-enLim1 = 450    # for now use indexes rather than actual Energy
-enLim2 = 550    # for now use indexes rather than actual Energy
-
+#***************************************************************
+''' Spectra normalization, preprocessing, model selection  '''
+#***************************************************************
 class preprocDef:
+    Ynorm = True   # Normalize spectra (True: recommended)
+    fullYnorm = False  # Normalize considering full range (False: recommended)
+
+    YnormTo = 1
+    YnormX = 1600
+    YnormXdelta = 30
+
+    enRestrictRegion = False
+    enLim1 = 450    # for now use indexes rather than actual Energy
+    enLim2 = 550    # for now use indexes rather than actual Energy
+    
     scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
     scrambleNoiseOffset = 0.1
 
@@ -50,66 +50,63 @@ class preprocDef:
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
 
-#**********************************************
-''' Calculation by limited number of points '''
-#**********************************************
-cherryPickEnPoint = False  # False recommended
+    #**********************************************
+    ''' Calculation by limited number of points '''
+    #**********************************************
+    cherryPickEnPoint = False  # False recommended
 
-enSel = [1050, 1150, 1220, 1270, 1330, 1410, 1480, 1590, 1620, 1650]
-enSelDelta = [2, 2, 2, 2, 10, 2, 2, 15, 5, 2]
+    enSel = [1050, 1150, 1220, 1270, 1330, 1410, 1480, 1590, 1620, 1650]
+    enSelDelta = [2, 2, 2, 2, 10, 2, 2, 15, 5, 2]
 
-if(cherryPickEnPoint == True):
-    enRestrictRegion = False
-    print(' Calculation by limited number of points: ENABLED ')
-    print(' THIS IS AN EXPERIMENTAL FEATURE \n')
-    print(' Restricted range: DISABLED')
+    if(cherryPickEnPoint == True):
+        enRestrictRegion = False
+        print(' Calculation by limited number of points: ENABLED ')
+        print(' THIS IS AN EXPERIMENTAL FEATURE \n')
+        print(' Restricted range: DISABLED')
 
-#**********************************************
-''' Model selection for training '''
-#**********************************************
-modelSelection = False
-percentCrossValid = 0.05
+    #**********************************************
+    ''' Model selection for training '''
+    #**********************************************
+    modelSelection = False
+    percentCrossValid = 0.05
 
 #**********************************************
 ''' Support Vector Classification'''
 #**********************************************
-runSVM = True
-svmClassReport = False
-
 class svmDef:
+    runSVM = True
     svmAlwaysRetrain = False
     plotSVM = True
+    svmClassReport = False
 
-''' Training algorithm for SVM
-Use either 'linear' or 'rbf'
-('rbf' for large number of features) '''
+    ''' Training algorithm for SVM
+        Use either 'linear' or 'rbf'
+        ('rbf' for large number of features) '''
 
-Cfactor = 20
-kernel = 'rbf'
-showClasses = False
+    Cfactor = 20
+    kernel = 'rbf'
+    showClasses = False
 
 #**********************************************
 ''' Neural Networks'''
 #**********************************************
-runNN = True
-nnClassReport = False
-
 class nnDef:
+    runNN = True
     nnAlwaysRetrain = False
     plotNN = True
+    nnClassReport = False
 
-''' Solver for NN
+    ''' Solver for NN
     lbfgs preferred for small datasets
     (alternatives: 'adam' or 'sgd') '''
-nnSolver = 'lbfgs'
-nnNeurons = 100  #default = 100
+    nnSolver = 'lbfgs'
+    nnNeurons = 100  #default = 100
 
 #**********************************************
 ''' TensorFlow '''
 #**********************************************
-runTF = True
-
 class tfDef:
+    runTF = True
     tfAlwaysRetrain = False
     tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
     plotTF = True
@@ -124,19 +121,18 @@ class tfDef:
 #**********************************************
 ''' Principal component analysis (PCA) '''
 #**********************************************
-runPCA = False
-customNumPCAComp = True
-
-numPCAcomponents = 2
+class pcaDef:
+    runPCA = False
+    customNumPCAComp = True
+    numPCAcomponents = 2
 
 #**********************************************
 ''' K-means '''
 #**********************************************
-runKM = False
-customNumKMComp = False
-numKMcomponents = 20
-
 class kmDef:
+    runKM = False
+    customNumKMComp = False
+    numKMcomponents = 20
     plotKM = True
     plotKMmaps = True
 
@@ -209,7 +205,7 @@ def main():
             if len(sys.argv) > 3:
                 numPCAcomp = int(sys.argv[3])
             else:
-                numPCAcomp = numPCAcomponents
+                numPCAcomp = pcaDef.numPCAcomponents
             try:
                 runPCA(sys.argv[2], numPCAcomp)
             except:
@@ -220,7 +216,7 @@ def main():
             if len(sys.argv) > 3:
                 numKMcomp = int(sys.argv[3])
             else:
-                numKMcomp = numKMcomponents
+                numKMcomp = kmDef.numKMcomponents
             try:
                 KmMap(sys.argv[2], numKMcomp)
             except:
@@ -237,7 +233,7 @@ def LearnPredictFile(learnFile, sampleFile):
     learnFileRoot = os.path.splitext(learnFile)[0]
 
     ''' Run PCA '''
-    if runPCA == True:
+    if pcaDef.runPCA == True:
         runPCAmain(A, Cl, En)
 
     ''' Open prediction file '''
@@ -248,15 +244,15 @@ def LearnPredictFile(learnFile, sampleFile):
     R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
 
     ''' Run Support Vector Machines '''
-    if runSVM == True:
+    if svmDef.runSVM == True:
         runSVMmain(A, Cl, En, R, learnFileRoot)
 
     ''' Run Neural Network '''
-    if runNN == True:
+    if nnDef.runNN == True:
         runNNmain(A, Cl, R, learnFileRoot)
 
     ''' Tensorflow '''
-    if runTF == True:
+    if tfDef.runTF == True:
         runTensorFlow(A,Cl,R, learnFileRoot)
 
     ''' Plot Training Data '''
@@ -264,7 +260,7 @@ def LearnPredictFile(learnFile, sampleFile):
         plotTrainData(A, En, R, plotDef.plotAllSpectra)
 
     ''' Run K-Means '''
-    if runKM == True:
+    if kmDef.runKM == True:
         runKMmain(A, Cl, En, R, Aorig, Rorig)
 
 
@@ -302,25 +298,25 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     learnFileRoot = os.path.splitext(learnFile)[0]
 
     ''' Run Support Vector Machines '''
-    if runSVM == True:
+    if svmDef.runSVM == True:
         svmPred, svmProb = runSVMmain(A, Cl, En, R, learnFileRoot)
         summaryFile.extend([svmPred, svmProb])
         svmDef.svmAlwaysRetrain = False
 
     ''' Run Neural Network '''
-    if runNN == True:
+    if nnDef.runNN == True:
         nnPred, nnProb = runNNmain(A, Cl, R, learnFileRoot)
         summaryFile.extend([nnPred, nnProb])
         nnDef.nnAlwaysRetrain = False
 
     ''' Tensorflow '''
-    if runTF == True:
+    if tfDef.runTF == True:
         tfPred, tfProb, tfAccur = runTensorFlow(A,Cl,R, learnFileRoot)
         summaryFile.extend([tfPred, tfProb, tfAccur])
         tfDef.tfAlwaysRetrain = False
 
     ''' Run K-Means '''
-    if runKM == True:
+    if kmDef.runKM == True:
         kmDef.plotKM = False
         kmPred = runKMmain(A, Cl, En, R, Aorig, Rorig)
         summaryFile.extend([kmPred])
@@ -357,31 +353,31 @@ def LearnPredictMap(learnFile, mapFile):
             svmDef.svmAlwaysRetrain = False
 
         ''' Run Neural Network '''
-        if runNN == True:
+        if nnDef.runNN == True:
             nnPred[i], temp = runNNmain(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
             nnDef.nnAlwaysRetrain = False
 
         ''' Tensorflow '''
-        if runTF == True:
+        if tfDef.runTF == True:
             tfPred[i], temp, temp = runTensorFlow(A,Cl,r, learnFileRoot)
             saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
 
         ''' Run K-Means '''
-        if runKM == True:
+        if kmDef.runKM == True:
             kmDef.plotKM = False
             kmPred[i] = runKMmain(A, Cl, En, r, Aorig, rorig)
             saveMap(mapFile, 'KM', 'HC', kmPred[i], X[i], Y[i], True)
         i+=1
 
-    if svmDef.plotSVM == True and runSVM == True:
+    if svmDef.plotSVM == True and svmDef.runSVM == True:
         plotMaps(X, Y, svmPred, 'SVM')
-    if nnDef.plotNN == True and runNN == True:
+    if nnDef.plotNN == True and nnDef.runNN == True:
         plotMaps(X, Y, nnPred, 'Neural netowrks')
-    if tfDef.plotTF == True and runTF == True:
+    if tfDef.plotTF == True and tfDef.runTF == True:
         plotMaps(X, Y, tfPred, 'TensorFlow')
-    if kmDef.plotKMmaps == True and runKM == True:
+    if kmDef.plotKMmaps == True and kmDef.runKM == True:
         plotMaps(X, Y, kmPred, 'K-Means Prediction')
 
 #********************************************************************************
@@ -437,7 +433,7 @@ def runSVMmain(A, Cl, En, R, Root):
     from sklearn import svm
     from sklearn.externals import joblib
     svmTrainedData = Root + '.svmModel.pkl'
-    print('\n Running Support Vector Machine (kernel: ' + kernel + ')...')
+    print('\n Running Support Vector Machine (kernel: ' + svmDef.kernel + ')...')
     try:
         if svmDef.svmAlwaysRetrain == False:
             with open(svmTrainedData):
@@ -450,12 +446,12 @@ def runSVMmain(A, Cl, En, R, Root):
         ''' Retrain NN data if not available'''
         #**********************************************
         print(' Retraining SVM data...')
-        clf = svm.SVC(C = Cfactor, decision_function_shape = 'ovr', probability=True)
+        clf = svm.SVC(C = svmDef.Cfactor, decision_function_shape = 'ovr', probability=True)
         clf.fit(A,Cl)
         Z= clf.decision_function(A)
         print(' Number of classes = ' + str(Z.shape[1]))
         joblib.dump(clf, svmTrainedData)
-        if showClasses == True:
+        if svmDef.showClasses == True:
             print(' List of classes: ' + str(clf.classes_))
 
     R_pred = clf.predict(R)
@@ -466,7 +462,7 @@ def runSVMmain(A, Cl, En, R, Root):
     #**************************************
     ''' SVM Classification Report '''
     #**************************************
-    if svmClassReport == True:
+    if svmDef.svmClassReport == True:
         print(' SVM Classification Report \n')
         runClassReport(clf, A, Cl)
 
@@ -487,7 +483,7 @@ def runNNmain(A, Cl, R, Root):
     from sklearn.externals import joblib
     nnTrainedData = Root + '.nnModel.pkl'
 
-    print('\n Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnSolver + ')...')
+    print('\n Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnDef.nnSolver + ')...')
     try:
         if nnDef.nnAlwaysRetrain == False:
             with open(nnTrainedData):
@@ -500,7 +496,7 @@ def runNNmain(A, Cl, R, Root):
         ''' Retrain data if not available'''
         #**********************************************
         print(' Retraining NN model...')
-        clf = MLPClassifier(solver=nnSolver, alpha=1e-5, hidden_layer_sizes=(nnNeurons,), random_state=1)
+        clf = MLPClassifier(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.nnNeurons,), random_state=1)
         clf.fit(A, Cl)
         joblib.dump(clf, nnTrainedData)
 
@@ -511,7 +507,7 @@ def runNNmain(A, Cl, R, Root):
     #**************************************
     ''' Neural Networks Classification Report '''
     #**************************************
-    if nnClassReport == True:
+    if nnDef.nnClassReport == True:
         print(' Neural Networks Classification Report\n')
         runClassReport(clf, A, Cl)
 
@@ -639,7 +635,7 @@ def runPCA(learnFile, numPCAcomponents):
 
     print(' Running PCA...\n')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
-    if customNumPCAComp == False:
+    if pcaDef.customNumPCAComp == False:
         numPCAcomp = np.unique(Cl).shape[0]
     else:
         numPCAcomp = numPCAcomponents
@@ -718,10 +714,10 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
     from sklearn.cluster import KMeans
     print('\n Running K-Means...')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
-    if customNumKMComp == False:
+    if kmDef.customNumKMComp == False:
         numKMcomp = np.unique(Cl).shape[0]
     else:
-        numKMcomp = numKMcomponents
+        numKMcomp = kmDef.numKMcomponents
     kmeans = KMeans(n_clusters=numKMcomp, random_state=0).fit(A)
     for i in range(0, numKMcomp):
         print('\n Class: ' + str(i) + '\n  ',end="")
@@ -756,7 +752,7 @@ def KmMap(mapFile, numKMcomp):
     from sklearn.cluster import KMeans
     print(' Running K-Means...')
     print(' Number of classes: ' + str(numKMcomp))
-    kmeans = KMeans(n_clusters=numKMcomponents, random_state=0).fit(R)
+    kmeans = KMeans(n_clusters=kmDef.numKMcomponents, random_state=0).fit(R)
     kmPred = np.empty([R.shape[0]])
 
     for i in range(0, R.shape[0]):
@@ -785,14 +781,14 @@ def readLearnFile(learnFile):
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
     A = np.delete(M,np.s_[0:1],1)
-    Atemp = A[:,range(len(enSel))]
+    Atemp = A[:,range(len(preprocDef.enSel))]
 
-    if cherryPickEnPoint == True and enRestrictRegion == False:
-        enPoints = list(enSel)
-        enRange = list(enSel)
+    if preprocDef.cherryPickEnPoint == True and preprocDef.enRestrictRegion == False:
+        enPoints = list(preprocDef.enSel)
+        enRange = list(preprocDef.enSel)
 
-        for i in range(0, len(enSel)):
-            enRange[i] = np.where((En<float(enSel[i]+enSelDelta[i])) & (En>float(enSel[i]-enSelDelta[i])))[0].tolist()
+        for i in range(0, len(preprocDef.enSel)):
+            enRange[i] = np.where((En<float(preprocDef.enSel[i]+preprocDef.enSelDelta[i])) & (En>float(preprocDef.enSel[i]-preprocDef.enSelDelta[i])))[0].tolist()
 
             for j in range(0, A.shape[0]):
                 Atemp[j,i] = A[j,A[j,enRange[i]].tolist().index(max(A[j, enRange[i]].tolist()))+enRange[i][0]]
@@ -805,10 +801,10 @@ def readLearnFile(learnFile):
             print( ' Cheery picking points in the spectra\n')
 
     # Find index corresponding to energy value to be used for Y normalization
-    if fullYnorm == True:
+    if preprocDef.fullYnorm == True:
         YnormXind = np.where(En>0)[0].tolist()
     else:
-        YnormXind_temp = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
+        YnormXind_temp = np.where((En<float(preprocDef.YnormX+preprocDef.YnormXdelta)) & (En>float(preprocDef.YnormX-preprocDef.YnormXdelta)))[0].tolist()
         if YnormXind_temp == []:
             print( ' Renormalization region out of requested range. Normalizing over full range...\n')
             YnormXind = np.where(En>0)[0].tolist()
@@ -834,12 +830,12 @@ def readPredFile(sampleFile):
     R=Rtot[1,:]
     Rx=Rtot[0,:]
 
-    if cherryPickEnPoint == True and enRestrictRegion == False:
-        Rtemp = R[range(len(enSel))]
-        enPoints = list(enSel)
-        enRange = list(enSel)
-        for i in range(0, len(enSel)):
-            enRange[i] = np.where((Rx<float(enSel[i]+enSelDelta[i])) & (Rx>float(enSel[i]-enSelDelta[i])))[0].tolist()
+    if preprocDef.cherryPickEnPoint == True and preprocDef.enRestrictRegion == False:
+        Rtemp = R[range(len(preprocDef.enSel))]
+        enPoints = list(preprocDef.enSel)
+        enRange = list(preprocDef.enSel)
+        for i in range(0, len(preprocDef.enSel)):
+            enRange[i] = np.where((Rx<float(preprocDef.enSel[i]+preprocDef.enSelDelta[i])) & (Rx>float(preprocDef.enSel[i]-preprocDef.enSelDelta[i])))[0].tolist()
             Rtemp[i] = R[R[enRange[i]].tolist().index(max(R[enRange[i]].tolist()))+enRange[i][0]]
 
             enPoints[i] = int(np.average(enRange[i]))
@@ -864,17 +860,17 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
     #**********************************************
-    if Ynorm == True:
+    if preprocDef.Ynorm == True:
         if type == 0:
-            if fullYnorm == False:
-                print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
+            if preprocDef.fullYnorm == False:
+                print('  Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; En = [' + str(preprocDef.YnormX-preprocDef.YnormXdelta) + ', ' + str(preprocDef.YnormX+preprocDef.YnormXdelta) + ']')
             else:
-                print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
+                print('  Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
             if(np.amin(A[i]) <= 0):
                 #print('  Spectra #' + str(i) + ' (Class: ' + str(Cl[i]) + '): min below zero detected' )
                 A[i,:] = A[i,:] - np.amin(A[i,:]) + 0.00001
-            A[i,:] = np.multiply(A[i,:], YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
+            A[i,:] = np.multiply(A[i,:], preprocDef.YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
 
     if preprocDef.StandardScalerFlag == True:
         print('  Using StandardScaler from sklearn ')
@@ -883,22 +879,22 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
     #**********************************************
     ''' Select subset of training data for cross validation '''
     #**********************************************
-    if modelSelection == True:
-        A, Cl = formatSubset(A, Cl, percentCrossValid)
+    if preprocDef.modelSelection == True:
+        A, Cl = formatSubset(A, Cl, preprocDef.percentCrossValid)
 
     #**********************************************
     ''' Energy normalization range '''
     #**********************************************
-    if enRestrictRegion == True:
-        A = A[:,range(enLim1, enLim2)]
-        En = En[range(enLim1, enLim2)]
-        Aorig = Aorig[:,range(enLim1, enLim2)]
+    if preprocDef.enRestrictRegion == True:
+        A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
+        En = En[range(preprocDef.enLim1, preprocDef.enLim2)]
+        Aorig = Aorig[:,range(preprocDef.enLim1, preprocDef.enLim2)]
 
         if type == 0:
             print( '  Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
         if type == 0:
-            if(cherryPickEnPoint == True):
+            if(preprocDef.cherryPickEnPoint == True):
                 print( '  Using selected spectral points:')
                 print(En)
             else:
@@ -924,17 +920,17 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
     #**********************************************
-    if Ynorm == True:
+    if preprocDef.Ynorm == True:
         if type == 0:
-            if fullYnorm == False:
-                print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
+            if preprocDef.fullYnorm == False:
+                print('  Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; En = [' + str(preprocDef.YnormX-preprocDef.YnormXdelta) + ', ' + str(preprocDef.YnormX+preprocDef.YnormXdelta) + ']')
             else:
-                print('  Normalizing spectral intensity to: ' + str(YnormTo) + '; to max intensity in spectra')
+                print('  Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; to max intensity in spectra')
     
         if(np.amin(R) <= 0):
             print('  Spectra max below zero detected')
             R[0,:] = R[0,:] - np.amin(R[0,:]) + 0.00001
-        R[0,:] = np.multiply(R[0,:], YnormTo/R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]])
+        R[0,:] = np.multiply(R[0,:], preprocDef.YnormTo/R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]])
 
     if preprocDef.StandardScalerFlag == True:
         print('  Using StandardScaler from sklearn ')
@@ -943,16 +939,16 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
     #**********************************************
     ''' Energy normalization range '''
     #**********************************************
-    if enRestrictRegion == True:
-        A = A[:,range(enLim1, enLim2)]
-        En = En[range(enLim1, enLim2)]
-        R = R[:,range(enLim1, enLim2)]
+    if preprocDef.enRestrictRegion == True:
+        A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
+        En = En[range(preprocDef.enLim1, preprocDef.enLim2)]
+        R = R[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         
         if type == 0:
             print( '  Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
         if type == 0:
-            if(cherryPickEnPoint == True):
+            if(preprocDef.cherryPickEnPoint == True):
                 print( '  Using selected spectral points:')
                 print(En)
             else:
@@ -968,8 +964,8 @@ def preProcessNormMap(A, En, type):
     #**********************************************************************************
 
     # Find index corresponding to energy value to be used for Y normalization
-    if fullYnorm == False:
-        YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
+    if preprocDef.fullYnorm == False:
+        YnormXind = np.where((En<float(preprocDef.YnormX+preprocDef.YnormXdelta)) & (En>float(preprocDef.YnormX-preprocDef.YnormXdelta)))[0].tolist()
     else:
         YnormXind = np.where(En>0)[0].tolist()
     Aorig = np.copy(A)
@@ -977,11 +973,11 @@ def preProcessNormMap(A, En, type):
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
     #**********************************************
-    if Ynorm == True:
+    if preprocDef.Ynorm == True:
         if type == 0:
-            print(' Normalizing spectral intensity to: ' + str(YnormTo) + '; En = [' + str(YnormX-YnormXdelta) + ', ' + str(YnormX+YnormXdelta) + ']')
+            print(' Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; En = [' + str(preprocDef.YnormX-preprocDef.YnormXdelta) + ', ' + str(preprocDef.YnormX+preprocDef.YnormXdelta) + ']')
         for i in range(0,A.shape[0]):
-            A[i,:] = np.multiply(A[i,:], YnormTo/np.amax(A[i]))
+            A[i,:] = np.multiply(A[i,:], preprocDef.YnormTo/np.amax(A[i]))
 
 
     if preprocDef.StandardScalerFlag == True:
@@ -991,10 +987,10 @@ def preProcessNormMap(A, En, type):
     #**********************************************
     ''' Energy normalization range '''
     #**********************************************
-    if enRestrictRegion == True:
-        A = A[:,range(enLim1, enLim2)]
-        En = En[range(enLim1, enLim2)]
-        Aorig = Aorig[:,range(enLim1, enLim2)]
+    if preprocDef.enRestrictRegion == True:
+        A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
+        En = En[range(preprocDef.enLim1, preprocDef.enLim2)]
+        Aorig = Aorig[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         if type == 0:
             print( ' Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
@@ -1086,7 +1082,7 @@ def plotTrainData(A, En, R, plotAllSpectra):
     else:
         step = plotDef.stepSpectraPlot
     print(' Stand by: Plotting each datapoint from the map...\n')
-    if Ynorm ==True:
+    if preprocDef.Ynorm ==True:
         plt.title("Normalized Training Data")
     else:
         plt.title("Training Data")
