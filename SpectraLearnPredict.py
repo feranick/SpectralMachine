@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170315d
+* version: 20170315e
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -43,8 +43,8 @@ enLim2 = 550    # for now use indexes rather than actual Energy
 class preprocDef:
     scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
     scrambleNoiseOffset = 0.1
+
     StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
-    linearFormatClass = False  # if true, create FormatClass for TF on the spot (don't rely on saved file)
 
     if StandardScalerFlag == True:
         from sklearn.preprocessing import StandardScaler
@@ -185,11 +185,11 @@ def main():
             else:
                 numRuns = 1
             preprocDef.scrambleNoiseFlag = False
-            try:
-                TrainTF(sys.argv[2], int(numRuns))
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            TrainTF(sys.argv[2], int(numRuns))
+            #except:
+                #usage()
+                #sys.exit(2)
 
         if o in ("-m" , "--map"):
             try:
@@ -533,25 +533,9 @@ def runNNmain(A, Cl, R, Root):
 ''' Format vectors of unique labels '''
 #********************************************************************************
 def formatClass(formatClassfile, Cl):
-    if preprocDef.linearFormatClass == True:
-        print('\n Creating TensorFlow format class data...')
-        size = np.unique(Cl).shape[0]
-        Cl2 = np.zeros((size, size))
-        for i in range(size):
-            np.put(Cl2[i], i, 1)
-        return Cl2
-
-    try:
-        with open(formatClassfile) as f:
-            print('\n Opening TensorFlow format class data...')
-            Cl2 = np.loadtxt(f, unpack =False)
-            if len(Cl2) != len(Cl):
-                raise ValueError(' WARNING: format class has different length')
-    except:
-        print( '\n Formatting training cluster data...')
-        import sklearn.preprocessing as pp
-        Cl2 = pp.LabelBinarizer().fit_transform(Cl)
-        np.savetxt(formatClassfile, Cl2, delimiter=' ', fmt='%d')
+    import sklearn.preprocessing as pp
+    print('\n Creating TensorFlow class data in binary form...')
+    Cl2 = pp.LabelBinarizer().fit_transform(Cl)
     return Cl2
 
 #********************************************************************************
