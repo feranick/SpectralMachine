@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170315e
+* version: 20170316a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -185,11 +185,11 @@ def main():
             else:
                 numRuns = 1
             preprocDef.scrambleNoiseFlag = False
-            #try:
-            TrainTF(sys.argv[2], int(numRuns))
-            #except:
-                #usage()
-                #sys.exit(2)
+            try:
+                TrainTF(sys.argv[2], int(numRuns))
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-m" , "--map"):
             try:
@@ -805,10 +805,15 @@ def readLearnFile(learnFile):
             print( ' Cheery picking points in the spectra\n')
 
     # Find index corresponding to energy value to be used for Y normalization
-    if fullYnorm == False:
-        YnormXind = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
-    else:
+    if fullYnorm == True:
         YnormXind = np.where(En>0)[0].tolist()
+    else:
+        YnormXind_temp = np.where((En<float(YnormX+YnormXdelta)) & (En>float(YnormX-YnormXdelta)))[0].tolist()
+        if YnormXind_temp == []:
+            print( ' Renormalization region out of requested range. Normalizing over full range...\n')
+            YnormXind = np.where(En>0)[0].tolist()
+        else:
+            YnormXind = YnormXind_temp
 
     print(' Number of datapoints = ' + str(A.shape[0]))
     print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
