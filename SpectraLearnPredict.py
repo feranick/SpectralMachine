@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170315c
+* version: 20170315d
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -549,11 +549,8 @@ def formatClass(formatClassfile, Cl):
                 raise ValueError(' WARNING: format class has different length')
     except:
         print( '\n Formatting training cluster data...')
-        Cl2 = np.zeros((np.array(Cl).shape[0], np.unique(Cl).shape[0]))
-        for i in range(np.array(Cl).shape[0]):
-            for j in range(np.unique(Cl).shape[0]):
-                if np.array(Cl)[i] == np.unique(Cl)[j]:
-                    Cl2[i,j] = 1
+        import sklearn.preprocessing as pp
+        Cl2 = pp.LabelBinarizer().fit_transform(Cl)
         np.savetxt(formatClassfile, Cl2, delimiter=' ', fmt='%d')
     return Cl2
 
