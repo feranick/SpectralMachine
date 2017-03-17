@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170317a
+* version: 20170317b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -400,14 +400,14 @@ def TrainTF(learnFile, numRuns):
             sum_file.write(' Using Noise scrambler (offset: ' + str(preprocDef.scrambleNoiseOffset) + ')\n\n')
         sum_file.write('\nIteration\tAccuracy %\t Prediction\t Probability %\n')
 
+    index = random.randint(0,A.shape[0]-1)
+    R = A[index,:]
+
     if preprocDef.scrambleNoiseFlag == False:
         A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
         ''' Plot Training Data '''
         if plotDef.createTrainingDataPlot == True:
-            plotTrainData(A, En, A[random.randint(0,A.shape[0]-1)].reshape(1,-1), plotDef.plotAllSpectra, learnFileRoot)
-    
-    index = random.randint(0,A.shape[0]-1)
-    R = A[index,:]
+            plotTrainData(A, En, R.reshape(1,-1), plotDef.plotAllSpectra, learnFileRoot)
 
     for i in range(numRuns):
         print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
