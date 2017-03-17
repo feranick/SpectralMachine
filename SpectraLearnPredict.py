@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170316b
+* version: 20170317a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -142,6 +142,7 @@ class kmDef:
 class plotDef:
     showProbPlot = False
     showPCAPlots = True
+    createTrainingDataPlot = False
     showTrainingDataPlot = False
     plotAllSpectra = True  # Set to false for extremely large training sets
     
@@ -256,8 +257,8 @@ def LearnPredictFile(learnFile, sampleFile):
         runTensorFlow(A,Cl,R, learnFileRoot)
 
     ''' Plot Training Data '''
-    if plotDef.showTrainingDataPlot == True:
-        plotTrainData(A, En, R, plotDef.plotAllSpectra)
+    if plotDef.createTrainingDataPlot == True:
+        plotTrainData(A, En, R, plotDef.plotAllSpectra, learnFileRoot)
 
     ''' Run K-Means '''
     if kmDef.runKM == True:
@@ -403,8 +404,8 @@ def TrainTF(learnFile, numRuns):
     if preprocDef.scrambleNoiseFlag == False:
         A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
         ''' Plot Training Data '''
-        if plotDef.showTrainingDataPlot == True:
-            plotTrainData(A, En, A[random.randint(0,A.shape[0]-1)].reshape(1,-1), plotDef.plotAllSpectra)
+        if plotDef.createTrainingDataPlot == True:
+            plotTrainData(A, En, A[random.randint(0,A.shape[0]-1)].reshape(1,-1), plotDef.plotAllSpectra, learnFileRoot)
     
     index = random.randint(0,A.shape[0]-1)
     R = A[index,:]
@@ -1075,13 +1076,16 @@ def plotProb(clf, R):
 #************************************
 ''' Plot Training data'''
 #************************************
-def plotTrainData(A, En, R, plotAllSpectra):
+def plotTrainData(A, En, R, plotAllSpectra, learnFileRoot):
     import matplotlib.pyplot as plt
     if plotDef.plotAllSpectra == True:
         step = 1
+        learnFileRoot = learnFileRoot + '_full-set'
     else:
         step = plotDef.stepSpectraPlot
-    print(' Stand by: Plotting each datapoint from the map...\n')
+        learnFileRoot = learnFileRoot + '_partial-' + str(step)
+
+    print(' Plotting Training dataset in: ' + learnFileRoot + '.png\n')
     if preprocDef.Ynorm ==True:
         plt.title("Normalized Training Data")
     else:
@@ -1091,7 +1095,13 @@ def plotTrainData(A, En, R, plotAllSpectra):
     plt.plot(En, R[0,:], linewidth = 4, label='Sample data')
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
-    plt.show()
+
+    plt.savefig(learnFileRoot + '.png', dpi = 160, format = 'png')  # Save plot
+
+    if plotDef.showTrainingDataPlot == True:
+        plt.show()
+
+    plt.close()
 
 
 #************************************
