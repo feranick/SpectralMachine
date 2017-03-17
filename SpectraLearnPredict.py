@@ -32,6 +32,7 @@ import random
 class preprocDef:
     Ynorm = True   # Normalize spectra (True: recommended)
     fullYnorm = False  # Normalize considering full range (False: recommended)
+    StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
 
     YnormTo = 1
     YnormX = 1600
@@ -43,8 +44,6 @@ class preprocDef:
     
     scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
     scrambleNoiseOffset = 0.1
-
-    StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
 
     if StandardScalerFlag == True:
         from sklearn.preprocessing import StandardScaler
