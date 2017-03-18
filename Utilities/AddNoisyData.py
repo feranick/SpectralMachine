@@ -34,7 +34,7 @@ def main():
     print(' Adding', sys.argv[2], 'sets with random noise with offset:', sys.argv[3], '\n')
 
     for j in range(int(sys.argv[2])):
-        newTrain = np.vstack((newTrain, scrambleNoise(M, int(sys.argv[3]))))
+        newTrain = np.vstack((newTrain, scrambleNoise(M, float(sys.argv[3]))))
 
     with open(newFile, 'ab') as f:
         np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
