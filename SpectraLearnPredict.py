@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170317b
+* version: 20170318b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -606,8 +606,8 @@ def runTensorFlow(A, Cl, R, Root):
 
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
-    #accur = 100*sess.run(accuracy, feed_dict={x: R, y_: Cl2})
-    accur = 100*accuracy.eval(feed_dict={x:R, y_:Cl2})
+    #accur = 100*sess.run(accuracy, feed_dict={x: A, y_: Cl2})
+    accur = 100*accuracy.eval(feed_dict={x:A, y_:Cl2})
     
     print(' Accuracy: ' + str(accur) + '%\n')
     sess.close()
