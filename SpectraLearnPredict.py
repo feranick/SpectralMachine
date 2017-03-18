@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170318b
+* version: 20170318c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -572,12 +572,12 @@ def runTensorFlow(A, Cl, R, Root):
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
     saver = tf.train.Saver()
-
+    accur = 0
     try:
         if tfDef.tfAlwaysRetrain == False:
             print(' Opening TF training model from:', tfTrainedData)
             saver.restore(sess, './' + tfTrainedData)
-            print(' Model restored.')
+            print('\n Model restored.')
         else:
             raise ValueError(' Force TF model retraining.')
     except:
@@ -585,33 +585,34 @@ def runTensorFlow(A, Cl, R, Root):
         sess.run(init)
 
         if os.path.isfile(tfTrainedData + '.meta') & tfDef.tfAlwaysImprove == True:
-            print(' Improving TF model...')
+            print('\n Improving TF model...')
             saver.restore(sess, './' + tfTrainedData)
         else:
-            print(' Rebuildind TF model...')
+            print('\n Rebuildind TF model...')
 
         if tfDef.subsetIterLearn == True:
             print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
             for i in range(tfDef.trainingIter):
-                As, Cl2s = formatSubset(A, Cl2, tfDef.percentTFCrossValid)
+                As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, tfDef.percentTFCrossValid)
                 sess.run(train_step, feed_dict={x: As, y_: Cl2s})
+                correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+                accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+                accur = 100*accuracy.eval(feed_dict={x:As_cv, y_:Cl2s_cv})
         else:
                 sess.run(train_step, feed_dict={x: A, y_: Cl2})
+                correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+                accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+                accur = 100*accuracy.eval(feed_dict={x:A, y_:Cl2})
 
         save_path = saver.save(sess, tfTrainedData)
-        print(' Model saved in file: %s' % save_path)
-
-    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        print(' Model saved in file: %s\n' % save_path)
+        print('\033[1m Accuracy: ' + str('{:.3f}'.format(accur)) + '%\n\033[0m')
 
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
-    #accur = 100*sess.run(accuracy, feed_dict={x: A, y_: Cl2})
-    accur = 100*accuracy.eval(feed_dict={x:A, y_:Cl2})
     
-    print(' Accuracy: ' + str(accur) + '%\n')
     sess.close()
-    print('\033[1m' + ' Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
+    print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
     return np.unique(Cl)[res2][0], res1[0][res2][0], accur
 
 
@@ -1007,7 +1008,7 @@ def formatSubset(A, Cl, percent):
     from sklearn.model_selection import train_test_split
     A_train, A_cv, Cl_train, Cl_cv = \
     train_test_split(A, Cl, test_size=percent, random_state=42)
-    return A_train, Cl_train
+    return A_train, Cl_train, A_cv, Cl_cv
 
 
 ####################################################################
