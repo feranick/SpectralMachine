@@ -75,7 +75,7 @@ To recreate, let's start with adding noisy spectra to the training set. For exam
 
 Accuracy is increased to 80.4% with a single training run (100 times 30% of the dataset). 2 iterations increase accuracy to 95.8% and a third increased to 100%. (The same can be achieved by running 30% of the dataset 300 times).
 
-One can optimize/minimize the number of spectra with added noise. Adding only 2 data-sets with noise offset at 0.02 converges the accuracy to about 94.6&. 
+One can optimize/minimize the number of spectra with added noise. Adding only 2 data-sets with noise offset at 0.02 converges the accuracy to about 94.6%. 
 One final word of caution: Increasing the number of statistically independent available spectra for training is highly recommended over adding noisy data. 
 
 
