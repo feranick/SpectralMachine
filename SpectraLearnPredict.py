@@ -881,7 +881,6 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
                 print('  Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
             if(np.amin(A[i]) <= 0):
-                #print('  Spectra #' + str(i) + ' (Class: ' + str(Cl[i]) + '): min below zero detected' )
                 A[i,:] = A[i,:] - np.amin(A[i,:]) + 0.00001
             A[i,:] = np.multiply(A[i,:], preprocDef.YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
 
@@ -1099,9 +1098,9 @@ def plotTrainData(A, En, R, plotAllSpectra, learnFileRoot):
 
     print(' Plotting Training dataset in: ' + learnFileRoot + '.png\n')
     if preprocDef.Ynorm ==True:
-        plt.title("Normalized Training Data")
+        plt.title('Normalized Training Data')
     else:
-        plt.title("Training Data")
+        plt.title('Training Data)
     for i in range(0,A.shape[0], step):
         plt.plot(En, A[i,:], label='Training data')
     plt.plot(En, R[0,:], linewidth = 4, label='Sample data')
