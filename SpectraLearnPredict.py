@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170318c
+* version: 20170320a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -188,11 +188,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-m" , "--map"):
-            try:
-                LearnPredictMap(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictMap(sys.argv[2], sys.argv[3])
+            #except:
+                #usage()
+                #sys.exit(2)
 
         if o in ("-b" , "--batch"):
             try:
@@ -347,7 +347,7 @@ def LearnPredictMap(learnFile, mapFile):
         type = 1
 
         ''' Run Support Vector Machines '''
-        if runSVM == True:
+        if svmDef.runSVM == True:
             svmPred[i], temp = runSVMmain(A, Cl, En, r, learnFileRoot)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
