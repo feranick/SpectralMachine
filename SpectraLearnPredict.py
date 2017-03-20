@@ -275,7 +275,7 @@ def LearnPredictBatch(learnFile):
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
     
     if multiproc == True:
-        import multiprocessing.Pool as mp
+        import multiprocessing as mp
         p = mp.Pool()
         for f in glob.glob('*.txt'):
             if (f != learnFile):
