@@ -1100,7 +1100,7 @@ def plotTrainData(A, En, R, plotAllSpectra, learnFileRoot):
     if preprocDef.Ynorm ==True:
         plt.title('Normalized Training Data')
     else:
-        plt.title('Training Data)
+        plt.title('Training Data')
     for i in range(0,A.shape[0], step):
         plt.plot(En, A[i,:], label='Training data')
     plt.plot(En, R[0,:], linewidth = 4, label='Sample data')
