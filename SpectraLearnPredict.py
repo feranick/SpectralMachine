@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170320a
+* version: 20170320b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -108,7 +108,8 @@ class tfDef:
     runTF = True
     tfAlwaysRetrain = False
     tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
-    plotTF = True
+    plotMapTF = True
+    plotClassDistribTF = False
 
     subsetIterLearn = True
     percentTFCrossValid = 0.3
@@ -374,7 +375,7 @@ def LearnPredictMap(learnFile, mapFile):
         plotMaps(X, Y, svmPred, 'SVM')
     if nnDef.plotNN == True and nnDef.runNN == True:
         plotMaps(X, Y, nnPred, 'Neural netowrks')
-    if tfDef.plotTF == True and tfDef.runTF == True:
+    if tfDef.plotMapTF == True and tfDef.runTF == True:
         plotMaps(X, Y, tfPred, 'TensorFlow')
     if kmDef.plotKMmaps == True and kmDef.runKM == True:
         plotMaps(X, Y, kmPred, 'K-Means Prediction')
@@ -533,6 +534,17 @@ def formatClass(formatClassfile, Cl):
     import sklearn.preprocessing as pp
     print('\n Creating TensorFlow class data in binary form...')
     Cl2 = pp.LabelBinarizer().fit_transform(Cl)
+
+    import matplotlib.pyplot as plt
+    plt.hist([float(x) for x in Cl], bins=np.unique([float(x) for x in Cl]), edgecolor="black")
+    plt.xlabel('Class')
+    plt.ylabel('Occurrances')
+    plt.title('Class distibution')
+    plt.savefig(formatClassfile + '_ClassDistrib.png', dpi = 160, format = 'png')  # Save plot
+    if tfDef.plotClassDistribTF == True:
+        print(' Plotting Class distibution \n')
+        plt.show()
+    
     return Cl2
 
 #********************************************************************************
