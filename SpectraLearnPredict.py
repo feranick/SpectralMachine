@@ -112,7 +112,7 @@ class tfDef:
 
     subsetIterLearn = True
     percentTFCrossValid = 0.3
-    trainingIter = 100
+    trainingIter = 300
 
     decayLearnRate = True
     learnRate = 0.75
