@@ -188,11 +188,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-m" , "--map"):
-            #try:
-            LearnPredictMap(sys.argv[2], sys.argv[3])
-            #except:
-                #usage()
-                #sys.exit(2)
+            try:
+                LearnPredictMap(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-b" , "--batch"):
             try:
@@ -275,8 +275,7 @@ def LearnPredictBatch(learnFile):
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
     
     if multiproc == True:
-        from multiprocessing import Pool
-        import multiprocessing as mp
+        import multiprocessing.Pool as mp
         p = mp.Pool()
         for f in glob.glob('*.txt'):
             if (f != learnFile):
