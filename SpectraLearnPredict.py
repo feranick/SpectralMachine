@@ -458,8 +458,8 @@ def runSVMmain(A, Cl, En, R, Root):
 
     R_pred = clf.predict(R)
     prob = clf.predict_proba(R)[0].tolist()
-    print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) + '\033[0m' + ' (probability = ' +
-          str(round(100*max(prob),1)) + '%)\n')
+    print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) + ' (probability = ' +
+          str(round(100*max(prob),1)) + '%)\033[0m\n')
 
     #**************************************
     ''' SVM Classification Report '''
@@ -503,8 +503,8 @@ def runNNmain(A, Cl, R, Root):
         joblib.dump(clf, nnTrainedData)
 
     prob = clf.predict_proba(R)[0].tolist()
-    print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) + '\033[0m' +
-          ' (probability = ' + str(round(100*max(prob),1)) + '%)\n')
+    print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) +
+          ' (probability = ' + str(round(100*max(prob),4)) + '%)\033[0m\n')
 
     #**************************************
     ''' Neural Networks Classification Report '''
