@@ -519,7 +519,7 @@ def runNNmain(A, Cl, R, Root):
     if plotDef.showProbPlot == True:
         plotProb(clf, R)
 
-    return clf.predict(R)[0], round(100*max(prob),1)
+    return clf.predict(R)[0], round(100*max(prob),4)
 
 
 #********************************************************************************
