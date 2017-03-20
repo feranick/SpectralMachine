@@ -419,7 +419,9 @@ def TrainTF(learnFile, numRuns):
 
         with open(summary_filename, "a") as sum_file:
             sum_file.write(str(i+1) + '\t{:10.2f}\t'.format(tfAccur) + str(tfPred) + '\t{:10.2f}\n'.format(tfProb))
-
+        
+        print(' Nominal class for prediction spectra:', str(index+1), '\n')
+            
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('\nTraining ended: %Y-%m-%d %H:%M:%S\n')))
 
