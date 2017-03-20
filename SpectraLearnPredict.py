@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170320b
+* version: 20170320c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -530,7 +530,7 @@ def runNNmain(A, Cl, R, Root):
 #********************************************************************************
 ''' Format vectors of unique labels '''
 #********************************************************************************
-def formatClass(formatClassfile, Cl):
+def formatClass(rootFile, Cl):
     import sklearn.preprocessing as pp
     print('\n Creating TensorFlow class data in binary form...')
     Cl2 = pp.LabelBinarizer().fit_transform(Cl)
@@ -540,7 +540,7 @@ def formatClass(formatClassfile, Cl):
     plt.xlabel('Class')
     plt.ylabel('Occurrances')
     plt.title('Class distibution')
-    plt.savefig(formatClassfile + '_ClassDistrib.png', dpi = 160, format = 'png')  # Save plot
+    plt.savefig(rootFile + '_ClassDistrib.png', dpi = 160, format = 'png')  # Save plot
     if tfDef.plotClassDistribTF == True:
         print(' Plotting Class distibution \n')
         plt.show()
@@ -552,9 +552,8 @@ def formatClass(formatClassfile, Cl):
 #********************************************************************************
 def runTensorFlow(A, Cl, R, Root):
     import tensorflow as tf
-    formatClassfile = Root + '.tfclass'
     tfTrainedData = Root + '.tfmodel'
-    Cl2 = formatClass(formatClassfile, Cl)
+    Cl2 = formatClass(Root, Cl)
 
     print(' Initializing TensorFlow...')
     tf.reset_default_graph()
