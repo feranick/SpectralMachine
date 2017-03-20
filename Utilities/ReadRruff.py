@@ -6,7 +6,7 @@
 * ReadRRuFF
 * Convert RRuFFspectra to ASCII
 * File must be in RRuFF
-* version: 20170309j
+* version: 20170320d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -20,7 +20,8 @@ import sys, os.path, getopt, glob, csv
 
 def main():
 	if(len(sys.argv)<2):
-		print(' Usage: \n  python readrruff.py <RRuFF filename>\n')
+		print(' Usage:\n  python3 readrruff.py <RRuFF filename>\n')
+        print(' Requires python 3.x. Not compatible with python 2.x\n')
 		return
 
 	try:

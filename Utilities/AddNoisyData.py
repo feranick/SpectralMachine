@@ -5,7 +5,7 @@
 *
 * Replicate training data with added noise
 * File must be in RRuFF
-* version: 2017018a
+* version: 20170320d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -19,7 +19,8 @@ import sys, os.path, getopt, glob, csv
 
 def main():
     if(len(sys.argv)<4):
-        print(' Usage: \n  python AddNoisyData.py <learnData> <#additions> <offset>\n')
+        print(' Usage:\n  python3 AddNoisyData.py <learnData> <#additions> <offset>\n')
+        print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
     En, M = readLearnFile(sys.argv[1])

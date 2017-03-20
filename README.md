@@ -31,27 +31,27 @@ Usage
 
 Single files: 
   
-    python SpectraLearnPredict.py -f learningfile spectrafile 
+    python3 SpectraLearnPredict.py -f learningfile spectrafile 
 
 Maps (formatted for Horiba LabSpec): 
   
-    python SpectraLearnPredict.py -m learningfile spectramap 
+    python3 SpectraLearnPredict.py -m learningfile spectramap 
 
 Batch txt files:
 
-    python SpectraLearnPredict.py -b learningfile 
+    python3 SpectraLearnPredict.py -b learningfile 
 
 K-means on Raman maps:
     
-    python SpectraLearnPredict.py -k spectramap number_of_classes
+    python3 SpectraLearnPredict.py -k spectramap number_of_classes
 
 Principal component analysis on spectral collection files:
     
-    python SpectraLearnPredict.py -p spectrafile #comp
+    python3 SpectraLearnPredict.py -p spectrafile #comp
 
 Run tensorflow training only:
 
-    python SpectraLearnPredict.py -t learningfile #iterations
+    python3 SpectraLearnPredict.py -t learningfile #iterations
 
 
 Training data

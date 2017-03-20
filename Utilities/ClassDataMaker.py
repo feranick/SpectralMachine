@@ -5,7 +5,7 @@
 *
 * ClassDataMaker
 * Adds spectra to single file for classification
-* version: 20170309a
+* version: 20170320d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -92,8 +92,9 @@ def makeFile(sampleFile, learnFile, param):
 ''' Lists the program usage '''
 #************************************
 def usage():
-    print('\n Usage:')
-    print('  python ClassDataMaker.py <learnfile>\n')
+    print('\n Usage:\n')
+    print('  python3 ClassDataMaker.py <learnfile>\n')
+    print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
 ''' Main initialization routine '''

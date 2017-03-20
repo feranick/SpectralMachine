@@ -5,7 +5,7 @@
 *
 * SpectraExtractorSVM.py
 * Extract spectra of specific phases
-* version: 20161014a
+* version: 20160320d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -90,8 +90,9 @@ def spectraExtractor(mapFile, clustFile, newMapFile):
 ''' Lists the program usage '''
 #**********************************************
 def usage():
-    print('\n Usage:')
-    print('  python SpectraExtractSVM.py <mapfile> <cluster file> <new map file>\n')
+    print('\n Usage:\n')
+    print('  python3 SpectraExtractSVM.py <mapfile> <cluster file> <new map file>\n')
+    print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #**********************************************
 ''' Main initialization routine '''

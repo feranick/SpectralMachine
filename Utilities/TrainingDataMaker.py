@@ -5,7 +5,7 @@
 *
 * TrainingDataMaker
 * Adds spectra to Training File
-* version: 20170306b
+* version: 20170320d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -73,8 +73,9 @@ def makeFile(trainFile, sampleFile, param):
 ''' Lists the program usage '''
 #************************************
 def usage():
-    print('\n Usage:')
-    print('  python TrainingDataMaker.py <trainingfile> <spectrafile> <parameter>\n')
+    print('\n Usage:\n')
+    print('  python3 TrainingDataMaker.py <trainingfile> <spectrafile> <parameter>\n')
+    print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
 ''' Main initialization routine '''

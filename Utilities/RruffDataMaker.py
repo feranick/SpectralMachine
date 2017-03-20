@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170310a
+* version: 20170320d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -118,8 +118,9 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep):
 ''' Lists the program usage '''
 #************************************
 def usage():
-    print('\n Usage:')
-    print('  python RruffDataMaker.py <learnfile> <enInitial> <enFinal> <enStep> \n')
+    print('\n Usage:\n')
+    print('  python3 RruffDataMaker.py <learnfile> <enInitial> <enFinal> <enStep> \n')
+    print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
 ''' Main initialization routine '''

@@ -5,7 +5,7 @@
 *
 * PCADataMaker
 * Adds spectra to single file for PCA
-* version: 20170306b
+* version: 20170320d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -80,11 +80,12 @@ def makeFile(sampleFile, pcaFile, param):
 ''' Lists the program usage '''
 #************************************
 def usage():
-    print('\n Usage:')
-    print('  python PCADataMaker.py <pcafile> <parameter>\n')
+    print('\n Usage:\n')
+    print('  python3 PCADataMaker.py <pcafile> <parameter>\n')
     print('  Note: a default <parameter> = 0 is used if not declared\n')
     print('  <parameter> is useful for differentiate between different')
     print('  datasets within PCA. \n')
+    print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
 ''' Main initialization routine '''

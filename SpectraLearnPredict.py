@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170320c
+* version: 20170320d
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -1154,19 +1154,20 @@ def makeHeaderSummary(file, learnFile):
 ''' Lists the program usage '''
 #************************************
 def usage():
-    print('\n Usage:')
+    print('\n Usage:\n')
     print(' Single files: ')
-    print('  python SpectraLearnPredict.py -f <learningfile> <spectrafile> \n')
+    print('  python3 SpectraLearnPredict.py -f <learningfile> <spectrafile> \n')
     print(' Maps (formatted for Horiba LabSpec): ')
-    print('  python SpectraLearnPredict.py -m <learningfile> <spectramap> \n')
+    print('  python3 SpectraLearnPredict.py -m <learningfile> <spectramap> \n')
     print(' Batch txt files: ')
-    print('  python SpectraLearnPredict.py -b <learningfile> \n')
+    print('  python3 SpectraLearnPredict.py -b <learningfile> \n')
     print(' K-means on maps: ')
-    print('  python SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
+    print('  python3 SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
     print(' Principal component analysis on spectral collection files: ')
-    print('  python SpectraLearnPredict.py -p <spectrafile> <#comp>\n')
+    print('  python3 SpectraLearnPredict.py -p <spectrafile> <#comp>\n')
     print(' Run tensorflow training only: ')
-    print('  python SpectraLearnPredict.py -t <learningfile> <# iterations>\n')
+    print('  python3 SpectraLearnPredict.py -t <learningfile> <# iterations>\n')
+    print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 
 #************************************
