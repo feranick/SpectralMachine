@@ -591,7 +591,7 @@ def runTensorFlow(A, Cl, R, Root):
         if tfDef.tfAlwaysRetrain == False:
             print(' Opening TF training model from:', tfTrainedData)
             saver.restore(sess, './' + tfTrainedData)
-            print('\n Model restored.')
+            print('\n Model restored.\n')
         else:
             raise ValueError(' Force TF model retraining.')
     except:
@@ -628,7 +628,7 @@ def runTensorFlow(A, Cl, R, Root):
     sess.close()
     
     rosterPred = np.where(res1[0]>tfDef.thresholdProbabilityTFPred)[0]
-    print('\n  ==============================')
+    print('  ==============================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
         print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(res1[0][rosterPred][i])))
