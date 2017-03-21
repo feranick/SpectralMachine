@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170321a
+* version: 20170321b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -78,7 +78,8 @@ class svmDef:
     plotSVM = True
     svmClassReport = False
     
-    thresholdProbabilitySVMPred = 3 # threshold in % of probabilities for listing prediction results
+    # threshold in % of probabilities for listing prediction results
+    thresholdProbabilitySVMPred = 3
 
     ''' Training algorithm for SVM
         Use either 'linear' or 'rbf'
@@ -96,6 +97,9 @@ class nnDef:
     nnAlwaysRetrain = False
     plotNN = True
     nnClassReport = False
+    
+    # threshold in % of probabilities for listing prediction results
+    thresholdProbabilityNNPred = 80
 
     ''' Solver for NN
     lbfgs preferred for small datasets
@@ -117,7 +121,8 @@ class tfDef:
     percentTFCrossValid = 0.3
     trainingIter = 300
     
-    thresholdProbabilityTFPred = 20 # threshold in % of probabilities for listing prediction results
+    # threshold in % of probabilities for listing prediction results
+    thresholdProbabilityTFPred = 20
 
     decayLearnRate = True
     learnRate = 0.75
@@ -174,11 +179,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -501,7 +506,7 @@ def runNNmain(A, Cl, R, Root):
     try:
         if nnDef.nnAlwaysRetrain == False:
             with open(nnTrainedData):
-                print(' Opening NN training model...')
+                print(' Opening NN training model...\n')
                 clf = joblib.load(nnTrainedData)
         else:
             raise ValueError('Force NN retraining.')
@@ -515,6 +520,15 @@ def runNNmain(A, Cl, R, Root):
         joblib.dump(clf, nnTrainedData)
 
     prob = clf.predict_proba(R)[0].tolist()
+
+    rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityNNPred/100)[0]
+    print('  ==============================')
+    print('  Prediction\tProbability [%]')
+    for i in range(rosterPred.shape[0]):
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
+    print('  ==============================')
+
+
     print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) +
           ' (probability = ' + str(round(100*max(prob),4)) + '%)\033[0m\n')
 
@@ -1199,7 +1213,7 @@ def runClassReport(clf, A, Cl):
     print(classification_report(Cl, y_pred, target_names=clf.classes_))
     print(' Precision is the probability that, given a classification result for a sample,\n' +
           ' the sample actually belongs to that class. Recall (Accuracy) is the probability that a \n' +
-          ' sample will be correctly classified for a given class. F1 score combines both \n' +
+          ' sample will be correctly classified for a given class. f1-score combines both \n' +
           ' accuracy and precision to give a single measure of relevancy of the classifier results.\n')
 
 #************************************
