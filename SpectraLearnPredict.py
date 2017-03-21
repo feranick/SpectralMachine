@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170320d
+* version: 20170321a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -114,6 +114,8 @@ class tfDef:
     subsetIterLearn = True
     percentTFCrossValid = 0.3
     trainingIter = 300
+    
+    thresholdProbabilityTFPred = 20 #threshold of probabilities for listing prediction results
 
     decayLearnRate = True
     learnRate = 0.75
@@ -624,6 +626,15 @@ def runTensorFlow(A, Cl, R, Root):
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
     
     sess.close()
+    
+    rosterPred = np.where(res1[0]>tfDef.thresholdProbabilityTFPred)[0]
+    print('\n  ==============================')
+    print('  Prediction\tProbability [%]')
+    for i in range(rosterPred.shape[0]):
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(res1[0][rosterPred][i])))
+    print('  ==============================\n')
+
+
     print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
     return np.unique(Cl)[res2][0], res1[0][res2][0], accur
 
