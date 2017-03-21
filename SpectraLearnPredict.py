@@ -77,6 +77,8 @@ class svmDef:
     svmAlwaysRetrain = False
     plotSVM = True
     svmClassReport = False
+    
+    thresholdProbabilitySVMPred = 3 # threshold in % of probabilities for listing prediction results
 
     ''' Training algorithm for SVM
         Use either 'linear' or 'rbf'
@@ -115,7 +117,7 @@ class tfDef:
     percentTFCrossValid = 0.3
     trainingIter = 300
     
-    thresholdProbabilityTFPred = 20 #threshold of probabilities for listing prediction results
+    thresholdProbabilityTFPred = 20 # threshold in % of probabilities for listing prediction results
 
     decayLearnRate = True
     learnRate = 0.75
@@ -172,11 +174,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -441,7 +443,7 @@ def runSVMmain(A, Cl, En, R, Root):
     try:
         if svmDef.svmAlwaysRetrain == False:
             with open(svmTrainedData):
-                print(' Opening SVM training model...')
+                print(' Opening SVM training model...\n')
                 clf = joblib.load(svmTrainedData)
         else:
             raise ValueError('Force retraining SVM model')
@@ -460,9 +462,17 @@ def runSVMmain(A, Cl, En, R, Root):
 
     R_pred = clf.predict(R)
     prob = clf.predict_proba(R)[0].tolist()
+
+    rosterPred = np.where(clf.predict_proba(R)[0]>svmDef.thresholdProbabilitySVMPred/100)[0]
+    print('  ==============================')
+    print('  Prediction\tProbability [%]')
+    for i in range(rosterPred.shape[0]):
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
+    print('  ==============================')
+
     print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) + ' (probability = ' +
           str(round(100*max(prob),1)) + '%)\033[0m\n')
-
+        
     #**************************************
     ''' SVM Classification Report '''
     #**************************************
@@ -633,7 +643,6 @@ def runTensorFlow(A, Cl, R, Root):
     for i in range(rosterPred.shape[0]):
         print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(res1[0][rosterPred][i])))
     print('  ==============================\n')
-
 
     print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
     return np.unique(Cl)[res2][0], res1[0][res2][0], accur
