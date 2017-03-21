@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170321b
+* version: 20170321c
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -142,7 +142,7 @@ class kmDef:
     runKM = False
     customNumKMComp = False
     numKMcomponents = 20
-    plotKM = True
+    plotKM = False
     plotKMmaps = True
 
 #**********************************************
@@ -444,7 +444,8 @@ def runSVMmain(A, Cl, En, R, Root):
     from sklearn import svm
     from sklearn.externals import joblib
     svmTrainedData = Root + '.svmModel.pkl'
-    print('\n Running Support Vector Machine (kernel: ' + svmDef.kernel + ')...')
+    print('==========================================================================\n')
+    print(' Running Support Vector Machine (kernel: ' + svmDef.kernel + ')...')
     try:
         if svmDef.svmAlwaysRetrain == False:
             with open(svmTrainedData):
@@ -503,8 +504,8 @@ def runNNmain(A, Cl, R, Root):
     from sklearn.neural_network import MLPClassifier
     from sklearn.externals import joblib
     nnTrainedData = Root + '.nnModel.pkl'
-
-    print('\n Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnDef.nnSolver + ')...')
+    print('==========================================================================\n')
+    print(' Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnDef.nnSolver + ')...')
     try:
         if nnDef.nnAlwaysRetrain == False:
             with open(nnTrainedData):
@@ -560,7 +561,8 @@ def runNNmain(A, Cl, R, Root):
 #********************************************************************************
 def formatClass(rootFile, Cl):
     import sklearn.preprocessing as pp
-    print('\n Creating TensorFlow class data in binary form...')
+    print('==========================================================================\n')
+    print(' Running tensorFlow. Creating class data in binary form...')
     Cl2 = pp.LabelBinarizer().fit_transform(Cl)
 
     import matplotlib.pyplot as plt
@@ -582,7 +584,7 @@ def runTensorFlow(A, Cl, R, Root):
     import tensorflow as tf
     tfTrainedData = Root + '.tfmodel'
     Cl2 = formatClass(Root, Cl)
-
+    
     print(' Initializing TensorFlow...')
     tf.reset_default_graph()
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
@@ -684,6 +686,7 @@ def runPCA(learnFile, numPCAcomponents):
     ''' Open and process training data '''
     En, Cl, A, YnormXind = readLearnFile(learnFile)
 
+    print('==========================================================================\n')
     print(' Running PCA...\n')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
     if pcaDef.customNumPCAComp == False:
@@ -763,19 +766,32 @@ def runPCA(learnFile, numPCAcomponents):
 #********************
 def runKMmain(A, Cl, En, R, Aorig, Rorig):
     from sklearn.cluster import KMeans
-    print('\n Running K-Means...')
+    print('==========================================================================\n')
+    print(' Running K-Means...')
     print(' Number of unique identifiers in training data: ' + str(np.unique(Cl).shape[0]))
     if kmDef.customNumKMComp == False:
         numKMcomp = np.unique(Cl).shape[0]
     else:
         numKMcomp = kmDef.numKMcomponents
     kmeans = KMeans(n_clusters=numKMcomp, random_state=0).fit(A)
+    
+    '''
     for i in range(0, numKMcomp):
         print('\n Class: ' + str(i) + '\n  ',end="")
         for j in range(0,kmeans.labels_.shape[0]):
             if kmeans.labels_[j] == i:
                 print(' ' + str(Cl[j]), end="")
-    print('\033[1m' + '\n\n Predicted class (K-Means) = ' + str(kmeans.predict(R)[0]) + '\033[0m \n')
+    '''
+    print('\n  ==============================')
+    print('  \033[1mKM\033[0m - Predicted class: \033[1m',str(kmeans.predict(R)[0]),'\033[0m')
+    print('  ==============================')
+    print('  Prediction')
+    for j in range(0,kmeans.labels_.shape[0]):
+        if kmeans.labels_[j] == 22:
+            print('  ' + str(Cl[j]))
+    print('  ==============================\n')
+
+
     if kmDef.plotKM == True:
         import matplotlib.pyplot as plt
         for j in range(0,kmeans.labels_.shape[0]):
