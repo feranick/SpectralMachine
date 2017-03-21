@@ -122,7 +122,7 @@ class tfDef:
     trainingIter = 300
     
     # threshold in % of probabilities for listing prediction results
-    thresholdProbabilityTFPred = 20
+    thresholdProbabilityTFPred = 30
 
     decayLearnRate = True
     learnRate = 0.75
@@ -470,6 +470,8 @@ def runSVMmain(A, Cl, En, R, Root):
 
     rosterPred = np.where(clf.predict_proba(R)[0]>svmDef.thresholdProbabilitySVMPred/100)[0]
     print('  ==============================')
+    print('  \033[1mSVM\033[0m - Probability >',str(svmDef.thresholdProbabilitySVMPred),'%')
+    print('  ==============================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
         print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
@@ -521,6 +523,8 @@ def runNNmain(A, Cl, R, Root):
 
     prob = clf.predict_proba(R)[0].tolist()
     rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityNNPred/100)[0]
+    print('  ==============================')
+    print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityNNPred),'%')
     print('  ==============================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
@@ -650,6 +654,8 @@ def runTensorFlow(A, Cl, R, Root):
     sess.close()
     
     rosterPred = np.where(res1[0]>tfDef.thresholdProbabilityTFPred)[0]
+    print('  ==============================')
+    print('  \033[1mTF\033[0m - Probability >',str(tfDef.thresholdProbabilityTFPred),'%')
     print('  ==============================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
