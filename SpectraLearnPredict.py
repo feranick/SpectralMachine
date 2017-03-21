@@ -99,7 +99,7 @@ class nnDef:
     nnClassReport = False
     
     # threshold in % of probabilities for listing prediction results
-    thresholdProbabilityNNPred = 80
+    thresholdProbabilityNNPred = 0.001
 
     ''' Solver for NN
     lbfgs preferred for small datasets
@@ -520,14 +520,12 @@ def runNNmain(A, Cl, R, Root):
         joblib.dump(clf, nnTrainedData)
 
     prob = clf.predict_proba(R)[0].tolist()
-
     rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityNNPred/100)[0]
     print('  ==============================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
-        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
     print('  ==============================')
-
 
     print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) +
           ' (probability = ' + str(round(100*max(prob),4)) + '%)\033[0m\n')
