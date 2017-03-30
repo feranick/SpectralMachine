@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170321c
+* version: 20170330a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -116,6 +116,7 @@ class tfDef:
     tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
     plotMapTF = True
     plotClassDistribTF = False
+    enableTensorboard = False
 
     subsetIterLearn = True
     percentTFCrossValid = 0.3
@@ -613,6 +614,11 @@ def runTensorFlow(A, Cl, R, Root):
 
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
+
+    if tfDef.enableTensorboard == True:
+        writer = tf.summary.FileWriter(".", sess.graph)
+        print('\n Saving graph. Accessible via tensorboard.  \n')
+
     saver = tf.train.Saver()
     accur = 0
     try:
@@ -636,12 +642,12 @@ def runTensorFlow(A, Cl, R, Root):
             print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
             for i in range(tfDef.trainingIter):
                 As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, tfDef.percentTFCrossValid)
-                sess.run(train_step, feed_dict={x: As, y_: Cl2s})
+                summary = sess.run(train_step, feed_dict={x: As, y_: Cl2s})
                 correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
                 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
                 accur = 100*accuracy.eval(feed_dict={x:As_cv, y_:Cl2s_cv})
         else:
-                sess.run(train_step, feed_dict={x: A, y_: Cl2})
+                summary = sess.run(train_step, feed_dict={x: A, y_: Cl2})
                 correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
                 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
                 accur = 100*accuracy.eval(feed_dict={x:A, y_:Cl2})
@@ -649,6 +655,9 @@ def runTensorFlow(A, Cl, R, Root):
         save_path = saver.save(sess, tfTrainedData)
         print(' Model saved in file: %s\n' % save_path)
         print('\033[1m Accuracy: ' + str('{:.3f}'.format(accur)) + '%\n\033[0m')
+
+    if tfDef.enableTensorboard == True:
+        writer.close()
 
     res1 = sess.run(y, feed_dict={x: R})
     res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
