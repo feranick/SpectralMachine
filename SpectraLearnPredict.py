@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170330a
+* version: 20170427a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -94,6 +94,8 @@ class svmDef:
 #**********************************************
 class nnDef:
     runNN = True
+    MLPRegressor = False
+
     nnAlwaysRetrain = False
     plotNN = True
     nnClassReport = False
@@ -502,9 +504,14 @@ def runSVMmain(A, Cl, En, R, Root):
 ''' Run Neural Network '''
 #********************************************************************************
 def runNNmain(A, Cl, R, Root):
-    from sklearn.neural_network import MLPClassifier
+    from sklearn.neural_network import MLPClassifier, MLPRegressor
     from sklearn.externals import joblib
-    nnTrainedData = Root + '.nnModel.pkl'
+    
+    if nnDef.MLPRegressor is False:
+        nnTrainedData = Root + '.nnModelC.pkl'
+    else:
+        nnTrainedData = Root + '.nnModelR.pkl'
+    
     print('==========================================================================\n')
     print(' Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnDef.nnSolver + ')...')
     try:
@@ -518,23 +525,41 @@ def runNNmain(A, Cl, R, Root):
         #**********************************************
         ''' Retrain data if not available'''
         #**********************************************
-        print(' Retraining NN model...')
-        clf = MLPClassifier(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.nnNeurons,), random_state=1)
-        clf.fit(A, Cl)
+        if nnDef.MLPRegressor is False:
+            print(' Retraining NN model using MLP Classifier...')
+            clf = MLPClassifier(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.nnNeurons,), random_state=1)
+            clf.fit(A, Cl)
+            print('  Mean accuracy: ',clf.score(A,Cl))
+        else:
+            print(' Retraining NN model using MLP Regressor...')
+            clf = MLPRegressor(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.nnNeurons,), random_state=1)
+            Cl = np.array(Cl,dtype=float)
+            clf.fit(A, Cl)
+            print('  Coefficient of determination R^2: ',clf.score(A,Cl))
+
         joblib.dump(clf, nnTrainedData)
+            
+    if nnDef.MLPRegressor is False:
+        prob = clf.predict_proba(R)[0].tolist()
+        rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityNNPred/100)[0]
+        print('  ==============================')
+        print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityNNPred),'%')
+        print('  ==============================')
+        print('  Prediction\tProbability [%]')
+        for i in range(rosterPred.shape[0]):
+            print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
+        print('  ==============================')
 
-    prob = clf.predict_proba(R)[0].tolist()
-    rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityNNPred/100)[0]
-    print('  ==============================')
-    print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityNNPred),'%')
-    print('  ==============================')
-    print('  Prediction\tProbability [%]')
-    for i in range(rosterPred.shape[0]):
-        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
-    print('  ==============================')
-
-    print('\033[1m' + '\n Predicted value (Neural Networks) = ' + str(clf.predict(R)[0]) +
-          ' (probability = ' + str(round(100*max(prob),4)) + '%)\033[0m\n')
+        predValue = clf.predict(R)[0]
+        predProb = round(100*max(prob),4)
+        print('\033[1m' + '\n Predicted classifier value (Neural Networks) = ' + str(predValue) +
+          '  (probability = ' + str(predProb) + '%)\033[0m\n')
+    else:
+        Cl = np.array(Cl,dtype=float)
+        predValue = clf.predict(R)[0]
+        predProb = clf.score(A,Cl)
+        print('\033[1m' + '\n Predicted regressor value (Neural Networks) = ' + str('{:.3f}'.format(predValue)) +
+              '  (R^2 = ' + str('{:.5f}'.format(predProb)) + ')\033[0m\n')
 
     #**************************************
     ''' Neural Networks Classification Report '''
@@ -547,9 +572,10 @@ def runNNmain(A, Cl, R, Root):
     ''' Plot probabilities '''
     #*************************
     if plotDef.showProbPlot == True:
-        plotProb(clf, R)
+        if nnDef.MLPRegressor is False:
+            plotProb(clf, R)
 
-    return clf.predict(R)[0], round(100*max(prob),4)
+    return predValue, predProb
 
 
 #********************************************************************************
