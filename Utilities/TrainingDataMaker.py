@@ -5,7 +5,7 @@
 *
 * TrainingDataMaker
 * Adds spectra to Training File
-* version: 20170320d
+* version: 20170518a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -14,7 +14,7 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path
+import sys, os
 
 #**********************************************
 ''' main '''
@@ -22,7 +22,7 @@ import sys, os.path
 
 def main():
     try:
-        makeFile(sys.argv[1], sys.argv[2], sys.argv[3])
+        makeFile(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     except:
         usage()
     sys.exit(2)
@@ -30,7 +30,7 @@ def main():
 #**********************************************
 ''' Make Training file '''
 #**********************************************
-def makeFile(trainFile, sampleFile, param):
+def makeFile(trainFile, sampleFile, sampleTag, param):
     
     #**********************************************
     ''' Open and process training data '''
@@ -50,6 +50,8 @@ def makeFile(trainFile, sampleFile, param):
     if os.path.exists(trainFile):
         with open(trainFile, 'r') as f:
             M = np.loadtxt(f, unpack =False)
+            sampleSize = M.shape[0]
+            print(' Number of samples in \"' + trainFile + '\": ' + str(sampleSize))
             EnT = np.delete(np.array(M[0,:]),np.s_[0:1],0)
             if EnT.shape[0] == En.shape[0]:
                 print(' Number of points in the map dataset: ' + str(EnT.shape[0]))
@@ -57,16 +59,32 @@ def makeFile(trainFile, sampleFile, param):
                 print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
                 R = np.interp(EnT, En, R, left = 0, right = 0)
                 print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
-            print('\n Added spectra to \"' + trainFile + '\"\n')
+            print('\n Added spectra to: \"' + trainFile + '\"')
             newTrain = np.append(float(param),R).reshape(1,-1)
     else:
         print('\n\033[1m' + ' Train data file not found. Creating...' + '\033[0m')
         newTrain = np.append([0], En)
-        print(' Added spectra to \"' + trainFile + '\"\n')
+        print(' Added spectra to: \"' + trainFile + '\"')
         newTrain = np.vstack((newTrain, np.append(float(param),R)))
-
+        sampleSize = 1
+    
     with open(trainFile, 'ab') as f:
         np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
+
+    trainFileInfo = os.path.splitext(trainFile)[0] + "_README.txt"
+
+    if os.path.exists(trainFileInfo):
+        newTrainHeader = ""
+    else:
+        print('\033[1m' + ' Train info file not found. Creating...' + '\033[0m')
+        newTrainHeader = "Tag \t File Name \t H:C \t row\n====================================================\n"
+
+    newTrainInfo = newTrainHeader + sampleTag + "\t"+ sampleFile + "\tH:C=" + param + "\t\trow: " + str(sampleSize) +"\n"
+        
+    with open(trainFileInfo, 'ab') as f:
+        f.write(newTrainInfo.encode())
+
+    print(' Added info to \"' + trainFileInfo + '\"\n')
 
 
 #************************************
@@ -74,7 +92,7 @@ def makeFile(trainFile, sampleFile, param):
 #************************************
 def usage():
     print('\n Usage:\n')
-    print('  python3 TrainingDataMaker.py <trainingfile> <spectrafile> <parameter>\n')
+    print('  python3 TrainingDataMaker.py <trainingfile> <spectrafile> <Tag> <parameter>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
