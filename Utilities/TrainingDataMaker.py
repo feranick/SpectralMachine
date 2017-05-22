@@ -5,7 +5,7 @@
 *
 * TrainingDataMaker
 * Adds spectra to Training File
-* version: 20170522a
+* version: 20170522b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -50,7 +50,7 @@ def makeFile(trainFile, sampleTag, sampleFile, param):
     if os.path.exists(trainFile):
         with open(trainFile, 'r') as f:
             M = np.loadtxt(f, unpack =False)
-            sampleSize = M.shape[0]
+            sampleSize = M.shape[0]+1
             print(' Number of samples in \"' + trainFile + '\": ' + str(sampleSize))
             EnT = np.delete(np.array(M[0,:]),np.s_[0:1],0)
             if EnT.shape[0] == En.shape[0]:
@@ -66,7 +66,7 @@ def makeFile(trainFile, sampleTag, sampleFile, param):
         newTrain = np.append([0], En)
         print(' Added spectra to: \"' + trainFile + '\"')
         newTrain = np.vstack((newTrain, np.append(float(param),R)))
-        sampleSize = 1
+        sampleSize = 2
     
     with open(trainFile, 'ab') as f:
         np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
