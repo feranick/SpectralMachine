@@ -5,7 +5,7 @@
 *
 * TrainingDataMaker
 * Adds spectra to Training File
-* version: 20170518a
+* version: 20170522a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -30,7 +30,7 @@ def main():
 #**********************************************
 ''' Make Training file '''
 #**********************************************
-def makeFile(trainFile, sampleFile, sampleTag, param):
+def makeFile(trainFile, sampleTag, sampleFile, param):
     
     #**********************************************
     ''' Open and process training data '''
@@ -79,7 +79,7 @@ def makeFile(trainFile, sampleFile, sampleTag, param):
         print('\033[1m' + ' Train info file not found. Creating...' + '\033[0m')
         newTrainHeader = "Tag \t File Name \t H:C \t row\n====================================================\n"
 
-    newTrainInfo = newTrainHeader + sampleTag + "\t"+ sampleFile + "\tH:C=" + param + "\t\trow: " + str(sampleSize) +"\n"
+    newTrainInfo = newTrainHeader + sampleTag + "\t"+ sampleFile + "\tH:C=" + param + "\trow: " + str(sampleSize) +"\n"
         
     with open(trainFileInfo, 'ab') as f:
         f.write(newTrainInfo.encode())
@@ -92,7 +92,7 @@ def makeFile(trainFile, sampleFile, sampleTag, param):
 #************************************
 def usage():
     print('\n Usage:\n')
-    print('  python3 TrainingDataMaker.py <trainingfile> <spectrafile> <Tag> <parameter>\n')
+    print('  python3 TrainingDataMaker.py <trainingfile> <Tag> <spectrafile> <parameter>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
