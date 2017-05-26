@@ -58,7 +58,7 @@ class preprocDef:
     enSelDelta = [2, 2, 2, 2, 10, 2, 2, 15, 5, 2]
     
     #enSel = [1220, 1270, 1590]
-    #enSelDelta = [10, 10, 10]
+    #enSelDelta = [2, 2, 30]
 
     if(cherryPickEnPoint == True):
         enRestrictRegion = False
