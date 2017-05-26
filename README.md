@@ -3,7 +3,7 @@ Machine learning software for rapid analysis of Raman spectra.
 
 Supported algorithms:
  - Support Vector Machine - SVM
- - Neural Network -  multi-layer perceptron (MLP)
+ - Neural Network -  multi-layer perceptron (MLP) (L-BFGS Optimizer strongly recommended)
  - TensorFlow
 
 Additional multivariate analysis:

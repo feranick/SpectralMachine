@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170427a
+* version: 20170526a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -56,6 +56,9 @@ class preprocDef:
 
     enSel = [1050, 1150, 1220, 1270, 1330, 1410, 1480, 1590, 1620, 1650]
     enSelDelta = [2, 2, 2, 2, 10, 2, 2, 15, 5, 2]
+    
+    #enSel = [1220, 1270, 1590]
+    #enSelDelta = [10, 10, 10]
 
     if(cherryPickEnPoint == True):
         enRestrictRegion = False
@@ -103,10 +106,11 @@ class nnDef:
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityNNPred = 0.001
 
-    ''' Solver for NN
-    lbfgs preferred for small datasets
-    (alternatives: 'adam' or 'sgd') '''
-    nnSolver = 'lbfgs'
+    ''' Solver for NN '''
+    nnSolver = 'lbfgs' # (Recommended) for datasets with large number of variables
+    #nnSolver = 'adam'
+    #nnSolver = 'sgd'
+    
     nnNeurons = 100  #default = 100
 
 #**********************************************
