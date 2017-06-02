@@ -1,7 +1,7 @@
 # SpectralMachine
 Machine learning software for rapid analysis of Raman spectra.
 
-Supported algorithms:
+**Supported algorithms:**
  
  - Deep Neural Networks:
    - multi-layer perceptron (MLP) (L-BFGS Optimizer strongly recommended)
@@ -9,16 +9,14 @@ Supported algorithms:
  - Support Vector Machine - SVM
  - TensorFlow (basic implementation)
 
-Additional multivariate analysis:
+**Additional multivariate analysis:**
 - K-Means
 - Principal component analysis
 
 Installation
 =============
 
-This software requires Python (3.3 or higher). It has been tested with Python 3.5 or hiher which is the recommended platform. It is not compatible with python 2.x.
-
-This package requires:
+This software requires Python (3.3 or higher). It has been tested with Python 3.5 or hiher which is the recommended platform. It is not compatible with python 2.x. Additional required packages:
 
     numpy
     scikit-learn (>=0.18)
