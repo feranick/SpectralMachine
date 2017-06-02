@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170602c
+* version: 20170602e
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -84,26 +84,30 @@ class nnDef:
     nnClassReport = False
     
     # threshold in % of probabilities for listing prediction results
-    thresholdProbabilityNNPred = 0.001
+    thresholdProbabilityPred = 0.001
 
     ''' Solver for NN '''
     nnSolver = 'lbfgs' # (Recommended) for datasets with large number of variables
     #nnSolver = 'adam'
     #nnSolver = 'sgd'
     
-    nnNeurons = 100  #default = 100
+    numNeurons = 100  #default = 100
 
 #***********************************************************
 ''' Deep Neural Networks - tensorflow via DNNClassifier'''
 #***********************************************************
 class dnntfDef:
     runDNNTF = True
-
     AlwaysRetrain = False
-    saveModel = False
+    
+    nnSolver = "Adagrad"   # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
+    numNeurons = 100   # number of neurons per layer
+    numHidlayers = 2    # number of hidden layer
+    
+    hidden_layers = [numNeurons]*numHidlayers
     
     # threshold in % of probabilities for listing prediction results
-    thresholdProbabilityDNNTFPred = 0.01
+    thresholdProbabilityPred = 0.01
 
 #**********************************************
 ''' TensorFlow '''
@@ -475,66 +479,6 @@ def TrainTF(learnFile, numRuns):
     print(' Completed ' + str(numRuns) + ' Training iterations. \n')
 
 #********************************************************************************
-''' Run SVM '''
-#********************************************************************************
-def runSVM(A, Cl, En, R, Root):
-    from sklearn import svm
-    from sklearn.externals import joblib
-    svmTrainedData = Root + '.svmModel.pkl'
-    print('==========================================================================\n')
-    print(' Running Support Vector Machine (kernel: ' + svmDef.kernel + ')...')
-    try:
-        if svmDef.svmAlwaysRetrain == False:
-            with open(svmTrainedData):
-                print(' Opening SVM training model...\n')
-                clf = joblib.load(svmTrainedData)
-        else:
-            raise ValueError('Force retraining SVM model')
-    except:
-        #**********************************************
-        ''' Retrain NN data if not available'''
-        #**********************************************
-        print(' Retraining SVM data...')
-        clf = svm.SVC(C = svmDef.Cfactor, decision_function_shape = 'ovr', probability=True)
-        clf.fit(A,Cl)
-        Z= clf.decision_function(A)
-        print(' Number of classes = ' + str(Z.shape[1]))
-        joblib.dump(clf, svmTrainedData)
-        if svmDef.showClasses == True:
-            print(' List of classes: ' + str(clf.classes_))
-
-    R_pred = clf.predict(R)
-    prob = clf.predict_proba(R)[0].tolist()
-
-    rosterPred = np.where(clf.predict_proba(R)[0]>svmDef.thresholdProbabilitySVMPred/100)[0]
-    print('  ==============================')
-    print('  \033[1mSVM\033[0m - Probability >',str(svmDef.thresholdProbabilitySVMPred),'%')
-    print('  ==============================')
-    print('  Prediction\tProbability [%]')
-    for i in range(rosterPred.shape[0]):
-        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
-    print('  ==============================')
-
-    print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) + ' (probability = ' +
-          str(round(100*max(prob),1)) + '%)\033[0m\n')
-        
-    #**************************************
-    ''' SVM Classification Report '''
-    #**************************************
-    if svmDef.svmClassReport == True:
-        print(' SVM Classification Report \n')
-        runClassReport(clf, A, Cl)
-
-    #*************************
-    ''' Plot probabilities '''
-    #*************************
-    if plotDef.showProbPlot == True:
-        plotProb(clf, R)
-
-    return R_pred[0], round(100*max(prob),1)
-
-
-#********************************************************************************
 ''' Run Neural Network - sklearn '''
 #********************************************************************************
 def runNN(A, Cl, R, Root):
@@ -542,6 +486,7 @@ def runNN(A, Cl, R, Root):
     from sklearn.externals import joblib
     
     if nnDef.MLPRegressor is False:
+        Root+"/DNN-TF_"
         nnTrainedData = Root + '.nnModelC.pkl'
     else:
         nnTrainedData = Root + '.nnModelR.pkl'
@@ -557,16 +502,16 @@ def runNN(A, Cl, R, Root):
             raise ValueError('Force NN retraining.')
     except:
         #**********************************************
-        ''' Retrain data if not available'''
+        ''' Retrain training data if not available'''
         #**********************************************
         if nnDef.MLPRegressor is False:
             print(' Retraining NN model using MLP Classifier...')
-            clf = MLPClassifier(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.nnNeurons,), random_state=1)
+            clf = MLPClassifier(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
             clf.fit(A, Cl)
             print('  Mean accuracy: ',clf.score(A,Cl))
         else:
             print(' Retraining NN model using MLP Regressor...')
-            clf = MLPRegressor(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.nnNeurons,), random_state=1)
+            clf = MLPRegressor(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
             Cl = np.array(Cl,dtype=float)
             clf.fit(A, Cl)
             print('  Coefficient of determination R^2: ',clf.score(A,Cl))
@@ -575,9 +520,9 @@ def runNN(A, Cl, R, Root):
             
     if nnDef.MLPRegressor is False:
         prob = clf.predict_proba(R)[0].tolist()
-        rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityNNPred/100)[0]
+        rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityPred/100)[0]
         print('  ==============================')
-        print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityNNPred),'%')
+        print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityPred),'%')
         print('  ==============================')
         print('  Prediction\tProbability [%]')
         for i in range(rosterPred.shape[0]):
@@ -611,7 +556,6 @@ def runNN(A, Cl, R, Root):
 
     return predValue, predProb
 
-
 #********************************************************************************
 ''' TensorFlow '''
 ''' Run SkFlow - DNN Classifier '''
@@ -622,34 +566,32 @@ def runNN(A, Cl, R, Root):
 def runDNNTF(A, Cl, R, Root):
     print('==========================================================================\n')
     print(' Running Deep Neural Networks: DNNClassifier - TensorFlow...')
+    print(' Hidden layers:', dnntfDef.hidden_layers)
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
     
+    model_directory = Root + "/DNN-TF_" + str(dnntfDef.numHidlayers)+"x"+str(dnntfDef.numNeurons)
     print(' Initializing TensorFlow...\n')
     tf.reset_default_graph()
-    tfTrainedData = Root + '.dnntfmodel'
 
     le = preprocessing.LabelEncoder()
     Cl2 = le.fit_transform(Cl)
     
     feature_columns = skflow.infer_real_valued_columns_from_input(A.astype(np.float32))
-    clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10], n_classes=np.unique(Cl).size,model_dir='/tmp/tf/mlp/')
+    clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
+                               optimizer=dnntfDef.nnSolver, n_classes=np.unique(Cl).size, model_dir=model_directory)
     clf.fit(input_fn=lambda: skflow_input_fn(A, Cl2), steps=200)
-    
-    if dnntfDef.saveModel == True:
-        tfrecord_serving_input_fn = tf.contrib.learn.build_parsing_serving_input_fn(tf.contrib.layers.create_feature_spec_for_parsing(feature_columns))
-        clf.export_savedmodel(export_dir_base="Models", serving_input_fn = tfrecord_serving_input_fn,as_text=True)
 
     pred_class = list(clf.predict_classes(input_fn=lambda: skflow_input_fn_predict(R)))[0]
     predValue = le.inverse_transform(pred_class)
     prob = list(clf.predict_proba(input_fn=lambda: skflow_input_fn_predict(R)))[0]
     predProb = round(100*prob[pred_class],2)
     
-    rosterPred = np.where(prob>dnntfDef.thresholdProbabilityDNNTFPred/100)[0]
+    rosterPred = np.where(prob>dnntfDef.thresholdProbabilityPred/100)[0]
     
     print('\n  ================================')
-    print('  \033[1mDNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityDNNTFPred),'%')
+    print('  \033[1mDNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
     print('  ================================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
@@ -658,6 +600,8 @@ def runDNNTF(A, Cl, R, Root):
     
     print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - TensorFlow) = ' + predValue +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
+
+    return predValue, predProb
 
 #********************************************************************************
 ''' Format inputs for DNNClassifier '''
@@ -795,6 +739,64 @@ def runTFbasic(A, Cl, R, Root):
     print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
     return np.unique(Cl)[res2][0], res1[0][res2][0], accur
 
+#********************************************************************************
+''' Run SVM '''
+#********************************************************************************
+def runSVM(A, Cl, En, R, Root):
+    from sklearn import svm
+    from sklearn.externals import joblib
+    svmTrainedData = Root + '.svmModel.pkl'
+    print('==========================================================================\n')
+    print(' Running Support Vector Machine (kernel: ' + svmDef.kernel + ')...')
+    try:
+        if svmDef.svmAlwaysRetrain == False:
+            with open(svmTrainedData):
+                print(' Opening SVM training model...\n')
+                clf = joblib.load(svmTrainedData)
+        else:
+            raise ValueError('Force retraining SVM model')
+    except:
+        #**********************************************
+        ''' Retrain training model if not available'''
+        #**********************************************
+        print(' Retraining SVM data...')
+        clf = svm.SVC(C = svmDef.Cfactor, decision_function_shape = 'ovr', probability=True)
+        clf.fit(A,Cl)
+        Z= clf.decision_function(A)
+        print(' Number of classes = ' + str(Z.shape[1]))
+        joblib.dump(clf, svmTrainedData)
+        if svmDef.showClasses == True:
+            print(' List of classes: ' + str(clf.classes_))
+
+    R_pred = clf.predict(R)
+    prob = clf.predict_proba(R)[0].tolist()
+    
+    rosterPred = np.where(clf.predict_proba(R)[0]>svmDef.thresholdProbabilitySVMPred/100)[0]
+    print('  ==============================')
+    print('  \033[1mSVM\033[0m - Probability >',str(svmDef.thresholdProbabilitySVMPred),'%')
+    print('  ==============================')
+    print('  Prediction\tProbability [%]')
+    for i in range(rosterPred.shape[0]):
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
+    print('  ==============================')
+
+    print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) + ' (probability = ' +
+      str(round(100*max(prob),1)) + '%)\033[0m\n')
+    
+    #**************************************
+    ''' SVM Classification Report '''
+    #**************************************
+    if svmDef.svmClassReport == True:
+        print(' SVM Classification Report \n')
+        runClassReport(clf, A, Cl)
+
+    #*************************
+    ''' Plot probabilities '''
+    #*************************
+    if plotDef.showProbPlot == True:
+        plotProb(clf, R)
+
+    return R_pred[0], round(100*max(prob),1)
 
 #********************************************************************************
 ''' Run PCA '''
@@ -1330,7 +1332,6 @@ def makeHeaderSummary(file, learnFile):
             csv_out.writerow(summaryHeader1)
             csv_out.writerow(summaryHeader2)
             sum_file.close()
-
 
 #************************************
 ''' Lists the program usage '''
