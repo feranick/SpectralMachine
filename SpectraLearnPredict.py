@@ -5,9 +5,9 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170602b
+* version: 20170602c
 *
-* Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
+* Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -99,7 +99,8 @@ class nnDef:
 class dnntfDef:
     runDNNTF = True
 
-    dnntfAlwaysRetrain = False
+    AlwaysRetrain = False
+    saveModel = False
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityDNNTFPred = 0.01
@@ -338,7 +339,7 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     if dnntfDef.runDNNTF == True:
         dnntfPred, dnntfProb = runDNNTF(A, Cl, R, learnFileRoot)
         summaryFile.extend([nnPred, nnProb])
-        dnntfDef.dnntfAlwaysRetrain = False
+        dnntfDef.AlwaysRetrain = False
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
@@ -636,6 +637,10 @@ def runDNNTF(A, Cl, R, Root):
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10], n_classes=np.unique(Cl).size,model_dir='/tmp/tf/mlp/')
     clf.fit(input_fn=lambda: skflow_input_fn(A, Cl2), steps=200)
     
+    if dnntfDef.saveModel == True:
+        tfrecord_serving_input_fn = tf.contrib.learn.build_parsing_serving_input_fn(tf.contrib.layers.create_feature_spec_for_parsing(feature_columns))
+        clf.export_savedmodel(export_dir_base="Models", serving_input_fn = tfrecord_serving_input_fn,as_text=True)
+
     pred_class = list(clf.predict_classes(input_fn=lambda: skflow_input_fn_predict(R)))[0]
     predValue = le.inverse_transform(pred_class)
     prob = list(clf.predict_proba(input_fn=lambda: skflow_input_fn_predict(R)))[0]
