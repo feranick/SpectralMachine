@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170526a
+* version: 20170602a
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -93,7 +93,7 @@ class svmDef:
     showClasses = False
 
 #**********************************************
-''' Neural Networks'''
+''' Deep Neural Networks - sklearn'''
 #**********************************************
 class nnDef:
     runNN = True
@@ -113,11 +113,22 @@ class nnDef:
     
     nnNeurons = 100  #default = 100
 
+#***********************************************************
+''' Deep Neural Networks - tensorflow via DNNClassifier'''
+#***********************************************************
+class dnntfDef:
+    runDNNTF = True
+
+    dnntfAlwaysRetrain = False
+    
+    # threshold in % of probabilities for listing prediction results
+    thresholdProbabilityDNNTFPred = 0.01
+
 #**********************************************
 ''' TensorFlow '''
 #**********************************************
 class tfDef:
-    runTF = True
+    runTF = False
     tfAlwaysRetrain = False
     tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
     plotMapTF = True
@@ -262,15 +273,19 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        runSVMmain(A, Cl, En, R, learnFileRoot)
+        runSVM(A, Cl, En, R, learnFileRoot)
 
-    ''' Run Neural Network '''
+    ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        runNNmain(A, Cl, R, learnFileRoot)
+        runNN(A, Cl, R, learnFileRoot)
+    
+    ''' Run Neural Network - sklearn'''
+    if dnntfDef.runDNNTF == True:
+        runDNNTF(A, Cl, R, learnFileRoot)
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
-        runTensorFlow(A,Cl,R, learnFileRoot)
+        runTFbasic(A,Cl,R, learnFileRoot)
 
     ''' Plot Training Data '''
     if plotDef.createTrainingDataPlot == True:
@@ -315,19 +330,19 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        svmPred, svmProb = runSVMmain(A, Cl, En, R, learnFileRoot)
+        svmPred, svmProb = runSVM(A, Cl, En, R, learnFileRoot)
         summaryFile.extend([svmPred, svmProb])
         svmDef.svmAlwaysRetrain = False
 
     ''' Run Neural Network '''
     if nnDef.runNN == True:
-        nnPred, nnProb = runNNmain(A, Cl, R, learnFileRoot)
+        nnPred, nnProb = runNN(A, Cl, R, learnFileRoot)
         summaryFile.extend([nnPred, nnProb])
         nnDef.nnAlwaysRetrain = False
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
-        tfPred, tfProb, tfAccur = runTensorFlow(A,Cl,R, learnFileRoot)
+        tfPred, tfProb, tfAccur = runTFbasic(A,Cl,R, learnFileRoot)
         summaryFile.extend([tfPred, tfProb, tfAccur])
         tfDef.tfAlwaysRetrain = False
 
@@ -364,19 +379,19 @@ def LearnPredictMap(learnFile, mapFile):
 
         ''' Run Support Vector Machines '''
         if svmDef.runSVM == True:
-            svmPred[i], temp = runSVMmain(A, Cl, En, r, learnFileRoot)
+            svmPred[i], temp = runSVM(A, Cl, En, r, learnFileRoot)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
 
         ''' Run Neural Network '''
         if nnDef.runNN == True:
-            nnPred[i], temp = runNNmain(A, Cl, r, learnFileRoot)
+            nnPred[i], temp = runNN(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
             nnDef.nnAlwaysRetrain = False
 
         ''' Tensorflow '''
         if tfDef.runTF == True:
-            tfPred[i], temp, temp = runTensorFlow(A,Cl,r, learnFileRoot)
+            tfPred[i], temp, temp = runTFbasic(A,Cl,r, learnFileRoot)
             saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
             tfDef.tfAlwaysRetrain = False
 
@@ -447,7 +462,7 @@ def TrainTF(learnFile, numRuns):
 #********************************************************************************
 ''' Run SVM '''
 #********************************************************************************
-def runSVMmain(A, Cl, En, R, Root):
+def runSVM(A, Cl, En, R, Root):
     from sklearn import svm
     from sklearn.externals import joblib
     svmTrainedData = Root + '.svmModel.pkl'
@@ -505,9 +520,9 @@ def runSVMmain(A, Cl, En, R, Root):
 
 
 #********************************************************************************
-''' Run Neural Network '''
+''' Run Neural Network - sklearn '''
 #********************************************************************************
-def runNNmain(A, Cl, R, Root):
+def runNN(A, Cl, R, Root):
     from sklearn.neural_network import MLPClassifier, MLPRegressor
     from sklearn.externals import joblib
     
@@ -556,13 +571,13 @@ def runNNmain(A, Cl, R, Root):
 
         predValue = clf.predict(R)[0]
         predProb = round(100*max(prob),4)
-        print('\033[1m' + '\n Predicted classifier value (Neural Networks) = ' + str(predValue) +
+        print('\033[1m' + '\n Predicted classifier value (Deep Neural Networks - sklearn) = ' + str(predValue) +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
     else:
         Cl = np.array(Cl,dtype=float)
         predValue = clf.predict(R)[0]
         predProb = clf.score(A,Cl)
-        print('\033[1m' + '\n Predicted regressor value (Neural Networks) = ' + str('{:.3f}'.format(predValue)) +
+        print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - sklearn) = ' + str('{:.3f}'.format(predValue)) +
               '  (R^2 = ' + str('{:.5f}'.format(predProb)) + ')\033[0m\n')
 
     #**************************************
@@ -583,17 +598,73 @@ def runNNmain(A, Cl, R, Root):
 
 
 #********************************************************************************
+''' TensorFlow '''
+''' Run SkFlow - DNN Classifier '''
+''' https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier'''
+#********************************************************************************
+''' Run DNNClassifier model training and evaluation via TensorFlow-skflow '''
+#********************************************************************************
+def runDNNTF(A, Cl, R, Root):
+    print('==========================================================================\n')
+    print(' Running Deep Neural Networks: DNNClassifier - TensorFlow...')
+    import tensorflow as tf
+    import tensorflow.contrib.learn as skflow
+    from sklearn import preprocessing
+    from sklearn.externals import joblib
+    
+    print(' Initializing TensorFlow...\n')
+    tf.reset_default_graph()
+    tfTrainedData = Root + '.dnntfmodel'
+
+    le = preprocessing.LabelEncoder()
+    Cl2 = le.fit_transform(Cl)
+    
+    feature_columns = skflow.infer_real_valued_columns_from_input(A.astype(np.float32))
+    clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10], n_classes=np.unique(Cl).size,model_dir='/tmp/tf/mlp/')
+    clf.fit(input_fn=lambda: skflow_input_fn(A, Cl2), steps=200)
+    
+    pred_class = list(clf.predict_classes(input_fn=lambda: skflow_input_fn_predict(R)))[0]
+    predValue = le.inverse_transform(pred_class)
+    prob = list(clf.predict_proba(input_fn=lambda: skflow_input_fn_predict(R)))[0]
+    predProb = round(100*prob[pred_class],2)
+    
+    rosterPred = np.where(prob>dnntfDef.thresholdProbabilityDNNTFPred/100)[0]
+    
+    print('\n  ================================')
+    print('  \033[1mDNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityDNNTFPred),'%')
+    print('  ================================')
+    print('  Prediction\tProbability [%]')
+    for i in range(rosterPred.shape[0]):
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*prob[rosterPred][i])))
+    print('  ================================')
+    
+    print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - TensorFlow) = ' + predValue +
+          '  (probability = ' + str(predProb) + '%)\033[0m\n')
+
+#********************************************************************************
+''' Format inputs for DNNClassifier '''
+#********************************************************************************
+def skflow_input_fn(A, Cl2):
+    import tensorflow as tf
+    feature_columns = tf.constant(A.astype(np.float32))
+    labels = tf.constant(Cl2)
+    return feature_columns, labels
+
+def skflow_input_fn_predict(R):
+    import tensorflow as tf
+    pred_columns = tf.constant(R.astype(np.float32))
+    return pred_columns
+
+#********************************************************************************
 ''' Tensorflow '''
 ''' https://www.tensorflow.org/get_started/mnist/beginners'''
-#********************************************************************************
-
 #********************************************************************************
 ''' Format vectors of unique labels '''
 #********************************************************************************
 def formatClass(rootFile, Cl):
     import sklearn.preprocessing as pp
     print('==========================================================================\n')
-    print(' Running tensorFlow. Creating class data in binary form...')
+    print(' Running basic TensorFlow. Creating class data in binary form...')
     Cl2 = pp.LabelBinarizer().fit_transform(Cl)
 
     import matplotlib.pyplot as plt
@@ -609,9 +680,9 @@ def formatClass(rootFile, Cl):
     return Cl2
 
 #********************************************************************************
-''' Run model training and evaluation via TensorFlow '''
+''' Run basic model training and evaluation via TensorFlow '''
 #********************************************************************************
-def runTensorFlow(A, Cl, R, Root):
+def runTFbasic(A, Cl, R, Root):
     import tensorflow as tf
     tfTrainedData = Root + '.tfmodel'
     Cl2 = formatClass(Root, Cl)
