@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170602a
+* version: 20170602b
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -271,10 +271,6 @@ def LearnPredictFile(learnFile, sampleFile):
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
     R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
 
-    ''' Run Support Vector Machines '''
-    if svmDef.runSVM == True:
-        runSVM(A, Cl, En, R, learnFileRoot)
-
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
         runNN(A, Cl, R, learnFileRoot)
@@ -282,6 +278,10 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Run Neural Network - sklearn'''
     if dnntfDef.runDNNTF == True:
         runDNNTF(A, Cl, R, learnFileRoot)
+
+    ''' Run Support Vector Machines '''
+    if svmDef.runSVM == True:
+        runSVM(A, Cl, En, R, learnFileRoot)
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
@@ -328,17 +328,23 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
 
     learnFileRoot = os.path.splitext(learnFile)[0]
 
+    ''' Run Neural Network - sklearn'''
+    if nnDef.runNN == True:
+        nnPred, nnProb = runNN(A, Cl, R, learnFileRoot)
+        summaryFile.extend([nnPred, nnProb])
+        nnDef.nnAlwaysRetrain = False
+    
+    ''' Run Neural Network - TensorFlow'''
+    if dnntfDef.runDNNTF == True:
+        dnntfPred, dnntfProb = runDNNTF(A, Cl, R, learnFileRoot)
+        summaryFile.extend([nnPred, nnProb])
+        dnntfDef.dnntfAlwaysRetrain = False
+
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
         svmPred, svmProb = runSVM(A, Cl, En, R, learnFileRoot)
         summaryFile.extend([svmPred, svmProb])
         svmDef.svmAlwaysRetrain = False
-
-    ''' Run Neural Network '''
-    if nnDef.runNN == True:
-        nnPred, nnProb = runNN(A, Cl, R, learnFileRoot)
-        summaryFile.extend([nnPred, nnProb])
-        nnDef.nnAlwaysRetrain = False
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
@@ -377,17 +383,23 @@ def LearnPredictMap(learnFile, mapFile):
         r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
         type = 1
 
+        ''' Run Neural Network - sklearn'''
+        if nnDef.runNN == True:
+            nnPred[i], temp = runNN(A, Cl, r, learnFileRoot)
+            saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
+            nnDef.nnAlwaysRetrain = False
+        
+        ''' Run Neural Network - TensorFlow'''
+        if nnDef.runNN == True:
+            dnntfPred[i], temp = runDNNTF(A, Cl, r, learnFileRoot)
+            saveMap(mapFile, 'DNN-TF', 'HC', dnntfPred[i], X[i], Y[i], True)
+            dnnDef.tfnnAlwaysRetrain = False
+        
         ''' Run Support Vector Machines '''
         if svmDef.runSVM == True:
             svmPred[i], temp = runSVM(A, Cl, En, r, learnFileRoot)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.svmAlwaysRetrain = False
-
-        ''' Run Neural Network '''
-        if nnDef.runNN == True:
-            nnPred[i], temp = runNN(A, Cl, r, learnFileRoot)
-            saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
-            nnDef.nnAlwaysRetrain = False
 
         ''' Tensorflow '''
         if tfDef.runTF == True:
@@ -402,10 +414,12 @@ def LearnPredictMap(learnFile, mapFile):
             saveMap(mapFile, 'KM', 'HC', kmPred[i], X[i], Y[i], True)
         i+=1
 
+    if nnDef.plotNN == True and nnDef.runNN == True:
+        plotMaps(X, Y, nnPred, 'Deep Neural networks - sklearn')
+    if nnDef.plotNN == True and nnDef.runNN == True:
+        plotMaps(X, Y, dnntfPred, 'Deep Neural networks - tensorFlow')
     if svmDef.plotSVM == True and svmDef.runSVM == True:
         plotMaps(X, Y, svmPred, 'SVM')
-    if nnDef.plotNN == True and nnDef.runNN == True:
-        plotMaps(X, Y, nnPred, 'Neural netowrks')
     if tfDef.plotMapTF == True and tfDef.runTF == True:
         plotMaps(X, Y, tfPred, 'TensorFlow')
     if kmDef.plotKMmaps == True and kmDef.runKM == True:
