@@ -73,26 +73,6 @@ class preprocDef:
     percentCrossValid = 0.05
 
 #**********************************************
-''' Support Vector Classification'''
-#**********************************************
-class svmDef:
-    runSVM = True
-    svmAlwaysRetrain = False
-    plotSVM = True
-    svmClassReport = False
-    
-    # threshold in % of probabilities for listing prediction results
-    thresholdProbabilitySVMPred = 3
-
-    ''' Training algorithm for SVM
-        Use either 'linear' or 'rbf'
-        ('rbf' for large number of features) '''
-
-    Cfactor = 20
-    kernel = 'rbf'
-    showClasses = False
-
-#**********************************************
 ''' Deep Neural Networks - sklearn'''
 #**********************************************
 class nnDef:
@@ -144,6 +124,26 @@ class tfDef:
 
     decayLearnRate = True
     learnRate = 0.75
+
+#**********************************************
+''' Support Vector Classification'''
+#**********************************************
+class svmDef:
+    runSVM = True
+    svmAlwaysRetrain = False
+    plotSVM = True
+    svmClassReport = False
+    
+    # threshold in % of probabilities for listing prediction results
+    thresholdProbabilitySVMPred = 3
+    
+    ''' Training algorithm for SVM
+        Use either 'linear' or 'rbf'
+        ('rbf' for large number of features) '''
+    
+    Cfactor = 20
+    kernel = 'rbf'
+    showClasses = False
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
