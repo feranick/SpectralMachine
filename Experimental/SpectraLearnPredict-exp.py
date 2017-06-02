@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170601a-exp4
+* version: 20170602a-exp2
 *
 * Uses: SVM, Neural Networks, TensorFlow, PCA, K-Means
 *
@@ -557,13 +557,13 @@ def runNNmain(A, Cl, R, Root):
 
         predValue = clf.predict(R)[0]
         predProb = round(100*max(prob),4)
-        print('\033[1m' + '\n Predicted classifier value (Neural Networks) = ' + str(predValue) +
+        print('\033[1m' + '\n Predicted classifier value (Deep Neural Networks - sklearn) = ' + str(predValue) +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
     else:
         Cl = np.array(Cl,dtype=float)
         predValue = clf.predict(R)[0]
         predProb = clf.score(A,Cl)
-        print('\033[1m' + '\n Predicted regressor value (Neural Networks) = ' + str('{:.3f}'.format(predValue)) +
+        print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - sklearn) = ' + str('{:.3f}'.format(predValue)) +
               '  (R^2 = ' + str('{:.5f}'.format(predProb)) + ')\033[0m\n')
 
     #**************************************
@@ -588,36 +588,48 @@ def runNNmain(A, Cl, R, Root):
 ''' Run SkFlow - DNN Classifier '''
 ''' https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier'''
 #********************************************************************************
-def skflow_input_fn(A, Cl):
+def skflow_input_fn(A, Cl2):
     import tensorflow as tf
-    import tensorflow.contrib.learn as skflow
-    from sklearn import preprocessing
-    le = preprocessing.LabelEncoder()
-    Cl2 = le.fit_transform(Cl)
-    
     feature_columns = tf.constant(A.astype(np.float32))
     labels = tf.constant(Cl2)
-    
     return feature_columns, labels
+
+def skflow_input_fn_predict(R):
+    import tensorflow as tf
+    pred_columns = tf.constant(R.astype(np.float32))
+    return pred_columns
 
 
 def runSKFDNN(A, Cl, R, Root):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
-    input_fn = skflow_input_fn(A, Cl)
-    print(input_fn[0])
-    feature_columns = skflow.infer_real_valued_columns_from_input(A.astype(np.float32))
-    clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10], n_classes=3,model_dir='/tmp/tf/mlp/')
-    #clf = skflow.SKCompat(skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10], n_classes=3,model_dir='/tmp/tf/mlp/'))
-    clf.fit(input_fn=lambda: skflow_input_fn(A, Cl), steps=200)
-    #predValue = le.inverse_fit(clf.predict(R)[0])
-    #prob = clf.predict_proba(R)[0].tolist()
-    #predProb = round(100*max(prob),4)
+    from sklearn import preprocessing
+
+    le = preprocessing.LabelEncoder()
+    Cl2 = le.fit_transform(Cl)
     
-    #print('\033[1m' + '\n Predicted regressor value (Neural Networks - SKFLOW) = ' + str('{:.3f}'.format(predValue2)) +
-    #      '  (R^2 = ' + str('{:.5f}'.format(predProb2)) + ')\033[0m\n')
-    #score = metrics.accuracy_score(y_test, clf2.predict(R))
-    #print("Accuracy: %f" % score)
+    #input_fn = skflow_input_fn(A, Cl2)
+    feature_columns = skflow.infer_real_valued_columns_from_input(A.astype(np.float32))
+    clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10], n_classes=np.unique(Cl).size,model_dir='/tmp/tf/mlp/')
+    #clf = skflow.SKCompat(skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10], n_classes=3,model_dir='/tmp/tf/mlp/'))
+    clf.fit(input_fn=lambda: skflow_input_fn(A, Cl2), steps=200)
+    pred_class = list(clf.predict_classes(input_fn=lambda: skflow_input_fn_predict(R)))[0]
+    predValue = le.inverse_transform(pred_class)
+    prob = list(clf.predict_proba(input_fn=lambda: skflow_input_fn_predict(R)))[0]
+    predProb = round(100*prob[pred_class],2)
+    
+    rosterPred = np.where(prob>nnDef.thresholdProbabilityNNPred/100)[0]
+    
+    print('  ==============================')
+    print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityNNPred),'%')
+    print('  ==============================')
+    print('  Prediction\tProbability [%]')
+    for i in range(rosterPred.shape[0]):
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*prob[rosterPred][i])))
+    print('  ==============================')
+    
+    print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - TensorFlow) = ' + predValue +
+          '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
 
 #********************************************************************************
