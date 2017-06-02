@@ -275,7 +275,7 @@ def LearnPredictFile(learnFile, sampleFile):
     if nnDef.runNN == True:
         runNN(A, Cl, R, learnFileRoot)
     
-    ''' Run Neural Network - sklearn'''
+    ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
         runDNNTF(A, Cl, R, learnFileRoot)
 
@@ -624,7 +624,6 @@ def runDNNTF(A, Cl, R, Root):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
-    from sklearn.externals import joblib
     
     print(' Initializing TensorFlow...\n')
     tf.reset_default_graph()
