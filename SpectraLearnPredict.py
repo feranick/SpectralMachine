@@ -73,9 +73,9 @@ class nnDef:
     runNN = True
     MLPRegressor = False
 
-    AlwaysRetrain = False
+    alwaysRetrain = False
 
-    subsetCrossValid = True
+    subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
     iterCrossValid = 2
     
@@ -116,11 +116,11 @@ class dnntfDef:
     hidden_layers = [numNeurons]*numHidlayers
 
 #**********************************************
-''' Support Vector Classification'''
+''' Support Vector Machines'''
 #**********************************************
 class svmDef:
     runSVM = True
-    AlwaysRetrain = False
+    alwaysRetrain = False
     
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
@@ -163,8 +163,8 @@ class kmDef:
 #**********************************************
 class tfDef:
     runTF = False
-    tfAlwaysRetrain = False
-    tfAlwaysImprove = False     # tfAlwaysRetrain must be True for this to work
+    alwaysRetrain = False
+    alwaysImprove = False     # alwaysRetrain must be True for this to work
     plotMapTF = True
     plotClassDistribTF = False
     enableTensorboard = False
@@ -348,25 +348,25 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     if nnDef.runNN == True:
         nnPred, nnProb = runNN(A, Cl, R, learnFileRoot)
         summaryFile.extend([nnPred, nnProb])
-        nnDef.AlwaysRetrain = False
+        nnDef.alwaysRetrain = False
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
         dnntfPred, dnntfProb = runDNNTF(A, Cl, R, learnFileRoot)
         summaryFile.extend([nnPred, nnProb])
-        dnntfDef.AlwaysRetrain = False
+        dnntfDef.alwaysRetrain = False
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
         svmPred, svmProb = runSVM(A, Cl, En, R, learnFileRoot)
         summaryFile.extend([svmPred, svmProb])
-        svmDef.AlwaysRetrain = False
+        svmDef.alwaysRetrain = False
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
         tfPred, tfProb, tfAccur = runTFbasic(A,Cl,R, learnFileRoot)
         summaryFile.extend([tfPred, tfProb, tfAccur])
-        tfDef.tfAlwaysRetrain = False
+        tfDef.tfalwaysRetrain = False
 
     ''' Run K-Means '''
     if kmDef.runKM == True:
@@ -403,25 +403,25 @@ def LearnPredictMap(learnFile, mapFile):
         if nnDef.runNN == True:
             nnPred[i], temp = runNN(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
-            nnDef.AlwaysRetrain = False
+            nnDef.alwaysRetrain = False
         
         ''' Run Neural Network - TensorFlow'''
         if nnDef.runNN == True:
             dnntfPred[i], temp = runDNNTF(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'DNN-TF', 'HC', dnntfPred[i], X[i], Y[i], True)
-            dnnDef.AlwaysRetrain = False
+            dnnDef.alwaysRetrain = False
         
         ''' Run Support Vector Machines '''
         if svmDef.runSVM == True:
             svmPred[i], temp = runSVM(A, Cl, En, r, learnFileRoot)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
-            svmDef.AlwaysRetrain = False
+            svmDef.alwaysRetrain = False
 
         ''' Tensorflow '''
         if tfDef.runTF == True:
             tfPred[i], temp, temp = runTFbasic(A,Cl,r, learnFileRoot)
             saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
-            tfDef.tfAlwaysRetrain = False
+            tfDef.alwaysRetrain = False
 
         ''' Run K-Means '''
         if kmDef.runKM == True:
@@ -458,7 +458,7 @@ def runNN(A, Cl, R, Root):
     print('==========================================================================\n')
     print(' Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnDef.nnSolver + ')...')
     try:
-        if nnDef.AlwaysRetrain == False:
+        if nnDef.alwaysRetrain == False:
             with open(nnTrainedData):
                 print(' Opening NN training model...\n')
                 clf = joblib.load(nnTrainedData)
@@ -628,7 +628,7 @@ def runSVM(A, Cl, En, R, Root):
     print('==========================================================================\n')
     print(' Running Support Vector Machine (kernel: ' + svmDef.kernel + ')...')
     try:
-        if svmDef.AlwaysRetrain == False:
+        if svmDef.alwaysRetrain == False:
             with open(svmTrainedData):
                 print(' Opening SVM training model...\n')
                 clf = joblib.load(svmTrainedData)
@@ -1264,8 +1264,8 @@ def scrambleNoise(A, offset):
 def TrainTF(learnFile, numRuns):
     learnFileRoot = os.path.splitext(learnFile)[0]
     summary_filename = learnFileRoot + '_summary-TF-training' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
-    tfDef.tfAlwaysRetrain = True
-    tfDef.tfAlwaysImprove = True
+    tfDef.alwaysRetrain = True
+    tfDef.alwaysImprove = True
     
     ''' Open and process training data '''
     En, Cl, A, YnormXind = readLearnFile(learnFile)
@@ -1371,7 +1371,7 @@ def runTFbasic(A, Cl, R, Root):
     saver = tf.train.Saver()
     accur = 0
     try:
-        if tfDef.tfAlwaysRetrain == False:
+        if tfDef.alwaysRetrain == False:
             print(' Opening TF training model from:', tfTrainedData)
             saver.restore(sess, './' + tfTrainedData)
             print('\n Model restored.\n')
