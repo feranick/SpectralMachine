@@ -102,7 +102,7 @@ class dnntfDef:
     iterCrossValid = 3
     
     numNeurons = 20        # number of neurons per layer
-    numHidlayers = 10        # number of hidden layer
+    numHidlayers = 1        # number of hidden layer
     nnSolver = "Adagrad"    # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     trainingSteps = 500     #number of training steps
     
