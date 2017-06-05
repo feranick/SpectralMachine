@@ -77,7 +77,7 @@ class nnDef:
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
     iterCrossValid = 3
 
-    numNeurons = 10  #default = 100
+    numNeurons = 20  #default = 100
     nnSolver = 'lbfgs'      # (Recommended) for datasets with large number of variables
     #nnSolver = 'adam'
     #nnSolver = 'sgd'
