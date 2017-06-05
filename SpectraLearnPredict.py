@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170605d
+* version: 20170605e
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -79,9 +79,11 @@ class nnDef:
     runNN = True
     MLPRegressor = False
 
-    nnAlwaysRetrain = False
-    plotNN = True
-    nnClassReport = False
+    AlwaysRetrain = False
+
+    subsetCrossValid = True
+    percentCrossValid = 0.10  # proportion of TEST data for cross validation
+    iterCrossValid = 2
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.001
@@ -93,12 +95,15 @@ class nnDef:
     
     numNeurons = 100  #default = 100
 
+    plotNN = True
+    nnClassReport = False
+
 #***********************************************************
 ''' Deep Neural Networks - tensorflow via DNNClassifier'''
 #***********************************************************
 class dnntfDef:
-    runDNNTF = True
-    alwaysRetrain = False
+    runDNNTF = False
+    alwaysRetrain = True
     
     nnSolver = "Adagrad"    # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     numNeurons = 100        # number of neurons per layer
@@ -121,9 +126,11 @@ class dnntfDef:
 #**********************************************
 class svmDef:
     runSVM = True
-    svmAlwaysRetrain = False
-    plotSVM = True
-    svmClassReport = False
+    AlwaysRetrain = False
+    
+    subsetCrossValid = False
+    percentCrossValid = 0.10  # proportion of TEST data for cross validation
+    iterCrossValid = 2
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilitySVMPred = 3
@@ -135,6 +142,9 @@ class svmDef:
     Cfactor = 20
     kernel = 'rbf'
     showClasses = False
+
+    plotSVM = True
+    svmClassReport = False
 
 #**********************************************
 ''' Principal component analysis (PCA) '''
@@ -344,7 +354,7 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     if nnDef.runNN == True:
         nnPred, nnProb = runNN(A, Cl, R, learnFileRoot)
         summaryFile.extend([nnPred, nnProb])
-        nnDef.nnAlwaysRetrain = False
+        nnDef.AlwaysRetrain = False
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
@@ -356,7 +366,7 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     if svmDef.runSVM == True:
         svmPred, svmProb = runSVM(A, Cl, En, R, learnFileRoot)
         summaryFile.extend([svmPred, svmProb])
-        svmDef.svmAlwaysRetrain = False
+        svmDef.AlwaysRetrain = False
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
@@ -399,19 +409,19 @@ def LearnPredictMap(learnFile, mapFile):
         if nnDef.runNN == True:
             nnPred[i], temp = runNN(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
-            nnDef.nnAlwaysRetrain = False
+            nnDef.AlwaysRetrain = False
         
         ''' Run Neural Network - TensorFlow'''
         if nnDef.runNN == True:
             dnntfPred[i], temp = runDNNTF(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'DNN-TF', 'HC', dnntfPred[i], X[i], Y[i], True)
-            dnnDef.tfnnAlwaysRetrain = False
+            dnnDef.AlwaysRetrain = False
         
         ''' Run Support Vector Machines '''
         if svmDef.runSVM == True:
             svmPred[i], temp = runSVM(A, Cl, En, r, learnFileRoot)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
-            svmDef.svmAlwaysRetrain = False
+            svmDef.AlwaysRetrain = False
 
         ''' Tensorflow '''
         if tfDef.runTF == True:
@@ -454,7 +464,7 @@ def runNN(A, Cl, R, Root):
     print('==========================================================================\n')
     print(' Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnDef.nnSolver + ')...')
     try:
-        if nnDef.nnAlwaysRetrain == False:
+        if nnDef.AlwaysRetrain == False:
             with open(nnTrainedData):
                 print(' Opening NN training model...\n')
                 clf = joblib.load(nnTrainedData)
@@ -467,21 +477,30 @@ def runNN(A, Cl, R, Root):
         if nnDef.MLPRegressor is False:
             print(' Retraining NN model using MLP Classifier...')
             clf = MLPClassifier(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
-            clf.fit(A, Cl)
-            print('  Mean accuracy: ',clf.score(A,Cl))
         else:
             print(' Retraining NN model using MLP Regressor...')
             clf = MLPRegressor(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
             Cl = np.array(Cl,dtype=float)
+
+        if nnDef.subsetCrossValid == True:
+            print(" Iterating training using: ",str(nnDef.percentCrossValid*100), "% as test subset, iterating",str(nnDef.iterCrossValid)," time(s) ...\n")
+            for i in range(nnDef.iterCrossValid):
+                As, Cls, As_cv, Cls_cv = formatSubset(A, Cl, nnDef.percentCrossValid)
+                clf.fit(As, Cls)
+                if nnDef.MLPRegressor is False:
+                    print('  Mean accuracy: ',100*clf.score(As_cv,Cls_cv),'%')
+                else:
+                    print('  Coefficient of determination R^2: ',clf.score(As_cv,Cls_cv))
+        else:
+            print(" Training on the full training dataset\n")
             clf.fit(A, Cl)
-            print('  Coefficient of determination R^2: ',clf.score(A,Cl))
 
         joblib.dump(clf, nnTrainedData)
             
     if nnDef.MLPRegressor is False:
         prob = clf.predict_proba(R)[0].tolist()
         rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityPred/100)[0]
-        print('  ==============================')
+        print('\n  ==============================')
         print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityPred),'%')
         print('  ==============================')
         print('  Prediction\tProbability [%]')
@@ -615,7 +634,7 @@ def runSVM(A, Cl, En, R, Root):
     print('==========================================================================\n')
     print(' Running Support Vector Machine (kernel: ' + svmDef.kernel + ')...')
     try:
-        if svmDef.svmAlwaysRetrain == False:
+        if svmDef.AlwaysRetrain == False:
             with open(svmTrainedData):
                 print(' Opening SVM training model...\n')
                 clf = joblib.load(svmTrainedData)
@@ -627,18 +646,28 @@ def runSVM(A, Cl, En, R, Root):
         #**********************************************
         print(' Retraining SVM data...')
         clf = svm.SVC(C = svmDef.Cfactor, decision_function_shape = 'ovr', probability=True)
-        clf.fit(A,Cl)
-        Z= clf.decision_function(A)
-        print(' Number of classes = ' + str(Z.shape[1]))
+        
+        if svmDef.subsetCrossValid == True:
+            print(" Iterating training using: ",str(nnDef.percentCrossValid*100), "% as test subset, iterating",str(nnDef.iterCrossValid)," time(s) ...\n")
+            for i in range(svmDef.iterCrossValid):
+                As, Cls, As_cv, Cls_cv = formatSubset(A, Cl, svmDef.percentCrossValid)
+                clf.fit(As, Cls)
+                print('  Mean accuracy: ',100*clf.score(As_cv,Cls_cv),'%')
+        else:
+            print(" Training on the full training dataset\n")
+            clf.fit(A,Cl)
+
+        Z = clf.decision_function(A)
+        print('\n  Number of classes = ' + str(Z.shape[1]))
         joblib.dump(clf, svmTrainedData)
         if svmDef.showClasses == True:
-            print(' List of classes: ' + str(clf.classes_))
+            print('  List of classes: ' + str(clf.classes_))
 
     R_pred = clf.predict(R)
     prob = clf.predict_proba(R)[0].tolist()
     
     rosterPred = np.where(clf.predict_proba(R)[0]>svmDef.thresholdProbabilitySVMPred/100)[0]
-    print('  ==============================')
+    print('\n  ==============================')
     print('  \033[1mSVM\033[0m - Probability >',str(svmDef.thresholdProbabilitySVMPred),'%')
     print('  ==============================')
     print('  Prediction\tProbability [%]')
