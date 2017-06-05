@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170604a
+* version: 20170605a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -98,16 +98,21 @@ class nnDef:
 #***********************************************************
 class dnntfDef:
     runDNNTF = True
-    AlwaysRetrain = False
+    alwaysRetrain = False
     
     nnSolver = "Adagrad"   # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     numNeurons = 100   # number of neurons per layer
     numHidlayers = 2    # number of hidden layer
     
-    hidden_layers = [numNeurons]*numHidlayers
+    subsetCrossValid = True
+    percentCrossValid = 0.3
+    iterCrossValid = 300
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
+
+    # Setup variables - do not change.
+    hidden_layers = [numNeurons]*numHidlayers
 
 #**********************************************
 ''' TensorFlow '''
@@ -524,7 +529,13 @@ def runDNNTF(A, Cl, R, Root):
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
     
-    model_directory = Root + "/DNN-TF_" + str(dnntfDef.numHidlayers)+"x"+str(dnntfDef.numNeurons)
+    if dnntfDef.alwaysRetrain == False:
+        model_directory = Root + "/DNN-TF_" + str(dnntfDef.numHidlayers)+"x"+str(dnntfDef.numNeurons)
+        print(" Training model saved in: ", model_directory, "\n")
+    else:
+        model_directory = None
+        print(" Training model not saved\n")
+
     print(' Initializing TensorFlow...\n')
     tf.reset_default_graph()
 
