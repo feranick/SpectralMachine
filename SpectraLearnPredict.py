@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170605a
+* version: 20170605b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -87,7 +87,7 @@ class nnDef:
     thresholdProbabilityPred = 0.001
 
     ''' Solver for NN '''
-    nnSolver = 'lbfgs' # (Recommended) for datasets with large number of variables
+    nnSolver = 'lbfgs'      # (Recommended) for datasets with large number of variables
     #nnSolver = 'adam'
     #nnSolver = 'sgd'
     
@@ -100,13 +100,15 @@ class dnntfDef:
     runDNNTF = True
     alwaysRetrain = False
     
-    nnSolver = "Adagrad"   # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
-    numNeurons = 100   # number of neurons per layer
-    numHidlayers = 2    # number of hidden layer
+    nnSolver = "Adagrad"    # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
+    numNeurons = 100        # number of neurons per layer
+    numHidlayers = 2        # number of hidden layer
+    
+    trainingSteps = 200     #number of training steps
     
     subsetCrossValid = True
     percentCrossValid = 0.3
-    iterCrossValid = 300
+    iterCrossValid = 1
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
@@ -120,7 +122,7 @@ class dnntfDef:
 class tfDef:
     runTF = False
     tfAlwaysRetrain = False
-    tfAlwaysImprove = False # tfAlwaysRetrain must be True for this to work
+    tfAlwaysImprove = False     # tfAlwaysRetrain must be True for this to work
     plotMapTF = True
     plotClassDistribTF = False
     enableTensorboard = False
@@ -536,7 +538,7 @@ def runDNNTF(A, Cl, R, Root):
         model_directory = None
         print(" Training model not saved\n")
 
-    print(' Initializing TensorFlow...\n')
+    print(' Initializing TensorFlow...')
     tf.reset_default_graph()
 
     le = preprocessing.LabelEncoder()
@@ -545,7 +547,19 @@ def runDNNTF(A, Cl, R, Root):
     feature_columns = skflow.infer_real_valued_columns_from_input(A.astype(np.float32))
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
                                optimizer=dnntfDef.nnSolver, n_classes=np.unique(Cl).size, model_dir=model_directory)
-    clf.fit(input_fn=lambda: skflow_input_fn(A, Cl2), steps=200)
+    print("\n Number of training steps:",dnntfDef.trainingSteps)
+
+    #********  EXPERIMENTAL ***********************
+
+    if dnntfDef.subsetCrossValid == True:
+        print(" Iterating training using subset (",str(dnntfDef.percentCrossValid*100), "%), ",str(dnntfDef.iterCrossValid)," time(s) ...\n")
+        for i in range(dnntfDef.iterCrossValid):
+            As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, dnntfDef.percentCrossValid)
+            clf.fit(input_fn=lambda: skflow_input_fn(As, Cl2s), steps=dnntfDef.trainingSteps)
+    else:
+        clf.fit(input_fn=lambda: skflow_input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
+
+    #******** END EXPERIMENTAL ***********************
 
     pred_class = list(clf.predict_classes(input_fn=lambda: skflow_input_fn_predict(R)))[0]
     predValue = le.inverse_transform(pred_class)
