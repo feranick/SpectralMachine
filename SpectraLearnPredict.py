@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170605c
+* version: 20170605d
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -104,38 +104,17 @@ class dnntfDef:
     numNeurons = 100        # number of neurons per layer
     numHidlayers = 2        # number of hidden layer
     
-    trainingSteps = 500     #number of training steps
+    trainingSteps = 1000     #number of training steps
     
     subsetCrossValid = False
-    percentCrossValid = 0.3
-    iterCrossValid = 1
+    percentCrossValid = 0.10  # proportion of TEST data for cross validation
+    iterCrossValid = 2
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
 
     # Setup variables - do not change.
     hidden_layers = [numNeurons]*numHidlayers
-
-#**********************************************
-''' TensorFlow '''
-#**********************************************
-class tfDef:
-    runTF = False
-    tfAlwaysRetrain = False
-    tfAlwaysImprove = False     # tfAlwaysRetrain must be True for this to work
-    plotMapTF = True
-    plotClassDistribTF = False
-    enableTensorboard = False
-
-    subsetIterLearn = True
-    percentTFCrossValid = 0.3
-    trainingIter = 300
-    
-    # threshold in % of probabilities for listing prediction results
-    thresholdProbabilityTFPred = 30
-
-    decayLearnRate = True
-    learnRate = 0.75
 
 #**********************************************
 ''' Support Vector Classification'''
@@ -174,6 +153,27 @@ class kmDef:
     numKMcomponents = 20
     plotKM = False
     plotKMmaps = True
+
+#**********************************************
+''' TensorFlow '''
+#**********************************************
+class tfDef:
+    runTF = False
+    tfAlwaysRetrain = False
+    tfAlwaysImprove = False     # tfAlwaysRetrain must be True for this to work
+    plotMapTF = True
+    plotClassDistribTF = False
+    enableTensorboard = False
+    
+    subsetIterLearn = True
+    percentTFCrossValid = 0.3
+    trainingIter = 300
+    
+    # threshold in % of probabilities for listing prediction results
+    thresholdProbabilityTFPred = 30
+    
+    decayLearnRate = True
+    learnRate = 0.75
 
 #**********************************************
 ''' Plotting '''
@@ -556,11 +556,17 @@ def runDNNTF(A, Cl, R, Root):
     ''' Train '''
     #**********************************************
     if dnntfDef.subsetCrossValid == True:
-        print(" Iterating training using subset (",str(dnntfDef.percentCrossValid*100), "%), ",str(dnntfDef.iterCrossValid)," time(s) ...\n")
+        print(" Iterating training using: ",str(dnntfDef.percentCrossValid*100), "% as test subset, iterating",str(dnntfDef.iterCrossValid)," time(s) ...\n")
         for i in range(dnntfDef.iterCrossValid):
             As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, dnntfDef.percentCrossValid)
+            
             clf.fit(input_fn=lambda: input_fn(As, Cl2s), steps=dnntfDef.trainingSteps)
+            accuracy_score = clf.evaluate(input_fn=lambda: input_fn(As_cv, Cl2s_cv), steps=1)
+            print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
+            print("  Loss: {:.2f}".format(accuracy_score["loss"]))
+            print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
     else:
+        print(" Training on the full training dataset\n")
         clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
 
     #**********************************************
@@ -1055,7 +1061,6 @@ def preProcessNormMap(A, En, type):
 
     return A, En, Aorig
 
-
 ####################################################################
 ''' Format subset of training data '''
 ####################################################################
@@ -1064,7 +1069,6 @@ def formatSubset(A, Cl, percent):
     A_train, A_cv, Cl_train, Cl_cv = \
     train_test_split(A, Cl, test_size=percent, random_state=42)
     return A_train, Cl_train, A_cv, Cl_cv
-
 
 ####################################################################
 ''' Open map files '''
@@ -1083,7 +1087,6 @@ def readPredMap(mapFile):
     A = np.delete(A, np.s_[0:2], 1)
     print(' Shape map: ' + str(A.shape))
     return X, Y, A, En
-
 
 ####################################################################
 ''' Save map files '''
