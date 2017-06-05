@@ -104,9 +104,9 @@ class dnntfDef:
     numNeurons = 100        # number of neurons per layer
     numHidlayers = 2        # number of hidden layer
     
-    trainingSteps = 200     #number of training steps
+    trainingSteps = 500     #number of training steps
     
-    subsetCrossValid = True
+    subsetCrossValid = False
     percentCrossValid = 0.3
     iterCrossValid = 1
     
@@ -555,18 +555,13 @@ def runDNNTF(A, Cl, R, Root):
     #**********************************************
     ''' Train '''
     #**********************************************
-    def input_fn():
-        x = tf.constant(A.astype(np.float32))
-        y = tf.constant(Cl2)
-        return x,y
-
     if dnntfDef.subsetCrossValid == True:
         print(" Iterating training using subset (",str(dnntfDef.percentCrossValid*100), "%), ",str(dnntfDef.iterCrossValid)," time(s) ...\n")
         for i in range(dnntfDef.iterCrossValid):
             As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, dnntfDef.percentCrossValid)
-            clf.fit(input_fn=input_fn, steps=dnntfDef.trainingSteps)
+            clf.fit(input_fn=lambda: input_fn(As, Cl2s), steps=dnntfDef.trainingSteps)
     else:
-        clf.fit(input_fn=input_fn, steps=dnntfDef.trainingSteps)
+        clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
 
     #**********************************************
     ''' Predict '''
@@ -594,6 +589,15 @@ def runDNNTF(A, Cl, R, Root):
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
+
+#**********************************************
+''' Format input data for Estimator '''
+#**********************************************
+def input_fn(A, Cl2):
+    import tensorflow as tf
+    x = tf.constant(A.astype(np.float32))
+    y = tf.constant(Cl2)
+    return x,y
 
 #********************************************************************************
 ''' Run SVM '''
