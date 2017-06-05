@@ -74,11 +74,11 @@ class nnDef:
     
     alwaysRetrain = False
     subsetCrossValid = False
-    percentCrossValid = 0.10  # proportion of TEST data for cross validation
-    iterCrossValid = 3
+    percentCrossValid = 0.10    # proportion of TEST data for cross validation
+    iterCrossValid = 2
 
-    numNeurons = 20  #default = 100
-    nnSolver = 'lbfgs'      # (Recommended) for datasets with large number of variables
+    numNeurons = 200            #default = 200
+    nnSolver = 'lbfgs'          # (Recommended) for datasets with large number of variables
     #nnSolver = 'adam'
     #nnSolver = 'sgd'
     
@@ -99,9 +99,9 @@ class dnntfDef:
     alwaysRetrain = False
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
-    iterCrossValid = 3
+    iterCrossValid = 2
     
-    numNeurons = 20        # number of neurons per layer
+    numNeurons = 200        # number of neurons per layer
     numHidlayers = 1        # number of hidden layer
     nnSolver = "Adagrad"    # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     trainingSteps = 500     #number of training steps
