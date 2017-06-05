@@ -66,12 +66,6 @@ class preprocDef:
         print(' THIS IS AN EXPERIMENTAL FEATURE \n')
         print(' Restricted range: DISABLED')
 
-    #**********************************************
-    ''' Model selection for training '''
-    #**********************************************
-    modelSelection = False
-    percentCrossValid = 0.05
-
 #**********************************************
 ''' Deep Neural Networks - sklearn'''
 #**********************************************
@@ -966,12 +960,6 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
     if preprocDef.StandardScalerFlag == True:
         print('  Using StandardScaler from sklearn ')
         A = preprocDef.scaler.fit_transform(A)
-
-    #**********************************************
-    ''' Select subset of training data for cross validation '''
-    #**********************************************
-    if preprocDef.modelSelection == True:
-        A, Cl = formatSubset(A, Cl, preprocDef.percentCrossValid)
 
     #**********************************************
     ''' Energy normalization range '''
