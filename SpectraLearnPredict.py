@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170605b
+* version: 20170605c
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -538,6 +538,9 @@ def runDNNTF(A, Cl, R, Root):
         model_directory = None
         print(" Training model not saved\n")
 
+    #**********************************************
+    ''' Initialize Estimator and training data '''
+    #**********************************************
     print(' Initializing TensorFlow...')
     tf.reset_default_graph()
 
@@ -549,21 +552,32 @@ def runDNNTF(A, Cl, R, Root):
                                optimizer=dnntfDef.nnSolver, n_classes=np.unique(Cl).size, model_dir=model_directory)
     print("\n Number of training steps:",dnntfDef.trainingSteps)
 
-    #********  EXPERIMENTAL ***********************
+    #**********************************************
+    ''' Train '''
+    #**********************************************
+    def input_fn():
+        x = tf.constant(A.astype(np.float32))
+        y = tf.constant(Cl2)
+        return x,y
 
     if dnntfDef.subsetCrossValid == True:
         print(" Iterating training using subset (",str(dnntfDef.percentCrossValid*100), "%), ",str(dnntfDef.iterCrossValid)," time(s) ...\n")
         for i in range(dnntfDef.iterCrossValid):
             As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, dnntfDef.percentCrossValid)
-            clf.fit(input_fn=lambda: skflow_input_fn(As, Cl2s), steps=dnntfDef.trainingSteps)
+            clf.fit(input_fn=input_fn, steps=dnntfDef.trainingSteps)
     else:
-        clf.fit(input_fn=lambda: skflow_input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
+        clf.fit(input_fn=input_fn, steps=dnntfDef.trainingSteps)
 
-    #******** END EXPERIMENTAL ***********************
+    #**********************************************
+    ''' Predict '''
+    #**********************************************
+    def input_fn_predict():
+        x = tf.constant(R.astype(np.float32))
+        return x
 
-    pred_class = list(clf.predict_classes(input_fn=lambda: skflow_input_fn_predict(R)))[0]
+    pred_class = list(clf.predict_classes(input_fn=input_fn_predict))[0]
     predValue = le.inverse_transform(pred_class)
-    prob = list(clf.predict_proba(input_fn=lambda: skflow_input_fn_predict(R)))[0]
+    prob = list(clf.predict_proba(input_fn=input_fn_predict))[0]
     predProb = round(100*prob[pred_class],2)
     
     rosterPred = np.where(prob>dnntfDef.thresholdProbabilityPred/100)[0]
@@ -580,20 +594,6 @@ def runDNNTF(A, Cl, R, Root):
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
-
-#********************************************************************************
-''' Format inputs for DNNClassifier '''
-#********************************************************************************
-def skflow_input_fn(A, Cl2):
-    import tensorflow as tf
-    feature_columns = tf.constant(A.astype(np.float32))
-    labels = tf.constant(Cl2)
-    return feature_columns, labels
-
-def skflow_input_fn_predict(R):
-    import tensorflow as tf
-    pred_columns = tf.constant(R.astype(np.float32))
-    return pred_columns
 
 #********************************************************************************
 ''' Run SVM '''
