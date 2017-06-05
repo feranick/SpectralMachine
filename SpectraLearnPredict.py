@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170605e
+* version: 20170605f
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -71,23 +71,21 @@ class preprocDef:
 #**********************************************
 class nnDef:
     runNN = True
-    MLPRegressor = False
-
+    
     alwaysRetrain = False
-
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
-    iterCrossValid = 2
-    
-    # threshold in % of probabilities for listing prediction results
-    thresholdProbabilityPred = 0.001
+    iterCrossValid = 3
 
-    ''' Solver for NN '''
+    numNeurons = 10  #default = 100
     nnSolver = 'lbfgs'      # (Recommended) for datasets with large number of variables
     #nnSolver = 'adam'
     #nnSolver = 'sgd'
     
-    numNeurons = 100  #default = 100
+    MLPRegressor = False
+    
+    # threshold in % of probabilities for listing prediction results
+    thresholdProbabilityPred = 0.001
 
     plotNN = True
     nnClassReport = False
@@ -96,18 +94,17 @@ class nnDef:
 ''' Deep Neural Networks - tensorflow via DNNClassifier'''
 #***********************************************************
 class dnntfDef:
-    runDNNTF = False
-    alwaysRetrain = True
+    runDNNTF = True
     
-    nnSolver = "Adagrad"    # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
-    numNeurons = 100        # number of neurons per layer
-    numHidlayers = 2        # number of hidden layer
-    
-    trainingSteps = 1000     #number of training steps
-    
+    alwaysRetrain = False
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
-    iterCrossValid = 2
+    iterCrossValid = 3
+    
+    numNeurons = 20        # number of neurons per layer
+    numHidlayers = 10        # number of hidden layer
+    nnSolver = "Adagrad"    # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
+    trainingSteps = 500     #number of training steps
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
@@ -120,8 +117,8 @@ class dnntfDef:
 #**********************************************
 class svmDef:
     runSVM = True
-    alwaysRetrain = False
     
+    alwaysRetrain = False
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
     iterCrossValid = 2
@@ -163,21 +160,22 @@ class kmDef:
 #**********************************************
 class tfDef:
     runTF = False
+    
     alwaysRetrain = False
     alwaysImprove = False     # alwaysRetrain must be True for this to work
-    plotMapTF = True
-    plotClassDistribTF = False
-    enableTensorboard = False
-    
     subsetIterLearn = True
-    percentTFCrossValid = 0.3
-    trainingIter = 300
+    percentTFCrossValid = 0.1
+    trainingIter = 2
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityTFPred = 30
     
     decayLearnRate = True
     learnRate = 0.75
+
+    plotMapTF = True
+    plotClassDistribTF = False
+    enableTensorboard = False
 
 #**********************************************
 ''' Plotting '''
@@ -1381,7 +1379,7 @@ def runTFbasic(A, Cl, R, Root):
         init = tf.global_variables_initializer()
         sess.run(init)
         
-        if os.path.isfile(tfTrainedData + '.meta') & tfDef.tfAlwaysImprove == True:
+        if os.path.isfile(tfTrainedData + '.meta') & tfDef.alwaysImprove == True:
             print('\n Improving TF model...')
             saver.restore(sess, './' + tfTrainedData)
         else:
