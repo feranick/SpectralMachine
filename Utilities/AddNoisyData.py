@@ -4,8 +4,9 @@
 *********************************************
 *
 * Replicate training data with added noise
-* File must be in RRuFF
-* version: 20170320d
+* For augmentation of data
+*
+* version: 20170606b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
