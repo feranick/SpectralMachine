@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170605f
+* version: 20170606a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -78,9 +78,14 @@ class nnDef:
     iterCrossValid = 2
 
     numNeurons = 200            #default = 200
-    nnSolver = 'lbfgs'          # (Recommended) for datasets with large number of variables
-    #nnSolver = 'adam'
-    #nnSolver = 'sgd'
+    
+    # Optimizers: lbfgs (default, for datasets with large number of varuables), adam, ssgd
+    nnOptimizer = "lbfgs"
+    
+    # activation functions: http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
+    # identity, logistic (sigmoid), tanh, relu
+    
+    activation_function = "relu"
     
     MLPRegressor = False
     
@@ -103,14 +108,33 @@ class dnntfDef:
     
     numNeurons = 200        # number of neurons per layer
     numHidlayers = 1        # number of hidden layer
-    nnSolver = "Adagrad"    # Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
+
+    # Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
+    nnOptimizer = "Adagrad"
+    
+    # activation functions: https://www.tensorflow.org/api_guides/python/nn
+    # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
+    # sigmoid, tanh
+    
+    activation_function = "relu"
+    
     trainingSteps = 500     #number of training steps
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
 
-    # Setup variables - do not change.
+    #*************************************************
+    # Setup variables and definitions- do not change.
+    #*************************************************
     hidden_layers = [numNeurons]*numHidlayers
+
+    if runDNNTF == True:
+        import tensorflow as tf
+    if activation_function == "sigmoid" or activation_function == "tanh":
+        actFn = "tf."+activation_function
+    else:
+        actFn = "tf.nn."+activation_function
+    activationFn = eval(actFn)
 
 #**********************************************
 ''' Support Vector Machines'''
@@ -211,11 +235,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -454,7 +478,10 @@ def runNN(A, Cl, R, Root):
         nnTrainedData = Root + '.nnModelR.pkl'
     
     print('==========================================================================\n')
-    print(' Running Neural Network: multi-layer perceptron (MLP) - (solver: ' + nnDef.nnSolver + ')...')
+    print(' Running Neural Network: multi-layer perceptron (MLP)')
+    print(' Number of neurons: Hidden layers:', nnDef.numNeurons)
+    print(' Optimizer:',nnDef.nnOptimizer,', Activation Fn:',nnDef.activation_function)
+
     try:
         if nnDef.alwaysRetrain == False:
             with open(nnTrainedData):
@@ -468,10 +495,11 @@ def runNN(A, Cl, R, Root):
         #**********************************************
         if nnDef.MLPRegressor is False:
             print(' Retraining NN model using MLP Classifier...')
-            clf = MLPClassifier(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
+            clf = MLPClassifier(solver=nnDef.nnOptimizer, alpha=1e-5, activation = nnDef.activation_function,
+                                hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
         else:
             print(' Retraining NN model using MLP Regressor...')
-            clf = MLPRegressor(solver=nnDef.nnSolver, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
+            clf = MLPRegressor(solver=nnDef.nnOptimizer, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
             Cl = np.array(Cl,dtype=float)
 
         if nnDef.subsetCrossValid == True:
@@ -538,16 +566,17 @@ def runDNNTF(A, Cl, R, Root):
     print('==========================================================================\n')
     print(' Running Deep Neural Networks: DNNClassifier - TensorFlow...')
     print(' Hidden layers:', dnntfDef.hidden_layers)
+    print(' Optimizer:',dnntfDef.nnOptimizer,', Activation Fn:',dnntfDef.activation_function)
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
     
     if dnntfDef.alwaysRetrain == False:
         model_directory = Root + "/DNN-TF_" + str(dnntfDef.numHidlayers)+"x"+str(dnntfDef.numNeurons)
-        print(" Training model saved in: ", model_directory, "\n")
+        print("\n Training model saved in: ", model_directory, "\n")
     else:
         model_directory = None
-        print(" Training model not saved\n")
+        print("\n Training model not saved\n")
 
     #**********************************************
     ''' Initialize Estimator and training data '''
@@ -560,7 +589,9 @@ def runDNNTF(A, Cl, R, Root):
     
     feature_columns = skflow.infer_real_valued_columns_from_input(A.astype(np.float32))
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
-                               optimizer=dnntfDef.nnSolver, n_classes=np.unique(Cl).size, model_dir=model_directory)
+                               optimizer=dnntfDef.nnOptimizer, n_classes=np.unique(Cl).size,
+                               activation_fn=dnntfDef.activationFn, model_dir=model_directory)
+                               
     print("\n Number of training steps:",dnntfDef.trainingSteps)
 
     #**********************************************
