@@ -79,7 +79,7 @@ class nnDef:
 
     numNeurons = 200            #default = 200
     
-    # Optimizers: lbfgs (default, for datasets with large number of varuables), adam, ssgd
+    # Optimizers: lbfgs (default), adam, ssgd
     nnOptimizer = "lbfgs"
     
     # activation functions: http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
@@ -110,6 +110,7 @@ class dnntfDef:
     numHidlayers = 1        # number of hidden layer
 
     # Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
+    # https://www.tensorflow.org/api_guides/python/train
     nnOptimizer = "Adagrad"
     
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
@@ -235,11 +236,11 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
