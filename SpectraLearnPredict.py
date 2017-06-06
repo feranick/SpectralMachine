@@ -77,9 +77,9 @@ class nnDef:
     percentCrossValid = 0.10    # proportion of TEST data for cross validation
     iterCrossValid = 2
 
-    numNeurons = 200            #default = 200
+    numNeurons = 200           #default = 200
     
-    # Optimizers: lbfgs (default), adam, ssgd
+    # Optimizers: lbfgs (default), adam, sgd
     nnOptimizer = "lbfgs"
     
     # activation functions: http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
