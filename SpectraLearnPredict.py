@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170606a
+* version: 20170606b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -185,12 +185,12 @@ class kmDef:
 #**********************************************
 class tfDef:
     runTF = False
-    
+
     alwaysRetrain = False
-    alwaysImprove = False     # alwaysRetrain must be True for this to work
-    subsetIterLearn = True
-    percentTFCrossValid = 0.1
-    trainingIter = 2
+    alwaysImprove = False       # alwaysRetrain must be True for this to work
+    subsetCrossValid = True
+    percentCrossValid = 0.1     # proportion of TEST data for cross validation
+    iterCrossValid = 2
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityTFPred = 30
@@ -225,7 +225,7 @@ multiproc = False
 #**********************************************
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ftmbkph:", ["file", "traintf", "map", "batch", "kmaps", "pca", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "fatmbkph:", ["file", "accuracy", "traintf", "map", "batch", "kmaps", "pca", "help"])
     except:
         usage()
         sys.exit(2)
@@ -236,6 +236,22 @@ def main():
 
     for o, a in opts:
         if o in ("-f" , "--file"):
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
+
+        if o in ("-a" , "--accuracy"):
+            print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
+            nnDef.alwaysRetrain = True
+            nnDef.subsetCrossValid = True
+            dnntfDef.alwaysRetrain = True
+            dnntfDef.subsetCrossValid = True
+            svmDef.alwaysRetrain = True
+            svmDef.subsetCrossValid = True
+            tfDef.alwaysRetrain = True
+            tfDef.subsetCrossValid = True
             try:
                 LearnPredictFile(sys.argv[2], sys.argv[3])
             except:
@@ -567,7 +583,7 @@ def runDNNTF(A, Cl, R, Root):
     print('==========================================================================\n')
     print(' Running Deep Neural Networks: DNNClassifier - TensorFlow...')
     print(' Hidden layers:', dnntfDef.hidden_layers)
-    print(' Optimizer:',dnntfDef.nnOptimizer,', Activation Fn:',dnntfDef.activation_function)
+    print(' Optimizer:',dnntfDef.nnOptimizer,', Activation function:',dnntfDef.activation_function)
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
@@ -1248,17 +1264,19 @@ def makeHeaderSummary(file, learnFile):
 #************************************
 def usage():
     print('\n Usage:\n')
-    print(' Single files: ')
+    print(' Single files:')
     print('  python3 SpectraLearnPredict.py -f <learningfile> <spectrafile> \n')
-    print(' Maps (formatted for Horiba LabSpec): ')
+    print(' Single files with cross-validation for accuracy determination: ')
+    print('  python3 SpectraLearnPredict.py -a <learningfile> <spectrafile> \n')
+    print(' Maps (formatted for Horiba LabSpec):')
     print('  python3 SpectraLearnPredict.py -m <learningfile> <spectramap> \n')
-    print(' Batch txt files: ')
+    print(' Batch txt files:')
     print('  python3 SpectraLearnPredict.py -b <learningfile> \n')
-    print(' K-means on maps: ')
+    print(' K-means on maps:')
     print('  python3 SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
     print(' Principal component analysis on spectral collection files: ')
     print('  python3 SpectraLearnPredict.py -p <spectrafile> <#comp>\n')
-    print(' Run tensorflow training only: ')
+    print(' Run tensorflow training only:')
     print('  python3 SpectraLearnPredict.py -t <learningfile> <# iterations>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
@@ -1287,7 +1305,6 @@ def scrambleNoise(A, offset):
 #********************************************************************************
 ''' Tensorflow '''
 ''' https://www.tensorflow.org/get_started/mnist/beginners'''
-''' WARNING: THIS IS NO LONGER THE PREFERRED USE MODE FOR TENSORFLOW '''
 #********************************************************************************
 ''' Setup training-only via TensorFlow '''
 #********************************************************************************
@@ -1417,10 +1434,10 @@ def runTFbasic(A, Cl, R, Root):
         else:
             print('\n Rebuildind TF model...')
         
-        if tfDef.subsetIterLearn == True:
-            print(' Iterating training using subset (' +  str(tfDef.percentTFCrossValid*100) + '%), ' + str(tfDef.trainingIter) + ' times ...')
-            for i in range(tfDef.trainingIter):
-                As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, tfDef.percentTFCrossValid)
+        if tfDef.subsetCrossValid == True:
+            print(' Iterating training using subset (' +  str(tfDef.percentCrossValid*100) + '%), ' + str(tfDef.iterCrossValid) + ' times ...')
+            for i in range(tfDef.iterCrossValid):
+                As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, tfDef.percentCrossValid)
                 summary = sess.run(train_step, feed_dict={x: As, y_: Cl2s})
                 correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
                 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
