@@ -85,7 +85,7 @@ class nnDef:
     # activation functions: http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
     # identity, logistic (sigmoid), tanh, relu
     
-    activation_function = "relu"
+    activation_function = "tanh"
     
     MLPRegressor = False
     
@@ -117,7 +117,7 @@ class dnntfDef:
     # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
     # sigmoid, tanh
     
-    activation_function = "relu"
+    activation_function = "tanh"
     
     trainingSteps = 500     #number of training steps
     
