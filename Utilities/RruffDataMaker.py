@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170608a
+* version: 20170608b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -60,7 +60,6 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
                 index = compound.index(f.partition("_")[0])
             except:
                 compound.append(f.partition("_")[0])
-                print(len(compound))
                 index = len(compound)-1
             
             success = makeFile(f, learnFile, index, enInit, enFin, enStep)
@@ -87,7 +86,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
 ''' Add data to Training file '''
 #**********************************************
 def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep):
-    print('\n Process file #: ' + str(param))
+    print('\n Process file in class #: ' + str(param))
     try:
         with open(sampleFile, 'r') as f:
             En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
