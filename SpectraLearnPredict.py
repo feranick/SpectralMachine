@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170606b
+* version: 20170608a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -234,6 +234,7 @@ def main():
         usage()
         sys.exit(2)
 
+    print(" Using training file: ", sys.argv[2],"\n")
     for o, a in opts:
         if o in ("-f" , "--file"):
             try:
