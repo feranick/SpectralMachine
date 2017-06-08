@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170320d
+* version: 20170608a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -44,9 +44,10 @@ def main():
 ''' Open and process inividual files '''
 #**********************************************
 def processMultiFile(learnFile, enInit, enFin, enStep):
-    index = 1
+    index = 0
     success = False
     size = 0
+    compound=[]
     learnFileRoot = os.path.splitext(learnFile)[0]
     summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
     with open(summary_filename, "a") as sum_file:
@@ -54,6 +55,14 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
     
     for f in glob.glob('*.txt'):
         if (f != learnFile):
+            
+            try:
+                index = compound.index(f.partition("_")[0])
+            except:
+                compound.append(f.partition("_")[0])
+                print(len(compound))
+                index = len(compound)-1
+            
             success = makeFile(f, learnFile, index, enInit, enFin, enStep)
             with open(summary_filename, "a") as sum_file:
                 if success == True:
@@ -61,7 +70,6 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
                     size = size + 1
                 else:
                     sum_file.write(str(index) + '\tNO\t' + f +'\n')
-            index = index + 1
     print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
 
     Cl2 = np.zeros((size, size))
@@ -73,6 +81,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
         print(' Saving class file...\n')
         with open(tfclass_filename, 'ab') as f:
             np.savetxt(f, Cl2, delimiter='\t', fmt='%10.6f')
+
 
 #**********************************************
 ''' Add data to Training file '''
