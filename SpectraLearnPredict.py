@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170608a
+* version: 20170609a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -92,6 +92,7 @@ class nnDef:
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.001
 
+    logCheckpoint = False
     plotNN = True
     nnClassReport = False
 
@@ -249,6 +250,7 @@ def main():
             nnDef.subsetCrossValid = True
             dnntfDef.alwaysRetrain = True
             dnntfDef.subsetCrossValid = True
+            dnntfDef.logCheckpoint = True
             svmDef.alwaysRetrain = True
             svmDef.subsetCrossValid = True
             tfDef.alwaysRetrain = True
@@ -588,6 +590,9 @@ def runDNNTF(A, Cl, R, Root):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
+    
+    if dnntfDef.logCheckpoint ==True:
+        tf.logging.set_verbosity(tf.logging.INFO)
     
     if dnntfDef.alwaysRetrain == False:
         model_directory = Root + "/DNN-TF_" + str(dnntfDef.numHidlayers)+"x"+str(dnntfDef.numNeurons)
