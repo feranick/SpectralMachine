@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170609a
+* version: 20170609b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -92,7 +92,6 @@ class nnDef:
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.001
 
-    logCheckpoint = False
     plotNN = True
     nnClassReport = False
 
@@ -124,6 +123,8 @@ class dnntfDef:
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
+    
+    logCheckpoint = False
 
     #*************************************************
     # Setup variables and definitions- do not change.
