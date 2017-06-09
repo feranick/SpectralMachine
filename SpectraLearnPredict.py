@@ -105,7 +105,7 @@ class dnntfDef:
     alwaysRetrain = False
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
-    iterCrossValid = 2
+    iterCrossValid = 1
     
     numNeurons = 200        # number of neurons per layer
     numHidlayers = 1        # number of hidden layer
@@ -120,7 +120,7 @@ class dnntfDef:
     
     activation_function = "tanh"
     
-    trainingSteps = 500     #number of training steps
+    trainingSteps = 1000     #number of training steps
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
