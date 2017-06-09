@@ -50,6 +50,10 @@ Principal component analysis on spectral collection files:
     
     python3 SpectraLearnPredict.py -p spectrafile #comp
 
+Run in background for accuracy determination during training:
+
+    python3 SpectraLearnPredict.py -a learningfile spectrafile 2>&1 | tee logfile &
+
 
 Training data
 =============
@@ -72,8 +76,9 @@ AddNoisyData.py Training/20170227a/Training_kerogen_633nm_HC_20170227a.txt 5 0.0
 
 Accuracy is increased to 80.4% with a single training run (100 times 30% of the dataset). 2 iterations increase accuracy to 95.8% and a third increased to 100%. (The same can be achieved by running 30% of the dataset 300 times).
 
-One can optimize/minimize the number of spectra with added noise. Adding only 2 data-sets with noise offset at 0.02 converges the accuracy to about 94.6&. 
-**One final word of caution**: Increasing the number of statistically independent available spectra for training is highly recommended over adding noisy data. 
+One can optimize/minimize the number of spectra with added noise. Adding only 2 data-sets with noise offset at 0.02 converges the accuracy to about 94.6%. 
+
+**One final word of caution**: Increasing the number of statistically independent available spectra for training is recommended over adding noisy data. 
 
 Optimizers
 ==========
