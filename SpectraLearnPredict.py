@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170609b
+* version: 20170609c
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -133,11 +133,11 @@ class dnntfDef:
 
     if runDNNTF == True:
         import tensorflow as tf
-    if activation_function == "sigmoid" or activation_function == "tanh":
-        actFn = "tf."+activation_function
-    else:
-        actFn = "tf.nn."+activation_function
-    activationFn = eval(actFn)
+        if activation_function == "sigmoid" or activation_function == "tanh":
+            actFn = "tf."+activation_function
+        else:
+            actFn = "tf.nn."+activation_function
+        activationFn = eval(actFn)
 
 #**********************************************
 ''' Support Vector Machines'''
