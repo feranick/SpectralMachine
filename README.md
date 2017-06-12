@@ -52,7 +52,7 @@ Principal component analysis on spectral collection files:
 
 Run in background for accuracy determination during training:
 
-    python3 SpectraLearnPredict.py -a learningfile spectrafile 2>&1 | tee logfile &
+    python3 SpectraLearnPredict.py -a learningfile spectrafile 2>&1 | tee -a logfile &
 
 
 Training data
