@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170612c
+* version: 20170612d
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -332,17 +332,18 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        clf = trainNN(A, Cl, learnFileRoot)
-        predNN(clf, A, Cl, R)
+        clf_nn = trainNN(A, Cl, learnFileRoot)
+        predNN(clf_nn, A, Cl, R)
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        clf, le  = trainDNNTF(A, Cl, learnFileRoot)
-        predDNNTF(clf, le, R, Cl)
+        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, learnFileRoot)
+        predDNNTF(clf_dnntf, le_dnntf, R, Cl)
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        runSVM(A, Cl, En, R, learnFileRoot)
+        clf_svm = trainSVM(A, Cl, learnFileRoot)
+        predSVM(clf_svm, A, Cl, R)
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
@@ -405,7 +406,8 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        svmPred, svmProb = runSVM(A, Cl, En, R, learnFileRoot)
+        clf_svm = trainSVM(A, Cl, learnFileRoot)
+        svmPred, svmProb = predSVM(clf_svm, A, Cl, En, R)
         summaryFile.extend([svmPred, svmProb])
         svmDef.alwaysRetrain = False
 
@@ -449,6 +451,9 @@ def LearnPredictMap(learnFile, mapFile):
     if nnDef.runDNNTF == True:
         clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, learnFileRoot)
 
+    if svmDef.runSVM == True:
+        clf_svm = trainSVM(A, Cl, learnFileRoot)
+
     for r in R[:]:
         r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
         type = 1
@@ -467,7 +472,7 @@ def LearnPredictMap(learnFile, mapFile):
         
         ''' Run Support Vector Machines '''
         if svmDef.runSVM == True:
-            svmPred[i], temp = runSVM(A, Cl, En, r, learnFileRoot)
+            svmPred[i], temp = predSVM(clf_svm, A, Cl, En, r)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.alwaysRetrain = False
 
@@ -557,7 +562,6 @@ def trainNN(A, Cl, Root):
 ''' Evaluate Neural Network - sklearn '''
 #********************************************************************************
 def predNN(clf, A, Cl, R):
-    print(clf)
     if nnDef.MLPRegressor is False:
         prob = clf.predict_proba(R)[0].tolist()
         rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityPred/100)[0]
@@ -702,9 +706,12 @@ def input_fn(A, Cl2):
     return x,y
 
 #********************************************************************************
-''' Run SVM '''
+''' Support Vector Machines - SVM '''
+''' http://scikit-learn.org/stable/modules/svm.html '''
 #********************************************************************************
-def runSVM(A, Cl, En, R, Root):
+''' Train SVM '''
+#********************************************************************************
+def trainSVM(A, Cl, Root):
     from sklearn import svm
     from sklearn.externals import joblib
     svmTrainedData = Root + '.svmModel.pkl'
@@ -740,6 +747,12 @@ def runSVM(A, Cl, En, R, Root):
         if svmDef.showClasses == True:
             print('  List of classes: ' + str(clf.classes_))
 
+    return clf
+
+#********************************************************************************
+''' Predict using SVM '''
+#********************************************************************************
+def predSVM(clf, A, Cl, R):
     R_pred = clf.predict(R)
     prob = clf.predict_proba(R)[0].tolist()
     
