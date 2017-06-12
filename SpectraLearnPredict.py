@@ -256,11 +256,11 @@ def main():
             svmDef.subsetCrossValid = True
             #tfDef.alwaysRetrain = True
             tfDef.subsetCrossValid = True
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
