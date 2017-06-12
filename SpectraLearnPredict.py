@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170612a
+* version: 20170612b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -336,7 +336,8 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        runDNNTF(A, Cl, R, learnFileRoot)
+        clf, le  = trainDNNTF(A, Cl, learnFileRoot)
+        predDNNTF(clf, le, R, Cl)
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
@@ -395,7 +396,8 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        dnntfPred, dnntfProb = runDNNTF(A, Cl, R, learnFileRoot)
+        clf, le  = trainDNNTF(A, Cl, learnFileRoot)
+        dnntfPred, dnntfProb = predDNNTF(cl, le, R, Cl)
         summaryFile.extend([nnPred, nnProb])
         dnntfDef.alwaysRetrain = False
 
@@ -438,6 +440,10 @@ def LearnPredictMap(learnFile, mapFile):
     svmPred = nnPred = tfPred = kmPred = np.empty([X.shape[0]])
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, type)
     print(' Processing map...' )
+    
+    if nnDef.runDNNTF == True:
+        clf, le  = trainDNNTF(A, Cl, learnFileRoot)
+    
     for r in R[:]:
         r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
         type = 1
@@ -449,8 +455,8 @@ def LearnPredictMap(learnFile, mapFile):
             nnDef.alwaysRetrain = False
         
         ''' Run Neural Network - TensorFlow'''
-        if nnDef.runNN == True:
-            dnntfPred[i], temp = runDNNTF(A, Cl, r, learnFileRoot)
+        if nnDef.runDNNTF == True:
+            dnntfPred[i], temp = predDNNTF(cl, le, r, Cl)
             saveMap(mapFile, 'DNN-TF', 'HC', dnntfPred[i], X[i], Y[i], True)
             dnnDef.alwaysRetrain = False
         
@@ -581,9 +587,9 @@ def runNN(A, Cl, R, Root):
 ''' Run SkFlow - DNN Classifier '''
 ''' https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier'''
 #********************************************************************************
-''' Run DNNClassifier model training and evaluation via TensorFlow-skflow '''
+''' Train DNNClassifier model training via TensorFlow-skflow '''
 #********************************************************************************
-def runDNNTF(A, Cl, R, Root):
+def trainDNNTF(A, Cl, Root):
     print('==========================================================================\n')
     print(' Running Deep Neural Networks: DNNClassifier - TensorFlow...')
     print(' Hidden layers:', dnntfDef.hidden_layers)
@@ -634,6 +640,16 @@ def runDNNTF(A, Cl, R, Root):
     else:
         print(" Training on the full training dataset\n")
         clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
+
+    return clf, le
+
+#********************************************************************************
+''' Predict using DNNClassifier model via TensorFlow-skflow '''
+#********************************************************************************
+def predDNNTF(clf, le, R, Cl):
+    import tensorflow as tf
+    import tensorflow.contrib.learn as skflow
+    from sklearn import preprocessing
 
     #**********************************************
     ''' Predict '''
