@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170612b
+* version: 20170612c
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -256,11 +256,11 @@ def main():
             svmDef.subsetCrossValid = True
             #tfDef.alwaysRetrain = True
             tfDef.subsetCrossValid = True
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -332,7 +332,8 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        runNN(A, Cl, R, learnFileRoot)
+        clf = trainNN(A, Cl, learnFileRoot)
+        predNN(clf, A, Cl, R)
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
@@ -390,14 +391,15 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
 
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        nnPred, nnProb = runNN(A, Cl, R, learnFileRoot)
+        clf_nn = trainNN(A, Cl, learnFileRoot)
+        nnPred, nnProb = predNN(clf_nn, A, Cl, R)
         summaryFile.extend([nnPred, nnProb])
         nnDef.alwaysRetrain = False
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        clf, le  = trainDNNTF(A, Cl, learnFileRoot)
-        dnntfPred, dnntfProb = predDNNTF(cl, le, R, Cl)
+        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, learnFileRoot)
+        dnntfPred, dnntfProb = predDNNTF(clf_dnntf, le_dnntf, R, Cl)
         summaryFile.extend([nnPred, nnProb])
         dnntfDef.alwaysRetrain = False
 
@@ -441,22 +443,25 @@ def LearnPredictMap(learnFile, mapFile):
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, type)
     print(' Processing map...' )
     
+    if nnDef.runNN == True:
+        clf_nn = trainNN(A, Cl, learnFileRoot)
+
     if nnDef.runDNNTF == True:
-        clf, le  = trainDNNTF(A, Cl, learnFileRoot)
-    
+        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, learnFileRoot)
+
     for r in R[:]:
         r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
         type = 1
 
         ''' Run Neural Network - sklearn'''
         if nnDef.runNN == True:
-            nnPred[i], temp = runNN(A, Cl, r, learnFileRoot)
+            nnPred[i], temp = predNN(clf_nn, A, Cl, r)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
             nnDef.alwaysRetrain = False
         
         ''' Run Neural Network - TensorFlow'''
         if nnDef.runDNNTF == True:
-            dnntfPred[i], temp = predDNNTF(cl, le, r, Cl)
+            dnntfPred[i], temp = predDNNTF(cl_dnntf, le_dnntf, r, Cl)
             saveMap(mapFile, 'DNN-TF', 'HC', dnntfPred[i], X[i], Y[i], True)
             dnnDef.alwaysRetrain = False
         
@@ -490,11 +495,13 @@ def LearnPredictMap(learnFile, mapFile):
     if kmDef.plotKMmaps == True and kmDef.runKM == True:
         plotMaps(X, Y, kmPred, 'K-Means Prediction')
 
-
 #********************************************************************************
-''' Run Neural Network - sklearn '''
+''' MultiLayer Perceptron - SKlearn '''
+''' http://scikit-learn.org/stable/modules/neural_networks_supervised.html'''
 #********************************************************************************
-def runNN(A, Cl, R, Root):
+''' Train Neural Network - sklearn '''
+#********************************************************************************
+def trainNN(A, Cl, Root):
     from sklearn.neural_network import MLPClassifier, MLPRegressor
     from sklearn.externals import joblib
     
@@ -543,7 +550,14 @@ def runNN(A, Cl, R, Root):
             clf.fit(A, Cl)
 
         joblib.dump(clf, nnTrainedData)
-            
+
+    return clf
+
+#********************************************************************************
+''' Evaluate Neural Network - sklearn '''
+#********************************************************************************
+def predNN(clf, A, Cl, R):
+    print(clf)
     if nnDef.MLPRegressor is False:
         prob = clf.predict_proba(R)[0].tolist()
         rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityPred/100)[0]
