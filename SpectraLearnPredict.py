@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170609c
+* version: 20170612a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -247,14 +247,14 @@ def main():
 
         if o in ("-a" , "--accuracy"):
             print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
-            nnDef.alwaysRetrain = True
+            #nnDef.alwaysRetrain = True
             nnDef.subsetCrossValid = True
-            dnntfDef.alwaysRetrain = True
+            #dnntfDef.alwaysRetrain = True
             dnntfDef.subsetCrossValid = True
             dnntfDef.logCheckpoint = True
-            svmDef.alwaysRetrain = True
+            #svmDef.alwaysRetrain = True
             svmDef.subsetCrossValid = True
-            tfDef.alwaysRetrain = True
+            #tfDef.alwaysRetrain = True
             tfDef.subsetCrossValid = True
             try:
                 LearnPredictFile(sys.argv[2], sys.argv[3])
