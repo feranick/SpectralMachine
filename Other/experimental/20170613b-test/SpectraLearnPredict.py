@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170613a-test
+* version: 20170613b-test
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -70,7 +70,7 @@ class preprocDef:
 ''' Deep Neural Networks - sklearn'''
 #**********************************************
 class nnDef:
-    runNN = True
+    runNN = False
     
     alwaysRetrain = False
 
@@ -137,7 +137,7 @@ class dnntfDef:
 ''' Support Vector Machines'''
 #**********************************************
 class svmDef:
-    runSVM = True
+    runSVM = False
     
     alwaysRetrain = False
     
@@ -645,13 +645,18 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print(' Initializing TensorFlow...')
     tf.reset_default_graph()
 
-    le = preprocessing.LabelEncoder()
-    Cl2 = le.fit_transform(Cl)
-    Cl2_test = le.fit_transform(Cl_test)
+    totA = np.vstack((A, A_test))
+    totCl = np.append(Cl, Cl_test)
+    numTotClasses = np.unique(totCl).size
     
-    feature_columns = skflow.infer_real_valued_columns_from_input(A.astype(np.float32))
+    le = preprocessing.LabelEncoder()
+    totCl2 = le.fit_transform(totCl)
+    Cl2 = le.transform(Cl)
+    Cl2_test = le.transform(Cl_test)
+
+    feature_columns = skflow.infer_real_valued_columns_from_input(totA.astype(np.float32))
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
-                               optimizer=dnntfDef.nnOptimizer, n_classes=np.unique(Cl).size,
+                               optimizer=dnntfDef.nnOptimizer, n_classes=numTotClasses,
                                activation_fn=dnntfDef.activationFn, model_dir=model_directory)
                                
     print("\n Number of training steps:",dnntfDef.trainingSteps)
@@ -659,15 +664,18 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Train '''
     #**********************************************
-    print(" Training on the full training dataset\n")
+    print(" Training on the training dataset: ", ,"\n")
     clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
     print(" Training done!")
 
-    accuracy_score = clf.evaluate(input_fn=lambda: input_fn(A_test, Cl2_test), steps=1)
-    
+    accuracy_score = clf.evaluate(input_fn=lambda: input_fn(A_test, Cl2_test), steps=2)
+    print('\n  ================================')
+    print('  \033[1mDNN-TF\033[0m - Accucuracy')
+    print('  ================================')
     print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
     print("  Loss: {:.2f}".format(accuracy_score["loss"]))
     print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
+    print('  ================================\n')
 
     return clf, le
 
