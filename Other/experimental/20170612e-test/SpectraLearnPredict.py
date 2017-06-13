@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170612e-test
+* version: 20170613a-test
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -118,7 +118,7 @@ class dnntfDef:
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
     
-    logCheckpoint = False
+    logCheckpoint = True
 
     #*************************************************
     # Setup variables and definitions- do not change.
@@ -227,20 +227,20 @@ def main():
     print(" Using training file: ", sys.argv[2],"\n")
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-a" , "--accuracy"):
             print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
             
-            try:
-                trainAccuracy(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            trainAccuracy(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-t" , "--traintf"):
             if len(sys.argv) > 3:
@@ -343,8 +343,9 @@ def LearnPredictFile(learnFile, sampleFile):
 #**********************************************
 def trainAccuracy(learnFile, testFile):
     ''' Open and process training data '''
+
     En, Cl, A, YnormXind = readLearnFile(learnFile)
-    En_test, Cl_test, A_test, YnormXind2 = readLearnFile(sampleFile)
+    En_test, Cl_test, A_test, YnormXind2 = readLearnFile(testFile)
     
     learnFileRoot = os.path.splitext(learnFile)[0]
     testFileRoot = os.path.splitext(testFile)[0]
@@ -660,7 +661,10 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     print(" Training on the full training dataset\n")
     clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
+    print(" Training done!")
+
     accuracy_score = clf.evaluate(input_fn=lambda: input_fn(A_test, Cl2_test), steps=1)
+    
     print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
     print("  Loss: {:.2f}".format(accuracy_score["loss"]))
     print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
