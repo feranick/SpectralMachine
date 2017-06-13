@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170612d
+* version: 20170613e
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -73,9 +73,6 @@ class nnDef:
     runNN = True
     
     alwaysRetrain = False
-    subsetCrossValid = False
-    percentCrossValid = 0.10    # proportion of TEST data for cross validation
-    iterCrossValid = 2
 
     numNeurons = 200           #default = 200
     
@@ -102,9 +99,6 @@ class dnntfDef:
     runDNNTF = True
     
     alwaysRetrain = False
-    subsetCrossValid = False
-    percentCrossValid = 0.10  # proportion of TEST data for cross validation
-    iterCrossValid = 1
     
     numNeurons = 200        # number of neurons per layer
     numHidlayers = 1        # number of hidden layer
@@ -124,7 +118,7 @@ class dnntfDef:
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
     
-    logCheckpoint = False
+    logCheckpoint = True
 
     #*************************************************
     # Setup variables and definitions- do not change.
@@ -146,9 +140,6 @@ class svmDef:
     runSVM = True
     
     alwaysRetrain = False
-    subsetCrossValid = False
-    percentCrossValid = 0.10  # proportion of TEST data for cross validation
-    iterCrossValid = 2
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilitySVMPred = 3
@@ -190,9 +181,6 @@ class tfDef:
 
     alwaysRetrain = False
     alwaysImprove = False       # alwaysRetrain must be True for this to work
-    subsetCrossValid = True
-    percentCrossValid = 0.1     # proportion of TEST data for cross validation
-    iterCrossValid = 2
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityTFPred = 30
@@ -247,17 +235,9 @@ def main():
 
         if o in ("-a" , "--accuracy"):
             print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
-            #nnDef.alwaysRetrain = True
-            nnDef.subsetCrossValid = True
-            #dnntfDef.alwaysRetrain = True
-            dnntfDef.subsetCrossValid = True
-            dnntfDef.logCheckpoint = True
-            #svmDef.alwaysRetrain = True
-            svmDef.subsetCrossValid = True
-            #tfDef.alwaysRetrain = True
-            tfDef.subsetCrossValid = True
+            
             try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
+                trainAccuracy(sys.argv[2], sys.argv[3])
             except:
                 usage()
                 sys.exit(2)
@@ -332,17 +312,17 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, learnFileRoot)
+        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
         predNN(clf_nn, A, Cl, R)
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, learnFileRoot)
+        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
         predDNNTF(clf_dnntf, le_dnntf, R, Cl)
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        clf_svm = trainSVM(A, Cl, learnFileRoot)
+        clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
         predSVM(clf_svm, A, Cl, R)
 
     ''' Tensorflow '''
@@ -356,6 +336,43 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Run K-Means '''
     if kmDef.runKM == True:
         runKMmain(A, Cl, En, R, Aorig, Rorig)
+
+
+#**********************************************
+''' Train and accuracy'''
+#**********************************************
+def trainAccuracy(learnFile, testFile):
+    ''' Open and process training data '''
+
+    En, Cl, A, YnormXind = readLearnFile(learnFile)
+    En_test, Cl_test, A_test, YnormXind2 = readLearnFile(testFile)
+    
+    learnFileRoot = os.path.splitext(learnFile)[0]
+    testFileRoot = os.path.splitext(testFile)[0]
+    
+    ''' Preprocess prediction data '''
+    A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
+    A_test, Cl_test, En_test, Aorig_test = preProcessNormLearningData(A_test, En_test, Cl_test, YnormXind, 0)
+    
+    ''' Run Neural Network - sklearn'''
+    if nnDef.runNN == True:
+        clf_nn = trainNN(A, Cl, A_test, Cl_test, learnFileRoot)
+    
+    ''' Run Neural Network - TensorFlow'''
+    if dnntfDef.runDNNTF == True:
+        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A_test, Cl_test, learnFileRoot)
+    
+    ''' Run Support Vector Machines '''
+    if svmDef.runSVM == True:
+        clf_svm = trainSVM(A, Cl, A_test, Cl_test, learnFileRoot)
+    
+    #''' Tensorflow '''
+    #if tfDef.runTF == True:
+    #    runTFbasic(A,Cl,R, learnFileRoot)
+    
+    ''' Plot Training Data '''
+    if plotDef.createTrainingDataPlot == True:
+        plotTrainData(A, En, R, plotDef.plotAllSpectra, learnFileRoot)
 
 
 #**********************************************
@@ -392,21 +409,21 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
 
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, learnFileRoot)
+        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
         nnPred, nnProb = predNN(clf_nn, A, Cl, R)
         summaryFile.extend([nnPred, nnProb])
         nnDef.alwaysRetrain = False
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, learnFileRoot)
+        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
         dnntfPred, dnntfProb = predDNNTF(clf_dnntf, le_dnntf, R, Cl)
         summaryFile.extend([nnPred, nnProb])
         dnntfDef.alwaysRetrain = False
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        clf_svm = trainSVM(A, Cl, learnFileRoot)
+        clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
         svmPred, svmProb = predSVM(clf_svm, A, Cl, En, R)
         summaryFile.extend([svmPred, svmProb])
         svmDef.alwaysRetrain = False
@@ -446,13 +463,13 @@ def LearnPredictMap(learnFile, mapFile):
     print(' Processing map...' )
     
     if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, learnFileRoot)
+        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
 
     if nnDef.runDNNTF == True:
-        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, learnFileRoot)
+        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
 
     if svmDef.runSVM == True:
-        clf_svm = trainSVM(A, Cl, learnFileRoot)
+        clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
 
     for r in R[:]:
         r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
@@ -506,7 +523,7 @@ def LearnPredictMap(learnFile, mapFile):
 #********************************************************************************
 ''' Train Neural Network - sklearn '''
 #********************************************************************************
-def trainNN(A, Cl, Root):
+def trainNN(A, Cl, A_test, Cl_test, Root):
     from sklearn.neural_network import MLPClassifier, MLPRegressor
     from sklearn.externals import joblib
     
@@ -517,42 +534,38 @@ def trainNN(A, Cl, Root):
         nnTrainedData = Root + '.nnModelR.pkl'
     
     print('==========================================================================\n')
-    print(' Running Neural Network: multi-layer perceptron (MLP)')
-    print(' Number of neurons: Hidden layers:', nnDef.numNeurons)
-    print(' Optimizer:',nnDef.nnOptimizer,', Activation Fn:',nnDef.activation_function)
+    print('\033[1m Running Neural Network: multi-layer perceptron (MLP)\033[0m')
+    print('  Number of neurons in hidden layers:', nnDef.numNeurons)
+    print('  Optimizer:',nnDef.nnOptimizer,', Activation Fn:',nnDef.activation_function)
 
     try:
         if nnDef.alwaysRetrain == False:
             with open(nnTrainedData):
-                print(' Opening NN training model...\n')
+                print('  Opening NN training model...\n')
                 clf = joblib.load(nnTrainedData)
         else:
-            raise ValueError('Force NN retraining.')
+            raise ValueError('  Force NN retraining.')
     except:
         #**********************************************
         ''' Retrain training data if not available'''
         #**********************************************
         if nnDef.MLPRegressor is False:
-            print(' Retraining NN model using MLP Classifier...')
+            print('  Retraining NN model using MLP Classifier...')
             clf = MLPClassifier(solver=nnDef.nnOptimizer, alpha=1e-5, activation = nnDef.activation_function,
                                 hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
         else:
-            print(' Retraining NN model using MLP Regressor...')
+            print('  Retraining NN model using MLP Regressor...')
             clf = MLPRegressor(solver=nnDef.nnOptimizer, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
             Cl = np.array(Cl,dtype=float)
 
-        if nnDef.subsetCrossValid == True:
-            print(" Iterating training using: ",str(nnDef.percentCrossValid*100), "% as test subset, iterating",str(nnDef.iterCrossValid)," time(s) ...\n")
-            for i in range(nnDef.iterCrossValid):
-                As, Cls, As_cv, Cls_cv = formatSubset(A, Cl, nnDef.percentCrossValid)
-                clf.fit(As, Cls)
-                if nnDef.MLPRegressor is False:
-                    print('  Mean accuracy: ',100*clf.score(As_cv,Cls_cv),'%')
-                else:
-                    print('  Coefficient of determination R^2: ',clf.score(As_cv,Cls_cv))
+        clf.fit(A, Cl)
+        print("  Training on the full training dataset\n")
+        accur = clf.score(A_test,Cl_test)
+
+        if nnDef.MLPRegressor is False:
+            print('  Accuracy: ',100*accur,'%\n')
         else:
-            print(" Training on the full training dataset\n")
-            clf.fit(A, Cl)
+            print('  Coefficient of determination R^2: ',accur,'\n')
 
         joblib.dump(clf, nnTrainedData)
 
@@ -607,11 +620,11 @@ def predNN(clf, A, Cl, R):
 #********************************************************************************
 ''' Train DNNClassifier model training via TensorFlow-skflow '''
 #********************************************************************************
-def trainDNNTF(A, Cl, Root):
+def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
-    print(' Running Deep Neural Networks: DNNClassifier - TensorFlow...')
-    print(' Hidden layers:', dnntfDef.hidden_layers)
-    print(' Optimizer:',dnntfDef.nnOptimizer,', Activation function:',dnntfDef.activation_function)
+    print('\033[1m Running Deep Neural Networks: DNNClassifier - TensorFlow...\033[0m')
+    print('  Hidden layers:', dnntfDef.hidden_layers)
+    print('  Optimizer:',dnntfDef.nnOptimizer,', Activation function:',dnntfDef.activation_function)
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
@@ -621,10 +634,10 @@ def trainDNNTF(A, Cl, Root):
     
     if dnntfDef.alwaysRetrain == False:
         model_directory = Root + "/DNN-TF_" + str(dnntfDef.numHidlayers)+"x"+str(dnntfDef.numNeurons)
-        print("\n Training model saved in: ", model_directory, "\n")
+        print("\n  Training model saved in: ", model_directory, "\n")
     else:
         model_directory = None
-        print("\n Training model not saved\n")
+        print("\n  Training model not saved\n")
 
     #**********************************************
     ''' Initialize Estimator and training data '''
@@ -632,32 +645,37 @@ def trainDNNTF(A, Cl, Root):
     print(' Initializing TensorFlow...')
     tf.reset_default_graph()
 
-    le = preprocessing.LabelEncoder()
-    Cl2 = le.fit_transform(Cl)
+    totA = np.vstack((A, A_test))
+    totCl = np.append(Cl, Cl_test)
+    numTotClasses = np.unique(totCl).size
     
-    feature_columns = skflow.infer_real_valued_columns_from_input(A.astype(np.float32))
+    le = preprocessing.LabelEncoder()
+    totCl2 = le.fit_transform(totCl)
+    Cl2 = le.transform(Cl)
+    Cl2_test = le.transform(Cl_test)
+
+    feature_columns = skflow.infer_real_valued_columns_from_input(totA.astype(np.float32))
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
-                               optimizer=dnntfDef.nnOptimizer, n_classes=np.unique(Cl).size,
+                               optimizer=dnntfDef.nnOptimizer, n_classes=numTotClasses,
                                activation_fn=dnntfDef.activationFn, model_dir=model_directory)
                                
-    print("\n Number of training steps:",dnntfDef.trainingSteps)
+    print("\n Number of global steps:",dnntfDef.trainingSteps)
 
     #**********************************************
     ''' Train '''
     #**********************************************
-    if dnntfDef.subsetCrossValid == True:
-        print(" Iterating training using: ",str(dnntfDef.percentCrossValid*100), "% as test subset, iterating",str(dnntfDef.iterCrossValid)," time(s) ...\n")
-        for i in range(dnntfDef.iterCrossValid):
-            As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, dnntfDef.percentCrossValid)
-            
-            clf.fit(input_fn=lambda: input_fn(As, Cl2s), steps=dnntfDef.trainingSteps)
-            accuracy_score = clf.evaluate(input_fn=lambda: input_fn(As_cv, Cl2s_cv), steps=1)
-            print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
-            print("  Loss: {:.2f}".format(accuracy_score["loss"]))
-            print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
-    else:
-        print(" Training on the full training dataset\n")
-        clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
+    print("  Training on the dataset: ", Root,"\n")
+    clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
+    print("\n  Training completed\n")
+
+    accuracy_score = clf.evaluate(input_fn=lambda: input_fn(A_test, Cl2_test), steps=2)
+    print('\n  ================================')
+    print('  \033[1mDNN-TF\033[0m - Accuracy')
+    print('  ================================')
+    print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
+    print("  Loss: {:.2f}".format(accuracy_score["loss"]))
+    print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
+    print('  ================================\n')
 
     return clf, le
 
@@ -711,41 +729,39 @@ def input_fn(A, Cl2):
 #********************************************************************************
 ''' Train SVM '''
 #********************************************************************************
-def trainSVM(A, Cl, Root):
+def trainSVM(A, Cl, A_test, Cl_test, Root):
     from sklearn import svm
     from sklearn.externals import joblib
     svmTrainedData = Root + '.svmModel.pkl'
     print('==========================================================================\n')
-    print(' Running Support Vector Machine (kernel: ' + svmDef.kernel + ')...')
+    print('\033[1m Running Support Vector Machine (kernel: ' + svmDef.kernel + ')\033[0m')
     try:
         if svmDef.alwaysRetrain == False:
             with open(svmTrainedData):
-                print(' Opening SVM training model...\n')
+                print('  Opening SVM training model...\n')
                 clf = joblib.load(svmTrainedData)
         else:
-            raise ValueError('Force retraining SVM model')
+            raise ValueError('  Force retraining SVM model')
     except:
         #**********************************************
         ''' Retrain training model if not available'''
         #**********************************************
-        print(' Retraining SVM data...')
+        print('  Retraining SVM data...')
         clf = svm.SVC(C = svmDef.Cfactor, decision_function_shape = 'ovr', probability=True)
         
-        if svmDef.subsetCrossValid == True:
-            print(" Iterating training using: ",str(nnDef.percentCrossValid*100), "% as test subset, iterating",str(nnDef.iterCrossValid)," time(s) ...\n")
-            for i in range(svmDef.iterCrossValid):
-                As, Cls, As_cv, Cls_cv = formatSubset(A, Cl, svmDef.percentCrossValid)
-                clf.fit(As, Cls)
-                print('  Mean accuracy: ',100*clf.score(As_cv,Cls_cv),'%')
-        else:
-            print(" Training on the full training dataset\n")
-            clf.fit(A,Cl)
+        print("  Training on the full training dataset\n")
+        clf.fit(A,Cl)
+        accur = clf.score(A_test,Cl_test)
+        print('  Mean accuracy: ',100*accur,'%')
 
         Z = clf.decision_function(A)
         print('\n  Number of classes = ' + str(Z.shape[1]))
         joblib.dump(clf, svmTrainedData)
         if svmDef.showClasses == True:
             print('  List of classes: ' + str(clf.classes_))
+
+    print('\n==========================================================================\n')
+
 
     return clf
 
@@ -1030,7 +1046,7 @@ def readPredFile(sampleFile):
 ''' Preprocess Learning data '''
 #**********************************************************************************
 def preProcessNormLearningData(A, En, Cl, YnormXind, type):
-    print(' Processing Training data file... ')
+    print(' Processing dataset ... ')
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
     #**********************************************************************************
