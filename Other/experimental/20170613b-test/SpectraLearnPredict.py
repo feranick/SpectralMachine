@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170613b-test
+* version: 20170613c-test
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -664,7 +664,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Train '''
     #**********************************************
-    print(" Training on the training dataset: ", ,"\n")
+    print(" Training on the training dataset: ", Root,"\n")
     clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
     print(" Training done!")
 
