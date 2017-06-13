@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170613f
+* version: 20170613g
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -218,7 +218,9 @@ multiproc = False
 #**********************************************
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "fatmbkph:", ["file", "accuracy", "traintf", "map", "batch", "kmaps", "pca", "help"])
+        opts, args = getopt.getopt(sys.argv[1:],
+                                   "fatmbkph:", ["file", "accuracy", "traintf",
+                                                 "map", "batch", "kmaps", "pca", "help"])
     except:
         usage()
         sys.exit(2)
@@ -238,9 +240,14 @@ def main():
 
         if o in ("-a" , "--accuracy"):
             print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
-            
             try:
-                trainAccuracy(sys.argv[2], sys.argv[3])
+                if sys.argv[3]:
+                    testFile = sys.argv[3]
+            except:
+                preprocDef.subsetCrossValid = True
+                testFile = "tmp"
+            try:
+                trainAccuracy(sys.argv[2], testFile)
             except:
                 usage()
                 sys.exit(2)
@@ -351,12 +358,12 @@ def trainAccuracy(learnFile, testFile):
     
     if preprocDef.subsetCrossValid == True:
         print(" Cross-validation training using: ",str(preprocDef.percentCrossValid*100),
-              "% of training file as test subset)\n")
+              "% of training file as test subset\n")
 
         A, Cl, A_test, Cl_test = formatSubset(A, Cl, preprocDef.percentCrossValid)
         En_test = En
     else:
-        print(" Cross-validation training using: privided test subset (",testFile,"\n")
+        print(" Cross-validation training using: privided test subset (",testFile,")\n")
         En_test, Cl_test, A_test, YnormXind2 = readLearnFile(testFile)
     
     learnFileRoot = os.path.splitext(learnFile)[0]
@@ -983,7 +990,7 @@ def readLearnFile(learnFile):
         with open(learnFile, 'r') as f:
             M = np.loadtxt(f, unpack =False)
     except:
-        print('\033[1m' + ' Map data file not found \n' + '\033[0m')
+        print('\033[1m' + ' Learning file not found \n' + '\033[0m')
         return
 
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
@@ -1342,13 +1349,15 @@ def makeHeaderSummary(file, learnFile):
 def usage():
     print('\n Usage:\n')
     print(' Single files:')
-    print('  python3 SpectraLearnPredict.py -f <learningfile> <spectrafile> \n')
-    print(' Cross-validation for accuracy determination: ')
-    print('  python3 SpectraLearnPredict.py -a <learningfile> <testdataset> \n')
+    print('  python3 SpectraLearnPredict.py -f <learningfile> <spectrafile>\n')
+    print(' Cross-validation for accuracy determination:')
+    print('  python3 SpectraLearnPredict.py -a <learningfile> <testdataset>\n')
+    print(' Cross-validation for accuracy determination (automatic splitting):')
+    print('  python3 SpectraLearnPredict.py -a <learningfile>\n')
     print(' Maps (formatted for Horiba LabSpec):')
-    print('  python3 SpectraLearnPredict.py -m <learningfile> <spectramap> \n')
+    print('  python3 SpectraLearnPredict.py -m <learningfile> <spectramap>\n')
     print(' Batch txt files:')
-    print('  python3 SpectraLearnPredict.py -b <learningfile> \n')
+    print('  python3 SpectraLearnPredict.py -b <learningfile>\n')
     print(' K-means on maps:')
     print('  python3 SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
     print(' Principal component analysis on spectral collection files: ')

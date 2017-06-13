@@ -38,6 +38,10 @@ Cross-validation for accuracy determination:
 
     python3 SpectraLearnPredict.py -a learningfile testdataset
 
+Cross-validation for accuracy determination (automatic splitting):
+
+    python3 SpectraLearnPredict.py -a <learningfile>
+
 Maps (formatted for Horiba LabSpec): 
   
     python3 SpectraLearnPredict.py -m learningfile spectramap 
