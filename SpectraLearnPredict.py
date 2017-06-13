@@ -1333,7 +1333,7 @@ def usage():
     print(' Single files:')
     print('  python3 SpectraLearnPredict.py -f <learningfile> <spectrafile> \n')
     print(' Single files with cross-validation for accuracy determination: ')
-    print('  python3 SpectraLearnPredict.py -a <learningfile> <spectrafile> \n')
+    print('  python3 SpectraLearnPredict.py -a <learningfile> <testdataset> \n')
     print(' Maps (formatted for Horiba LabSpec):')
     print('  python3 SpectraLearnPredict.py -m <learningfile> <spectramap> \n')
     print(' Batch txt files:')
@@ -1342,7 +1342,7 @@ def usage():
     print('  python3 SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
     print(' Principal component analysis on spectral collection files: ')
     print('  python3 SpectraLearnPredict.py -p <spectrafile> <#comp>\n')
-    print(' Run tensorflow training only:')
+    print(' Run tensorflow-basic training only:')
     print('  python3 SpectraLearnPredict.py -t <learningfile> <# iterations>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 

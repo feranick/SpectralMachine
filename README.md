@@ -32,7 +32,11 @@ Usage
 
 Single files: 
   
-    python3 SpectraLearnPredict.py -f learningfile spectrafile 
+    python3 SpectraLearnPredict.py -f learningfile spectrafile
+
+Cross-validation for accuracy determination:
+
+    python3 SpectraLearnPredict.py -a learningfile testdataset
 
 Maps (formatted for Horiba LabSpec): 
   
@@ -52,7 +56,7 @@ Principal component analysis on spectral collection files:
 
 Run in background for accuracy determination during training:
 
-    python3 SpectraLearnPredict.py -a learningfile spectrafile 2>&1 | tee -a logfile &
+    python3 SpectraLearnPredict.py -a learningfile testdataset 2>&1 | tee -a logfile &
 
 
 Training data
