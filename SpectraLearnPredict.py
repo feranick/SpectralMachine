@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170613e
+* version: 20170613f
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -33,6 +33,9 @@ class preprocDef:
     Ynorm = True   # Normalize spectra (True: recommended)
     fullYnorm = False  # Normalize considering full range (False: recommended)
     StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
+
+    subsetCrossValid = False
+    percentCrossValid = 0.10  # proportion of TEST data for cross validation
 
     YnormTo = 1
     YnormX = 1600
@@ -345,10 +348,18 @@ def trainAccuracy(learnFile, testFile):
     ''' Open and process training data '''
 
     En, Cl, A, YnormXind = readLearnFile(learnFile)
-    En_test, Cl_test, A_test, YnormXind2 = readLearnFile(testFile)
+    
+    if preprocDef.subsetCrossValid == True:
+        print(" Cross-validation training using: ",str(preprocDef.percentCrossValid*100),
+              "% of training file as test subset)\n")
+
+        A, Cl, A_test, Cl_test = formatSubset(A, Cl, preprocDef.percentCrossValid)
+        En_test = En
+    else:
+        print(" Cross-validation training using: privided test subset (",testFile,"\n")
+        En_test, Cl_test, A_test, YnormXind2 = readLearnFile(testFile)
     
     learnFileRoot = os.path.splitext(learnFile)[0]
-    testFileRoot = os.path.splitext(testFile)[0]
     
     ''' Preprocess prediction data '''
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
@@ -1332,7 +1343,7 @@ def usage():
     print('\n Usage:\n')
     print(' Single files:')
     print('  python3 SpectraLearnPredict.py -f <learningfile> <spectrafile> \n')
-    print(' Single files with cross-validation for accuracy determination: ')
+    print(' Cross-validation for accuracy determination: ')
     print('  python3 SpectraLearnPredict.py -a <learningfile> <testdataset> \n')
     print(' Maps (formatted for Horiba LabSpec):')
     print('  python3 SpectraLearnPredict.py -m <learningfile> <spectramap> \n')
