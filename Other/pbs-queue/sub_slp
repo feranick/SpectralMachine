@@ -6,12 +6,12 @@
 @ARGV > 0 or die "usage: sub_3dpv inpfile | qsub -N jobname \n";
 #$n=$ARGV[0];
 $n=1;
-#$nprocs=$n*1;
+$nprocs=8;
 #$inpfile=$ARGV[1];
 $inpfile=$ARGV[0];
 #This part creates necessary directories;
 $execpath="/usr/local/bin/";
-$fullpath="/home/nicola/ML/rruff-ir";
+$fullpath="/home/user/ML/test";
 $basedir = $inpfile;
 $basedir =~ s{\.[^.]+$}{};
 $percvtest=5;
@@ -20,7 +20,7 @@ $inpfiletest=$basedir."_test-".$percvtest."pc.txt";
 $inpfiletrain=$basedir."_train-".$percvtrain."pc.txt";
 
 print "#!/bin/sh
-#PBS -l nodes=$n:ppn=1
+#PBS -l nodes=$n:ppn=$nprocs
 #PBS -N SLP
 
 cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
