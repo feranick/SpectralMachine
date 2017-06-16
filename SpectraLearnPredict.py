@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170613g
+* version: 20170616c
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -671,11 +671,15 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     totCl2 = le.fit_transform(totCl)
     Cl2 = le.transform(Cl)
     Cl2_test = le.transform(Cl_test)
+    
+    validation_monitor = skflow.monitors.ValidationMonitor(input_fn=lambda: input_fn(A_test, Cl2_test),
+                                                           eval_steps=1, every_n_steps=50)
 
     feature_columns = skflow.infer_real_valued_columns_from_input(totA.astype(np.float32))
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
                                optimizer=dnntfDef.nnOptimizer, n_classes=numTotClasses,
-                               activation_fn=dnntfDef.activationFn, model_dir=model_directory)
+                               activation_fn=dnntfDef.activationFn, model_dir=model_directory,
+                               config=skflow.RunConfig(save_checkpoints_secs=1))
                                
     print("\n Number of global steps:",dnntfDef.trainingSteps)
 
@@ -683,10 +687,11 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     ''' Train '''
     #**********************************************
     print("  Training on the dataset: ", Root,"\n")
-    clf.fit(input_fn=lambda: input_fn(A, Cl2), steps=dnntfDef.trainingSteps)
+    clf.fit(input_fn=lambda: input_fn(A, Cl2),
+            steps=dnntfDef.trainingSteps, monitors=[validation_monitor])
     print("\n  Training completed\n")
 
-    accuracy_score = clf.evaluate(input_fn=lambda: input_fn(A_test, Cl2_test), steps=2)
+    accuracy_score = clf.evaluate(input_fn=lambda: input_fn(A_test, Cl2_test), steps=1)
     print('\n  ================================')
     print('  \033[1mDNN-TF\033[0m - Accuracy')
     print('  ================================')
