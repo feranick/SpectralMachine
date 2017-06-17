@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170616c
+* version: 20170617a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -102,6 +102,7 @@ class dnntfDef:
     runDNNTF = True
     
     alwaysRetrain = False
+    alwaysImprove = True
     
     numNeurons = 200        # number of neurons per layer
     numHidlayers = 1        # number of hidden layer
@@ -654,6 +655,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         model_directory = Root + "/DNN-TF_" + str(dnntfDef.numHidlayers)+"x"+str(dnntfDef.numNeurons)
         print("\n  Training model saved in: ", model_directory, "\n")
     else:
+        dnntfDef.alwaysImprove = True
         model_directory = None
         print("\n  Training model not saved\n")
 
@@ -686,10 +688,12 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Train '''
     #**********************************************
-    print("  Training on the dataset: ", Root,"\n")
-    clf.fit(input_fn=lambda: input_fn(A, Cl2),
-            steps=dnntfDef.trainingSteps, monitors=[validation_monitor])
-    print("\n  Training completed\n")
+    if dnntfDef.alwaysImprove == True or os.path.exists(model_directory) is False:
+        print(" (Re-)training using dataset: ", Root,"\n")
+        clf.fit(input_fn=lambda: input_fn(A, Cl2),
+                steps=dnntfDef.trainingSteps, monitors=[validation_monitor])
+    else:
+        print("  Retreaving training model from: ", model_directory,"\n")
 
     accuracy_score = clf.evaluate(input_fn=lambda: input_fn(A_test, Cl2_test), steps=1)
     print('\n  ================================')
