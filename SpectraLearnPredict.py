@@ -569,7 +569,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: DNNClassifier - TensorFlow...\033[0m')
     print('  Hidden layers:', dnntfDef.hidden_layers)
-    print('  Optimizer:',dnntfDef.optimizer,', Activation function:',dnntfDef.activation_function)
+    print('  Optimizer:',dnntfDef.optimizer,', Activation function:',dnntfDef.activation_function,
+                    ', Dropout:', dnntfDef.dropout_perc)
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
