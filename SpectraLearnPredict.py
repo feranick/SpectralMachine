@@ -413,7 +413,7 @@ def trainAccuracy(learnFile, testFile):
     
     ''' Plot Training Data '''
     if plotDef.createTrainingDataPlot == True:
-        plotTrainData(A, En, R, plotDef.plotAllSpectra, learnFileRoot)
+        plotTrainData(A, En, A_test, plotDef.plotAllSpectra, learnFileRoot)
 
 
 #**********************************************
