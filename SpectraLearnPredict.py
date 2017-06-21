@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170621f
+* version: 20170621g
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -391,6 +391,10 @@ def trainAccuracy(learnFile, testFile):
     
     learnFileRoot = os.path.splitext(learnFile)[0]
     
+    ''' Plot Training Data - Raw '''
+    if plotDef.createTrainingDataPlot == True:
+        plotTrainData(A, En, A_test, plotDef.plotAllSpectra, learnFileRoot+"_raw")
+    
     ''' Preprocess prediction data '''
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
     A_test, Cl_test, En_test, Aorig_test = preProcessNormLearningData(A_test, En_test, Cl_test, YnormXind, 0)
@@ -411,10 +415,9 @@ def trainAccuracy(learnFile, testFile):
     #if tfDef.runTF == True:
     #    runTFbasic(A,Cl,R, learnFileRoot)
     
-    ''' Plot Training Data '''
+    ''' Plot Training Data - Normalized'''
     if plotDef.createTrainingDataPlot == True:
-        plotTrainData(A, En, A_test, plotDef.plotAllSpectra, learnFileRoot)
-
+        plotTrainData(A, En, A_test, plotDef.plotAllSpectra, learnFileRoot+"_norm")
 
 #**********************************************
 ''' Process - Batch'''
