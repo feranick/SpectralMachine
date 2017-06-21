@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170621c
+* version: 20170621d
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -69,32 +69,6 @@ class preprocDef:
         print(' THIS IS AN EXPERIMENTAL FEATURE \n')
         print(' Restricted range: DISABLED')
 
-#**********************************************
-''' Deep Neural Networks - sklearn'''
-#**********************************************
-class nnDef:
-    runNN = True
-    
-    alwaysRetrain = False
-
-    numNeurons = 200           #default = 200
-    
-    # Optimizers: lbfgs (default), adam, sgd
-    optimizer = "lbfgs"
-    
-    # activation functions: http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
-    # identity, logistic (sigmoid), tanh, relu
-    
-    activation_function = "tanh"
-    
-    MLPRegressor = False
-    
-    # threshold in % of probabilities for listing prediction results
-    thresholdProbabilityPred = 0.001
-
-    plotNN = True
-    nnClassReport = False
-
 #***********************************************************
 ''' Deep Neural Networks - tensorflow via DNNClassifier'''
 #***********************************************************
@@ -152,6 +126,32 @@ class dnntfDef:
             print(" DNNTF: Using Adagrad, learn_rate:",learning_rate,"\n")
             optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
                                         name="Adagrad-pro")
+
+#**********************************************
+''' Deep Neural Networks - sklearn'''
+#**********************************************
+class nnDef:
+    runNN = True
+    
+    alwaysRetrain = False
+    
+    numNeurons = 200           #default = 200
+    
+    # Optimizers: lbfgs (default), adam, sgd
+    optimizer = "lbfgs"
+    
+    # activation functions: http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
+    # identity, logistic (sigmoid), tanh, relu
+    
+    activation_function = "tanh"
+    
+    MLPRegressor = False
+    
+    # threshold in % of probabilities for listing prediction results
+    thresholdProbabilityPred = 0.001
+    
+    plotNN = True
+    nnClassReport = False
 
 #**********************************************
 ''' Support Vector Machines'''
@@ -336,16 +336,16 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Preprocess prediction data '''
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
     R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
-
-    ''' Run Neural Network - sklearn'''
-    if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
-        predNN(clf_nn, A, Cl, R)
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
         clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
         predDNNTF(clf_dnntf, le_dnntf, R, Cl)
+    
+    ''' Run Neural Network - sklearn'''
+    if nnDef.runNN == True:
+        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
+        predNN(clf_nn, A, Cl, R)
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
@@ -389,13 +389,13 @@ def trainAccuracy(learnFile, testFile):
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
     A_test, Cl_test, En_test, Aorig_test = preProcessNormLearningData(A_test, En_test, Cl_test, YnormXind, 0)
     
-    ''' Run Neural Network - sklearn'''
-    if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, A_test, Cl_test, learnFileRoot)
-    
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
         clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A_test, Cl_test, learnFileRoot)
+    
+    ''' Run Neural Network - sklearn'''
+    if nnDef.runNN == True:
+        clf_nn = trainNN(A, Cl, A_test, Cl_test, learnFileRoot)
     
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
@@ -441,13 +441,6 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
 
     learnFileRoot = os.path.splitext(learnFile)[0]
-
-    ''' Run Neural Network - sklearn'''
-    if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
-        nnPred, nnProb = predNN(clf_nn, A, Cl, R)
-        summaryFile.extend([nnPred, nnProb])
-        nnDef.alwaysRetrain = False
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
@@ -455,6 +448,13 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
         dnntfPred, dnntfProb = predDNNTF(clf_dnntf, le_dnntf, R, Cl)
         summaryFile.extend([nnPred, nnProb])
         dnntfDef.alwaysRetrain = False
+    
+    ''' Run Neural Network - sklearn'''
+    if nnDef.runNN == True:
+        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
+        nnPred, nnProb = predNN(clf_nn, A, Cl, R)
+        summaryFile.extend([nnPred, nnProb])
+        nnDef.alwaysRetrain = False
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
@@ -509,18 +509,18 @@ def LearnPredictMap(learnFile, mapFile):
     for r in R[:]:
         r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
         type = 1
-
-        ''' Run Neural Network - sklearn'''
-        if nnDef.runNN == True:
-            nnPred[i], temp = predNN(clf_nn, A, Cl, r)
-            saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
-            nnDef.alwaysRetrain = False
         
         ''' Run Neural Network - TensorFlow'''
         if nnDef.runDNNTF == True:
             dnntfPred[i], temp = predDNNTF(cl_dnntf, le_dnntf, r, Cl)
             saveMap(mapFile, 'DNN-TF', 'HC', dnntfPred[i], X[i], Y[i], True)
             dnnDef.alwaysRetrain = False
+        
+        ''' Run Neural Network - sklearn'''
+        if nnDef.runNN == True:
+            nnPred[i], temp = predNN(clf_nn, A, Cl, r)
+            saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
+            nnDef.alwaysRetrain = False
         
         ''' Run Support Vector Machines '''
         if svmDef.runSVM == True:
@@ -551,102 +551,6 @@ def LearnPredictMap(learnFile, mapFile):
         plotMaps(X, Y, tfPred, 'TensorFlow')
     if kmDef.plotKMmaps == True and kmDef.runKM == True:
         plotMaps(X, Y, kmPred, 'K-Means Prediction')
-
-#********************************************************************************
-''' MultiLayer Perceptron - SKlearn '''
-''' http://scikit-learn.org/stable/modules/neural_networks_supervised.html'''
-#********************************************************************************
-''' Train Neural Network - sklearn '''
-#********************************************************************************
-def trainNN(A, Cl, A_test, Cl_test, Root):
-    from sklearn.neural_network import MLPClassifier, MLPRegressor
-    from sklearn.externals import joblib
-    
-    if nnDef.MLPRegressor is False:
-        Root+"/DNN-TF_"
-        nnTrainedData = Root + '.nnModelC.pkl'
-    else:
-        nnTrainedData = Root + '.nnModelR.pkl'
-    
-    print('==========================================================================\n')
-    print('\033[1m Running Neural Network: multi-layer perceptron (MLP)\033[0m')
-    print('  Number of neurons in hidden layers:', nnDef.numNeurons)
-    print('  Optimizer:',nnDef.optimizer,', Activation Fn:',nnDef.activation_function)
-
-    try:
-        if nnDef.alwaysRetrain == False:
-            with open(nnTrainedData):
-                print('  Opening NN training model...\n')
-                clf = joblib.load(nnTrainedData)
-        else:
-            raise ValueError('  Force NN retraining.')
-    except:
-        #**********************************************
-        ''' Retrain training data if not available'''
-        #**********************************************
-        if nnDef.MLPRegressor is False:
-            print('  Retraining NN model using MLP Classifier...')
-            clf = MLPClassifier(solver=nnDef.optimizer, alpha=1e-5, activation = nnDef.activation_function,
-                                hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
-        else:
-            print('  Retraining NN model using MLP Regressor...')
-            clf = MLPRegressor(solver=nnDef.optimizer, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
-            Cl = np.array(Cl,dtype=float)
-
-        clf.fit(A, Cl)
-        print("  Training on the full training dataset\n")
-        accur = clf.score(A_test,Cl_test)
-
-        if nnDef.MLPRegressor is False:
-            print('  Accuracy: ',100*accur,'%\n')
-        else:
-            print('  Coefficient of determination R^2: ',accur,'\n')
-
-        joblib.dump(clf, nnTrainedData)
-
-    return clf
-
-#********************************************************************************
-''' Evaluate Neural Network - sklearn '''
-#********************************************************************************
-def predNN(clf, A, Cl, R):
-    if nnDef.MLPRegressor is False:
-        prob = clf.predict_proba(R)[0].tolist()
-        rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityPred/100)[0]
-        print('\n  ==============================')
-        print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityPred),'%')
-        print('  ==============================')
-        print('  Prediction\tProbability [%]')
-        for i in range(rosterPred.shape[0]):
-            print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
-        print('  ==============================')
-
-        predValue = clf.predict(R)[0]
-        predProb = round(100*max(prob),4)
-        print('\033[1m' + '\n Predicted classifier value (Deep Neural Networks - sklearn) = ' + str(predValue) +
-          '  (probability = ' + str(predProb) + '%)\033[0m\n')
-    else:
-        Cl = np.array(Cl,dtype=float)
-        predValue = clf.predict(R)[0]
-        predProb = clf.score(A,Cl)
-        print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - sklearn) = ' + str('{:.3f}'.format(predValue)) +
-              '  (R^2 = ' + str('{:.5f}'.format(predProb)) + ')\033[0m\n')
-
-    #**************************************
-    ''' Neural Networks Classification Report '''
-    #**************************************
-    if nnDef.nnClassReport == True:
-        print(' Neural Networks Classification Report\n')
-        runClassReport(clf, A, Cl)
-
-    #*************************
-    ''' Plot probabilities '''
-    #*************************
-    if plotDef.showProbPlot == True:
-        if nnDef.MLPRegressor is False:
-            plotProb(clf, R)
-
-    return predValue, predProb
 
 #********************************************************************************
 ''' TensorFlow '''
@@ -766,6 +670,103 @@ def input_fn(A, Cl2):
     x = tf.constant(A.astype(np.float32))
     y = tf.constant(Cl2)
     return x,y
+
+#********************************************************************************
+''' MultiLayer Perceptron - SKlearn '''
+''' http://scikit-learn.org/stable/modules/neural_networks_supervised.html'''
+#********************************************************************************
+''' Train Neural Network - sklearn '''
+#********************************************************************************
+def trainNN(A, Cl, A_test, Cl_test, Root):
+    from sklearn.neural_network import MLPClassifier, MLPRegressor
+    from sklearn.externals import joblib
+    
+    if nnDef.MLPRegressor is False:
+        Root+"/DNN-TF_"
+        nnTrainedData = Root + '.nnModelC.pkl'
+    else:
+        nnTrainedData = Root + '.nnModelR.pkl'
+
+    print('==========================================================================\n')
+    print('\033[1m Running Neural Network: multi-layer perceptron (MLP)\033[0m')
+    print('  Number of neurons in hidden layers:', nnDef.numNeurons)
+    print('  Optimizer:',nnDef.optimizer,', Activation Fn:',nnDef.activation_function)
+
+    try:
+        if nnDef.alwaysRetrain == False:
+            with open(nnTrainedData):
+                print('  Opening NN training model...\n')
+                clf = joblib.load(nnTrainedData)
+        else:
+            raise ValueError('  Force NN retraining.')
+    except:
+        #**********************************************
+        ''' Retrain training data if not available'''
+        #**********************************************
+        if nnDef.MLPRegressor is False:
+            print('  Retraining NN model using MLP Classifier...')
+            clf = MLPClassifier(solver=nnDef.optimizer, alpha=1e-5, activation = nnDef.activation_function,
+                                hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
+        else:
+            print('  Retraining NN model using MLP Regressor...')
+            clf = MLPRegressor(solver=nnDef.optimizer, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
+            Cl = np.array(Cl,dtype=float)
+
+        clf.fit(A, Cl)
+        print("  Training on the full training dataset\n")
+        accur = clf.score(A_test,Cl_test)
+
+        if nnDef.MLPRegressor is False:
+            print('  Accuracy: ',100*accur,'%\n')
+        else:
+            print('  Coefficient of determination R^2: ',accur,'\n')
+
+        joblib.dump(clf, nnTrainedData)
+
+    return clf
+
+#********************************************************************************
+''' Evaluate Neural Network - sklearn '''
+#********************************************************************************
+def predNN(clf, A, Cl, R):
+    if nnDef.MLPRegressor is False:
+        prob = clf.predict_proba(R)[0].tolist()
+        rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityPred/100)[0]
+        print('\n  ==============================')
+        print('  \033[1mNN\033[0m - Probability >',str(nnDef.thresholdProbabilityPred),'%')
+        print('  ==============================')
+        print('  Prediction\tProbability [%]')
+        for i in range(rosterPred.shape[0]):
+            print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
+        print('  ==============================')
+        
+        predValue = clf.predict(R)[0]
+        predProb = round(100*max(prob),4)
+        print('\033[1m' + '\n Predicted classifier value (Deep Neural Networks - sklearn) = ' + str(predValue) +
+              '  (probability = ' + str(predProb) + '%)\033[0m\n')
+    else:
+        Cl = np.array(Cl,dtype=float)
+        predValue = clf.predict(R)[0]
+        predProb = clf.score(A,Cl)
+        print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - sklearn) = ' + str('{:.3f}'.format(predValue)) +
+              '  (R^2 = ' + str('{:.5f}'.format(predProb)) + ')\033[0m\n')
+    
+    #**************************************
+    ''' Neural Networks Classification Report '''
+    #**************************************
+    if nnDef.nnClassReport == True:
+        print(' Neural Networks Classification Report\n')
+        runClassReport(clf, A, Cl)
+
+    #*************************
+    ''' Plot probabilities '''
+    #*************************
+    if plotDef.showProbPlot == True:
+        if nnDef.MLPRegressor is False:
+            plotProb(clf, R)
+
+    return predValue, predProb
+
 
 #********************************************************************************
 ''' Support Vector Machines - SVM '''
