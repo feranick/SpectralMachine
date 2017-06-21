@@ -90,7 +90,8 @@ class dnntfDef:
     #optimizer = "ProximalAdagrad"
     
     learning_rate=0.1
-    l2_reg_strength=0.000001
+    l2_reg_strength=0.0001
+    
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
     # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
     # sigmoid, tanh
