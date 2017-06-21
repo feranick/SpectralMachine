@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170621a
+* version: 20170621b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -107,14 +107,19 @@ class dnntfDef:
     numNeurons = 200        # number of neurons per layer
     numHidlayers = 1        # number of hidden layer
 
-    # Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
+    # Stock Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     # https://www.tensorflow.org/api_guides/python/train
     optimizer = "Adagrad"
+
+    # Additional optimizers: ProximalAdagrad, Adagrad-pro: (allow for parameters)
+    # https://www.tensorflow.org/api_guides/python/train
+    #optimizer = "ProximalAdagrad"
     
+    learning_rate=0.1
+    l2_reg_strength=0.000001
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
     # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
     # sigmoid, tanh
-    
     activation_function = "tanh"
     
     trainingSteps = 1000    # number of training steps
@@ -138,6 +143,17 @@ class dnntfDef:
         else:
             actFn = "tf.nn."+activation_function
         activationFn = eval(actFn)
+
+        if optimizer == "ProximalAdagrad":
+            print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
+                  ", l2_reg_strength:", l2_reg_strength,"\n")
+            optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
+                                        l2_regularization_strength=l2_reg_strength,
+                                        name="ProximalAdagrad")
+        if optimizer == "Adagrad-pro":
+            print(" DNNTF: Using Adagrad, learn_rate:",learning_rate,"\n")
+            optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
+                                        name="Adagrad-pro")
 
 #**********************************************
 ''' Support Vector Machines'''
