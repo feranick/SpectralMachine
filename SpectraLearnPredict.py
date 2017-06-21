@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170621b
+* version: 20170621c
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -104,8 +104,8 @@ class dnntfDef:
     alwaysRetrain = False
     alwaysImprove = True
     
-    numNeurons = 200        # number of neurons per layer
-    numHidlayers = 1        # number of hidden layer
+    # Format: [number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,...]
+    hidden_layers = [200]
 
     # Stock Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     # https://www.tensorflow.org/api_guides/python/train
@@ -134,8 +134,6 @@ class dnntfDef:
     #*************************************************
     # Setup variables and definitions- do not change.
     #*************************************************
-    hidden_layers = [numNeurons]*numHidlayers
-
     if runDNNTF == True:
         import tensorflow as tf
         if activation_function == "sigmoid" or activation_function == "tanh":
@@ -670,7 +668,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         tf.logging.set_verbosity(tf.logging.INFO)
     
     if dnntfDef.alwaysRetrain == False:
-        model_directory = Root + "/DNN-TF_" + str(dnntfDef.numHidlayers)+"x"+str(dnntfDef.numNeurons)
+        model_directory = Root + "/DNN-TF_" + str(len(dnntfDef.hidden_layers))+"HL_"+str(dnntfDef.hidden_layers[0])
         print("\n  Training model saved in: ", model_directory, "\n")
     else:
         dnntfDef.alwaysImprove = True
