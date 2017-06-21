@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170620a
+* version: 20170621a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -80,7 +80,7 @@ class nnDef:
     numNeurons = 200           #default = 200
     
     # Optimizers: lbfgs (default), adam, sgd
-    nnOptimizer = "lbfgs"
+    optimizer = "lbfgs"
     
     # activation functions: http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
     # identity, logistic (sigmoid), tanh, relu
@@ -109,7 +109,7 @@ class dnntfDef:
 
     # Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     # https://www.tensorflow.org/api_guides/python/train
-    nnOptimizer = "Adagrad"
+    optimizer = "Adagrad"
     
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
     # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
@@ -557,7 +557,7 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Neural Network: multi-layer perceptron (MLP)\033[0m')
     print('  Number of neurons in hidden layers:', nnDef.numNeurons)
-    print('  Optimizer:',nnDef.nnOptimizer,', Activation Fn:',nnDef.activation_function)
+    print('  Optimizer:',nnDef.optimizer,', Activation Fn:',nnDef.activation_function)
 
     try:
         if nnDef.alwaysRetrain == False:
@@ -572,11 +572,11 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
         #**********************************************
         if nnDef.MLPRegressor is False:
             print('  Retraining NN model using MLP Classifier...')
-            clf = MLPClassifier(solver=nnDef.nnOptimizer, alpha=1e-5, activation = nnDef.activation_function,
+            clf = MLPClassifier(solver=nnDef.optimizer, alpha=1e-5, activation = nnDef.activation_function,
                                 hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
         else:
             print('  Retraining NN model using MLP Regressor...')
-            clf = MLPRegressor(solver=nnDef.nnOptimizer, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
+            clf = MLPRegressor(solver=nnDef.optimizer, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
             Cl = np.array(Cl,dtype=float)
 
         clf.fit(A, Cl)
@@ -645,7 +645,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: DNNClassifier - TensorFlow...\033[0m')
     print('  Hidden layers:', dnntfDef.hidden_layers)
-    print('  Optimizer:',dnntfDef.nnOptimizer,', Activation function:',dnntfDef.activation_function)
+    print('  Optimizer:',dnntfDef.optimizer,', Activation function:',dnntfDef.activation_function)
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
@@ -682,7 +682,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
 
     feature_columns = skflow.infer_real_valued_columns_from_input(totA.astype(np.float32))
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
-                               optimizer=dnntfDef.nnOptimizer, n_classes=numTotClasses,
+                               optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
                                activation_fn=dnntfDef.activationFn, model_dir=model_directory,
                                config=skflow.RunConfig(save_checkpoints_secs=1))
                                
