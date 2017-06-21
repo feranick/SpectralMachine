@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170621d
+* version: 20170621e
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -104,6 +104,8 @@ class dnntfDef:
     thresholdProbabilityPred = 0.01
     
     logCheckpoint = True
+    
+    plotMap = True
 
     #*************************************************
     # Setup variables and definitions- do not change.
@@ -150,7 +152,7 @@ class nnDef:
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.001
     
-    plotNN = True
+    plotMap = True
     nnClassReport = False
 
 #**********************************************
@@ -172,7 +174,7 @@ class svmDef:
     kernel = 'rbf'
     showClasses = False
 
-    plotSVM = True
+    plotMap = True
     svmClassReport = False
 
 #**********************************************
@@ -191,7 +193,7 @@ class kmDef:
     customNumKMComp = False
     numKMcomponents = 20
     plotKM = False
-    plotKMmaps = True
+    plotMap = True
 
 #**********************************************
 ''' TensorFlow '''
@@ -208,7 +210,7 @@ class tfDef:
     decayLearnRate = True
     learnRate = 0.75
 
-    plotMapTF = True
+    plotMap = True
     plotClassDistribTF = False
     enableTensorboard = False
 
@@ -541,15 +543,15 @@ def LearnPredictMap(learnFile, mapFile):
             saveMap(mapFile, 'KM', 'HC', kmPred[i], X[i], Y[i], True)
         i+=1
 
-    if nnDef.plotNN == True and nnDef.runNN == True:
-        plotMaps(X, Y, nnPred, 'Deep Neural networks - sklearn')
-    if nnDef.plotNN == True and nnDef.runNN == True:
+    if dnntfDef.plotMap == True and dnntfDef.runDNNTF == True:
         plotMaps(X, Y, dnntfPred, 'Deep Neural networks - tensorFlow')
-    if svmDef.plotSVM == True and svmDef.runSVM == True:
+    if nnDef.plotMap == True and nnDef.runNN == True:
+        plotMaps(X, Y, nnPred, 'Deep Neural networks - sklearn')
+    if svmDef.plotMap == True and svmDef.runSVM == True:
         plotMaps(X, Y, svmPred, 'SVM')
-    if tfDef.plotMapTF == True and tfDef.runTF == True:
+    if tfDef.plotMap == True and tfDef.runTF == True:
         plotMaps(X, Y, tfPred, 'TensorFlow')
-    if kmDef.plotKMmaps == True and kmDef.runKM == True:
+    if kmDef.plotMap == True and kmDef.runKM == True:
         plotMaps(X, Y, kmPred, 'K-Means Prediction')
 
 #********************************************************************************
