@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170617a
+* version: 20170620a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -117,7 +117,9 @@ class dnntfDef:
     
     activation_function = "tanh"
     
-    trainingSteps = 1000     #number of training steps
+    trainingSteps = 1000    # number of training steps
+    
+    valMonitorSecs = 10     # perform validation every given seconds
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
@@ -675,7 +677,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     Cl2_test = le.transform(Cl_test)
     
     validation_monitor = skflow.monitors.ValidationMonitor(input_fn=lambda: input_fn(A_test, Cl2_test),
-                                                           eval_steps=1, every_n_steps=50)
+                                                           eval_steps=1,
+                                                           every_n_steps=dnntfDef.valMonitorSecs)
 
     feature_columns = skflow.infer_real_valued_columns_from_input(totA.astype(np.float32))
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
