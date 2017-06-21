@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170621e
+* version: 20170621f
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -90,12 +90,15 @@ class dnntfDef:
     #optimizer = "ProximalAdagrad"
     
     learning_rate=0.1
-    l2_reg_strength=0.0001
+    l2_reg_strength=1e-8
     
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
     # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
     # sigmoid, tanh
     activation_function = "tanh"
+    
+    # When not None, the probability of dropout.
+    dropout_perc = None
     
     trainingSteps = 1000    # number of training steps
     
@@ -605,7 +608,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
                                optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
                                activation_fn=dnntfDef.activationFn, model_dir=model_directory,
-                               config=skflow.RunConfig(save_checkpoints_secs=1))
+                               config=skflow.RunConfig(save_checkpoints_secs=1),
+                               dropout=dnntfDef.dropout_perc)
                                
     print("\n Number of global steps:",dnntfDef.trainingSteps)
 
