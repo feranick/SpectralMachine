@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170622a
+* version: 20170622b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -736,9 +736,10 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
         accur = clf.score(A_test,Cl_test)
 
         if nnDef.MLPRegressor is False:
-            print('  Accuracy: ',100*accur,'%\n')
+            print('  Accuracy: ',100*accur,'%\n  Loss: {:.5f}'.format(clf.loss_),'\n')
         else:
-            print('  Coefficient of determination R^2: ',accur,'\n')
+            print('  Coefficient of determination R^2: ',accur,
+                  '\n  Loss: {:.5f}'.format(clf.loss_),'\n')
 
         joblib.dump(clf, nnTrainedData)
 
@@ -786,7 +787,6 @@ def predNN(clf, A, Cl, R):
 
     return predValue, predProb
 
-
 #********************************************************************************
 ''' Support Vector Machines - SVM '''
 ''' http://scikit-learn.org/stable/modules/svm.html '''
@@ -825,8 +825,6 @@ def trainSVM(A, Cl, A_test, Cl_test, Root):
             print('  List of classes: ' + str(clf.classes_))
 
     print('\n==========================================================================\n')
-
-
     return clf
 
 #********************************************************************************
