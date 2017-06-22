@@ -144,8 +144,10 @@ class nnDef:
     # Format: (number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,)
     hidden_layers = (200,)  # default: 200
     
-    # Optimizers: lbfgs (default), adam, sgd
-    optimizer = "lbfgs"
+    # Optimizers:
+    # - adam (default), for large datasets
+    # - lbfgs (default) for smaller datasets
+    optimizer = "adam"
     
     # activation functions: http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html
     # identity, logistic (sigmoid), tanh, relu
