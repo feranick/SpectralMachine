@@ -6,7 +6,7 @@
 * Replicate training data with added noise
 * For augmentation of data
 *
-* version: 20170606b
+* version: 20170622a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -16,16 +16,28 @@ print(__doc__)
 
 
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path, getopt, glob
+
+class defParam:
+    addToFlatland = False
 
 def main():
-    if(len(sys.argv)<4):
+    if len(sys.argv) < 4:
         print(' Usage:\n  python3 AddNoisyData.py <learnData> <#additions> <offset>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
+    
+    newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2] + '_offs' + sys.argv[3]
+    
+    if len(sys.argv) == 5:
+        defParam.addToFlatland = True
+        newFile += '_back'
+        print(' Adding ', sys.argv[2], 'sets with background random noise with offset:', sys.argv[3], '\n')
+    else:
+        print(' Adding', sys.argv[2], 'sets with random noise with offset:', sys.argv[3], '\n')
 
+    newFile += '.txt'
     En, M = readLearnFile(sys.argv[1])
-    newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2] + '_offs' + sys.argv[3] + '.txt'
 
     if os.path.exists(newFile) == False:
         newTrain = np.append([0], En)
@@ -33,15 +45,13 @@ def main():
     else:
         newTrain = M
 
-    print(' Adding', sys.argv[2], 'sets with random noise with offset:', sys.argv[3], '\n')
-
     for j in range(int(sys.argv[2])):
         newTrain = np.vstack((newTrain, scrambleNoise(M, float(sys.argv[3]))))
 
     with open(newFile, 'ab') as f:
         np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
 
-    print(' New training file saved: ', newFile, '\n')
+    print(' New training file saved:', newFile, '\n')
 
 #************************************
 ''' Open Learning Data '''
@@ -65,8 +75,11 @@ def scrambleNoise(M, offset):
     from random import uniform
     
     for i in range(1, M.shape[1]-1):
-        M[:,i] += offset*uniform(-1,1)
-    
+        if defParam.addToFlatland == False:
+            M[:,i] += offset*uniform(-1,1)
+        else:
+            if M[:,i].any() == 0:
+                M[:,i] += offset*uniform(-1,1)
     return M
 
 #************************************
