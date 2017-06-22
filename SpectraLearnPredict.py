@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170621g
+* version: 20170621h
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -31,7 +31,7 @@ import random
 #***************************************************************
 class preprocDef:
     Ynorm = True   # Normalize spectra (True: recommended)
-    fullYnorm = False  # Normalize considering full range (False: recommended)
+    fullYnorm = True  # Normalize considering full range (True: recommended)
     StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
 
     subsetCrossValid = False
