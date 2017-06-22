@@ -704,7 +704,8 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Neural Network: multi-layer perceptron (MLP)\033[0m')
     print('  Hidden layers with neuron count:', nnDef.hidden_layers)
-    print('  Optimizer:',nnDef.optimizer,', Activation Fn:',nnDef.activation_function)
+    print('  Optimizer:',nnDef.optimizer,', Activation Fn:',nnDef.activation_function,
+          ', L2 reg. strength: ',nnDef.l2_reg_strength)
 
     try:
         if nnDef.alwaysRetrain == False:
@@ -719,11 +720,13 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
         #**********************************************
         if nnDef.MLPRegressor is False:
             print('  Retraining NN model using MLP Classifier...')
-            clf = MLPClassifier(solver=nnDef.optimizer, alpha=nnDef.l2_reg_strength, activation = nnDef.activation_function,
+            clf = MLPClassifier(solver=nnDef.optimizer, alpha=nnDef.l2_reg_strength,
+                                activation = nnDef.activation_function,
                                 hidden_layer_sizes=nnDef.hidden_layers, random_state=1)
         else:
             print('  Retraining NN model using MLP Regressor...')
-            clf = MLPRegressor(solver=nnDef.optimizer, alpha=1e-5, hidden_layer_sizes=nnDef.hidden_layers, random_state=1)
+            clf = MLPRegressor(solver=nnDef.optimizer, alpha=nnDef.l2_reg_strength,
+                               hidden_layer_sizes=nnDef.hidden_layers, random_state=1)
             Cl = np.array(Cl,dtype=float)
 
         clf.fit(A, Cl)
