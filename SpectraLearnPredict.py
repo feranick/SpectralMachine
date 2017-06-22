@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170621h
+* version: 20170622a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -141,7 +141,8 @@ class nnDef:
     
     alwaysRetrain = False
     
-    numNeurons = 200           #default = 200
+    # Format: (number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,)
+    hidden_layers = (200,)  # default: 200
     
     # Optimizers: lbfgs (default), adam, sgd
     optimizer = "lbfgs"
@@ -150,6 +151,8 @@ class nnDef:
     # identity, logistic (sigmoid), tanh, relu
     
     activation_function = "tanh"
+    
+    l2_reg_strength=1e-5
     
     MLPRegressor = False
     
@@ -700,7 +703,7 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
 
     print('==========================================================================\n')
     print('\033[1m Running Neural Network: multi-layer perceptron (MLP)\033[0m')
-    print('  Number of neurons in hidden layers:', nnDef.numNeurons)
+    print('  Hidden layers with neuron count:', nnDef.hidden_layers)
     print('  Optimizer:',nnDef.optimizer,', Activation Fn:',nnDef.activation_function)
 
     try:
@@ -716,11 +719,11 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
         #**********************************************
         if nnDef.MLPRegressor is False:
             print('  Retraining NN model using MLP Classifier...')
-            clf = MLPClassifier(solver=nnDef.optimizer, alpha=1e-5, activation = nnDef.activation_function,
-                                hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
+            clf = MLPClassifier(solver=nnDef.optimizer, alpha=nnDef.l2_reg_strength, activation = nnDef.activation_function,
+                                hidden_layer_sizes=nnDef.hidden_layers, random_state=1)
         else:
             print('  Retraining NN model using MLP Regressor...')
-            clf = MLPRegressor(solver=nnDef.optimizer, alpha=1e-5, hidden_layer_sizes=(nnDef.numNeurons,), random_state=1)
+            clf = MLPRegressor(solver=nnDef.optimizer, alpha=1e-5, hidden_layer_sizes=nnDef.hidden_layers, random_state=1)
             Cl = np.array(Cl,dtype=float)
 
         clf.fit(A, Cl)
