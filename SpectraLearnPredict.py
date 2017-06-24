@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170622b
+* version: 20170624a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -1128,7 +1128,7 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
                 print('  Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; to max intensity in spectra')
         for i in range(0,A.shape[0]):
             if(np.amin(A[i]) <= 0):
-                A[i,:] = A[i,:] - np.amin(A[i,:]) + 0.00001
+                A[i,:] = A[i,:] - np.amin(A[i,:]) + 1e-8
             A[i,:] = np.multiply(A[i,:], preprocDef.YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
 
     if preprocDef.StandardScalerFlag == True:
@@ -1182,7 +1182,7 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
     
         if(np.amin(R) <= 0):
             print('  Spectra max below zero detected')
-            R[0,:] = R[0,:] - np.amin(R[0,:]) + 0.00001
+            R[0,:] = R[0,:] - np.amin(R[0,:]) + 1e-8
         R[0,:] = np.multiply(R[0,:], preprocDef.YnormTo/R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]])
 
     if preprocDef.StandardScalerFlag == True:
