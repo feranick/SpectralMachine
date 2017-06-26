@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170625b
+* version: 20170625c
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -32,7 +32,7 @@ import random
 class preprocDef:
     Ynorm = True   # Normalize spectra (True: recommended)
     fullYnorm = True  # Normalize considering full range (True: recommended)
-    StandardScalerFlag = False  # Standardize features by removing the mean and scaling to unit variance (sklearn)
+    StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
 
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
@@ -264,11 +264,11 @@ def main():
     print(" Using training file: ", sys.argv[2],"\n")
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-a" , "--accuracy"):
             print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
@@ -369,7 +369,9 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
-        runTFbasic(A,Cl,R, learnFileRoot)
+        #runTFbasic(A,Cl,R, learnFileRoot)
+        trainTF(A, Cl, A, Cl, learnFileRoot)
+        predTF(A, Cl, R, learnFileRoot)
 
     ''' Plot Training Data '''
     if plotDef.createTrainingDataPlot == True:
@@ -1609,14 +1611,13 @@ def runTFbasic(A, Cl, R, Root):
 
 #********************************************************************************
 ''' TensorFlow '''
-''' Run SkFlow - DNN Classifier '''
-''' https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier'''
+''' Basic Tensorflow '''
+''' https://www.tensorflow.org/get_started/mnist/beginners'''
 #********************************************************************************
-''' Train DNNClassifier model training via TensorFlow-skflow '''
+''' Train basic TF training via TensorFlow- '''
 #********************************************************************************
 ''' THIS IS A MAJOR REWRITE OF WHAT NOW IS TFbasic '''
 #********************************************************************************
-
 def trainTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Basic TensorFlow...\033[0m')
@@ -1628,13 +1629,8 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     if tfDef.logCheckpoint == True:
         tf.logging.set_verbosity(tf.logging.INFO)
     
-    if dnntfDef.alwaysRetrain == False:
-        tfTrainedData = Root + '.tfmodel'
-        print("\n  Training model saved in: ", tfTrainedData, "\n")
-    else:
-        dnntfDef.alwaysImprove = True
-        tfTrainedData = None
-        print("\n  Training model not saved\n")
+    tfTrainedData = Root + '.tfmodel'
+    print("\n  Training model saved in: ", tfTrainedData, "\n")
 
     #**********************************************
     ''' Initialize Estimator and training data '''
@@ -1646,7 +1642,6 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     totCl = np.append(Cl, Cl_test)
     numTotClasses = np.unique(totCl).size
     
-    #le = preprocessing.LabelEncoder()
     le = preprocessing.LabelBinarizer()
     totCl2 = le.fit_transform(totCl) # this is original from DNNTF
     Cl2 = le.transform(Cl)     # this is original from DNNTF
@@ -1659,11 +1654,10 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Construct TF model '''
     #**********************************************
-    
     tf.reset_default_graph()
     x = tf.placeholder(tf.float32, [None, totA.shape[1]])
-    W = tf.Variable(tf.zeros([totA.shape[1], np.unique(totCl).shape[0]]))
-    b = tf.Variable(tf.zeros(np.unique(totCl).shape[0]))
+    W = tf.Variable(tf.zeros([totA.shape[1], np.unique(totCl).shape[0]]), name="W")
+    b = tf.Variable(tf.zeros(np.unique(totCl).shape[0]), name="b")
     y_ = tf.placeholder(tf.float32, [None, np.unique(totCl).shape[0]])
     
     # The raw formulation of cross-entropy can be numerically unstable
@@ -1742,6 +1736,53 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     print('  ================================\n')
 
     return
+
+#**********************************************
+''' Predict using basic Tensorflow '''
+#**********************************************
+def predTF(A, Cl, R, Root):
+    print('==========================================================================\n')
+    print('\033[1m Running Basic TensorFlow Prediction...\033[0m')
+    
+    import tensorflow as tf
+    import tensorflow.contrib.learn as skflow
+    from sklearn import preprocessing
+    
+    if tfDef.logCheckpoint == True:
+        tf.logging.set_verbosity(tf.logging.INFO)
+    
+    tfTrainedData = Root + '.tfmodel'
+
+    x = tf.placeholder(tf.float32, [None, A.shape[1]])
+    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]),name="W")
+    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]),name="b")
+    y = tf.matmul(x,W) + b
+    
+    sess = tf.InteractiveSession()
+    tf.global_variables_initializer().run()
+
+    print(' Opening TF training model from:', tfTrainedData)
+    saver = tf.train.Saver()
+
+    saver.restore(sess, './' + tfTrainedData)
+    
+    res1 = sess.run(y, feed_dict={x: R})
+    res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
+    
+    sess.close()
+    
+    rosterPred = np.where(res1[0]>tfDef.thresholdProbabilityTFPred)[0]
+    print('  ==============================')
+    print('  \033[1mTF\033[0m - Probability >',str(tfDef.thresholdProbabilityTFPred),'%')
+    print('  ==============================')
+    print('  Prediction\tProbability [%]')
+    for i in range(rosterPred.shape[0]):
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(res1[0][rosterPred][i])))
+    print('  ==============================\n')
+    
+    print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
+    return np.unique(Cl)[res2][0], res1[0][res2][0], accur
+
 
 #************************************
 ''' Main initialization routine '''
