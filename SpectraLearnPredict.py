@@ -1474,7 +1474,7 @@ def TrainTF(learnFile, numRuns):
             A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
         R_temp, Rorig = preProcessNormPredData(R, En, A_temp, En_temp, Cl_temp, YnormXind, 0)
         print(' Using random spectra from training dataset as evaluation file ')
-        tfPred, tfProb, tfAccur = runTensorFlow(A_temp,Cl_temp,R_temp,learnFileRoot)
+        tfPred, tfProb, tfAccur = runTFbasic(A_temp,Cl_temp,R_temp,learnFileRoot)
         
         with open(summary_filename, "a") as sum_file:
             sum_file.write(str(i+1) + '\t{:10.2f}\t'.format(tfAccur) + str(tfPred) + '\t{:10.2f}\n'.format(tfProb))
