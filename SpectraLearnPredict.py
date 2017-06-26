@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170625a
+* version: 20170625b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -32,7 +32,7 @@ import random
 class preprocDef:
     Ynorm = True   # Normalize spectra (True: recommended)
     fullYnorm = True  # Normalize considering full range (True: recommended)
-    StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
+    StandardScalerFlag = False  # Standardize features by removing the mean and scaling to unit variance (sklearn)
 
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
@@ -74,7 +74,6 @@ class preprocDef:
 #***********************************************************
 class dnntfDef:
     runDNNTF = True
-    
     alwaysRetrain = False
     alwaysImprove = True
     
@@ -210,8 +209,8 @@ class kmDef:
 class tfDef:
     runTF = False
 
-    alwaysRetrain = False
-    alwaysImprove = False       # alwaysRetrain must be True for this to work
+    alwaysRetrain = True
+    alwaysImprove = True       # alwaysRetrain must be True for this to work
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityTFPred = 30
@@ -221,6 +220,8 @@ class tfDef:
     
     subsetCrossValid = False
     percentCrossValid = 0.05
+    
+    logCheckpoint = False
 
     plotMap = True
     plotClassDistribTF = False
@@ -419,9 +420,10 @@ def trainAccuracy(learnFile, testFile):
     if svmDef.runSVM == True:
         clf_svm = trainSVM(A, Cl, A_test, Cl_test, learnFileRoot)
     
-    #''' Tensorflow '''
-    #if tfDef.runTF == True:
-    #    runTFbasic(A,Cl,R, learnFileRoot)
+    ''' Tensorflow '''
+    if tfDef.runTF == True:
+        #runTFbasic(A,Cl,R, learnFileRoot)
+        trainTF(A, Cl, A_test, Cl_test, learnFileRoot)
     
     ''' Plot Training Data - Normalized'''
     if plotDef.createTrainingDataPlot == True:
@@ -1603,6 +1605,143 @@ def runTFbasic(A, Cl, R, Root):
     
     print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
     return np.unique(Cl)[res2][0], res1[0][res2][0], accur
+
+
+#********************************************************************************
+''' TensorFlow '''
+''' Run SkFlow - DNN Classifier '''
+''' https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier'''
+#********************************************************************************
+''' Train DNNClassifier model training via TensorFlow-skflow '''
+#********************************************************************************
+''' THIS IS A MAJOR REWRITE OF WHAT NOW IS TFbasic '''
+#********************************************************************************
+
+def trainTF(A, Cl, A_test, Cl_test, Root):
+    print('==========================================================================\n')
+    print('\033[1m Running Basic TensorFlow...\033[0m')
+
+    import tensorflow as tf
+    import tensorflow.contrib.learn as skflow
+    from sklearn import preprocessing
+    
+    if tfDef.logCheckpoint == True:
+        tf.logging.set_verbosity(tf.logging.INFO)
+    
+    if dnntfDef.alwaysRetrain == False:
+        tfTrainedData = Root + '.tfmodel'
+        print("\n  Training model saved in: ", tfTrainedData, "\n")
+    else:
+        dnntfDef.alwaysImprove = True
+        tfTrainedData = None
+        print("\n  Training model not saved\n")
+
+    #**********************************************
+    ''' Initialize Estimator and training data '''
+    #**********************************************
+    print(' Initializing TensorFlow...')
+    tf.reset_default_graph()
+
+    totA = np.vstack((A, A_test))
+    totCl = np.append(Cl, Cl_test)
+    numTotClasses = np.unique(totCl).size
+    
+    #le = preprocessing.LabelEncoder()
+    le = preprocessing.LabelBinarizer()
+    totCl2 = le.fit_transform(totCl) # this is original from DNNTF
+    Cl2 = le.transform(Cl)     # this is original from DNNTF
+    Cl2_test = le.transform(Cl_test)
+    
+    #validation_monitor = skflow.monitors.ValidationMonitor(input_fn=lambda: input_fn(A_test, Cl2_test),
+    #                                                       eval_steps=1,
+    #                                                       every_n_steps=dnntfDef.valMonitorSecs)
+
+    #**********************************************
+    ''' Construct TF model '''
+    #**********************************************
+    
+    tf.reset_default_graph()
+    x = tf.placeholder(tf.float32, [None, totA.shape[1]])
+    W = tf.Variable(tf.zeros([totA.shape[1], np.unique(totCl).shape[0]]))
+    b = tf.Variable(tf.zeros(np.unique(totCl).shape[0]))
+    y_ = tf.placeholder(tf.float32, [None, np.unique(totCl).shape[0]])
+    
+    # The raw formulation of cross-entropy can be numerically unstable
+    #y = tf.nn.softmax(tf.matmul(x, W) + b)
+    #cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
+        
+    # So here we use tf.nn.softmax_cross_entropy_with_logits on the raw
+    # outputs of 'y', and then average across the batch.
+    y = tf.matmul(x,W) + b
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+    
+    if tfDef.decayLearnRate == True:
+        print(' Using decaying learning rate, start at:',tfDef.learnRate, '\n')
+        global_step = tf.Variable(0, trainable=False)
+        starter_learning_rate = tfDef.learnRate
+        learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step, 100000, 0.96, staircase=True)
+        train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
+    else:
+        print(' Using fix learning rate:', tfDef.learnRate, '\n')
+        train_step = tf.train.GradientDescentOptimizer(tfDef.learnRate).minimize(cross_entropy)
+
+    sess = tf.InteractiveSession()
+    tf.global_variables_initializer().run()
+    
+    if tfDef.enableTensorboard == True:
+        writer = tf.summary.FileWriter(".", sess.graph)
+        print('\n Saving graph. Accessible via tensorboard.  \n')
+
+    saver = tf.train.Saver()
+    accur = 0
+
+    #print("\n Number of global steps:",dnntfDef.trainingSteps)
+
+    #**********************************************
+    ''' Train '''
+    #**********************************************
+    try:
+        if tfDef.alwaysRetrain == False:
+            print(' Opening TF training model from:', tfTrainedData)
+            saver.restore(sess, './' + tfTrainedData)
+            print('\n Model restored.\n')
+        else:
+            raise ValueError(' Force TF model retraining.')
+    except:
+        init = tf.global_variables_initializer()
+        sess.run(init)
+        
+        if os.path.isfile(tfTrainedData + '.meta') & tfDef.alwaysImprove == True:
+            print('\n Improving TF model...')
+            saver.restore(sess, './' + tfTrainedData)
+        else:
+            print('\n Rebuildind TF model...')
+
+        print(' Performing training using subset (' +  str(tfDef.percentCrossValid*100) + '%)')
+
+        summary = sess.run(train_step, feed_dict={x: A, y_: Cl2})
+        correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        accuracy_score = 100*accuracy.eval(feed_dict={x:A_test, y_:Cl2_test})
+
+        save_path = saver.save(sess, tfTrainedData)
+        print(' Model saved in file: %s\n' % save_path)
+        
+    if tfDef.enableTensorboard == True:
+        writer.close()
+    
+    sess.close()
+    
+
+    print('\n  ================================')
+    print('  \033[1mDNN-TF\033[0m - Accuracy')
+    print('  ================================')
+    print("\n  Accuracy: {:.2f}%".format(accuracy_score))
+    #print("  Loss: {:.2f}".format(accuracy_score["loss"]))
+    #print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
+    print('  ================================\n')
+
+    return
 
 #************************************
 ''' Main initialization routine '''
