@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170624a
+* version: 20170625a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -218,6 +218,9 @@ class tfDef:
     
     decayLearnRate = True
     learnRate = 0.75
+    
+    subsetCrossValid = False
+    percentCrossValid = 0.05
 
     plotMap = True
     plotClassDistribTF = False
@@ -1565,13 +1568,12 @@ def runTFbasic(A, Cl, R, Root):
             print('\n Rebuildind TF model...')
         
         if tfDef.subsetCrossValid == True:
-            print(' Iterating training using subset (' +  str(tfDef.percentCrossValid*100) + '%), ' + str(tfDef.iterCrossValid) + ' times ...')
-            for i in range(tfDef.iterCrossValid):
-                As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, tfDef.percentCrossValid)
-                summary = sess.run(train_step, feed_dict={x: As, y_: Cl2s})
-                correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-                accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-                accur = 100*accuracy.eval(feed_dict={x:As_cv, y_:Cl2s_cv})
+            print(' Performing training using subset (' +  str(tfDef.percentCrossValid*100) + '%)')
+            As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, tfDef.percentCrossValid)
+            summary = sess.run(train_step, feed_dict={x: As, y_: Cl2s})
+            correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+            accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+            accur = 100*accuracy.eval(feed_dict={x:As_cv, y_:Cl2s_cv})
         else:
             summary = sess.run(train_step, feed_dict={x: A, y_: Cl2})
             correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
