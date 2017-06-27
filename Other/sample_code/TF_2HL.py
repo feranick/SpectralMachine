@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import time
 import tensorflow as tf
 
@@ -49,7 +51,7 @@ with tf.Session() as sess:
     })
 
     # ... train ...
-    for i in range(5000):
+    for i in range(100):
         #  ... by sampling some input data (fetching) ...
         x_input, y_input = sess.run([x_inputs_data, y_inputs_data])
         # ... and feeding it to our model
@@ -57,6 +59,11 @@ with tf.Session() as sess:
             input: x_input,
             y_true: y_input
         })
+        print(x_input)
+        sess.run(accuracy, feed_dict={
+                     input: x_input,
+                     y_true: y_input
+                     })
 
         # We regularly check the loss
         if i % 500 == 0:
