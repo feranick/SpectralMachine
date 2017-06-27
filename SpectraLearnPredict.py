@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170626b
+* version: 20170626c
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -32,7 +32,7 @@ import random
 class preprocDef:
     Ynorm = True   # Normalize spectra (True: recommended)
     fullYnorm = True  # Normalize considering full range (True: recommended)
-    StandardScalerFlag = True  # Standardize features by removing the mean and scaling to unit variance (sklearn)
+    StandardScalerFlag = False  # Standardize features by removing the mean and scaling to unit variance (sklearn)
 
     subsetCrossValid = False
     percentCrossValid = 0.10  # proportion of TEST data for cross validation
@@ -251,8 +251,8 @@ multiproc = False
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "fatmbkph:", ["file", "accuracy", "traintf",
-                                                 "map", "batch", "kmaps", "pca", "help"])
+                                   "fambkph:", ["file", "accuracy", "map", "batch",
+                                   "kmaps", "pca", "help"])
     except:
         usage()
         sys.exit(2)
@@ -264,11 +264,11 @@ def main():
     print(" Using training file: ", sys.argv[2],"\n")
     for o, a in opts:
         if o in ("-f" , "--file"):
-            #try:
-            LearnPredictFile(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                LearnPredictFile(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-a" , "--accuracy"):
             print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
@@ -280,18 +280,6 @@ def main():
                 testFile = "tmp"
             try:
                 trainAccuracy(sys.argv[2], testFile)
-            except:
-                usage()
-                sys.exit(2)
-
-        if o in ("-t" , "--traintf"):
-            if len(sys.argv) > 3:
-                numRuns = int(sys.argv[3])
-            else:
-                numRuns = 1
-            preprocDef.scrambleNoiseFlag = False
-            try:
-                TrainTF(sys.argv[2], int(numRuns))
             except:
                 usage()
                 sys.exit(2)
@@ -369,7 +357,6 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
-        #runTFbasic(A,Cl,R, learnFileRoot)
         trainTF(A, Cl, A, Cl, learnFileRoot)
         predTF(A, Cl, R, learnFileRoot)
 
@@ -424,7 +411,6 @@ def trainAccuracy(learnFile, testFile):
     
     ''' Tensorflow '''
     if tfDef.runTF == True:
-        #runTFbasic(A,Cl,R, learnFileRoot)
         trainTF(A, Cl, A_test, Cl_test, learnFileRoot)
     
     ''' Plot Training Data - Normalized'''
@@ -486,7 +472,8 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
 
     ''' Tensorflow '''
     if tfDef.runTF == True:
-        tfPred, tfProb, tfAccur = runTFbasic(A,Cl,R, learnFileRoot)
+        trainTF(A, Cl, A, Cl, learnFileRoot)
+        tfPred, tfProb = predTF(A, Cl, R, learnFileRoot)
         summaryFile.extend([tfPred, tfProb, tfAccur])
         tfDef.tfalwaysRetrain = False
 
@@ -551,7 +538,8 @@ def LearnPredictMap(learnFile, mapFile):
 
         ''' Tensorflow '''
         if tfDef.runTF == True:
-            tfPred[i], temp, temp = runTFbasic(A,Cl,r, learnFileRoot)
+            trainTF(A, Cl, A, Cl, learnFileRoot)
+            tfPred, temp = predTF(A, Cl, r, learnFileRoot)
             saveMap(mapFile, 'TF', 'HC', tfPred[i], X[i], Y[i], True)
             tfDef.alwaysRetrain = False
 
@@ -1413,8 +1401,6 @@ def usage():
     print('  python3 SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
     print(' Principal component analysis on spectral collection files: ')
     print('  python3 SpectraLearnPredict.py -p <spectrafile> <#comp>\n')
-    print(' Run tensorflow-basic training only:')
-    print('  python3 SpectraLearnPredict.py -t <learningfile> <# iterations>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 
@@ -1438,185 +1424,12 @@ def scrambleNoise(A, offset):
     for i in range(A.shape[1]):
         A[:,i] += offset*uniform(-1,1)
 
-
-#********************************************************************************
-''' Tensorflow '''
-''' https://www.tensorflow.org/get_started/mnist/beginners'''
-#********************************************************************************
-''' Setup training-only via TensorFlow '''
-#********************************************************************************
-def TrainTF(learnFile, numRuns):
-    learnFileRoot = os.path.splitext(learnFile)[0]
-    summary_filename = learnFileRoot + '_summary-TF-training' + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
-    tfDef.alwaysRetrain = True
-    tfDef.alwaysImprove = True
-    
-    ''' Open and process training data '''
-    En, Cl, A, YnormXind = readLearnFile(learnFile)
-    En_temp = En
-    Cl_temp = Cl
-    A_temp = A
-    with open(summary_filename, "a") as sum_file:
-        sum_file.write(str(datetime.now().strftime('Training started: %Y-%m-%d %H:%M:%S\n')))
-        if preprocDef.scrambleNoiseFlag == True:
-            sum_file.write(' Using Noise scrambler (offset: ' + str(preprocDef.scrambleNoiseOffset) + ')\n\n')
-        sum_file.write('\nIteration\tAccuracy %\t Prediction\t Probability %\n')
-
-    index = random.randint(0,A.shape[0]-1)
-    R = A[index,:]
-
-    if preprocDef.scrambleNoiseFlag == False:
-        A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
-        ''' Plot Training Data '''
-        if plotDef.createTrainingDataPlot == True:
-            plotTrainData(A, En, R.reshape(1,-1), plotDef.plotAllSpectra, learnFileRoot)
-
-    for i in range(numRuns):
-        print(' Running tensorflow training iteration: ' + str(i+1) + '\n')
-        ''' Preprocess prediction data '''
-        if preprocDef.scrambleNoiseFlag == True:
-            A_temp, Cl_temp, En_temp, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
-        R_temp, Rorig = preProcessNormPredData(R, En, A_temp, En_temp, Cl_temp, YnormXind, 0)
-        print(' Using random spectra from training dataset as evaluation file ')
-        tfPred, tfProb, tfAccur = runTFbasic(A_temp,Cl_temp,R_temp,learnFileRoot)
-        
-        with open(summary_filename, "a") as sum_file:
-            sum_file.write(str(i+1) + '\t{:10.2f}\t'.format(tfAccur) + str(tfPred) + '\t{:10.2f}\n'.format(tfProb))
-
-        print(' Nominal class for prediction spectra:', str(index+1), '\n')
-    
-    with open(summary_filename, "a") as sum_file:
-        sum_file.write(str(datetime.now().strftime('\nTraining ended: %Y-%m-%d %H:%M:%S\n')))
-    
-    print(' Completed ' + str(numRuns) + ' Training iterations. \n')
-
-#********************************************************************************
-''' Format vectors of unique labels '''
-#********************************************************************************
-def formatClass(rootFile, Cl):
-    import sklearn.preprocessing as pp
-    print('==========================================================================\n')
-    print(' Running basic TensorFlow. Creating class data in binary form...')
-    Cl2 = pp.LabelBinarizer().fit_transform(Cl)
-    
-    import matplotlib.pyplot as plt
-    plt.hist([float(x) for x in Cl], bins=np.unique([float(x) for x in Cl]), edgecolor="black")
-    plt.xlabel('Class')
-    plt.ylabel('Occurrances')
-    plt.title('Class distibution')
-    plt.savefig(rootFile + '_ClassDistrib.png', dpi = 160, format = 'png')  # Save plot
-    if tfDef.plotClassDistribTF == True:
-        print(' Plotting Class distibution \n')
-        plt.show()
-    
-    return Cl2
-
-#********************************************************************************
-''' Run basic model training and evaluation via TensorFlow '''
-#********************************************************************************
-def runTFbasic(A, Cl, R, Root):
-    import tensorflow as tf
-    tfTrainedData = Root + '.tfmodel'
-    Cl2 = formatClass(Root, Cl)
-    
-    print(' Initializing TensorFlow...')
-    tf.reset_default_graph()
-    x = tf.placeholder(tf.float32, [None, A.shape[1]])
-    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]))
-    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]))
-    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
-    
-    # The raw formulation of cross-entropy can be numerically unstable
-    #y = tf.nn.softmax(tf.matmul(x, W) + b)
-    #cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
-    
-    # So here we use tf.nn.softmax_cross_entropy_with_logits on the raw
-    # outputs of 'y', and then average across the batch.
-    y = tf.matmul(x,W) + b
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
-    
-    if tfDef.decayLearnRate == True:
-        print(' Using decaying learning rate, start at:',tfDef.learnRate, '\n')
-        global_step = tf.Variable(0, trainable=False)
-        starter_learning_rate = tfDef.learnRate
-        learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step, 100000, 0.96, staircase=True)
-        train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
-    else:
-        print(' Using fix learning rate:', tfDef.learnRate, '\n')
-        train_step = tf.train.GradientDescentOptimizer(tfDef.learnRate).minimize(cross_entropy)
-
-    sess = tf.InteractiveSession()
-    tf.global_variables_initializer().run()
-
-    if tfDef.enableTensorboard == True:
-        writer = tf.summary.FileWriter(".", sess.graph)
-        print('\n Saving graph. Accessible via tensorboard.  \n')
-    
-    saver = tf.train.Saver()
-    accur = 0
-    try:
-        if tfDef.alwaysRetrain == False:
-            print(' Opening TF training model from:', tfTrainedData)
-            saver.restore(sess, './' + tfTrainedData)
-            print('\n Model restored.\n')
-        else:
-            raise ValueError(' Force TF model retraining.')
-    except:
-        init = tf.global_variables_initializer()
-        sess.run(init)
-        
-        if os.path.isfile(tfTrainedData + '.meta') & tfDef.alwaysImprove == True:
-            print('\n Improving TF model...')
-            saver.restore(sess, './' + tfTrainedData)
-        else:
-            print('\n Rebuildind TF model...')
-        
-        if tfDef.subsetCrossValid == True:
-            print(' Performing training using subset (' +  str(tfDef.percentCrossValid*100) + '%)')
-            As, Cl2s, As_cv, Cl2s_cv = formatSubset(A, Cl2, tfDef.percentCrossValid)
-            summary = sess.run(train_step, feed_dict={x: As, y_: Cl2s})
-            correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-            accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            accur = 100*accuracy.eval(feed_dict={x:As_cv, y_:Cl2s_cv})
-        else:
-            summary = sess.run(train_step, feed_dict={x: A, y_: Cl2})
-            correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-            accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            accur = 100*accuracy.eval(feed_dict={x:A, y_:Cl2})
-
-        save_path = saver.save(sess, tfTrainedData)
-        print(' Model saved in file: %s\n' % save_path)
-        print('\033[1m Accuracy: ' + str('{:.3f}'.format(accur)) + '%\n\033[0m')
-    
-    if tfDef.enableTensorboard == True:
-        writer.close()
-
-    res1 = sess.run(y, feed_dict={x: R})
-    res2 = sess.run(tf.argmax(y, 1), feed_dict={x: R})
-    
-    sess.close()
-    
-    rosterPred = np.where(res1[0]>tfDef.thresholdProbabilityTFPred)[0]
-    print('  ==============================')
-    print('  \033[1mTF\033[0m - Probability >',str(tfDef.thresholdProbabilityTFPred),'%')
-    print('  ==============================')
-    print('  Prediction\tProbability [%]')
-    for i in range(rosterPred.shape[0]):
-        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(res1[0][rosterPred][i])))
-    print('  ==============================\n')
-    
-    print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
-    return np.unique(Cl)[res2][0], res1[0][res2][0], accur
-
-
 #********************************************************************************
 ''' TensorFlow '''
 ''' Basic Tensorflow '''
 ''' https://www.tensorflow.org/get_started/mnist/beginners'''
 #********************************************************************************
 ''' Train basic TF training via TensorFlow- '''
-#********************************************************************************
-''' THIS IS A MAJOR REWRITE OF WHAT NOW IS TFbasic '''
 #********************************************************************************
 def trainTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
@@ -1712,7 +1525,6 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
         writer.close()
     
     sess.close()
-    
 
     print('\n  ================================')
     print('  \033[1mDNN-TF\033[0m - Accuracy')
@@ -1751,7 +1563,7 @@ def predTF(A, Cl, R, Root):
     sess.close()
     
     rosterPred = np.where(res1[0]>tfDef.thresholdProbabilityTFPred)[0]
-    print('  ==============================')
+    print('\n  ==============================')
     print('  \033[1mTF\033[0m - Probability >',str(tfDef.thresholdProbabilityTFPred),'%')
     print('  ==============================')
     print('  Prediction\tProbability [%]')
@@ -1782,7 +1594,7 @@ def setupTFmodel(A, Cl):
     y = tf.matmul(x,W) + b
     
     return x, y, y_
-    
+
 #************************************
 ''' Main initialization routine '''
 #************************************
