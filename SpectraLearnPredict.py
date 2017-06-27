@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170625c
+* version: 20170626a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -1753,10 +1753,22 @@ def predTF(A, Cl, R, Root):
     
     tfTrainedData = Root + '.tfmodel'
 
+    tf.reset_default_graph()
+
     x = tf.placeholder(tf.float32, [None, A.shape[1]])
     W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]),name="W")
     b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]),name="b")
+    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
+    
+    # The raw formulation of cross-entropy can be numerically unstable
+    #y = tf.nn.softmax(tf.matmul(x, W) + b)
+    #cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
+
+    # So here we use tf.nn.softmax_cross_entropy_with_logits on the raw
+    # outputs of 'y', and then average across the batch.
     y = tf.matmul(x,W) + b
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+    train_step = tf.train.GradientDescentOptimizer(tfDef.learnRate).minimize(cross_entropy)
     
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
@@ -1781,7 +1793,7 @@ def predTF(A, Cl, R, Root):
     print('  ==============================\n')
     
     print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
-    return np.unique(Cl)[res2][0], res1[0][res2][0], accur
+    return np.unique(Cl)[res2][0], res1[0][res2][0]
 
 
 #************************************
