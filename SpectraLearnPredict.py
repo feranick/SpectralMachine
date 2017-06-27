@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170626a
+* version: 20170626b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -1654,19 +1654,8 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Construct TF model '''
     #**********************************************
-    tf.reset_default_graph()
-    x = tf.placeholder(tf.float32, [None, totA.shape[1]])
-    W = tf.Variable(tf.zeros([totA.shape[1], np.unique(totCl).shape[0]]), name="W")
-    b = tf.Variable(tf.zeros(np.unique(totCl).shape[0]), name="b")
-    y_ = tf.placeholder(tf.float32, [None, np.unique(totCl).shape[0]])
-    
-    # The raw formulation of cross-entropy can be numerically unstable
-    #y = tf.nn.softmax(tf.matmul(x, W) + b)
-    #cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
-        
-    # So here we use tf.nn.softmax_cross_entropy_with_logits on the raw
-    # outputs of 'y', and then average across the batch.
-    y = tf.matmul(x,W) + b
+    x,y,y_ = setupTFmodel(totA, totCl)
+
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
     
     if tfDef.decayLearnRate == True:
@@ -1688,8 +1677,6 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
 
     saver = tf.train.Saver()
     accur = 0
-
-    #print("\n Number of global steps:",dnntfDef.trainingSteps)
 
     #**********************************************
     ''' Train '''
@@ -1735,8 +1722,6 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     #print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
     print('  ================================\n')
 
-    return
-
 #**********************************************
 ''' Predict using basic Tensorflow '''
 #**********************************************
@@ -1753,29 +1738,11 @@ def predTF(A, Cl, R, Root):
     
     tfTrainedData = Root + '.tfmodel'
 
-    tf.reset_default_graph()
-
-    x = tf.placeholder(tf.float32, [None, A.shape[1]])
-    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]),name="W")
-    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]),name="b")
-    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
-    
-    # The raw formulation of cross-entropy can be numerically unstable
-    #y = tf.nn.softmax(tf.matmul(x, W) + b)
-    #cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
-
-    # So here we use tf.nn.softmax_cross_entropy_with_logits on the raw
-    # outputs of 'y', and then average across the batch.
-    y = tf.matmul(x,W) + b
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
-    train_step = tf.train.GradientDescentOptimizer(tfDef.learnRate).minimize(cross_entropy)
-    
+    x,y,y_ = setupTFmodel(A, Cl)
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
-
     print(' Opening TF training model from:', tfTrainedData)
     saver = tf.train.Saver()
-
     saver.restore(sess, './' + tfTrainedData)
     
     res1 = sess.run(y, feed_dict={x: R})
@@ -1795,7 +1762,27 @@ def predTF(A, Cl, R, Root):
     print('\033[1m Predicted value (TF): ' + str(np.unique(Cl)[res2][0]) + ' (Probability: ' + str('{:.1f}'.format(res1[0][res2][0])) + '%)\n' + '\033[0m' )
     return np.unique(Cl)[res2][0], res1[0][res2][0]
 
-
+#**********************************************
+''' Setup Tensorflow Model'''
+#**********************************************
+def setupTFmodel(A, Cl):
+    import tensorflow as tf
+    tf.reset_default_graph()
+    x = tf.placeholder(tf.float32, [None, A.shape[1]])
+    W = tf.Variable(tf.zeros([A.shape[1], np.unique(Cl).shape[0]]),name="W")
+    b = tf.Variable(tf.zeros(np.unique(Cl).shape[0]),name="b")
+    y_ = tf.placeholder(tf.float32, [None, np.unique(Cl).shape[0]])
+    
+    # The raw formulation of cross-entropy can be numerically unstable
+    #y = tf.nn.softmax(tf.matmul(x, W) + b)
+    #cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), axis=[1]))
+    
+    # So here we use tf.nn.softmax_cross_entropy_with_logits on the raw
+    # outputs of 'y', and then average across the batch.
+    y = tf.matmul(x,W) + b
+    
+    return x, y, y_
+    
 #************************************
 ''' Main initialization routine '''
 #************************************
