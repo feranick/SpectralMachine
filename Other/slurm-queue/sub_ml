@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#SBATCH --nodes=1                  # Request 2 nodes 
+#SBATCH -t 6:00:00                 # Request 12 hours in walltime.
+#SBATCH --job-name=ml-test           # Job name
+#SBATCH -o output                  # output file
+#SBATCH -e error                   # error file
+#SBATCH --ntasks=24                # total number of cores required. Nodes*24              
+#SBATCH --export=ALL
+
+# Load environment modules
+. /usr/share/Modules/init/bash
+
+# Unload any modules and load an MPI/compiler module.
+module purge
+module load intel
+module load impi
+
+basepy="/usr/local/bin/python3"
+
+train="train.txt"
+test="test.txt"
+
+base=${PWD}
+
+logname="log_"${PWD##*/}".txt"
+
+$basepy $base/SpectraLearnPredict.py -a $base/$train $base/$test 2>&1 | tee -a $logname
