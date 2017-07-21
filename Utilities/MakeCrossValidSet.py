@@ -22,7 +22,7 @@ class defParam:
 
 def main():
     if len(sys.argv) < 3:
-        print(' Usage:\n  python3 makeCrossValidSet.py <learnData> <file-list-data>\n')
+        print(' Usage:\n  python3 MakeCrossValidSet.py <learnData> <file-list-data>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
