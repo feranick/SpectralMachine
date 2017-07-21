@@ -1,10 +1,12 @@
 #!/bin/bash
+#use the script as follows:
+# sbatch sub_ml
 
 #SBATCH --nodes=1                  # Request 2 nodes 
-#SBATCH -t 6:00:00                 # Request 12 hours in walltime.
-#SBATCH --job-name=ml-test           # Job name
-#SBATCH -o output                  # output file
-#SBATCH -e error                   # error file
+#SBATCH -t 24:00:00                # Request 12 hours in walltime.
+#SBATCH --job-name=ml-ir           # Job name
+#SBATCH -o log_output              # output file
+#SBATCH -e log_error               # error file
 #SBATCH --ntasks=24                # total number of cores required. Nodes*24              
 #SBATCH --export=ALL
 
@@ -16,13 +18,17 @@ module purge
 module load intel
 module load impi
 
-basepy="/usr/local/bin/python3"
+basepy="/home/nicola/exec/bin/python3"
 
-train="train.txt"
-test="test.txt"
+train="AAA_ir_ML_train.txt"
+test="AAA_ir_ML_test.txt"
 
 base=${PWD}
 
 logname="log_"${PWD##*/}".txt"
 
+# Use argument specific cross validation file:
 $basepy $base/SpectraLearnPredict.py -a $base/$train $base/$test 2>&1 | tee -a $logname
+
+# Use randomly created cross validation dataset:
+#$basepy $base/SpectraLearnPredict.py -a $base/$train 2>&1 | tee -a $logname
