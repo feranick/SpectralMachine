@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170626c
+* version: 20170721a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -24,7 +24,7 @@ import sys, os.path, getopt, glob, csv
 from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
-import random
+import random, time
 
 #***************************************************************
 ''' Spectra normalization, preprocessing, model selection  '''
@@ -249,6 +249,7 @@ multiproc = False
 ''' Main '''
 #**********************************************
 def main():
+    start_time = time.clock()
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    "fambkph:", ["file", "accuracy", "map", "batch",
@@ -319,6 +320,8 @@ def main():
             except:
                 usage()
                 sys.exit(2)
+        total_time = time.clock() - start_time
+        print(" Total time (s):",total_time)
 
 #**********************************************
 ''' Learn and Predict - File'''
