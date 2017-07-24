@@ -32,22 +32,24 @@ def main():
     M = readIndexFile(sys.argv[1])
 
     L = np.zeros(0)
-    print(M)
-    
+
     for i in range(1,M.shape[0]):
         if M[i] != 0:
-            print(i)
-            print(M[i])
             L = np.append(L,[i])
 
+    cvSize = L.shape[0]*100/M.shape[0]
+
+    print("\n Size of training set:", str(M.shape[0]),
+          "\n Size of testing set: ",str(L.shape[0]),
+          " ({:.2f}%)\n".format(cvSize))
 
     L = L.reshape(-1,1)
-    
 
-    print(' Saving new cross validation file in:', listFile, '\n')
+    print(' Saving <list_file> in:', listFile, '\n')
     with open(listFile, 'ab') as f:
         np.savetxt(f, L, delimiter='\t', fmt='%1d')
-    print(' Done!\n')
+    print(' To create cross validation data set from learning set run:\n',
+          '  MakeCrossValidSet.py <learningFile> <list_file> \n')
 
 #************************************
 ''' Open Index File '''
