@@ -3,10 +3,10 @@
 '''
 *********************************************
 *
-* Create Cross Validation Datasets
+* Create Random Cross Validation Datasets
 * Train + Test
 *
-* version: 20170612a
+* version: 20170724a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -20,7 +20,7 @@ import sys, os, getopt, glob, csv
 
 def main():
     if(len(sys.argv)<3):
-        print(' Usage:\n  python3 CrossValidMaker.py <learnData> <percentageCrossValid>\n')
+        print(' Usage:\n  python3 RandomCrossValidMaker.py <learnData> <percentageCrossValid>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
