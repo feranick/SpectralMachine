@@ -4,8 +4,9 @@
 *************************************************
 *
 * Make Cross Validation Dataset from Learing Set
+* Uses CSV with selected spectra from log file.
 *
-* version: 20170720a
+* version: 20170724c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -22,7 +23,7 @@ class defParam:
 
 def main():
     if len(sys.argv) < 3:
-        print(' Usage:\n  python3 MakeCrossValidSet.py <learnData> <file-list-data>\n')
+        print(' Usage:\n  python3 MakeCrossValidSet.py <learnData> <index_csv_data>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
@@ -34,17 +35,31 @@ def main():
         return
 
     En, M = readLearnFile(sys.argv[1])
+    I = readIndexFile(sys.argv[2])
+    L = np.zeros(0)
     
-    L = readList(sys.argv[2])
+    for i in range(0,I.shape[0]):
+        if I[i] != 0:
+            L = np.append(L,[i])
+
+    cvSize = L.shape[0]*100/I.shape[0]
+    
+    print("\n Size of training set:", str(I.shape[0]),
+          "\n Size of testing set: ",str(L.shape[0]),
+          " ({:.2f}%)\n".format(cvSize))
+        
+    L = L.reshape(-1,1)
+
+    print(L)
 
     newTrain = np.append([0], En)
     newTest = np.append([0], En)
 
-    print(" Selecting:",str(L.shape[0])," spectra for test file (",str(L.shape[0]*100/M.shape[0]),"%)")
+    #print(" Selecting:",str(L.shape[0])," spectra for test file (",str(L.shape[0]*100/M.shape[0]),"%)")
 
     print(" Sorting spectra for training and testing according to list...")
-    for i in range(1,M.shape[0]):
-        if i+1 in L:
+    for i in range(0,M.shape[0]):
+        if i in L:
             newTest = np.vstack((newTest, M[i]))
         else:
             newTrain = np.vstack((newTrain, M[i]))
@@ -71,20 +86,21 @@ def readLearnFile(learnFile):
         return
 
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    #M = np.delete(M,np.s_[0:1],0)
+    M = np.delete(M,np.s_[0:1],0)
     return En, M
 
 #************************************
-''' Open list '''
+''' Open Index File '''
 #************************************
-def readList(File):
+def readIndexFile(File):
     try:
-        with open(File, 'r') as f:
-            L = np.loadtxt(f, unpack =False)
+        csv = np.genfromtxt(File,delimiter=',')
+        L = np.nan_to_num(csv[:,1])
     except:
-        print('\033[1m' + ' List data file not found \n' + '\033[0m')
+        print('\033[1m' + ' Index data file not found \n' + '\033[0m')
         return
-    
+    L = np.delete(L,np.s_[0:1],0)
+    print(L)
     return L
 
 #************************************
