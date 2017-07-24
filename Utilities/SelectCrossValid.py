@@ -5,7 +5,7 @@
 *
 * Select Cross Validation Dataset from log file
 *
-* version: 20170724a
+* version: 20170724b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -63,19 +63,6 @@ def readIndexFile(File):
         return
 
     return M
-
-#************************************
-''' Open list '''
-#************************************
-def readList(File):
-    try:
-        with open(File, 'r') as f:
-            L = np.loadtxt(f, unpack =False)
-    except:
-        print('\033[1m' + ' List data file not found \n' + '\033[0m')
-        return
-    
-    return L
 
 #************************************
 ''' Main initialization routine '''
