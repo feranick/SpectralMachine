@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20170622a
+* version: 20170724c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -63,7 +63,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
     size = 0
     compound=[]
     learnFileRoot = os.path.splitext(learnFile)[0]
-    summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.log'))
+    summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S\n')))
     
@@ -79,10 +79,10 @@ def processMultiFile(learnFile, enInit, enFin, enStep):
             success = makeFile(f, learnFile, index, enInit, enFin, enStep)
             with open(summary_filename, "a") as sum_file:
                 if success == True:
-                    sum_file.write(str(index) + '\t\t' + f +'\n')
+                    sum_file.write(str(index) + ',,,' + f +'\n')
                     size = size + 1
                 else:
-                    sum_file.write(str(index) + '\tNO\t' + f +'\n')
+                    sum_file.write(str(index) + ',,NO,' + f +'\n')
     print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
 
     Cl2 = np.zeros((size, size))
