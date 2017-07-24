@@ -6,7 +6,7 @@
 * Make Cross Validation Dataset from Learing Set
 * Uses CSV with selected spectra from log file.
 *
-* version: 20170724c
+* version: 20170724d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -18,9 +18,6 @@ print(__doc__)
 import numpy as np
 import sys, os.path, getopt, glob
 
-class defParam:
-    addToFlatland = False
-
 def main():
     if len(sys.argv) < 3:
         print(' Usage:\n  python3 MakeCrossValidSet.py <learnData> <index_csv_data>\n')
@@ -31,7 +28,7 @@ def main():
     testFile = os.path.splitext(sys.argv[1])[0] + '_test.txt'
 
     if os.path.exists(trainFile) or os.path.exists(testFile) == True:
-        print(" Training or Cross validation files exist. Exiting.\n")
+        print(" Training or cross validation test files exist. Exiting.\n")
         return
 
     En, M = readLearnFile(sys.argv[1])
@@ -44,18 +41,14 @@ def main():
 
     cvSize = L.shape[0]*100/I.shape[0]
     
-    print("\n Size of training set:", str(I.shape[0]),
-          "\n Size of testing set: ",str(L.shape[0]),
+    print("\n Size of initial training set:", str(I.shape[0]),
+          "\n Size of final training set:", str(I.shape[0]-L.shape[0]),
+          "\n Size of final testing set: ",str(L.shape[0]),
           " ({:.2f}%)\n".format(cvSize))
         
     L = L.reshape(-1,1)
-
-    print(L)
-
     newTrain = np.append([0], En)
     newTest = np.append([0], En)
-
-    #print(" Selecting:",str(L.shape[0])," spectra for test file (",str(L.shape[0]*100/M.shape[0]),"%)")
 
     print(" Sorting spectra for training and testing according to list...")
     for i in range(0,M.shape[0]):
@@ -84,7 +77,6 @@ def readLearnFile(learnFile):
     except:
         print('\033[1m' + ' Learn data file not found \n' + '\033[0m')
         return
-
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
     M = np.delete(M,np.s_[0:1],0)
     return En, M
@@ -100,7 +92,6 @@ def readIndexFile(File):
         print('\033[1m' + ' Index data file not found \n' + '\033[0m')
         return
     L = np.delete(L,np.s_[0:1],0)
-    print(L)
     return L
 
 #************************************
