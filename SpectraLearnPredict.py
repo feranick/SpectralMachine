@@ -82,11 +82,11 @@ class dnntfDef:
 
     # Stock Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     # https://www.tensorflow.org/api_guides/python/train
-    optimizer = "Adagrad"
+    #optimizer = "Adagrad"
 
     # Additional optimizers: ProximalAdagrad, Adagrad-pro: (allow for parameters)
     # https://www.tensorflow.org/api_guides/python/train
-    #optimizer = "ProximalAdagrad"
+    optimizer = "ProximalAdagrad"
     
     learning_rate=0.1
     l2_reg_strength=1e-5
