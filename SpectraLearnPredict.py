@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Raman spectra.
-* version: 20170721a
+* version: 20170728a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -575,8 +575,10 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: DNNClassifier - TensorFlow...\033[0m')
     print('  Hidden layers:', dnntfDef.hidden_layers)
-    print('  Optimizer:',dnntfDef.optimizer,', Activation function:',dnntfDef.activation_function,
-                    ', Dropout:', dnntfDef.dropout_perc)
+    print('  Optimizer:',dnntfDef.optimizer,
+                '\n  Activation function:',dnntfDef.activation_function,
+                '\n L2:',dnntfDef.l2_reg_strength,
+                '\n  Dropout:', dnntfDef.dropout_perc)
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
