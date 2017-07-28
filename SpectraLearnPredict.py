@@ -577,7 +577,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('  Hidden layers:', dnntfDef.hidden_layers)
     print('  Optimizer:',dnntfDef.optimizer,
                 '\n  Activation function:',dnntfDef.activation_function,
-                '\n L2:',dnntfDef.l2_reg_strength,
+                '\n  L2:',dnntfDef.l2_reg_strength,
                 '\n  Dropout:', dnntfDef.dropout_perc)
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
