@@ -35,7 +35,7 @@ class preprocDef:
     StandardScalerFlag = False  # Standardize features by removing the mean and scaling to unit variance (sklearn)
 
     subsetCrossValid = False
-    percentCrossValid = 0.10  # proportion of TEST data for cross validation
+    percentCrossValid = 0.05  # proportion of TEST data for cross validation
 
     YnormTo = 1
     YnormX = 1600
