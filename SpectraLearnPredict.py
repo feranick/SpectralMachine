@@ -4,7 +4,7 @@
 **********************************************************
 *
 * SpectraLearnPredict
-* Perform Machine Learning on Raman spectra.
+* Perform Machine Learning on Spectroscopy Data.
 * version: 20170728a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
@@ -99,9 +99,9 @@ class dnntfDef:
     # When not None, the probability of dropout.
     dropout_perc = None
     
-    trainingSteps = 1000    # number of training steps
+    trainingSteps = 20000    # number of training steps
     
-    valMonitorSecs = 10     # perform validation every given seconds
+    valMonitorSecs = 2000     # perform validation every given seconds
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
@@ -136,7 +136,7 @@ class dnntfDef:
 ''' Deep Neural Networks - sklearn'''
 #**********************************************
 class nnDef:
-    runNN = True
+    runNN = False
     
     alwaysRetrain = False
     
@@ -167,7 +167,7 @@ class nnDef:
 ''' Support Vector Machines'''
 #**********************************************
 class svmDef:
-    runSVM = True
+    runSVM = False
     
     alwaysRetrain = False
     
