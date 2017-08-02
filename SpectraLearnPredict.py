@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20170728a
+* version: 20170802a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -78,7 +78,7 @@ class dnntfDef:
     alwaysImprove = True
     
     # Format: [number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,...]
-    hidden_layers = [200]
+    hidden_layers = [400]
 
     # Stock Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
     # https://www.tensorflow.org/api_guides/python/train
@@ -89,7 +89,7 @@ class dnntfDef:
     optimizer = "ProximalAdagrad"
     
     learning_rate=0.1
-    l2_reg_strength=1e-5
+    l2_reg_strength=1e-4
     
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
     # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
@@ -101,7 +101,7 @@ class dnntfDef:
     
     trainingSteps = 20000    # number of training steps
     
-    valMonitorSecs = 2000     # perform validation every given seconds
+    valMonitorSecs = 200     # perform validation every given seconds
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
@@ -136,12 +136,12 @@ class dnntfDef:
 ''' Deep Neural Networks - sklearn'''
 #**********************************************
 class nnDef:
-    runNN = False
+    runNN = True
     
     alwaysRetrain = False
     
     # Format: (number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,)
-    hidden_layers = (200,)  # default: 200
+    hidden_layers = (400,)  # default: 200
     
     # Optimizers:
     # - adam (default), for large datasets
@@ -153,7 +153,7 @@ class nnDef:
     
     activation_function = "tanh"
     
-    l2_reg_strength=1e-5
+    l2_reg_strength=1e-4
     
     MLPRegressor = False
     
