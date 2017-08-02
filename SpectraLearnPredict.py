@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20170802a
+* version: 20170802b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -80,11 +80,12 @@ class dnntfDef:
     # Format: [number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,...]
     hidden_layers = [400]
 
-    # Stock Optimizers: Adagrad (recommended), Adam, Ftrl, Momentum, RMSProp, SGD
+    # Stock Optimizers: Adagrad (recommended), Adam, Ftrl, RMSProp, SGD
     # https://www.tensorflow.org/api_guides/python/train
     #optimizer = "Adagrad"
 
-    # Additional optimizers: ProximalAdagrad, Adagrad-pro: (allow for parameters)
+    # Additional optimizers: ProximalAdagrad, AdamOpt, Adadelta,
+    #                        GradientDescent, ProximalGradientDescent
     # https://www.tensorflow.org/api_guides/python/train
     optimizer = "ProximalAdagrad"
     
@@ -99,7 +100,7 @@ class dnntfDef:
     # When not None, the probability of dropout.
     dropout_perc = None
     
-    trainingSteps = 20000    # number of training steps
+    trainingSteps = 1000    # number of training steps
     
     valMonitorSecs = 200     # perform validation every given seconds
     
@@ -126,11 +127,37 @@ class dnntfDef:
                   ", l2_reg_strength:", l2_reg_strength,"\n")
             optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
                                         l2_regularization_strength=l2_reg_strength,
+                                        use_locking=False,
                                         name="ProximalAdagrad")
-        if optimizer == "Adagrad-pro":
-            print(" DNNTF: Using Adagrad, learn_rate:",learning_rate,"\n")
-            optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
-                                        name="Adagrad-pro")
+        if optimizer == "AdamOpt":
+            print(" DNNTF: Using Adam, learn_rate:",learning_rate,"\n")
+            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate,
+                                        beta1=0.9,
+                                        beta2=0.999,
+                                        epsilon=1e-08,
+                                        use_locking=False,
+                                        name="Adam")
+        if optimizer == "Adadelta":
+            print(" DNNTF: Using Adadelta, learn_rate:",learning_rate,"\n")
+            optimizer = tf.train.AdadeltaOptimizer(learning_rate=learning_rate,
+                                        rho=0.95,
+                                        epsilon=1e-08,
+                                        use_locking=False,
+                                        name="Adadelta")
+
+        if optimizer == "GradientDescent":
+            print(" DNNTF: Using GradientDescent, learn_rate:",learning_rate,"\n")
+            optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate,
+                                        use_locking=False,
+                                        name="GradientDescent")
+
+        if optimizer == "ProximalGradientDescent":
+            print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
+                  ", l2_reg_strength:", l2_reg_strength,"\n")
+            optimizer = tf.train.ProximalGradientDescentOptimizer(learning_rate=learning_rate,
+                                        l2_regularization_strength=l2_reg_strength,
+                                        use_locking=False,
+                                        name="ProximalGradientDescent")
 
 #**********************************************
 ''' Deep Neural Networks - sklearn'''
