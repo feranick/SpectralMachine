@@ -4,7 +4,7 @@
 *********************************************
 *
 * Replicate training data with added noise
-* Offset is randomly set
+* Noise is a percentage of max in a spectra.
 * For augmentation of data
 *
 * version: 20170807a
@@ -24,11 +24,11 @@ class defParam:
 
 def main():
     if len(sys.argv) < 4:
-        print(' Usage:\n  python3 AddNoisyData.py <learnData> <#additions> <offset>\n')
+        print(' Usage:\n  python3 AddRelativeNoisyData.py <learnData> <#additions> <%-offset>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
-    newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2] + '_offs' + sys.argv[3]
+    newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2] + '_offsPC' + sys.argv[3]
     
     if len(sys.argv) == 5:
         defParam.addToFlatland = True
@@ -74,13 +74,13 @@ def readLearnFile(learnFile):
 #************************************
 def scrambleNoise(M, offset):
     from random import uniform
-    
-    for i in range(1, M.shape[1]-1):
-        if defParam.addToFlatland == False:
-            M[:,i] += offset*uniform(-1,1)
-        else:
-            if M[:,i].any() == 0:
-                M[:,i] += offset*uniform(-1,1)
+    for j in range(0, M.shape[0]):
+        for i in range(1, M.shape[1]-1):
+            if defParam.addToFlatland == False:
+                M[j,i] += offset*uniform(-1,1)*np.amax(M[j,:])
+            else:
+                if M[j,i].any() == 0:
+                    M[:,i] += offset*uniform(-1,1)*np.amax(M[j,:])
     return M
 
 #************************************
