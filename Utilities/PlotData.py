@@ -56,6 +56,8 @@ def plotTrainData(En, M):
     #print(' Plotting Training dataset in: ' + learnFileRoot + '.png\n')
     for i in range(0,M.shape[0], 1):
         plt.plot(En, M[i,1:], label='Training data')
+    
+    plt.plot(En, M[0,1:], label='Training data')
 
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
