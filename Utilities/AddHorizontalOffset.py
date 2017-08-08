@@ -6,7 +6,7 @@
 * Replicate training data with horizontal offset
 * For augmentation of data
 *
-* version: 20170807b
+* version: 20170807c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -62,16 +62,17 @@ def readLearnFile(learnFile):
 ''' Introduce Noise in Data '''
 #************************************
 def horizontalOffset(En, M, offset, rand):
-    if rand is True:
-        from random import uniform
-        newEn = En + offset*uniform(-1,1)
-    else:
-        newEn = En + offset
 
     newM = np.zeros(M.shape)
     newM[:,0] = M[:,0]
-
+    newEn = np.zeros(En.shape)
+    
     for i in range(0, M.shape[0]):
+        if rand is True:
+            from random import uniform
+            newEn = En + offset*uniform(-1,1)
+        else:
+            newEn = En + offset
         newM[i,1:] = np.interp(En, newEn, M[i,1:], left = 0, right = 0)
 
     return newM
