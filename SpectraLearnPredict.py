@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20170802b
+* version: 20170808a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -102,12 +102,13 @@ class dnntfDef:
     
     trainingSteps = 1000    # number of training steps
     
-    valMonitorSecs = 200     # perform validation every given seconds
+    valMonitorSecs = 200    # perform validation every given seconds
+    
+    logCheckpoint = True
+    timeCheckpoint = 20     # number of seconds in between checkpoints
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = 0.01
-    
-    logCheckpoint = True
     
     plotMap = True
 
@@ -642,10 +643,10 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
 
     feature_columns = skflow.infer_real_valued_columns_from_input(totA.astype(np.float32))
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
-                               optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
-                               activation_fn=dnntfDef.activationFn, model_dir=model_directory,
-                               config=skflow.RunConfig(save_checkpoints_secs=1),
-                               dropout=dnntfDef.dropout_perc)
+            optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
+            activation_fn=dnntfDef.activationFn, model_dir=model_directory,
+            config=skflow.RunConfig(save_checkpoints_secs=dnntfDef.timeCheckpoint),
+            dropout=dnntfDef.dropout_perc)
                                
     print("\n Number of global steps:",dnntfDef.trainingSteps)
 
