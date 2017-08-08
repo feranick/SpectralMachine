@@ -6,7 +6,7 @@
 * Replicate training data with vertical offset
 * For augmentation of data
 *
-* version: 20170622a
+* version: 20170807b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -19,13 +19,13 @@ import numpy as np
 import sys, os.path, getopt, glob, csv
 
 def main():
-    if(len(sys.argv)<3):
-        print(' Usage:\n  python3 AddVerticalOffset.py <learnData> <offset>\n')
+    if(len(sys.argv)<4):
+        print(' Usage:\n  python3 AddVerticalOffset.py <learnData> <#additions> <offset>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
     En, M = readLearnFile(sys.argv[1])
-    newFile = os.path.splitext(sys.argv[1])[0] + '_Voffs' + sys.argv[2] + '.txt'
+    newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2]+ '_Voffs' + sys.argv[3] + '.txt'
 
     if os.path.exists(newFile) == False:
         newTrain = np.append([0], En)
@@ -33,9 +33,10 @@ def main():
     else:
         newTrain = M
 
-    print(' Adding sets with vertical offset:', sys.argv[2], '\n')
+    print(' Adding', sys.argv[2],'sets with vertical offset:', sys.argv[3], '\n')
 
-    newTrain = np.vstack((newTrain, verticalOffset(M, float(sys.argv[2]))))
+    for j in range(int(sys.argv[2])):
+        newTrain = np.vstack((newTrain, verticalOffset(M, float(sys.argv[3]))))
 
     with open(newFile, 'ab') as f:
         np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
