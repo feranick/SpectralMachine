@@ -6,7 +6,7 @@
 * Replicate training data with vertical offset
 * For augmentation of data
 *
-* version: 20170807b
+* version: 20170809b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -25,7 +25,7 @@ def main():
         return
 
     En, M = readLearnFile(sys.argv[1])
-    newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2]+ '_Voffs' + sys.argv[3] + '.txt'
+    newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2]+ '_oV' + sys.argv[3] + '.txt'
 
     if os.path.exists(newFile) == False:
         newTrain = np.append([0], En)

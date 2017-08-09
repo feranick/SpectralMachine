@@ -28,7 +28,7 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
-    newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2] + '_offsPC' + sys.argv[3]
+    newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2] + '_oNpc' + sys.argv[3]
     
     if len(sys.argv) == 5:
         defParam.addToFlatland = True
