@@ -7,7 +7,7 @@
 * Noise is a percentage of max in a spectra.
 * For augmentation of data
 *
-* version: 20170809a
+* version: 20170809b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -80,7 +80,7 @@ def scrambleNoise(M, offset):
                 M[j,i] += offset*uniform(-1,1)*np.amax(M[j,:])
             else:
                 if M[j,i].any() == 0:
-                    M[:,i] += offset*uniform(-1,1)*np.amax(M[j,:])
+                    M[j,i] += offset*uniform(-1,1)*np.amax(M[j,:])
     return M
 
 #************************************
