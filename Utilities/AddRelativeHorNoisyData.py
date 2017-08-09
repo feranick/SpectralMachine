@@ -8,7 +8,7 @@
 * spectra are also shifted along the x axis
 * For augmentation of data
 *
-* version: 20170809b
+* version: 20170809c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -34,9 +34,11 @@ def main():
     if len(sys.argv) == 6:
         defParam.addToFlatland = True
         newFile += '_back'
-        print(' Adding ', sys.argv[2], 'sets with background random noise with offset:', sys.argv[3], '\n')
+        print(' Adding ', sys.argv[2], 'sets with background random noise with offset:', sys.argv[3],
+              ', horizontal offset within', sys.argv[4],'\n')
     else:
-        print(' Adding', sys.argv[2], 'sets with random noise with offset:', sys.argv[3], '\n')
+        print(' Adding', sys.argv[2], 'sets with random noise with offset:', sys.argv[3],
+              ', horizontal offset within', sys.argv[4],'\n')
 
     newFile += '.txt'
     En, M = readLearnFile(sys.argv[1])
