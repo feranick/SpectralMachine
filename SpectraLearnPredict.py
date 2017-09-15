@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20170915a
+* version: 20170915b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -36,23 +36,6 @@ class Configuration():
         if os.path.isfile(self.configFile) is False:
             print("Configuration file does not exist: Creating one.")
             self.createConfig()
-
-    # Create configuration file
-    def createConfig(self):
-        try:
-            self.preprocDef()
-            self.dnntfDef()
-            self.nnDef()
-            self.svmDef()
-            self.pcaDef()
-            self.kmDef()
-            self.tfDef()
-            self.plotDef()
-            self.sysDef()
-            with open(self.configFile, 'w') as configfile:
-                self.conf.write(configfile)
-        except:
-            print("Error in creating configuration file")
 
     # Hadrcoded default definitions for the confoguration file
     def preprocDef(self):
@@ -264,6 +247,23 @@ class Configuration():
         self.stepSpectraPlot = eval(self.plotDef['stepSpectraPlot'])
 
         self.multiproc = eval(self.sysDef['multiproc'])
+
+    # Create configuration file
+    def createConfig(self):
+        try:
+            self.preprocDef()
+            self.dnntfDef()
+            self.nnDef()
+            self.svmDef()
+            self.pcaDef()
+            self.kmDef()
+            self.tfDef()
+            self.plotDef()
+            self.sysDef()
+            with open(self.configFile, 'w') as configfile:
+                self.conf.write(configfile)
+        except:
+            print("Error in creating configuration file")
 
 #***************************************************************
 ''' Spectra normalization, preprocessing, model selection  '''
