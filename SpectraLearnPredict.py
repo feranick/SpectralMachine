@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20170915b
+* version: 20170915d
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -61,6 +61,7 @@ class Configuration():
     def dnntfDef(self):
         self.conf['DNNClassifier'] = {
             'runDNNTF' : True,
+            'runSkflowDNNTF' : True,
             'alwaysRetrainDNNTF' : False,
             'alwaysImproveDNNTF' : True,
             'hidden_layersDNNTF' : [400,],
@@ -181,6 +182,7 @@ class Configuration():
         self.enSelDelta = eval(self.preprocDef['enSelDelta'])
         
         self.runDNNTF = eval(self.dnntfDef['runDNNTF'])
+        self.runSkflowDNNTF = eval(self.dnntfDef['runSkflowDNNTF'])
         self.alwaysRetrainDNNTF = eval(self.dnntfDef['alwaysRetrainDNNTF'])
         self.alwaysImproveDNNTF = eval(self.dnntfDef['alwaysImproveDNNTF'])
         self.hidden_layersDNNTF = eval(self.dnntfDef['hidden_layersDNNTF'])
@@ -319,6 +321,7 @@ class dnntfDef:
     config.readConfig(config.configFile)
     
     runDNNTF = config.runDNNTF
+    runSkflowDNNTF = config.runSkflowDNNTF
     alwaysRetrain = config.alwaysRetrainDNNTF
     alwaysImprove = config.alwaysImproveDNNTF
     
@@ -636,8 +639,12 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
-        predDNNTF(clf_dnntf, le_dnntf, R, Cl)
+        if dnntfDef.runSkflowDNNTF == True:
+            clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
+            predDNNTF(clf_dnntf, le_dnntf, R, Cl)
+        else:
+            clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A, Cl, learnFileRoot)
+            predDNNTF2(clf_dnntf, le_dnntf, R, Cl)
     
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
@@ -693,8 +700,11 @@ def trainAccuracy(learnFile, testFile):
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A_test, Cl_test, learnFileRoot)
-    
+        if dnntfDef.runSkflowDNNTF == True:
+            clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A_test, Cl_test, learnFileRoot)
+        else:
+            clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A_test, Cl_test, learnFileRoot)
+
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
         clf_nn = trainNN(A, Cl, A_test, Cl_test, learnFileRoot)
@@ -745,8 +755,12 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
-        dnntfPred, dnntfProb = predDNNTF(clf_dnntf, le_dnntf, R, Cl)
+        if dnntfDef.runSkflowDNNTF == True:
+            clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
+            dnntfPred, dnntfProb = predDNNTF(clf_dnntf, le_dnntf, R, Cl)
+        else:
+            clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A, Cl, learnFileRoot)
+            dnntfPred, dnntfProb = predDNNTF2(clf_dnntf, le_dnntf, R, Cl)
         summaryFile.extend([nnPred, nnProb])
         dnntfDef.alwaysRetrain = False
     
@@ -802,8 +816,11 @@ def LearnPredictMap(learnFile, mapFile):
     if nnDef.runNN == True:
         clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
 
-    if nnDef.runDNNTF == True:
-        clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
+    if dnntfDef.runDNNTF == True:
+        if dnntfDef.runSkflowDNNTF == True:
+            clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
+        else:
+            clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A, Cl, learnFileRoot)
 
     if svmDef.runSVM == True:
         clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
@@ -813,8 +830,12 @@ def LearnPredictMap(learnFile, mapFile):
         type = 1
         
         ''' Run Neural Network - TensorFlow'''
-        if nnDef.runDNNTF == True:
-            dnntfPred[i], temp = predDNNTF(cl_dnntf, le_dnntf, r, Cl)
+        if dnntfDef.runDNNTF == True:
+            if dnntfDef.runSkflowDNNTF == True:
+                dnntfPred[i], temp = predDNNTF(cl_dnntf, le_dnntf, r, Cl)
+            else:
+                dnntfPred[i], temp = predDNNTF2(cl_dnntf, le_dnntf, r, Cl)
+            
             saveMap(mapFile, 'DNN-TF', 'HC', dnntfPred[i], X[i], Y[i], True)
             dnnDef.alwaysRetrain = False
         
@@ -864,7 +885,7 @@ def LearnPredictMap(learnFile, mapFile):
 #********************************************************************************
 def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
-    print('\033[1m Running Deep Neural Networks: DNNClassifier - TensorFlow...\033[0m')
+    print('\033[1m Running Deep Neural Networks: skflow-DNNClassifier - TensorFlow...\033[0m')
     print('  Hidden layers:', dnntfDef.hidden_layers)
     print('  Optimizer:',dnntfDef.optimizer,
                 '\n  Activation function:',dnntfDef.activation_function,
@@ -924,13 +945,13 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         print("  Retreaving training model from: ", model_directory,"\n")
 
     accuracy_score = clf.evaluate(input_fn=lambda: input_fn(A_test, Cl2_test), steps=1)
-    print('\n  ================================')
-    print('  \033[1mDNN-TF\033[0m - Accuracy')
-    print('  ================================')
+    print('\n  ===================================')
+    print('  \033[1msk-DNN-TF\033[0m - Accuracy')
+    print('  ===================================')
     print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
     print("  Loss: {:.2f}".format(accuracy_score["loss"]))
     print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
-    print('  ================================\n')
+    print('  ===================================\n')
 
     return clf, le
 
@@ -956,15 +977,15 @@ def predDNNTF(clf, le, R, Cl):
     
     rosterPred = np.where(prob>dnntfDef.thresholdProbabilityPred/100)[0]
     
-    print('\n  ================================')
-    print('  \033[1mDNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
-    print('  ================================')
+    print('\n  ===================================')
+    print('  \033[1msk-DNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
+    print('  ===================================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
         print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*prob[rosterPred][i])))
-    print('  ================================')
+    print('  ===================================')
     
-    print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - TensorFlow) = ' + predValue +
+    print('\033[1m' + '\n Predicted value (skflow.DNNClassifier) = ' + predValue +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
@@ -977,6 +998,136 @@ def input_fn(A, Cl2):
     x = tf.constant(A.astype(np.float32))
     y = tf.constant(Cl2)
     return x,y
+
+#********************************************************************************
+''' TensorFlow '''
+''' Run tf.estimator.DNNClassifier '''
+''' https://www.tensorflow.org/api_docs/python/tf/estimator/DNNClassifier'''
+#********************************************************************************
+''' Train DNNClassifier model training via TensorFlow-skflow '''
+#********************************************************************************
+def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
+    print('==========================================================================\n')
+    print('\033[1m Running Deep Neural Networks: tf.DNNClassifier - TensorFlow...\033[0m')
+    print('  Hidden layers:', dnntfDef.hidden_layers)
+    print('  Optimizer:',dnntfDef.optimizer,
+                '\n  Activation function:',dnntfDef.activation_function,
+                '\n  L2:',dnntfDef.l2_reg_strength,
+                '\n  Dropout:', dnntfDef.dropout_perc)
+    import tensorflow as tf
+    import tensorflow.contrib.learn as skflow
+    from sklearn import preprocessing
+    from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
+    
+    if dnntfDef.logCheckpoint ==True:
+        tf.logging.set_verbosity(tf.logging.INFO)
+    
+    if dnntfDef.alwaysRetrain == False:
+        model_directory = Root + "/DNN-TF_" + str(len(dnntfDef.hidden_layers))+"HL_"+str(dnntfDef.hidden_layers[0])
+        print("\n  Training model saved in: ", model_directory, "\n")
+    else:
+        dnntfDef.alwaysImprove = True
+        model_directory = None
+        print("\n  Training model not saved\n")
+
+    #**********************************************
+    ''' Initialize Estimator and training data '''
+    #**********************************************
+    print(' Initializing TensorFlow...')
+    tf.reset_default_graph()
+
+    totA = np.vstack((A, A_test))
+    totCl = np.append(Cl, Cl_test)
+    numTotClasses = np.unique(totCl).size
+    
+    le = preprocessing.LabelEncoder()
+    totCl2 = le.fit_transform(totCl)
+    Cl2 = le.transform(Cl)
+    Cl2_test = le.transform(Cl_test)
+    
+    train_input_fn = tf.estimator.inputs.numpy_input_fn(
+            x={"x": np.array(A)},
+            y=np.array(Cl2),
+            num_epochs=None,
+            shuffle=True)
+        
+    test_input_fn = tf.estimator.inputs.numpy_input_fn(
+            x={"x": np.array(A_test)},
+            y=np.array(Cl2_test),
+            num_epochs=None,
+            shuffle=True)
+    
+    validation_monitor = [skflow.monitors.ValidationMonitor(input_fn=test_input_fn,
+                                                           eval_steps=1,
+                                                           every_n_steps=dnntfDef.valMonitorSecs)]
+
+    feature_columns = [tf.feature_column.numeric_column("x", shape=[totA.shape[1]])]
+    
+    clf = tf.estimator.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
+            optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
+            activation_fn=dnntfDef.activationFn, model_dir=model_directory,
+           config=skflow.RunConfig(save_checkpoints_secs=dnntfDef.timeCheckpoint),
+           dropout=dnntfDef.dropout_perc)
+           
+    hooks = monitor_lib.replace_monitors_with_hooks(validation_monitor, clf)
+
+                               
+    print("\n Number of global steps:",dnntfDef.trainingSteps)
+
+    #**********************************************
+    ''' Train '''
+    #**********************************************
+    if dnntfDef.alwaysImprove == True or os.path.exists(model_directory) is False:
+        print(" (Re-)training using dataset: ", Root,"\n")
+        clf.train(input_fn=train_input_fn,
+                steps=dnntfDef.trainingSteps, hooks=hooks)
+    else:
+        print("  Retreaving training model from: ", model_directory,"\n")
+
+    accuracy_score = clf.evaluate(input_fn=test_input_fn, steps=1)
+    print('\n  ==================================')
+    print('  \033[1mtf.DNNCl\033[0m - Accuracy')
+    print('  ==================================')
+    print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
+    print("  Loss: {:.2f}".format(accuracy_score["loss"]))
+    print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
+    print('  ==================================\n')
+
+    return clf, le
+
+#********************************************************************************
+''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''
+#********************************************************************************
+def predDNNTF2(clf, le, R, Cl):
+    import tensorflow as tf
+    import tensorflow.contrib.learn as skflow
+    from sklearn import preprocessing
+
+    predict_input_fn = tf.estimator.inputs.numpy_input_fn(
+      x={"x": R},
+      num_epochs=1,
+      shuffle=False)
+      
+    predictions = list(clf.predict(input_fn=predict_input_fn))
+    pred_class = [p["class_ids"] for p in predictions][0][0]
+    predValue = le.inverse_transform(pred_class)
+    prob = [p["probabilities"] for p in predictions][0]
+    predProb = round(100*prob[pred_class],2)
+    
+    rosterPred = np.where(prob>dnntfDef.thresholdProbabilityPred/100)[0]
+    
+    print('\n  ==================================')
+    print('  \033[1mtf.DNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
+    print('  ==================================')
+    print('  Prediction\tProbability [%]')
+    for i in range(rosterPred.shape[0]):
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*prob[rosterPred][i])))
+    print('  ==================================')
+    
+    print('\033[1m' + '\n Predicted value (tf.DNNClassifier) = ' + predValue +
+          '  (probability = ' + str(predProb) + '%)\033[0m\n')
+
+    return predValue, predProb
 
 #********************************************************************************
 ''' MultiLayer Perceptron - SKlearn '''

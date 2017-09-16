@@ -556,11 +556,11 @@ def main():
     print(" Using training file: ", sys.argv[2],"\n")
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-a" , "--accuracy"):
             print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
@@ -857,14 +857,14 @@ def LearnPredictMap(learnFile, mapFile):
 
 #********************************************************************************
 ''' TensorFlow '''
-''' Run SkFlow - DNN Classifier '''
-''' https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier'''
+''' Run tf.estimator.DNNClassifier '''
+''' https://www.tensorflow.org/api_docs/python/tf/estimator/DNNClassifier'''
 #********************************************************************************
 ''' Train DNNClassifier model training via TensorFlow-skflow '''
 #********************************************************************************
 def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
-    print('\033[1m Running Deep Neural Networks: DNNClassifier - TensorFlow...\033[0m')
+    print('\033[1m Running Deep Neural Networks: tf.DNNClassifier - TensorFlow...\033[0m')
     print('  Hidden layers:', dnntfDef.hidden_layers)
     print('  Optimizer:',dnntfDef.optimizer,
                 '\n  Activation function:',dnntfDef.activation_function,
@@ -943,13 +943,13 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         print("  Retreaving training model from: ", model_directory,"\n")
 
     accuracy_score = clf.evaluate(input_fn=test_input_fn, steps=1)
-    print('\n  ================================')
-    print('  \033[1mDNN-TF\033[0m - Accuracy')
-    print('  ================================')
+    print('\n  ==================================')
+    print('  \033[1mtf.DNNCl\033[0m - Accuracy')
+    print('  ==================================')
     print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
     print("  Loss: {:.2f}".format(accuracy_score["loss"]))
     print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
-    print('  ================================\n')
+    print('  ==================================\n')
 
     return clf, le
 
@@ -961,41 +961,31 @@ def predDNNTF(clf, le, R, Cl):
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
 
-    #**********************************************
-    ''' Predict '''
-    #**********************************************
-    def input_fn_predict():
-        x = tf.constant(R.astype(np.float32))
-        return x
-
-    pred_class = list(clf.predict_classes(input_fn=input_fn_predict))[0]
+    predict_input_fn = tf.estimator.inputs.numpy_input_fn(
+      x={"x": R},
+      num_epochs=1,
+      shuffle=False)
+      
+    predictions = list(clf.predict(input_fn=predict_input_fn))
+    pred_class = [p["class_ids"] for p in predictions][0][0]
     predValue = le.inverse_transform(pred_class)
-    prob = list(clf.predict_proba(input_fn=input_fn_predict))[0]
+    prob = [p["probabilities"] for p in predictions][0]
     predProb = round(100*prob[pred_class],2)
     
     rosterPred = np.where(prob>dnntfDef.thresholdProbabilityPred/100)[0]
     
-    print('\n  ================================')
-    print('  \033[1mDNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
-    print('  ================================')
+    print('\n  ==================================')
+    print('  \033[1mtf.DNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
+    print('  ==================================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
         print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*prob[rosterPred][i])))
-    print('  ================================')
+    print('  ==================================')
     
     print('\033[1m' + '\n Predicted regressor value (Deep Neural Networks - TensorFlow) = ' + predValue +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
-
-#**********************************************
-''' Format input data for Estimator '''
-#**********************************************
-def input_fn(A, Cl2):
-    import tensorflow as tf
-    x = tf.constant(A.astype(np.float32))
-    y = tf.constant(Cl2)
-    return x,y
 
 #********************************************************************************
 ''' MultiLayer Perceptron - SKlearn '''
