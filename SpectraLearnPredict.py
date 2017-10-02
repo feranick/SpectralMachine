@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20170915d
+* version: 20171001a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -33,6 +33,7 @@ class Configuration():
     def __init__(self):
         self.configFile = "SpectraLearnPredict.ini"
         self.conf = configparser.ConfigParser()
+        self.conf.optionxform = str
         if os.path.isfile(self.configFile) is False:
             print("Configuration file does not exist: Creating one.")
             self.createConfig()
