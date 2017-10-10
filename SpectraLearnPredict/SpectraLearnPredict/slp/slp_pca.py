@@ -36,13 +36,13 @@ from .slp_config import *
     pca.explained_variance_ratio
     '''
 #********************************************************************************
-def runPCA(learnFile, numPCAcomponents):
+def runPCA(En, Cl, A, YnormXind, numPCAcomponents):
     from sklearn.decomposition import PCA
     import matplotlib.pyplot as plt
     from matplotlib import cm
 
-    ''' Open and process training data '''
-    En, Cl, A, YnormXind = readLearnFile(learnFile)
+    #''' Open and process training data '''
+    #En, Cl, A, YnormXind = readLearnFile(learnFile)
 
     print('==========================================================================\n')
     print(' Running PCA...\n')

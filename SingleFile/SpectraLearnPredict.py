@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171002c
+* version: 20171010c
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -629,7 +629,7 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Run PCA '''
     if pcaDef.runPCA == True:
-        runPCAmain(A, Cl, En)
+        runPCA(En, Cl, A, YnormXind, pcaDef.numPCAcomponents)
 
     ''' Open prediction file '''
     R, Rx = readPredFile(sampleFile)
@@ -1314,13 +1314,13 @@ def predSVM(clf, A, Cl, R):
     pca.explained_variance_ratio
     '''
 #********************************************************************************
-def runPCA(learnFile, numPCAcomponents):
+def runPCA(En, Cl, A, YnormXind, numPCAcomponents):
     from sklearn.decomposition import PCA
     import matplotlib.pyplot as plt
     from matplotlib import cm
 
-    ''' Open and process training data '''
-    En, Cl, A, YnormXind = readLearnFile(learnFile)
+    #''' Open and process training data '''
+    #En, Cl, A, YnormXind = readLearnFile(learnFile)
 
     print('==========================================================================\n')
     print(' Running PCA...\n')

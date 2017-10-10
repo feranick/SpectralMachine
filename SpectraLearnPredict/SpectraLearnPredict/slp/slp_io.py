@@ -44,7 +44,7 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Run PCA '''
     if pcaDef.runPCA == True:
-        runPCAmain(A, Cl, En)
+        runPCA(En, Cl, A, YnormXind, pcaDef.numPCAcomponents)
 
     ''' Open prediction file '''
     R, Rx = readPredFile(sampleFile)
