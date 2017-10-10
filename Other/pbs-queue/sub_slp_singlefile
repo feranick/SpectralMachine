@@ -12,7 +12,7 @@ $nprocs=$n*1;
 $inpfile=$ARGV[0];
 $inpfiletest=$ARGV[1];
 #This part creates necessary directories;
-#$execpath="/usr/local/bin/";
+$execpath="/usr/local/bin/";
 $fullpath=getcwd;
 $basedir = $inpfile;
 $basedir =~ s{\.[^.]+$}{};
@@ -38,11 +38,9 @@ cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
   echo $inpfiletest
 
   # Use argument specific cross validation file:
-  #$execpath/SpectraLearnPredict.py -a $inpfile $inpfiletest 2>&1 | tee -a log_$inpfile
-  SpectraLearnPredict -a $inpfile $inpfiletest 2>&1 | tee -a log_$inpfile
+  $execpath/SpectraLearnPredict.py -a $inpfile $inpfiletest 2>&1 | tee -a log_$inpfile
 
   # Use randomly created cross validation dataset:
   #$execpath/SpectraLearnPredict.py -a $inpfile  2>&1 | tee -a log_$inpfile
-  #SpectraLearnPredict -a $inpfile  2>&1 | tee -a log_$inpfile
 
 ";
