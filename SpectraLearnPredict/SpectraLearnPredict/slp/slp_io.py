@@ -25,6 +25,14 @@ from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
 
+from .slp_config import *
+from .slp_preprocess import *
+from .slp_tf import *
+from .slp_nn import *
+from .slp_svm import *
+from .slp_pca import *
+from .slp_kmeans import *
+
 #**********************************************
 ''' Learn and Predict - File'''
 #**********************************************

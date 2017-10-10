@@ -24,7 +24,6 @@ from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
 
-from .slp_config import *
 
 #***************************************************************
 ''' Parameters and configuration  '''
