@@ -2,24 +2,21 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
-* Plot train data
-*
-* version: 20171012a
+* Plot train data skipping with steps
+* version: 20171012b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)
-
-
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path, random
+import matplotlib.pyplot as plt
 
 def main():
     if(len(sys.argv)<2):
         print(' Usage:\n  python3 PlotData.py <learnData> <step>\n')
+        print(' Usage (full set):\n  python3 PlotData.py <learnData>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
@@ -49,25 +46,26 @@ def readLearnFile(learnFile):
     
     print("En:",En.shape)
     print("M:",M.shape)
-    print ("En:",En)
-    print("M:",M)
+    #print ("En:",En)
+    #print("M:",M)
     return En, M, learnFileRoot
 
 #************************************
 ''' Plot data '''
 #************************************
 def plotTrainData(En, M, learnFileRoot, step):
-    import matplotlib.pyplot as plt
-
-    #print(' Plotting Training dataset in: ' + learnFileRoot + '.png\n')
+    learnFileRootNew = learnFileRoot
     if step == 1:
-        learnFileRoot = learnFileRoot + '_full-set'
+        learnFileRootNew = learnFileRoot + '_full-set'
+        plt.title('Full set: '+learnFileRootNew)
     else:
-        learnFileRoot = learnFileRoot + '_partial-' + str(step)
+        start = random.randint(0,10)
+        learnFileRootNew = learnFileRoot + '_partial-' + str(step) + '_start-' + str(start)
+        plt.title(learnFileRootNew+'\nPartial Set: every '+str(step)+' spectrum, start at: '+ str(start))
 
-    print(' Plotting Training dataset in: ' + learnFileRoot + '.png\n')
+    print(' Plotting Training dataset in: ' + learnFileRootNew + '.png\n')
     
-    for i in range(0,M.shape[0], step):
+    for i in range(start,M.shape[0], step):
         plt.plot(En, M[i,1:], label='Training data')
     
     plt.plot(En, M[0,1:], label='Training data')
@@ -75,7 +73,7 @@ def plotTrainData(En, M, learnFileRoot, step):
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
 
-    plt.savefig(learnFileRoot + '.png', dpi = 160, format = 'png')  # Save plot
+    plt.savefig(learnFileRootNew + '.png', dpi = 160, format = 'png')  # Save plot
     
     plt.show()
     plt.close()
