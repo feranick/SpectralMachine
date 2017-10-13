@@ -3,7 +3,7 @@
 '''
 *********************************************
 * Plot train data skipping with steps
-* version: 20171012b
+* version: 20171013a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
@@ -56,12 +56,13 @@ def readLearnFile(learnFile):
 def plotTrainData(En, M, learnFileRoot, step):
     learnFileRootNew = learnFileRoot
     if step == 1:
+        start = 0
         learnFileRootNew = learnFileRoot + '_full-set'
-        plt.title('Full set: '+learnFileRootNew)
+        plt.title(learnFileRoot+'\nFull set (#'+str(M.shape[0])+')')
     else:
         start = random.randint(0,10)
         learnFileRootNew = learnFileRoot + '_partial-' + str(step) + '_start-' + str(start)
-        plt.title(learnFileRootNew+'\nPartial Set: every '+str(step)+' spectrum, start at: '+ str(start))
+        plt.title(learnFileRootNew+'\nPartial Set (#'+str(M.shape[0])+'): every '+str(step)+' spectrum, start at: '+ str(start))
 
     print(' Plotting Training dataset in: ' + learnFileRootNew + '.png\n')
     

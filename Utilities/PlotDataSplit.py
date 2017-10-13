@@ -3,7 +3,7 @@
 '''
 *********************************************
 * Plot train data split in different files
-* version: 20171012b
+* version: 20171013a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
@@ -60,19 +60,20 @@ def plotTrainData(En, M, learnFileRoot, nplots):
     i=0
     j=0
     while j*nplots < M.shape[0]:
-    
         if (j+1)*nplots < M.shape[0]:
             max = (j+1)*nplots
         else:
             max = M.shape[0]
+        print(max)
 
         if nplots == 1:
             nplots = M.shape[0]
+            max = M.shape[0]
             learnFileRootNew = learnFileRoot + '_full-set'
-            plt.title('Full set: '+learnFileRoot)
+            plt.title(learnFileRoot+'\nFull set (#'+str(M.shape[0])+')')
         else:
             learnFileRootNew = learnFileRoot + '_partial-' + str(i)+'-'+str(max)
-            plt.title(learnFileRoot+'\nPartial Set: ['+str(i)+', '+str(max)+']')
+            plt.title(learnFileRoot+'\nPartial Set (#'+str(M.shape[0])+') ['+str(i)+', '+str(max)+']')
 
         print(' Plotting Training dataset in: ' + learnFileRootNew + '.png\n')
     
