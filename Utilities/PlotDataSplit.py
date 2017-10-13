@@ -3,7 +3,7 @@
 '''
 *********************************************
 * Plot train data split in different files
-* version: 20171013a
+* version: 20171013b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
@@ -44,7 +44,7 @@ def readLearnFile(learnFile):
     learnFileRoot = os.path.splitext(learnFile)[0]
 
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(M,np.s_[0:1],0)
+    M = np.delete(np.array(M[:,1:]),np.s_[0:1],0)
     
     print("En:",En.shape)
     print("M:",M.shape)
@@ -78,9 +78,9 @@ def plotTrainData(En, M, learnFileRoot, nplots):
         print(' Plotting Training dataset in: ' + learnFileRootNew + '.png\n')
     
         while i < max:
-            plt.plot(En, M[i,1:], label='Training data')
+            plt.plot(En, M[i,:], label='Training data')
             i+=1
-        plt.plot(En, M[0,1:], label='Training data')
+        plt.plot(En, M[0,:], label='Training data')
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Raman Intensity [arb. units]')
 
