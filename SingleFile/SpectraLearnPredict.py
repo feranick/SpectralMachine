@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171010c
+* version: 20171020a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -1056,7 +1056,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
             x={"x": np.array(A_test)},
             y=np.array(Cl2_test),
             num_epochs=None,
-            shuffle=True)
+            shuffle=False)
     
     validation_monitor = [skflow.monitors.ValidationMonitor(input_fn=test_input_fn,
                                                            eval_steps=1,
