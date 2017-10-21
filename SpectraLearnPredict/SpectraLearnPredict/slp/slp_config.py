@@ -200,8 +200,8 @@ class Configuration():
         self.thresholdProbabilityPredDNNTF = eval(self.dnntfDef['thresholdProbabilityPredDNNTF'])
         self.plotMapDNNTF = eval(self.dnntfDef['plotMapDNNTF'])
         try:
-            self.shuffleTrainDNNTF : eval(self.dnntfDef['shuffleTrainDNNTF'])
-            self.shuffleTestDNNTF : eval(self.dnntfDef['shuffleTestDNNTF'])
+            self.shuffleTrainDNNTF = eval(self.dnntfDef['shuffleTrainDNNTF'])
+            self.shuffleTestDNNTF = eval(self.dnntfDef['shuffleTestDNNTF'])
         except:
             self.shuffleTrainDNNTF = True
             self.shuffleTestDNNTF = False
