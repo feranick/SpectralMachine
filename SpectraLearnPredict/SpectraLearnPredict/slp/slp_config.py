@@ -368,8 +368,8 @@ class dnntfDef:
     
     plotMap = config.plotMapDNNTF
     
-    shuffleTrainDNNTF = config.shuffleTrainDNNTF
-    shuffleTestDNNTF = config.shuffleTestDNNTF
+    shuffleTrain = config.shuffleTrainDNNTF
+    shuffleTest = config.shuffleTestDNNTF
 
     #*************************************************
     # Setup variables and definitions- do not change.
