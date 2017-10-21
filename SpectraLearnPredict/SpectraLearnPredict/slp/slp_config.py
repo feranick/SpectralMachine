@@ -76,6 +76,8 @@ class Configuration():
             'timeCheckpointDNNTF' : 20,
             'thresholdProbabilityPredDNNTF' : 0.01,
             'plotMapDNNTF' : True,
+            'shuffleTrainDNNTF' : True,
+            'shuffleTestDNNTF' : False,
             }
     
     def nnDef(self):
@@ -197,7 +199,13 @@ class Configuration():
         self.timeCheckpointDNNTF = eval(self.dnntfDef['timeCheckpointDNNTF'])
         self.thresholdProbabilityPredDNNTF = eval(self.dnntfDef['thresholdProbabilityPredDNNTF'])
         self.plotMapDNNTF = eval(self.dnntfDef['plotMapDNNTF'])
-
+        try:
+            self.shuffleTrainDNNTF : eval(self.dnntfDef['shuffleTrainDNNTF'])
+            self.shuffleTestDNNTF : eval(self.dnntfDef['shuffleTestDNNTF'])
+        except:
+            self.shuffleTrainDNNTF = True
+            self.shuffleTestDNNTF = False
+        
         self.runNN = eval(self.nnDef['runNN'])
         self.alwaysRetrainNN = eval(self.nnDef['alwaysRetrainNN'])
         self.hidden_layersNN = eval(self.nnDef['hidden_layersNN'])
@@ -359,6 +367,9 @@ class dnntfDef:
     thresholdProbabilityPred = config.thresholdProbabilityPredDNNTF
     
     plotMap = config.plotMapDNNTF
+    
+    shuffleTrainDNNTF = config.shuffleTrainDNNTF
+    shuffleTestDNNTF = config.shuffleTestDNNTF
 
     #*************************************************
     # Setup variables and definitions- do not change.
