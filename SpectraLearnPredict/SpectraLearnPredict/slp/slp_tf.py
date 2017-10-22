@@ -199,7 +199,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     test_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": np.array(A_test)},
             y=np.array(Cl2_test),
-            num_epochs=None,
+            num_epochs=1,
             shuffle=dnntfDef.shuffleTest)
     
     validation_monitor = [skflow.monitors.ValidationMonitor(input_fn=test_input_fn,
