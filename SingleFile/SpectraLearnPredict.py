@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171020a
+* version: 20171022a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -77,6 +77,8 @@ class Configuration():
             'timeCheckpointDNNTF' : 20,
             'thresholdProbabilityPredDNNTF' : 0.01,
             'plotMapDNNTF' : True,
+            'shuffleTrainDNNTF' : True,
+            'shuffleTestDNNTF' : False,
             }
     
     def nnDef(self):
@@ -198,6 +200,12 @@ class Configuration():
         self.timeCheckpointDNNTF = eval(self.dnntfDef['timeCheckpointDNNTF'])
         self.thresholdProbabilityPredDNNTF = eval(self.dnntfDef['thresholdProbabilityPredDNNTF'])
         self.plotMapDNNTF = eval(self.dnntfDef['plotMapDNNTF'])
+        try:
+            self.shuffleTrainDNNTF = eval(self.dnntfDef['shuffleTrainDNNTF'])
+            self.shuffleTestDNNTF = eval(self.dnntfDef['shuffleTestDNNTF'])
+        except:
+            self.shuffleTrainDNNTF = True
+            self.shuffleTestDNNTF = False
 
         self.runNN = eval(self.nnDef['runNN'])
         self.alwaysRetrainNN = eval(self.nnDef['alwaysRetrainNN'])
@@ -360,6 +368,9 @@ class dnntfDef:
     thresholdProbabilityPred = config.thresholdProbabilityPredDNNTF
     
     plotMap = config.plotMapDNNTF
+    
+    shuffleTrain = config.shuffleTrainDNNTF
+    shuffleTest = config.shuffleTestDNNTF
 
     #*************************************************
     # Setup variables and definitions- do not change.
@@ -1008,13 +1019,7 @@ def input_fn(A, Cl2):
 ''' Train DNNClassifier model training via TensorFlow-skflow '''
 #********************************************************************************
 def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
-    print('==========================================================================\n')
-    print('\033[1m Running Deep Neural Networks: tf.DNNClassifier - TensorFlow...\033[0m')
-    print('  Hidden layers:', dnntfDef.hidden_layers)
-    print('  Optimizer:',dnntfDef.optimizer,
-                '\n  Activation function:',dnntfDef.activation_function,
-                '\n  L2:',dnntfDef.l2_reg_strength,
-                '\n  Dropout:', dnntfDef.dropout_perc)
+    printInfo()
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
@@ -1050,13 +1055,13 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
             x={"x": np.array(A)},
             y=np.array(Cl2),
             num_epochs=None,
-            shuffle=True)
+            shuffle=dnntfDef.shuffleTrain)
         
     test_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": np.array(A_test)},
             y=np.array(Cl2_test),
-            num_epochs=None,
-            shuffle=False)
+            num_epochs=1,
+            shuffle=dnntfDef.shuffleTest)
     
     validation_monitor = [skflow.monitors.ValidationMonitor(input_fn=test_input_fn,
                                                            eval_steps=1,
@@ -1086,6 +1091,8 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
         print("  Retreaving training model from: ", model_directory,"\n")
 
     accuracy_score = clf.evaluate(input_fn=test_input_fn, steps=1)
+    printInfo()
+
     print('\n  ==================================')
     print('  \033[1mtf.DNNCl\033[0m - Accuracy')
     print('  ==================================')
@@ -1095,6 +1102,18 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     print('  ==================================\n')
 
     return clf, le
+
+def printInfo():
+    print('==========================================================================\n')
+    print('\033[1m Running Deep Neural Networks: tf.DNNClassifier - TensorFlow...\033[0m')
+    print('  Optimizer:',dnntfDef.optimizer,
+          '\n  Hidden layers:', dnntfDef.hidden_layers,
+          '\n  Activation function:',dnntfDef.activation_function,
+          '\n  L2:',dnntfDef.l2_reg_strength,
+          '\n  Dropout:', dnntfDef.dropout_perc,
+          '\n  Learning rate:', dnntfDef.learning_rate,
+          '\n  Shuffle Train:', dnntfDef.shuffleTrain,
+          '\n  Shuffle Test:', dnntfDef.shuffleTest,)
 
 #********************************************************************************
 ''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''
