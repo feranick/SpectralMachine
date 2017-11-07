@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171022a
+* version: 20171106a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -157,6 +157,7 @@ class Configuration():
     # Read configuration file into usable variables
     def readConfig(self, configFile):
         self.conf.read(configFile)
+        
         self.preprocDef = self.conf['Preprocessing']
         self.dnntfDef = self.conf['DNNClassifier']
         self.nnDef = self.conf['NNSklearn']
@@ -167,97 +168,98 @@ class Configuration():
         self.plotDef = self.conf['Plotting']
         self.sysDef = self.conf['System']
         
-        self.Ynorm = eval(self.preprocDef['Ynorm'])
-        self.fullYnorm = eval(self.preprocDef['fullYnorm'])
-        self.StandardScalerFlag = eval(self.preprocDef['StandardScalerFlag'])
-        self.subsetCrossValid = eval(self.preprocDef['subsetCrossValid'])
-        self.percentCrossValid = eval(self.preprocDef['percentCrossValid'])
-        self.YnormTo = eval(self.preprocDef['YnormTo'])
-        self.YnormX = eval(self.preprocDef['YnormX'])
-        self.YnormXdelta = eval(self.preprocDef['YnormXdelta'])
-        self.enRestrictRegion = eval(self.preprocDef['enRestrictRegion'])
-        self.enLim1 = eval(self.preprocDef['enLim1'])
-        self.enLim2 = eval(self.preprocDef['enLim2'])
-        self.scrambleNoiseFlag = eval(self.preprocDef['scrambleNoiseFlag'])
-        self.scrambleNoiseOffset = eval(self.preprocDef['scrambleNoiseOffset'])
-        self.cherryPickEnPoint = eval(self.preprocDef['cherryPickEnPoint'])
+        self.Ynorm = self.conf.getboolean('Preprocessing','Ynorm')
+        self.fullYnorm = self.conf.getboolean('Preprocessing','fullYnorm')
+        self.StandardScalerFlag = self.conf.getboolean('Preprocessing','StandardScalerFlag')
+        self.subsetCrossValid = self.conf.getboolean('Preprocessing','subsetCrossValid')
+        self.percentCrossValid = self.conf.getfloat('Preprocessing','percentCrossValid')
+        self.YnormTo = self.conf.getfloat('Preprocessing','YnormTo')
+        self.YnormX = self.conf.getfloat('Preprocessing','YnormX')
+        self.YnormXdelta = self.conf.getfloat('Preprocessing','YnormXdelta')
+        self.enRestrictRegion = self.conf.getboolean('Preprocessing','enRestrictRegion')
+        self.enLim1 = self.conf.getint('Preprocessing','enLim1')
+        self.enLim2 = self.conf.getint('Preprocessing','enLim2')
+        self.scrambleNoiseFlag = self.conf.getboolean('Preprocessing','scrambleNoiseFlag')
+        self.scrambleNoiseOffset = self.conf.getfloat('Preprocessing','scrambleNoiseOffset')
+        self.cherryPickEnPoint = self.conf.getboolean('Preprocessing','cherryPickEnPoint')
         self.enSel = eval(self.preprocDef['enSel'])
         self.enSelDelta = eval(self.preprocDef['enSelDelta'])
         
-        self.runDNNTF = eval(self.dnntfDef['runDNNTF'])
-        self.runSkflowDNNTF = eval(self.dnntfDef['runSkflowDNNTF'])
-        self.alwaysRetrainDNNTF = eval(self.dnntfDef['alwaysRetrainDNNTF'])
-        self.alwaysImproveDNNTF = eval(self.dnntfDef['alwaysImproveDNNTF'])
+        self.runDNNTF = self.conf.getboolean('DNNClassifier','runDNNTF')
+        self.runSkflowDNNTF = self.conf.getboolean('DNNClassifier','runSkflowDNNTF')
+        self.alwaysRetrainDNNTF = self.conf.getboolean('DNNClassifier','alwaysRetrainDNNTF')
+        self.alwaysImproveDNNTF = self.conf.getboolean('DNNClassifier','alwaysImproveDNNTF')
         self.hidden_layersDNNTF = eval(self.dnntfDef['hidden_layersDNNTF'])
         self.optimizerDNNTF = self.dnntfDef['optimizerDNNTF']
-        self.learning_rateDNNTF = eval(self.dnntfDef['learning_rateDNNTF'])
-        self.l2_reg_strengthDNNTF = eval(self.dnntfDef['l2_reg_strengthDNNTF'])
+        self.learning_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rateDNNTF')
+        self.l2_reg_strengthDNNTF = self.conf.getfloat('DNNClassifier','l2_reg_strengthDNNTF')
         self.activation_functionDNNTF = self.dnntfDef['activation_functionDNNTF']
-        self.dropout_percDNNTF = eval(self.dnntfDef['dropout_percDNNTF'])
-        self.trainingStepsDNNTF = eval(self.dnntfDef['trainingStepsDNNTF'])
-        self.valMonitorSecsDNNTF = eval(self.dnntfDef['valMonitorSecsDNNTF'])
-        self.logCheckpointDNNTF = eval(self.dnntfDef['logCheckpointDNNTF'])
-        self.timeCheckpointDNNTF = eval(self.dnntfDef['timeCheckpointDNNTF'])
-        self.thresholdProbabilityPredDNNTF = eval(self.dnntfDef['thresholdProbabilityPredDNNTF'])
-        self.plotMapDNNTF = eval(self.dnntfDef['plotMapDNNTF'])
+        self.dropout_percDNNTF = self.dnntfDef['dropout_percDNNTF']
+        self.trainingStepsDNNTF = self.conf.getint('DNNClassifier','trainingStepsDNNTF')
+        self.valMonitorSecsDNNTF = self.conf.getint('DNNClassifier','valMonitorSecsDNNTF')
+        self.logCheckpointDNNTF = self.conf.getboolean('DNNClassifier','logCheckpointDNNTF')
+        self.timeCheckpointDNNTF = self.conf.getint('DNNClassifier','timeCheckpointDNNTF')
+        self.thresholdProbabilityPredDNNTF = self.conf.getfloat('DNNClassifier','thresholdProbabilityPredDNNTF')
+        self.plotMapDNNTF = self.conf.getboolean('DNNClassifier','plotMapDNNTF')
         try:
-            self.shuffleTrainDNNTF = eval(self.dnntfDef['shuffleTrainDNNTF'])
-            self.shuffleTestDNNTF = eval(self.dnntfDef['shuffleTestDNNTF'])
+            self.shuffleTrainDNNTF = self.conf.getboolean('DNNClassifier','shuffleTrainDNNTF')
+            self.shuffleTestDNNTF = self.conf.getboolean('DNNClassifier','shuffleTestDNNTF')
         except:
             self.shuffleTrainDNNTF = True
             self.shuffleTestDNNTF = False
-
-        self.runNN = eval(self.nnDef['runNN'])
-        self.alwaysRetrainNN = eval(self.nnDef['alwaysRetrainNN'])
+        
+        self.runNN = self.conf.getboolean('NNSklearn','runNN')
+        self.alwaysRetrainNN = self.conf.getboolean('NNSklearn','alwaysRetrainNN')
         self.hidden_layersNN = eval(self.nnDef['hidden_layersNN'])
         self.optimizerNN = self.nnDef['optimizerNN']
         self.activation_functionNN = self.nnDef['activation_functionNN']
-        self.l2_reg_strengthNN = eval(self.nnDef['l2_reg_strengthNN'])
-        self.MLPRegressorNN = eval(self.nnDef['MLPRegressorNN'])
-        self.thresholdProbabilityPredNN = eval(self.nnDef['thresholdProbabilityPredNN'])
-        self.plotMapNN = eval(self.nnDef['plotMapNN'])
-        self.classReportNN = eval(self.nnDef['classReportNN'])
+        self.l2_reg_strengthNN = self.conf.getfloat('NNSklearn','l2_reg_strengthNN')
+        self.MLPRegressorNN = self.conf.getboolean('NNSklearn','MLPRegressorNN')
+        self.thresholdProbabilityPredNN = self.conf.getfloat('NNSklearn','thresholdProbabilityPredNN')
+        self.plotMapNN = self.conf.getboolean('NNSklearn','plotMapNN')
+        self.classReportNN = self.conf.getboolean('NNSklearn','classReportNN')
     
-        self.runSVM = eval(self.svmDef['runSVM'])
-        self.alwaysRetrainSVM = eval(self.svmDef['alwaysRetrainSVM'])
-        self.thresholdProbabilityPredSVM = eval(self.svmDef['thresholdProbabilityPredSVM'])
-        self.CfactorSVM = eval(self.svmDef['CfactorSVM'])
+        self.runSVM = self.conf.getboolean('SVM','runSVM')
+        self.alwaysRetrainSVM = self.conf.getboolean('SVM','alwaysRetrainSVM')
+        self.thresholdProbabilityPredSVM = self.conf.getfloat('SVM','thresholdProbabilityPredSVM')
+        self.CfactorSVM = self.conf.getfloat('SVM','CfactorSVM')
         self.kernelSVM = self.svmDef['kernelSVM']
-        self.showClassesSVM = eval(self.svmDef['showClassesSVM'])
-        self.plotMapSVM = eval(self.svmDef['plotMapSVM'])
-        self.classReportSVM = eval(self.svmDef['classReportSVM'])
+        self.showClassesSVM = self.conf.getboolean('SVM','showClassesSVM')
+        self.plotMapSVM = self.conf.getboolean('SVM','plotMapSVM')
+        self.classReportSVM = self.conf.getboolean('SVM','classReportSVM')
         
-        self.runPCA = eval(self.pcaDef['runPCA'])
-        self.customNumCompPCA = eval(self.pcaDef['customNumCompPCA'])
-        self.numComponentsPCA = eval(self.pcaDef['numComponentsPCA'])
+        self.runPCA = self.conf.getboolean('PCA','runPCA')
+        self.customNumCompPCA = self.conf.getboolean('PCA','customNumCompPCA')
+        self.numComponentsPCA = self.conf.getint('PCA','numComponentsPCA')
 
-        self.runKM = eval(self.kmDef['runKM'])
-        self.customNumCompKM = eval(self.kmDef['customNumCompKM'])
-        self.numComponentsKM = eval(self.kmDef['numComponentsKM'])
-        self.plotKM = eval(self.kmDef['plotKM'])
-        self.plotMapKM = eval(self.kmDef['plotMapKM'])
+        self.runKM = self.conf.getboolean('KMeans','runKM')
+        self.customNumCompKM = self.conf.getboolean('KMeans','customNumCompKM')
+        self.numComponentsKM = self.conf.getint('KMeans','numComponentsKM')
+        self.plotKM = self.conf.getboolean('KMeans','plotKM')
+        self.plotMapKM = self.conf.getboolean('KMeans','plotMapKM')
         
-        self.runTF = eval(self.tfDef['runTF'])
-        self.alwaysRetrainTF = eval(self.tfDef['alwaysRetrainTF'])
-        self.alwaysImproveTF = eval(self.tfDef['alwaysImproveTF'])
-        self.thresholdProbabilityPredTF = eval(self.tfDef['thresholdProbabilityPredTF'])
-        self.decayLearnRateTF = eval(self.tfDef['decayLearnRateTF'])
-        self.learnRateTF = eval(self.tfDef['learnRateTF'])
-        self.subsetCrossValidTF = eval(self.tfDef['subsetCrossValidTF'])
-        self.percentCrossValidTF = eval(self.tfDef['percentCrossValidTF'])
-        self.logCheckpointTF = eval(self.tfDef['logCheckpointTF'])
-        self.plotMapTF = eval(self.tfDef['plotMapTF'])
-        self.plotClassDistribTF = eval(self.tfDef['plotClassDistribTF'])
-        self.enableTensorboardTF = eval(self.tfDef['enableTensorboardTF'])
-         
-        self.showProbPlot = eval(self.plotDef['showProbPlot'])
-        self.showPCAPlots = eval(self.plotDef['showPCAPlots'])
-        self.createTrainingDataPlot = eval(self.plotDef['createTrainingDataPlot'])
-        self.showTrainingDataPlot = eval(self.plotDef['showTrainingDataPlot'])
-        self.plotAllSpectra = eval(self.plotDef['plotAllSpectra'])
-        self.stepSpectraPlot = eval(self.plotDef['stepSpectraPlot'])
+        self.runTF = self.conf.getboolean('TensorFlow','runTF')
+        self.alwaysRetrainTF = self.conf.getboolean('TensorFlow','alwaysRetrainTF')
+        self.alwaysImproveTF = self.conf.getboolean('TensorFlow','alwaysImproveTF')
+        self.thresholdProbabilityPredTF = self.conf.getfloat('TensorFlow','thresholdProbabilityPredTF')
+        self.decayLearnRateTF = self.conf.getboolean('TensorFlow','decayLearnRateTF')
+        self.learnRateTF = self.conf.getfloat('TensorFlow','learnRateTF')
+        self.subsetCrossValidTF = self.conf.getboolean('TensorFlow','subsetCrossValidTF')
+        self.percentCrossValidTF = self.conf.getfloat('TensorFlow','percentCrossValidTF')
+        self.logCheckpointTF = self.conf.getboolean('TensorFlow','logCheckpointTF')
+        self.plotMapTF = self.conf.getboolean('TensorFlow','plotMapTF')
+        self.plotClassDistribTF = self.conf.getboolean('TensorFlow','plotClassDistribTF')
+        self.enableTensorboardTF = self.conf.getboolean('TensorFlow','enableTensorboardTF')
+        
+        self.showProbPlot = self.conf.getboolean('Plotting','showProbPlot')
+        self.showPCAPlots = self.conf.getboolean('Plotting','showPCAPlots')
+        self.createTrainingDataPlot = self.conf.getboolean('Plotting','createTrainingDataPlot')
+        self.showTrainingDataPlot = self.conf.getboolean('Plotting','showTrainingDataPlot')
+        self.plotAllSpectra = self.conf.getboolean('Plotting','plotAllSpectra')
+        self.stepSpectraPlot = self.conf.getint('Plotting','stepSpectraPlot')
 
-        self.multiproc = eval(self.sysDef['multiproc'])
+        self.multiproc = self.conf.getboolean('System','multiproc')
+
 
     # Create configuration file
     def createConfig(self):
