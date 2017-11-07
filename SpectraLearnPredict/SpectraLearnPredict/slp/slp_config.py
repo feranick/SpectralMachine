@@ -197,7 +197,7 @@ class Configuration():
         self.trainingStepsDNNTF = self.conf.getint('DNNClassifier','trainingStepsDNNTF')
         self.valMonitorSecsDNNTF = self.conf.getint('DNNClassifier','valMonitorSecsDNNTF')
         self.logCheckpointDNNTF = self.conf.getboolean('DNNClassifier','logCheckpointDNNTF')
-        self.timeCheckpointDNNTF = self.conf.getint('DNNClassifier','timeCheckpointDNNTF']
+        self.timeCheckpointDNNTF = self.conf.getint('DNNClassifier','timeCheckpointDNNTF')
         self.thresholdProbabilityPredDNNTF = self.conf.getfloat('DNNClassifier','thresholdProbabilityPredDNNTF')
         self.plotMapDNNTF = self.conf.getboolean('DNNClassifier','plotMapDNNTF')
         try:
