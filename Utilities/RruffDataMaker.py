@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20171122a
+* version: 20171122b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -15,7 +15,7 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, glob
+import sys, os.path
 from datetime import datetime, date
 
 #**********************************************
@@ -70,9 +70,9 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
         sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
             ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+\
             ",threshold="+str(threshold)+"\n")
-    
-    for f in glob.glob('*.txt'):
-        if (f != learnFile):
+        
+    for ind, f in enumerate(sorted(os.listdir("."))):
+        if (f != learnFile and os.path.splitext(f)[-1] == ".txt"):
             
             try:
                 index = compound.index(f.partition("_")[0])
@@ -87,7 +87,9 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
                     size = size + 1
                 else:
                     sum_file.write(str(index) + ',,NO,' + f +'\n')
-    print('\n Energy scale: [' + str(enInit) + ', ' + str(enFin) + '] Step: ' + str(enStep) + '\n')
+    print('\n Energy scale: [', str(enInit),',',
+            str(enFin), ']; Step:', str(enStep),
+            '; Threshold:', str(threshold),'\n')
 
     Cl2 = np.zeros((size, size))
     for i in range(size):
