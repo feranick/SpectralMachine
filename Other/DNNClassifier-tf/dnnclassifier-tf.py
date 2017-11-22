@@ -14,9 +14,12 @@ print("TensorFlow version: {}".format(tf_version))
 assert "1.4" <= tf_version, "TensorFlow r1.4 or later is needed"
 
 PATH = ""
-FILE_TRAIN = "Training_kerogen_633nm_HC_20170524a.txt"
+FILE_TRAIN = "AAAtest.txt"
+#FILE_TRAIN = "Training_kerogen_633nm_HC_20170524a.txt"
 #FILE_TRAIN = PATH+"AAA_ram_ex-unor_train.txt"
-FILE_TEST = "AAA_ram_ex-unor_test.txt"
+FILE_TEST = "AAAtest.txt"
+
+tf.logging.set_verbosity(tf.logging.INFO)
 
 def get_feature_names(learnFile):
     try:
@@ -30,12 +33,20 @@ def get_feature_names(learnFile):
 
 feature_names = get_feature_names(FILE_TRAIN)
 print(feature_names.shape)
+arr = [[0]]
+for i in range(len(feature_names)):
+    arr.append([0.])
+print(arr)
 
 def my_input_fn(learnFile,file_path, perform_shuffle=False, repeat_count=1):
 
     def decode_csv(line):
-        parsed_line = tf.decode_csv(line, [[i] for i in range(len(feature_names)+1)])
-        label = parsed_line[0]  # Last element is the label
+        #parsed_line = tf.decode_csv(line, [[i] for i in range(len(feature_names)+1)],field_delim='\t')
+        #parsed_line = tf.decode_csv(line, [[0], [0.] for i in range(len(feature_names)+1)],field_delim='\t')
+        #parsed_line = tf.decode_csv(line, [[0], [0.], [0.], [0.], [0.], [0.]],field_delim='\t')
+        parsed_line = tf.decode_csv(line, arr,field_delim='\t')
+        label = parsed_line[0]
+        tf.cast(label, tf.int32)  # Last element is the label
         print("\n\nlabel\n",label,"\n\n\n")
         #del parsed_line[0]  # Delete last element
         features = parsed_line[1:]  # Everything but last elements are the features
@@ -57,17 +68,19 @@ def my_input_fn(learnFile,file_path, perform_shuffle=False, repeat_count=1):
     dataset = dataset.batch(32)  # Batch size to use
     iterator = dataset.make_one_shot_iterator()
     batch_features, batch_labels = iterator.get_next()
+    print("\n\nbatch_features\n",len(batch_features),"\n\n",batch_features,"\n\n")
     return batch_features, batch_labels
 
 next_batch = my_input_fn(FILE_TRAIN, True)  # Will return 32 random elements
+print("\n\n",next_batch)
 
-'''
+
 feature_columns = [tf.feature_column.numeric_column(k) for k in feature_names]
 
 classifier = tf.estimator.DNNClassifier(
     feature_columns=feature_columns,  # The input features to our model
     hidden_units=[400, 200],  # Two layers, each with 10 neurons
-    n_classes=3,
+    n_classes=24,
     model_dir=PATH)
 
 classifier.train(
@@ -90,4 +103,5 @@ for prediction in predict_results:
     # Will print the predicted class, i.e: 0, 1, or 2 if the prediction
     # is Iris Sentosa, Vericolor, Virginica, respectively.
     print(prediction["class_ids"][0])
-'''
+
+

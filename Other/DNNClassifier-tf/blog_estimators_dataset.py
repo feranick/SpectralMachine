@@ -71,6 +71,7 @@ def my_input_fn(file_path, perform_shuffle=False, repeat_count=1):
         features = parsed_line  # Everything but last elements are the features
         print("features: ",features)
         d = dict(zip(feature_names, features)), label
+        #print("\n\nfeatures\n",len(features),"\n\n",features,"\n\n")
         return d
 
     dataset = (tf.data.TextLineDataset(file_path)  # Read text file
@@ -85,9 +86,13 @@ def my_input_fn(file_path, perform_shuffle=False, repeat_count=1):
     dataset = dataset.batch(32)  # Batch size to use
     iterator = dataset.make_one_shot_iterator()
     batch_features, batch_labels = iterator.get_next()
+    print("\n\nbatch_features\n",len(batch_features),"\n\n",batch_features,"\n\n")
     return batch_features, batch_labels
 
+
 next_batch = my_input_fn(FILE_TRAIN, True)  # Will return 32 random elements
+print("\n\n",next_batch)
+
 
 # Create the feature_columns, which specifies the input to our model
 # All our input features are numeric, so use numeric_column for each one
@@ -106,7 +111,7 @@ classifier = tf.estimator.DNNClassifier(
 # Stop training after 8 iterations of train data (epochs)
 classifier.train(
     input_fn=lambda: my_input_fn(FILE_TRAIN, True, 8))
-
+'''
 # Evaluate our model using the examples contained in FILE_TEST
 # Return value will contain evaluation_metrics such as: loss & average_loss
 evaluate_result = classifier.evaluate(
@@ -155,3 +160,4 @@ for idx, prediction in enumerate(predict_results):
         print("  I think: {}, is Iris Versicolor".format(prediction_input[idx]))
     else:
         print("  I think: {}, is Iris Virginica".format(prediction_input[idx]))
+'''
