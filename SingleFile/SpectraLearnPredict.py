@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171106a
+* version: 20171122a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -194,7 +194,7 @@ class Configuration():
         self.learning_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rateDNNTF')
         self.l2_reg_strengthDNNTF = self.conf.getfloat('DNNClassifier','l2_reg_strengthDNNTF')
         self.activation_functionDNNTF = self.dnntfDef['activation_functionDNNTF']
-        self.dropout_percDNNTF = self.dnntfDef['dropout_percDNNTF']
+        self.dropout_percDNNTF = eval(self.dnntfDef['dropout_percDNNTF'])
         self.trainingStepsDNNTF = self.conf.getint('DNNClassifier','trainingStepsDNNTF')
         self.valMonitorSecsDNNTF = self.conf.getint('DNNClassifier','valMonitorSecsDNNTF')
         self.logCheckpointDNNTF = self.conf.getboolean('DNNClassifier','logCheckpointDNNTF')
