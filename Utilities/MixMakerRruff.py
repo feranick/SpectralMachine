@@ -30,8 +30,17 @@ def main():
         enStep = sys.argv[3]
         #threshold = sys.argv[5]
 
+    rootMixFile = "mixture"
+    dateTimeStamp = str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S'))
+    mixFile = rootMixFile+dateTimeStamp+".txt"
+    summaryMixFile = rootMixFile+"-summary_"+dateTimeStamp+".csv"
+
+    with open(summaryMixFile, "a") as sum_file:
+                    sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
+                    ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+"\n")
     index = 0
     first = True
+
     for ind, file in enumerate(sorted(os.listdir("."))):
         try:
             if file[:7] != "mixture" and os.path.splitext(file)[-1] == ".txt":
@@ -56,16 +65,20 @@ def main():
                     index += 1
 
                     print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
+                with open(summaryMixFile, "a") as sum_file:
+                    sum_file.write(str(index) + ',,,' + file+'\n')
         except:
             pass
 
     newR = np.transpose(np.vstack((EnT, mixR)))
-    newFile = "mixture"+str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.txt'))
+    mixFile = "mixture"+str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.txt'))
 
-    with open(newFile, 'ab') as f:
+
+
+    with open(mixFile, 'ab') as f:
         np.savetxt(f, newR, delimiter='\t', fmt='%10.6f')
 
-    print("\n Mixtures saved in: ",newFile, "\n")
+    print("\n Mixtures saved in: ",mixFile, "\n")
 
 #************************************
 ''' Main initialization routine '''
