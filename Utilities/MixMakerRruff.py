@@ -6,7 +6,7 @@
 * MixMaker
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171130a
+* version: 20171130b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -14,29 +14,33 @@
 '''
 print(__doc__)
 
-
 import numpy as np
 import sys, os.path, getopt, glob, csv
 from datetime import datetime, date
 
 def main():
-    if(len(sys.argv)<4):
-        print(' Usage:\n  python3 MixMaker.py <EnIn> <EnFin> <EnStep>\n')
+    if len(sys.argv) < 4:
+        print(' Usage:\n  python3 MixMaker.py <EnIn> <EnFin> <EnStep> (<threshold %>)\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     else:
         enInit = sys.argv[1]
         enFin =  sys.argv[2]
         enStep = sys.argv[3]
-        #threshold = sys.argv[5]
+        if len(sys.argv)<5:
+            print("No threshold defined, setting to zero\n")
+            threshold = 0
+        else:
+            threshold = sys.argv[4]
+            print("Setting threshold to:", threshold,"%\n")
 
     rootMixFile = "mixture"
-    dateTimeStamp = str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S'))
-    mixFile = rootMixFile+dateTimeStamp+".txt"
+    dateTimeStamp = str(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    mixFile = rootMixFile+"_"+dateTimeStamp+".txt"
     summaryMixFile = rootMixFile+"-summary_"+dateTimeStamp+".csv"
 
     with open(summaryMixFile, "a") as sum_file:
-                    sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
+                    sum_file.write('Classification started: '+dateTimeStamp+\
                     ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+"\n")
     index = 0
     first = True
@@ -48,6 +52,8 @@ def main():
                     En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
                 with open(file, 'r') as f:
                     R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = ',', skiprows = 10)
+                    
+                R[R<float(threshold)*np.amax(R)/100] = 0
                 print(file + '\n File OK, converting to ASCII...')
 
                 EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
@@ -68,17 +74,15 @@ def main():
                 with open(summaryMixFile, "a") as sum_file:
                     sum_file.write(str(index) + ',,,' + file+'\n')
         except:
-            pass
+            print("\n Skipping: ",file)
 
     newR = np.transpose(np.vstack((EnT, mixR)))
     mixFile = "mixture"+str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.txt'))
 
-
-
     with open(mixFile, 'ab') as f:
         np.savetxt(f, newR, delimiter='\t', fmt='%10.6f')
 
-    print("\n Mixtures saved in: ",mixFile, "\n")
+    print("\nMixtures saved in:",mixFile, "\n")
 
 #************************************
 ''' Main initialization routine '''
