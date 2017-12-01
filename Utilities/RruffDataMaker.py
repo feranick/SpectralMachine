@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20171122b
+* version: 20171130a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -36,16 +36,18 @@ class defParam:
     useMinForBoundary = False
 
 def main():
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 5:
         enInit = 100
         enFin = 1500
         enStep = 0.5
-        threshold = 100
     else:
         enInit = sys.argv[2]
         enFin =  sys.argv[3]
         enStep = sys.argv[4]
-        threshold = sys.argv[5]
+        if len(sys.argv) < 6:
+            threshold = 0
+        else:
+            threshold = sys.argv[5]
 
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
