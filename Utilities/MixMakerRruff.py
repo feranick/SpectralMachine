@@ -6,7 +6,7 @@
 * MixMaker
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171207b
+* version: 20171207c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -40,6 +40,7 @@ def main():
     dateTimeStamp = str(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     mixFile = rootMixFile+"_"+dateTimeStamp+".txt"
     summaryMixFile = rootMixFile+"-summary_"+dateTimeStamp+".csv"
+    plotFile = rootMixFile+"-plot_"+dateTimeStamp+".png"
 
     with open(summaryMixFile, "a") as sum_file:
                     sum_file.write('Classification started: '+dateTimeStamp+\
@@ -98,17 +99,16 @@ def main():
             print("\n Skipping: ",file)
 
     newR = np.transpose(np.vstack((EnT, mixR)))
-    mixFileRoot = "mixture"+str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S'))
-    with open(mixFileRoot+".txt", 'ab') as f:
+    with open(mixFile, 'ab') as f:
         np.savetxt(f, newR, delimiter='\t', fmt='%10.6f')
-    print("\nMixtures saved in:",mixFileRoot+".txt", "\n")
+    print("\nMixtures saved in:",mixFile, "\n")
 
     plt.plot(EnT, mixR, linewidth=3)
 
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
 
-    plt.savefig(mixFileRoot + '.png', dpi = 160, format = 'png')  # Save plot
+    plt.savefig(plotFile, dpi = 160, format = 'png')  # Save plot
     plt.show()
     plt.close()
 
