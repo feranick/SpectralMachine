@@ -88,7 +88,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Train '''
     #**********************************************
-    if dnntfDef.alwaysImprove == True or os.path.exists(model_directory) is False:
+    if dnntfDef.alwaysImproveDNNTF == True or os.path.exists(model_directory) is False:
         print(" (Re-)training using dataset: ", Root,"\n")
         clf.fit(input_fn=lambda: input_fn(A, Cl2),
                 steps=dnntfDef.trainingSteps, monitors=[validation_monitor])
@@ -222,7 +222,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Train '''
     #**********************************************
-    if dnntfDef.alwaysImprove == True or os.path.exists(model_directory) is False:
+    if dnntfDef.alwaysImproveDNNTF == True or os.path.exists(model_directory) is False:
         print(" (Re-)training using dataset: ", Root,"\n")
         clf.train(input_fn=train_input_fn,
                 steps=dnntfDef.trainingSteps, hooks=hooks)
