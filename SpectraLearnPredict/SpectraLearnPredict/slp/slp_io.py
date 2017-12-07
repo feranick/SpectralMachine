@@ -5,7 +5,6 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* Version 20171007d
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -55,7 +54,7 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        dnntfDef.alwaysImproveDNNTF = False
+        dnntfDef.alwaysImprove = False
         if dnntfDef.runSkflowDNNTF == True:
             clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
             predDNNTF(clf_dnntf, le_dnntf, R, Cl)

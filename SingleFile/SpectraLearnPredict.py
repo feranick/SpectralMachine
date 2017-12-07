@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171207a
+* version: 20171207b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -653,7 +653,7 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        dnntfDef.alwaysImproveDNNTF = False
+        dnntfDef.alwaysImprove = False
         if dnntfDef.runSkflowDNNTF == True:
             clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
             predDNNTF(clf_dnntf, le_dnntf, R, Cl)
@@ -952,7 +952,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Train '''
     #**********************************************
-    if dnntfDef.alwaysImproveDNNTF == True or os.path.exists(model_directory) is False:
+    if dnntfDef.alwaysImprove == True or os.path.exists(model_directory) is False:
         print(" (Re-)training using dataset: ", Root,"\n")
         clf.fit(input_fn=lambda: input_fn(A, Cl2),
                 steps=dnntfDef.trainingSteps, monitors=[validation_monitor])
@@ -1086,7 +1086,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     ''' Train '''
     #**********************************************
-    if dnntfDef.alwaysImproveDNNTF == True or os.path.exists(model_directory) is False:
+    if dnntfDef.alwaysImprove == True or os.path.exists(model_directory) is False:
         print(" (Re-)training using dataset: ", Root,"\n")
         clf.train(input_fn=train_input_fn,
                 steps=dnntfDef.trainingSteps, hooks=hooks)
