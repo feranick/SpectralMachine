@@ -653,6 +653,7 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
+        dnntfDef.alwaysImproveDNNTF = False
         if dnntfDef.runSkflowDNNTF == True:
             clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
             predDNNTF(clf_dnntf, le_dnntf, R, Cl)
