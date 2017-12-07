@@ -66,11 +66,11 @@ def main():
                     print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
 
                     # Interpolate to new axis
-                    
                     R = np.interp(EnT, En, R, left = R[0], right = 0)
+                    # Renormalize offset by min R
                     R = R - np.amin(R)
                     # Renormalize to max of R
-                    R =R/np.amax(R)
+                    R = R/np.amax(R)
                     
                     if first:
                         mixR = R
