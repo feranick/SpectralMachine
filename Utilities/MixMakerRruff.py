@@ -6,7 +6,7 @@
 * MixMaker
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171206c
+* version: 20171207a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -17,6 +17,8 @@ print(__doc__)
 import numpy as np
 import sys, os.path, getopt, glob, csv
 from datetime import datetime, date
+import matplotlib.pyplot as plt
+
 
 def main():
     if len(sys.argv) < 4:
@@ -62,8 +64,14 @@ def main():
                     print(' Number of points in the learning dataset: ' + str(EnT.shape[0]))
                 else:
                     print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
-                    R = np.interp(EnT, En, R, left = 0, right = 0)
-                    R = R/np.amax(R)
+
+                    # Interpolate to new axis
+                    
+                    R = np.interp(EnT, En, R, left = R[0], right = 0)
+                    R = R - np.amin(R)
+                    # Renormalize to max of R
+                    R =R/np.amax(R)
+                    
                     if first:
                         mixR = R
                         first = False
@@ -82,16 +90,26 @@ def main():
                     pass
                 with open(summaryMixFile, "a") as sum_file:
                     sum_file.write(str(index) + ',,,' + file+'\n')
+    
+                plt.plot(EnT,R)
+
         except:
             print("\n Skipping: ",file)
 
     newR = np.transpose(np.vstack((EnT, mixR)))
-    mixFile = "mixture"+str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.txt'))
-
-    with open(mixFile, 'ab') as f:
+    mixFileRoot = "mixture"+str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S'))
+    with open(mixFileRoot+".txt", 'ab') as f:
         np.savetxt(f, newR, delimiter='\t', fmt='%10.6f')
+    print("\nMixtures saved in:",mixFileRoot+".txt", "\n")
 
-    print("\nMixtures saved in:",mixFile, "\n")
+    plt.plot(EnT, mixR, linewidth=3)
+
+    plt.xlabel('Raman shift [1/cm]')
+    plt.ylabel('Raman Intensity [arb. units]')
+
+    plt.savefig(mixFileRoot + '.png', dpi = 160, format = 'png')  # Save plot
+    plt.show()
+    plt.close()
 
 #************************************
 ''' Main initialization routine '''
