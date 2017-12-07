@@ -71,7 +71,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
             ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+\
-            ",threshold="+str(threshold)+"\n")
+            ",threshold="+str(threshold)+"Using RruffDataMaker2\n")
         
     for ind, f in enumerate(sorted(os.listdir("."))):
         if (f != learnFile and os.path.splitext(f)[-1] == ".txt"):
