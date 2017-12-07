@@ -6,7 +6,7 @@
 * MixMaker
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171207c
+* version: 20171207d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -15,10 +15,9 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path, getopt, glob, csv, re
 from datetime import datetime, date
 import matplotlib.pyplot as plt
-
 
 def main():
     if len(sys.argv) < 4:
@@ -93,21 +92,24 @@ def main():
                 with open(summaryMixFile, "a") as sum_file:
                     sum_file.write(str(index) + ',,,' + file+'\n')
     
-                plt.plot(EnT,R)
-
+                plt.plot(EnT,R,label=re.search('(.+?)__',file).group(1))
         except:
             print("\n Skipping: ",file)
 
-    newR = np.transpose(np.vstack((EnT, mixR)))
+    try:
+        newR = np.transpose(np.vstack((EnT, mixR)))
+    except:
+        print("No usable files found\n ")
+        return
     with open(mixFile, 'ab') as f:
         np.savetxt(f, newR, delimiter='\t', fmt='%10.6f')
     print("\nMixtures saved in:",mixFile, "\n")
 
-    plt.plot(EnT, mixR, linewidth=3)
+    plt.plot(EnT, mixR, linewidth=3, label=r'Mixture')
 
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
-
+    plt.legend(loc='upper left')
     plt.savefig(plotFile, dpi = 160, format = 'png')  # Save plot
     plt.show()
     plt.close()
