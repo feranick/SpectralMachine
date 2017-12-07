@@ -137,7 +137,7 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
         print("  Left:",defParam.leftBoundary,"; Right:",defParam.leftBoundary)
         
         R = np.interp(EnT, En, R, left = defParam.leftBoundary, right = defParam.rightBoundary)
-        R = np.amin(R)
+        R = R - np.amin(R)
         R = R/np.amax(R)
         print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
 
