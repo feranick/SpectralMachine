@@ -6,7 +6,7 @@
 * MixMaker
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171206b
+* version: 20171206c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -68,7 +68,7 @@ def main():
                         mixR = R
                         first = False
                     else:
-                        mixR = (mixR + R)*index/(index+1)
+                        mixR = (mixR*index + R)/(index+1)
                     index += 1
 
                     print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
