@@ -6,7 +6,7 @@
 * MixMaker
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171207a
+* version: 20171207b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -80,7 +80,7 @@ def main():
                     index += 1
 
                     print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
-                
+                '''
                 try:
                     convertFile = os.path.splitext(file)[0] + '_ASCII.txt'
                     convertR = np.transpose(np.vstack((EnT, R)))
@@ -88,6 +88,7 @@ def main():
                         np.savetxt(f, convertR, delimiter='\t', fmt='%10.6f')
                 except:
                     pass
+                '''
                 with open(summaryMixFile, "a") as sum_file:
                     sum_file.write(str(index) + ',,,' + file+'\n')
     
