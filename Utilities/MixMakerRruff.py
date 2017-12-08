@@ -90,7 +90,7 @@ def main():
                     pass
                 '''
                 label = re.search('(.+?)__',file).group(1)
-                with open(summaryPlotFile, "a") as sum_file:
+                with open(summaryMixFile, "a") as sum_file:
                     sum_file.write(str(index) + ',,,' + label + ','+file+'\n')
     
                 plt.plot(EnT,R,label=label)
