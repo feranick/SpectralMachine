@@ -3,10 +3,10 @@
 '''
 *********************************************
 *
-* MixMaker
+* MixMakerRruff
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171207d
+* version: 20171208a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 def main():
     if len(sys.argv) < 4:
-        print(' Usage:\n  python3 MixMaker.py <EnIn> <EnFin> <EnStep> (<threshold %>)\n')
+        print(' Usage:\n  python3 MixMakerRruff.py <EnIn> <EnFin> <EnStep> (<threshold %>)\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     else:
@@ -89,10 +89,11 @@ def main():
                 except:
                     pass
                 '''
-                with open(summaryMixFile, "a") as sum_file:
-                    sum_file.write(str(index) + ',,,' + file+'\n')
+                label = re.search('(.+?)__',file).group(1)
+                with open(summaryPlotFile, "a") as sum_file:
+                    sum_file.write(str(index) + ',,,' + label + ','+file+'\n')
     
-                plt.plot(EnT,R,label=re.search('(.+?)__',file).group(1))
+                plt.plot(EnT,R,label=label)
         except:
             print("\n Skipping: ",file)
 
