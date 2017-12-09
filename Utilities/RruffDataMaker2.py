@@ -6,7 +6,7 @@
 * RRuffDataMaker2
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 2-20171207a
+* version: 2-20171208c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -45,15 +45,19 @@ def main():
         enFin =  sys.argv[3]
         enStep = sys.argv[4]
         if len(sys.argv) < 6:
-            threshold = 0
+            decimals = 6
         else:
-            threshold = sys.argv[5]
+            decimals = sys.argv[5]
+            if len(sys.argv) < 7:
+                threshold = 0
+            else:
+                threshold = sys.argv[6]
 
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
     
     try:
-        processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
+        processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold, decimals)
     except:
         usage()
     sys.exit(2)
@@ -61,7 +65,7 @@ def main():
 #**********************************************
 ''' Open and process inividual files '''
 #**********************************************
-def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
+def processMultiFile(learnFile, enInit, enFin, enStep, threshold, decimals):
     index = 0
     success = False
     size = 0
@@ -71,7 +75,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     with open(summary_filename, "a") as sum_file:
         sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
             ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+\
-            ",threshold="+str(threshold)+"Using RruffDataMaker2\n")
+            ",threshold="+str(threshold)+",decimals="+str(decimals)+"Using RruffDataMaker2\n")
         
     for ind, f in enumerate(sorted(os.listdir("."))):
         if (f != learnFile and os.path.splitext(f)[-1] == ".txt"):
@@ -82,7 +86,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
                 compound.append(f.partition("_")[0])
                 index = len(compound)-1
             
-            success = makeFile(f, learnFile, index, enInit, enFin, enStep, threshold)
+            success = makeFile(f, learnFile, index, enInit, enFin, enStep, threshold, decimals)
             with open(summary_filename, "a") as sum_file:
                 if success == True:
                     sum_file.write(str(index) + ',,,' + f +'\n')
@@ -106,7 +110,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
 #**********************************************
 ''' Add data to Training file '''
 #**********************************************
-def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
+def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold, decimals):
     print('\n Process file in class #: ' + str(param))
     try:
         with open(sampleFile, 'r') as f:
@@ -137,9 +141,10 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
         print("  Left:",defParam.leftBoundary,"; Right:",defParam.leftBoundary)
         
         R = np.interp(EnT, En, R, left = defParam.leftBoundary, right = defParam.rightBoundary)
-        R = R - np.amin(R)
-        R = R/np.amax(R)
         print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
+        R = R - np.amin(R) + 1e-8
+        R = R/np.amax(R)
+        R = np.around(R, decimals=decimals)
 
     if os.path.exists(learnFile):
         newTrain = np.append(float(param),R).reshape(1,-1)
@@ -159,7 +164,7 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
 #************************************
 def usage():
     print('\n Usage:\n')
-    print('  python3 RruffDataMaker.py <learnfile> <enInitial> <enFinal> <enStep> <threshold> \n')
+    print('  python3 RruffDataMaker2.py <learnfile> <enInitial> <enFinal> <enStep> <threshold> \n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************

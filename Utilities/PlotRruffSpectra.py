@@ -6,7 +6,7 @@
 * PlotRruffSpectra
 * Plot Rruff spectra
 * Files must be in RRuFF
-* version: 20171208b
+* version: 20171208c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -58,7 +58,7 @@ def main():
                     # Interpolate to new axis
                     R = np.interp(EnT, En, R, left = R[0], right = 0)
                     # Renormalize offset by min R
-                    R = R - np.amin(R)
+                    R = R - np.amin(R) + 1e-8
                     # Renormalize to max of R
                     R = R/np.amax(R)
 
