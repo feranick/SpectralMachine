@@ -6,7 +6,7 @@
 * PlotRruffSpectra
 * Plot Rruff spectra
 * Files must be in RRuFF
-* version: 20171208a
+* version: 20171208b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -32,7 +32,8 @@ def main():
     rootPlotFile = "plot_"
     dateTimeStamp = str(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     summaryPlotFile = rootPlotFile+"summary_"+dateTimeStamp+".csv"
-    plotFile = rootPlotFile+dateTimeStamp+".png"
+    plotFile = rootPlotFile+dateTimeStamp
+    plt.figure(num=plotFile)
 
     with open(summaryPlotFile, "a") as sum_file:
                     sum_file.write('Classification started: '+dateTimeStamp+"\n")
@@ -82,7 +83,7 @@ def main():
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
     plt.legend(loc='upper left')
-    plt.savefig(plotFile, dpi = 160, format = 'png')  # Save plot
+    plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
     plt.show()
     plt.close()
 

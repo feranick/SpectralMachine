@@ -6,7 +6,7 @@
 * MixMakerRruff
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171208a
+* version: 20171208b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -39,7 +39,8 @@ def main():
     dateTimeStamp = str(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     mixFile = rootMixFile+"_"+dateTimeStamp+".txt"
     summaryMixFile = rootMixFile+"-summary_"+dateTimeStamp+".csv"
-    plotFile = rootMixFile+"-plot_"+dateTimeStamp+".png"
+    plotFile = rootMixFile+"-plot_"+dateTimeStamp
+    plt.figure(num=plotFile)
 
     with open(summaryMixFile, "a") as sum_file:
                     sum_file.write('Classification started: '+dateTimeStamp+\
@@ -110,8 +111,8 @@ def main():
 
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
-    plt.legend(loc='upper left')
-    plt.savefig(plotFile, dpi = 160, format = 'png')  # Save plot
+    plt.legend(loc='upper right')
+    plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
     plt.show()
     plt.close()
 
