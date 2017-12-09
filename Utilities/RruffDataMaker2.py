@@ -6,7 +6,7 @@
 * RRuffDataMaker2
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 2-20171208c
+* version: 2-20171208d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -144,7 +144,7 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold, dec
         print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
         R = R - np.amin(R) + 1e-8
         R = R/np.amax(R)
-        R = np.around(R, decimals=decimals)
+        R = np.around(R, decimals=int(decimals))
 
     if os.path.exists(learnFile):
         newTrain = np.append(float(param),R).reshape(1,-1)
