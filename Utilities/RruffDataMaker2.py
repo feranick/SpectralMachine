@@ -145,7 +145,7 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold, dec
     R = R - np.amin(R) + 1e-8
     R = R/np.amax(R)
     R = np.around(R, decimals=int(decimals))
-    print('\033[1m' + ' Rounding to: ' + str(decimal) + ' decimals\033[0m')
+    print('\033[1m' + ' Rounding to: ' + str(decimals) + ' decimals\033[0m')
 
     if os.path.exists(learnFile):
         newTrain = np.append(float(param),R).reshape(1,-1)
