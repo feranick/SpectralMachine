@@ -142,9 +142,10 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold, dec
         
         R = np.interp(EnT, En, R, left = defParam.leftBoundary, right = defParam.rightBoundary)
         print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
-        R = R - np.amin(R) + 1e-8
-        R = R/np.amax(R)
-        R = np.around(R, decimals=int(decimals))
+    R = R - np.amin(R) + 1e-8
+    R = R/np.amax(R)
+    R = np.around(R, decimals=int(decimals))
+    print('\033[1m' + ' Rounding to: ' + str(decimal) + ' decimals\033[0m')
 
     if os.path.exists(learnFile):
         newTrain = np.append(float(param),R).reshape(1,-1)

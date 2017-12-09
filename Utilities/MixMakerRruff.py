@@ -6,7 +6,7 @@
 * MixMakerRruff
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171208b
+* version: 20171208d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -66,21 +66,21 @@ def main():
                 else:
                     print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
 
-                    # Interpolate to new axis
-                    R = np.interp(EnT, En, R, left = R[0], right = 0)
-                    # Renormalize offset by min R
-                    R = R - np.amin(R)
-                    # Renormalize to max of R
-                    R = R/np.amax(R)
+                # Interpolate to new axis
+                R = np.interp(EnT, En, R, left = R[0], right = 0)
+                # Renormalize offset by min R
+                R = R - np.amin(R)
+                # Renormalize to max of R
+                R = R/np.amax(R)
                     
-                    if first:
-                        mixR = R
-                        first = False
-                    else:
-                        mixR = (mixR*index + R)/(index+1)
-                    index += 1
+                if first:
+                    mixR = R
+                    first = False
+                else:
+                    mixR = (mixR*index + R)/(index+1)
+                index += 1
 
-                    print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
+                print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
                 '''
                 try:
                     convertFile = os.path.splitext(file)[0] + '_ASCII.txt'
