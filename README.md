@@ -24,7 +24,7 @@ This software requires Python (3.3 or higher). It has been tested with Python 3.
 
 These are found in Unix based systems using common repositories (apt-get for Debian/Ubuntu Linux, or MacPorts for MacOS). More details in the [scikit-learn installation page](http://scikit-learn.org/stable/install.html).
 
-[TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow v.1.0+ (not compatible with v.0.12 and below).
+[TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow v.1.4+ (not compatible with v.1.3 and below).
 
 
 Usage
@@ -111,6 +111,7 @@ Activation functions
 - logistic, the logistic sigmoid function, returns f(x) = 1 / (1 + exp(-x)).
 - tanh, the hyperbolic tan function, returns f(x) = tanh(x).
 - relu, the rectified linear unit function, returns f(x) = max(0, x)
+- leaky_relu: tf.nn.relu(x) - alpha * tf.nn.relu(-x)   -  Alpha = 0.2
 
 ## [DNNClassifier - TensorFlow](https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier) [Activation Functions](https://www.tensorflow.org/api_guides/python/nn):
 - relu, rectified linear: max(features, 0)

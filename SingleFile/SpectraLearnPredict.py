@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171207b
+* version: 20171215a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -353,7 +353,7 @@ class dnntfDef:
     
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
     # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
-    # sigmoid, tanh
+    # sigmoid, tanh, leaky_relu
     activation_function = config.activation_functionDNNTF
     
     # When not None, the probability of dropout.
