@@ -158,14 +158,14 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
 #**********************************************************************************
 ''' Preprocess Prediction data '''
 #**********************************************************************************
-def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
+def preProcessNormPredData(R, Rx, En, YnormXind, type):
     print(' Processing Prediction data file... ')
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
     #**********************************************************************************
-    if(R.shape[0] != A.shape[1]):
+    if(R.shape[0] != En.shape):
         if type == 0:
-            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
+            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape) + ') and sample (' + str(R.shape[0]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
     Rorig = np.copy(R)
@@ -193,7 +193,7 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
     ''' Energy normalization range '''
     #**********************************************
     if preprocDef.enRestrictRegion == True:
-        A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
+        #A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         En = En[range(preprocDef.enLim1, preprocDef.enLim2)]
         R = R[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         

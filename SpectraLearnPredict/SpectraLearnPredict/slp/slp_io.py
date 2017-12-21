@@ -50,7 +50,7 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Preprocess prediction data '''
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
-    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
+    R, Rorig = preProcessNormPredData(R, Rx, En, YnormXind, 0)
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
@@ -165,7 +165,7 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
-    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
+    R, Rorig = preProcessNormPredData(R, Rx, En, YnormXind, 0)
 
     learnFileRoot = os.path.splitext(learnFile)[0]
     
@@ -242,7 +242,7 @@ def LearnPredictMap(learnFile, mapFile):
         clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
 
     for r in R[:]:
-        r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
+        r, rorig = preProcessNormPredData(r, Rx, En, YnormXind, type)
         type = 1
         
         ''' Run Neural Network - TensorFlow'''

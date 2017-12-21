@@ -50,11 +50,11 @@ def run():
     print(" Using training file: ", sys.argv[2],"\n")
     for o, a in opts:
         if o in ("-f" , "--file"):
-            try:
-                LearnPredictFile(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            LearnPredictFile(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-a" , "--accuracy"):
             print('\033[1m Running in cross validation mode for accuracy determination...\033[0m\n')
