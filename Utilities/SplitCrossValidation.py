@@ -3,7 +3,7 @@
 '''
 *********************************************
 * Split learning data into Train/Test
-* version: 20171219a
+* version: 20171221a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
@@ -11,12 +11,11 @@
 print(__doc__)
 import numpy as np
 import sys, os.path, random
-import matplotlib.pyplot as plt
 
 def main():
     if(len(sys.argv)<2):
         print(' Usage:\n  python3 SplitCrossValidation.py <learnData> <percentage>\n')
-        print(' Usage (2.6%):\n  python3 PlotData.py <learnData>\n')
+        print(' Usage (2.6%):\n  python3 SplitCrossValidation.py <learnData>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
