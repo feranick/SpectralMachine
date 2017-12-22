@@ -155,7 +155,7 @@ def input_fn(A, Cl2):
 ''' Run tf.estimator.DNNClassifier '''
 ''' https://www.tensorflow.org/api_docs/python/tf/estimator/DNNClassifier'''
 #********************************************************************************
-''' Train DNNClassifier model training via TensorFlow-skflow '''
+''' Train DNNClassifier model training via TensorFlow-Estimators '''
 #********************************************************************************
 def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     printInfo()
@@ -216,7 +216,19 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
            
     hooks = monitor_lib.replace_monitors_with_hooks(validation_monitor, clf)
 
-                               
+
+    #**********************************************
+    ''' Define parameters for savedmodel '''
+    #**********************************************
+    feature_spec = {'x': tf.FixedLenFeature([numTotClasses],tf.float32)}
+    def serving_input_receiver_fn():
+        serialized_tf_example = tf.placeholder(dtype=tf.string,
+                                         shape=[None],
+                                         name='input_tensors')
+        receiver_tensors = {'inputs': serialized_tf_example}
+        features = tf.parse_example(serialized_tf_example, feature_spec)
+        return tf.estimator.export.ServingInputReceiver(features, receiver_tensors)
+
     print("\n Number of global steps:",dnntfDef.trainingSteps)
 
     #**********************************************
@@ -226,6 +238,8 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
         print(" (Re-)training using dataset: ", Root,"\n")
         clf.train(input_fn=train_input_fn,
                 steps=dnntfDef.trainingSteps, hooks=hooks)
+        print(" Exporting savedmodel in: ", Root,"\n")
+        clf.export_savedmodel(model_directory, serving_input_receiver_fn)
     else:
         print("  Retreaving training model from: ", model_directory,"\n")
 
