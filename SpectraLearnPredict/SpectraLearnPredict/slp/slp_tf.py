@@ -216,7 +216,6 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
            
     hooks = monitor_lib.replace_monitors_with_hooks(validation_monitor, clf)
 
-
     #**********************************************
     ''' Define parameters for savedmodel '''
     #**********************************************

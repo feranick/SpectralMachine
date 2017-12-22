@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171215a
+* version: 20171221b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -649,7 +649,7 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Preprocess prediction data '''
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
-    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
+    R, Rorig = preProcessNormPredData(R, Rx, En, YnormXind, 0)
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
@@ -764,7 +764,7 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     R, Rx = readPredFile(f)
     summaryFile = [f]
     ''' Preprocess prediction data '''
-    R, Rorig = preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, 0)
+    R, Rorig = preProcessNormPredData(R, Rx, En,YnormXind, 0)
 
     learnFileRoot = os.path.splitext(learnFile)[0]
     
@@ -841,7 +841,7 @@ def LearnPredictMap(learnFile, mapFile):
         clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
 
     for r in R[:]:
-        r, rorig = preProcessNormPredData(r, Rx, A, En, Cl, YnormXind, type)
+        r, rorig = preProcessNormPredData(r, Rx, En, YnormXind, type)
         type = 1
         
         ''' Run Neural Network - TensorFlow'''
@@ -1019,7 +1019,7 @@ def input_fn(A, Cl2):
 ''' Run tf.estimator.DNNClassifier '''
 ''' https://www.tensorflow.org/api_docs/python/tf/estimator/DNNClassifier'''
 #********************************************************************************
-''' Train DNNClassifier model training via TensorFlow-skflow '''
+''' Train DNNClassifier model training via TensorFlow-Estimators '''
 #********************************************************************************
 def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     printInfo()
@@ -1080,7 +1080,18 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
            
     hooks = monitor_lib.replace_monitors_with_hooks(validation_monitor, clf)
 
-                               
+    #**********************************************
+    ''' Define parameters for savedmodel '''
+    #**********************************************
+    feature_spec = {'x': tf.FixedLenFeature([numTotClasses],tf.float32)}
+    def serving_input_receiver_fn():
+        serialized_tf_example = tf.placeholder(dtype=tf.string,
+                                         shape=[None],
+                                         name='input_tensors')
+        receiver_tensors = {'inputs': serialized_tf_example}
+        features = tf.parse_example(serialized_tf_example, feature_spec)
+        return tf.estimator.export.ServingInputReceiver(features, receiver_tensors)
+
     print("\n Number of global steps:",dnntfDef.trainingSteps)
 
     #**********************************************
@@ -1090,6 +1101,8 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
         print(" (Re-)training using dataset: ", Root,"\n")
         clf.train(input_fn=train_input_fn,
                 steps=dnntfDef.trainingSteps, hooks=hooks)
+        print(" Exporting savedmodel in: ", Root,"\n")
+        clf.export_savedmodel(model_directory, serving_input_receiver_fn)
     else:
         print("  Retreaving training model from: ", model_directory,"\n")
 
@@ -1623,14 +1636,14 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
 #**********************************************************************************
 ''' Preprocess Prediction data '''
 #**********************************************************************************
-def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
+def preProcessNormPredData(R, Rx, En,YnormXind, type):
     print(' Processing Prediction data file... ')
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
     #**********************************************************************************
-    if(R.shape[0] != A.shape[1]):
+    if(R.shape[0] != En.shape):
         if type == 0:
-            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(A.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
+            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape[1]) + ') and sample (' + str(R.shape[0]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
     Rorig = np.copy(R)
@@ -1658,7 +1671,7 @@ def preProcessNormPredData(R, Rx, A, En, Cl, YnormXind, type):
     ''' Energy normalization range '''
     #**********************************************
     if preprocDef.enRestrictRegion == True:
-        A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
+        #A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         En = En[range(preprocDef.enLim1, preprocDef.enLim2)]
         R = R[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         
