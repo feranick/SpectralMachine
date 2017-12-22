@@ -26,7 +26,6 @@ from datetime import datetime, date
 
 from .slp_config import *
 
-
 #********************************************************************************
 ''' TensorFlow '''
 ''' Run SkFlow - DNN Classifier '''
@@ -201,15 +200,13 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
             x={"x": np.array(A)},
             y=np.array(Cl2),
             num_epochs=None,
-            shuffle=dnntfDef.shuffleTrain,
-            batch_size=128)
+            shuffle=dnntfDef.shuffleTrain)
         
     test_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": np.array(A_test)},
             y=np.array(Cl2_test),
             num_epochs=1,
-            shuffle=dnntfDef.shuffleTest,
-            batch_size=128)
+            shuffle=dnntfDef.shuffleTest)
     
     validation_monitor = [skflow.monitors.ValidationMonitor(input_fn=test_input_fn,
                                                            eval_steps=1,
