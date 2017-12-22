@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171221b
+* version: 20171222b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -941,10 +941,17 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
                                                            every_n_steps=dnntfDef.valMonitorSecs)
 
     feature_columns = skflow.infer_real_valued_columns_from_input(totA.astype(np.float32))
+    '''
     clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
             optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
             activation_fn=dnntfDef.activationFn, model_dir=model_directory,
             config=skflow.RunConfig(save_checkpoints_secs=dnntfDef.timeCheckpoint),
+            dropout=dnntfDef.dropout_perc)
+    '''
+    clf = skflow.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
+            optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
+            activation_fn=dnntfDef.activationFn, model_dir=model_directory,
+            config=tf.estimator.RunConfig().replace(save_summary_steps=dnntfDef.timeCheckpoint),
             dropout=dnntfDef.dropout_perc)
                                
     print("\n Number of global steps:",dnntfDef.trainingSteps)
@@ -1075,8 +1082,8 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     clf = tf.estimator.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
             optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
             activation_fn=dnntfDef.activationFn, model_dir=model_directory,
-           config=skflow.RunConfig(save_checkpoints_secs=dnntfDef.timeCheckpoint),
-           dropout=dnntfDef.dropout_perc)
+            config=tf.estimator.RunConfig().replace(save_summary_steps=dnntfDef.timeCheckpoint),
+            dropout=dnntfDef.dropout_perc)
            
     hooks = monitor_lib.replace_monitors_with_hooks(validation_monitor, clf)
 
