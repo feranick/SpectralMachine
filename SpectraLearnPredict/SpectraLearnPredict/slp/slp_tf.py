@@ -214,6 +214,18 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
 
     feature_columns = [tf.feature_column.numeric_column("x", shape=[totA.shape[1]])]
     
+    #**********************************************
+    ''' Define learning rate '''
+    #**********************************************
+    if dnntfDef.learning_rate_decay == False:
+        learning_rate = dnntfDef.learning_rate
+    else:
+        learning_rate = tf.train.exponential_decay(dnntfDef.learning_rate,
+                        tf.Variable(0, trainable=False),
+                        dnntfDef.learning_rate_decay_steps,
+                        dnntfDef.learning_rate_decay_rate,
+                        staircase=True)
+
     clf = tf.estimator.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
             optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
             activation_fn=dnntfDef.activationFn, model_dir=model_directory,
@@ -272,6 +284,12 @@ def printInfo():
                 '\n  Learning rate:', dnntfDef.learning_rate,
                 '\n  Shuffle Train:', dnntfDef.shuffleTrain,
                 '\n  Shuffle Test:', dnntfDef.shuffleTest,)
+    if dnntfDef.learning_rate_decay == False:
+        print('  Fixed learning rate :',dnntfDef.learning_rate,)
+    else:
+        print('  Exponential decay - initial learning rate:',dnntfDef.learning_rate,
+                '\n  Exponential decay rate:', dnntfDef.learning_rate_decay_rate,
+                '\n  Exponential decay steps:', dnntfDef.learning_rate_decay_steps,)
 
 #********************************************************************************
 ''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''

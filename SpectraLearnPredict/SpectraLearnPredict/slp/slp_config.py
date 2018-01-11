@@ -67,6 +67,9 @@ class Configuration():
             'hidden_layersDNNTF' : [400,],
             'optimizerDNNTF' : "ProximalAdagrad",
             'learning_rateDNNTF' : 0.1,
+            'learning_rate_decayDNNTF' : False,
+            'learning_rate_decay_rateDNNTF' : 0.96,
+            'learning_rate_decay_stepsDNNTF' : 100,
             'l2_reg_strengthDNNTF' : 1e-4,
             'activation_functionDNNTF' : "tanh",
             'dropout_percDNNTF' : str(None),
@@ -191,6 +194,13 @@ class Configuration():
         self.hidden_layersDNNTF = eval(self.dnntfDef['hidden_layersDNNTF'])
         self.optimizerDNNTF = self.dnntfDef['optimizerDNNTF']
         self.learning_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rateDNNTF')
+        try:
+            self.learning_rate_decayDNNTF = self.conf.getboolean('DNNClassifier','learning_rate_decayDNNTF')
+            self.learning_rate_decay_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rate_decay_rateDNNTF')
+            self.learning_rate_decay_stepsDNNTF = self.conf.getfloat('DNNClassifier','learning_rate_decay_stepsDNNTF')
+        except:
+            self.learning_rate_decayDNNTF = False
+
         self.l2_reg_strengthDNNTF = self.conf.getfloat('DNNClassifier','l2_reg_strengthDNNTF')
         self.activation_functionDNNTF = self.dnntfDef['activation_functionDNNTF']
         self.dropout_percDNNTF = eval(self.dnntfDef['dropout_percDNNTF'])
@@ -347,6 +357,11 @@ class dnntfDef:
     optimizer = config.optimizerDNNTF
     
     learning_rate = config.learning_rateDNNTF
+    learning_rate_decay = config.learning_rate_decayDNNTF
+    if learning_rate_decay == True:
+        learning_rate_decay_rate = config.learning_rate_decay_rateDNNTF
+        learning_rate_decay_steps = config.learning_rate_decay_stepsDNNTF
+
     l2_reg_strength = config.l2_reg_strengthDNNTF
     
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
