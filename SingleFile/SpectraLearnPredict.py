@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20171222c
+* version: 20180111a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -68,6 +68,9 @@ class Configuration():
             'hidden_layersDNNTF' : [400,],
             'optimizerDNNTF' : "ProximalAdagrad",
             'learning_rateDNNTF' : 0.1,
+            'learning_rate_decayDNNTF' : False,
+            'learning_rate_decay_rateDNNTF' : 0.96,
+            'learning_rate_decay_stepsDNNTF' : 100,
             'l2_reg_strengthDNNTF' : 1e-4,
             'activation_functionDNNTF' : "tanh",
             'dropout_percDNNTF' : str(None),
@@ -192,6 +195,13 @@ class Configuration():
         self.hidden_layersDNNTF = eval(self.dnntfDef['hidden_layersDNNTF'])
         self.optimizerDNNTF = self.dnntfDef['optimizerDNNTF']
         self.learning_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rateDNNTF')
+        try:
+            self.learning_rate_decayDNNTF = self.conf.getboolean('DNNClassifier','learning_rate_decayDNNTF')
+            self.learning_rate_decay_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rate_decay_rateDNNTF')
+            self.learning_rate_decay_stepsDNNTF = self.conf.getfloat('DNNClassifier','learning_rate_decay_stepsDNNTF')
+        except:
+            self.learning_rate_decayDNNTF = False
+
         self.l2_reg_strengthDNNTF = self.conf.getfloat('DNNClassifier','l2_reg_strengthDNNTF')
         self.activation_functionDNNTF = self.dnntfDef['activation_functionDNNTF']
         self.dropout_percDNNTF = eval(self.dnntfDef['dropout_percDNNTF'])
@@ -349,6 +359,11 @@ class dnntfDef:
     optimizer = config.optimizerDNNTF
     
     learning_rate = config.learning_rateDNNTF
+        learning_rate_decay = config.learning_rate_decayDNNTF
+    if learning_rate_decay == True:
+        learning_rate_decay_rate = config.learning_rate_decay_rateDNNTF
+        learning_rate_decay_steps = config.learning_rate_decay_stepsDNNTF
+
     l2_reg_strength = config.l2_reg_strengthDNNTF
     
     # activation functions: https://www.tensorflow.org/api_guides/python/nn
@@ -1079,6 +1094,18 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
 
     feature_columns = [tf.feature_column.numeric_column("x", shape=[totA.shape[1]])]
     
+    #**********************************************
+    ''' Define learning rate '''
+    #**********************************************
+    if dnntfDef.learning_rate_decay == False:
+        learning_rate = dnntfDef.learning_rate
+    else:
+        learning_rate = tf.train.exponential_decay(dnntfDef.learning_rate,
+                        tf.Variable(0, trainable=False),
+                        dnntfDef.learning_rate_decay_steps,
+                        dnntfDef.learning_rate_decay_rate,
+                        staircase=True)
+    
     clf = tf.estimator.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
             optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
             activation_fn=dnntfDef.activationFn, model_dir=model_directory,
@@ -1137,6 +1164,12 @@ def printInfo():
           '\n  Learning rate:', dnntfDef.learning_rate,
           '\n  Shuffle Train:', dnntfDef.shuffleTrain,
           '\n  Shuffle Test:', dnntfDef.shuffleTest,)
+    if dnntfDef.learning_rate_decay == False:
+        print('  Fixed learning rate :',dnntfDef.learning_rate,)
+    else:
+        print('  Exponential decay - initial learning rate:',dnntfDef.learning_rate,
+                '\n  Exponential decay rate:', dnntfDef.learning_rate_decay_rate,
+                '\n  Exponential decay steps:', dnntfDef.learning_rate_decay_steps,)
 
 #********************************************************************************
 ''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''
