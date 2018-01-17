@@ -87,9 +87,10 @@ class Configuration():
         self.conf['Keras'] = {
             'runKeras' : True,
             'hidden_layersKeras' : [400,400],
-            'optimizerKeras' : "sgd",
+            'optimizerKeras' : "SGD",
             'l2_reg_strengthKeras' : 1e-4,
             'learning_rateKeras' : 0.1,
+            'learning_decay_rateKeras' : 0.96,
             'activation_functionKeras' : "relu",
             'dropout_percKeras' : 0.5,
             'trainingStepsKeras' : 1000,
@@ -228,6 +229,7 @@ class Configuration():
         self.optimizerKeras = self.kerasDef['optimizerKeras']
         self.l2_reg_strengthKeras = self.conf.getfloat('Keras','l2_reg_strengthKeras')
         self.learning_rateKeras = self.conf.getfloat('Keras','learning_rateKeras')
+        self.learning_decay_rateKeras = self.conf.getfloat('Keras','learning_decay_rateKeras')
         self.activation_functionKeras = self.kerasDef['activation_functionKeras']
         self.dropout_percKeras = eval(self.kerasDef['dropout_percKeras'])
         self.trainingStepsKeras = self.conf.getint('Keras','trainingStepsKeras')
@@ -476,6 +478,8 @@ class kerasDef:
     l2_reg_strength = config.l2_reg_strengthKeras
     
     learning_rate = config.learning_rateKeras
+    learning_decay_rate = config.learning_decay_rateKeras
+    
     
     # activation functions: https://keras.io/activations/
     # softmax, elu, relu, selu, softplus, softsign, tanh, sigmoid,
@@ -493,47 +497,50 @@ class kerasDef:
     #*************************************************
     if runKeras == True:
         import tensorflow as tf
-        import keras.optimizers
+        import keras.optimizers as opt
         from keras.layers import Activation
     
         activationFn = Activation(activation_function)
         
-        if optimizer == "ProximalAdagrad":
-            print(" Keras: Using ProximalAdagrad, learn_rate:",learning_rate,
-                  ", l2_reg_strength:", l2_reg_strength,"\n")
-            optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
-                                        l2_regularization_strength=l2_reg_strength,
-                                        use_locking=False,
-                                        name="ProximalAdagrad")
-        if optimizer == "AdamOpt":
-            print(" DNNTF: Using Adam, learn_rate:",learning_rate,"\n")
-            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate,
-                                        beta1=0.9,
-                                        beta2=0.999,
-                                        epsilon=1e-08,
-                                        use_locking=False,
-                                        name="Adam")
+        if optimizer == "SGD":
+            print(" Keras: Using SGD, learn_rate:",learning_rate,"\n")
+            optimizer = opt.SGD(lr=learning_rate, decay=learning_decay_rate,
+                momentum=0.9, nesterov=False)
+            
+        if optimizer == "Adagrad":
+            print(" Keras: Using Adagrad, learn_rate:",learning_rate,"\n")
+            optimizer = opt.Adagrad(lr=learning_rate, epsilon=1e-08,
+                decay=learning_decay_rate)
+        
         if optimizer == "Adadelta":
-            print(" DNNTF: Using Adadelta, learn_rate:",learning_rate,"\n")
-            optimizer = tf.train.AdadeltaOptimizer(learning_rate=learning_rate,
-                                        rho=0.95,
+            print(" Keras: Using AdaDelta, learn_rate:",learning_rate,"\n")
+            optimizer = opt.Adadelta(lr=learning_rate, epsilon=1e-08, rho=0.95,
+                decay=learning_decay_rate)
+            
+        if optimizer == "Adam":
+            print(" Keras: Using Adam, learn_rate:",learning_rate,"\n")
+            optimizer = opt.Adam(lr=learning_rate, beta_1=0.9,
+                                        beta_2=0.999, epsilon=1e-08,
+                                        decay=learning_decay_rate,
+                                        amsgrad=False)
+
+        if optimizer == "Adamax":
+            print(" Keras: Using Adamax, learn_rate:",learning_rate,"\n")
+            optimizer = opt.Adamax(lr=learning_rate, beta_1=0.9,
+                                        beta_2=0.999, epsilon=1e-08,
+                                        decay=learning_decay_rate)
+
+        if optimizer == "RMSprop":
+            print(" Keras: Using RMSprop, learn_rate:",learning_rate,"\n")
+            optimizer = opt.RMSprop(lr=learning_rate, rho=0.95,
                                         epsilon=1e-08,
-                                        use_locking=False,
-                                        name="Adadelta")
+                                        decay=learning_decay_rate)
 
-        if optimizer == "GradientDescent":
-            print(" DNNTF: Using GradientDescent, learn_rate:",learning_rate,"\n")
-            optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate,
-                                        use_locking=False,
-                                        name="GradientDescent")
-
-        if optimizer == "ProximalGradientDescent":
-            print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
-                  ", l2_reg_strength:", l2_reg_strength,"\n")
-            optimizer = tf.train.ProximalGradientDescentOptimizer(learning_rate=learning_rate,
-                                        l2_regularization_strength=l2_reg_strength,
-                                        use_locking=False,
-                                        name="ProximalGradientDescent")
+        '''
+        if optimizer == "TFOptimizer":
+            print(" DNNTF: Using TensorFlow native optimizer"\n")
+            optimizer = TFOptimizer(optimizer)
+        '''
 
 #**********************************************
 ''' Deep Neural Networks - sklearn'''

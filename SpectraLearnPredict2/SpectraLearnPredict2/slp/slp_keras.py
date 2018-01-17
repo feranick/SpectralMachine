@@ -82,7 +82,6 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
         model.add(Dropout(kerasDef.dropout_perc))
     model.add(Dense(np.unique(Cl).size+1, activation='softmax'))
 
-    sgd = SGD(lr=kerasDef.learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='categorical_crossentropy',
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
@@ -108,12 +107,13 @@ def printInfoKeras():
                 '\n  L2:',kerasDef.l2_reg_strength,
                 '\n  Dropout:', kerasDef.dropout_perc,
                 '\n  Learning rate:', kerasDef.learning_rate,
+                '\n  Learning decay rate:', kerasDef.learning_decay_rate,
                 '\n')
 
 #********************************************************************************
 ''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''
 #********************************************************************************
-def predKeras(clf, le, R, Cl):
+def predKeras(model, le, R, Cl):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
