@@ -36,8 +36,6 @@ class Configuration():
         if os.path.isfile(self.configFile) is False:
             print("Configuration file: \""+confFileName+"\" does not exist: Creating one.")
             self.createConfig()
-        else:
-            print("Using configuration file: \""+confFileName+"\"")
 
     # Hadrcoded default definitions for the confoguration file
     def preprocDef(self):
@@ -95,6 +93,7 @@ class Configuration():
             'activation_functionKeras' : "relu",
             'dropout_percKeras' : 0.5,
             'trainingStepsKeras' : 1000,
+            'plotModelKeras' : False,
             }
 
     def nnDef(self):
@@ -232,6 +231,7 @@ class Configuration():
         self.activation_functionKeras = self.kerasDef['activation_functionKeras']
         self.dropout_percKeras = eval(self.kerasDef['dropout_percKeras'])
         self.trainingStepsKeras = self.conf.getint('Keras','trainingStepsKeras')
+        self.plotModelKeras = self.conf.getboolean('Keras','plotModelKeras')
         
         self.runNN = self.conf.getboolean('NNSklearn','runNN')
         self.alwaysRetrainNN = self.conf.getboolean('NNSklearn','alwaysRetrainNN')
@@ -486,6 +486,7 @@ class kerasDef:
     dropout_perc = config.dropout_percKeras
     
     trainingSteps = config.trainingStepsKeras    # number of training steps
+    plotModel = config.plotModelKeras
 
     #*************************************************
     # Setup variables and definitions- do not change.

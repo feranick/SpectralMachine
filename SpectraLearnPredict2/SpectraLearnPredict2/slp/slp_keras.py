@@ -92,7 +92,13 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
           batch_size=128)
     score = model.evaluate(A_test, Cl2_test, batch_size=128)
 
+    if kerasDef.plotModel == True:
+        from keras.utils import plot_model
+        plot_model(model, to_file='model.png')
+
     return model, le
+
+
 def printInfoKeras():
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: Keras...\033[0m')

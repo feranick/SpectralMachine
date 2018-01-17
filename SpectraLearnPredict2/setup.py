@@ -3,7 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name='SpectraLearnPredict2',
     packages=find_packages(),
-    install_requires=['numpy', 'matplotlib', 'pandas', 'tensorflow', 'scikit-learn', 'keras'],
+    install_requires=['numpy', 'matplotlib', 'pandas', 'tensorflow', 'scikit-learn', 'keras',
+                    'pydot', 'graphviz'],
     entry_points={'gui_scripts' : ['SpectraLearnPredict2=SpectraLearnPredict2.__main__:main']},
     version='20180117a',
     description='Machine learning for spectral data',
