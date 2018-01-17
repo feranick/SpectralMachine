@@ -24,18 +24,20 @@ from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
 
-
 #***************************************************************
 ''' Parameters and configuration  '''
 #***************************************************************
 class Configuration():
     def __init__(self):
-        self.configFile = os.getcwd()+"/SpectraLearnPredict.ini"
+        confFileName = "SpectraLearnPredict2.ini"
+        self.configFile = os.getcwd()+"/"+confFileName
         self.conf = configparser.ConfigParser()
         self.conf.optionxform = str
         if os.path.isfile(self.configFile) is False:
-            print("Configuration file does not exist: Creating one.")
+            print("Configuration file: \""+confFileName+"\" does not exist: Creating one.")
             self.createConfig()
+        else:
+            print("Using configuration file: \""+confFileName+"\"")
 
     # Hadrcoded default definitions for the confoguration file
     def preprocDef(self):
@@ -61,7 +63,7 @@ class Configuration():
     def dnntfDef(self):
         self.conf['DNNClassifier'] = {
             'runDNNTF' : True,
-            'runSkflowDNNTF' : True,
+            'runSkflowDNNTF' : False,
             'alwaysRetrainDNNTF' : False,
             'alwaysImproveDNNTF' : True,
             'hidden_layersDNNTF' : [400,],
@@ -91,7 +93,7 @@ class Configuration():
             'l2_reg_strengthKeras' : 1e-4,
             'learning_rateKeras' : 0.1,
             'activation_functionKeras' : "relu",
-            'dropout_percKeras' : str(None),
+            'dropout_percKeras' : 0.5,
             'trainingStepsKeras' : 1000,
             }
 
@@ -207,13 +209,9 @@ class Configuration():
         self.hidden_layersDNNTF = eval(self.dnntfDef['hidden_layersDNNTF'])
         self.optimizerDNNTF = self.dnntfDef['optimizerDNNTF']
         self.learning_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rateDNNTF')
-        try:
-            self.learning_rate_decayDNNTF = self.conf.getboolean('DNNClassifier','learning_rate_decayDNNTF')
-            self.learning_rate_decay_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rate_decay_rateDNNTF')
-            self.learning_rate_decay_stepsDNNTF = self.conf.getfloat('DNNClassifier','learning_rate_decay_stepsDNNTF')
-        except:
-            self.learning_rate_decayDNNTF = False
-
+        self.learning_rate_decayDNNTF = self.conf.getboolean('DNNClassifier','learning_rate_decayDNNTF')
+        self.learning_rate_decay_rateDNNTF = self.conf.getfloat('DNNClassifier','learning_rate_decay_rateDNNTF')
+        self.learning_rate_decay_stepsDNNTF = self.conf.getfloat('DNNClassifier','learning_rate_decay_stepsDNNTF')
         self.l2_reg_strengthDNNTF = self.conf.getfloat('DNNClassifier','l2_reg_strengthDNNTF')
         self.activation_functionDNNTF = self.dnntfDef['activation_functionDNNTF']
         self.dropout_percDNNTF = eval(self.dnntfDef['dropout_percDNNTF'])
@@ -223,13 +221,8 @@ class Configuration():
         self.timeCheckpointDNNTF = self.conf.getint('DNNClassifier','timeCheckpointDNNTF')
         self.thresholdProbabilityPredDNNTF = self.conf.getfloat('DNNClassifier','thresholdProbabilityPredDNNTF')
         self.plotMapDNNTF = self.conf.getboolean('DNNClassifier','plotMapDNNTF')
-        try:
-            self.shuffleTrainDNNTF = self.conf.getboolean('DNNClassifier','shuffleTrainDNNTF')
-            self.shuffleTestDNNTF = self.conf.getboolean('DNNClassifier','shuffleTestDNNTF')
-        except:
-            self.shuffleTrainDNNTF = True
-            self.shuffleTestDNNTF = False
-        
+        self.shuffleTrainDNNTF = self.conf.getboolean('DNNClassifier','shuffleTrainDNNTF')
+        self.shuffleTestDNNTF = self.conf.getboolean('DNNClassifier','shuffleTestDNNTF')
         
         self.runKeras = self.conf.getboolean('Keras','runKeras')
         self.hidden_layersKeras = eval(self.kerasDef['hidden_layersKeras'])
@@ -302,6 +295,7 @@ class Configuration():
             self.pcaDef()
             self.kmDef()
             self.tfDef()
+            self.kerasDef()
             self.plotDef()
             self.sysDef()
             with open(self.configFile, 'w') as configfile:
