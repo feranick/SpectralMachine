@@ -90,10 +90,18 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
           epochs=kerasDef.trainingSteps,
           batch_size=128)
     score = model.evaluate(A_test, Cl2_test, batch_size=128)
-
+    
     if kerasDef.plotModel == True:
         from keras.utils import plot_model
         plot_model(model, to_file='model.png')
+
+    print('\n  ==================================')
+    print('  \033[1mKeras\033[0m - Accuracy')
+    print('  ==================================')
+    print("\n  Accuracy: {:.2f}%".format(100*score[1]))
+    print("  Loss: {:.2f}".format(score[0]))
+    print("  Global step: {:.2f}\n".format(kerasDef.trainingSteps))
+    print('  ==================================\n')
 
     return model, le
 

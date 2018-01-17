@@ -44,7 +44,7 @@ class Configuration():
             'fullYnorm' : True,
             'StandardScalerFlag' : False,
             'subsetCrossValid' : False,
-            'percentCrossValid' : 0.05,
+            'percentCrossValid' : 0.01,
             'YnormTo' : 1,
             'YnormX' : 1600,
             'YnormXdelta' : 30,
