@@ -76,7 +76,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
     # here, 20-dimensional vectors.
     for numLayers in kerasDef.hidden_layers:
         model.add(Dense(numLayers,
-                    activation=kerasDef.activation_function,
+                    activation=kerasDef.activationFn,
                     input_dim=A.shape[1],
                     kernel_regularizer=regularizers.l2(kerasDef.l2_reg_strength)))
         model.add(Dropout(kerasDef.dropout_perc))

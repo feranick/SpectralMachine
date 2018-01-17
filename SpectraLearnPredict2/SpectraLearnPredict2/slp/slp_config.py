@@ -477,9 +477,9 @@ class kerasDef:
     
     learning_rate = config.learning_rateKeras
     
-    # activation functions: https://www.tensorflow.org/api_guides/python/nn
-    # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
-    # sigmoid, tanh, leaky_relu
+    # activation functions: https://keras.io/activations/
+    # softmax, elu, relu, selu, softplus, softsign, tanh, sigmoid,
+    # hard_sigmoid, linear
     activation_function = config.activation_functionKeras
     
     # When not None, the probability of dropout.
@@ -494,12 +494,10 @@ class kerasDef:
     if runKeras == True:
         import tensorflow as tf
         import keras.optimizers
-        if activation_function == "sigmoid" or activation_function == "tanh":
-            actFn = "tf."+activation_function
-        else:
-            actFn = "tf.nn."+activation_function
-        activationFn = eval(actFn)
-
+        from keras.layers import Activation
+    
+        activationFn = Activation(activation_function)
+        
         if optimizer == "ProximalAdagrad":
             print(" Keras: Using ProximalAdagrad, learn_rate:",learning_rate,
                   ", l2_reg_strength:", l2_reg_strength,"\n")
