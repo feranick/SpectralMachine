@@ -78,10 +78,10 @@ def LearnPredictFile(learnFile, sampleFile):
         trainTF(A, Cl, A, Cl, learnFileRoot)
         predTF(A, Cl, R, learnFileRoot)
     
-    ''' Tensorflow '''
+    ''' Keras '''
     if kerasDef.runKeras == True:
-        model, le  = trainKeras(A, Cl, A, Cl, learnFileRoot)
-        predKeras(model, le, R, Cl)
+        model_keras, le_keras  = trainKeras(A, Cl, A, Cl, learnFileRoot)
+        predKeras(model_keras, le_keras, R, Cl)
 
     ''' Plot Training Data '''
     if plotDef.createTrainingDataPlot == True:
@@ -188,6 +188,12 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
             dnntfPred, dnntfProb = predDNNTF2(clf_dnntf, le_dnntf, R, Cl)
         summaryFile.extend([nnPred, nnProb])
         dnntfDef.alwaysRetrain = False
+        
+    ''' Run Keras'''
+    if kerasDef.runKeras == True:
+        model, le_keras  = trainKeras(A, Cl, A, Cl, learnFileRoot)
+        kerasPred, kerasProb = predKeras(model_keras, le_keras, R, Cl)
+        summaryFile.extend([kerasPred, kerasProb])
     
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
@@ -247,6 +253,9 @@ def LearnPredictMap(learnFile, mapFile):
         else:
             clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A, Cl, learnFileRoot)
 
+    if kerasDef.runKeras == True:
+        model_keras, le_keras  = trainKeras(A, Cl, A, Cl, learnFileRoot)
+
     if svmDef.runSVM == True:
         clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
 
@@ -263,7 +272,12 @@ def LearnPredictMap(learnFile, mapFile):
             
             saveMap(mapFile, 'DNN-TF', 'HC', dnntfPred[i], X[i], Y[i], True)
             dnnDef.alwaysRetrain = False
-        
+            
+        if dnntfDef.runKeras == True:
+            kerasPred[i], temp = predKeras(model_keras, le_keras, r, Cl)
+            
+            saveMap(mapFile, 'Keras', 'HC', kerasPred[i], X[i], Y[i], True)
+
         ''' Run Neural Network - sklearn'''
         if nnDef.runNN == True:
             nnPred[i], temp = predNN(clf_nn, A, Cl, r)

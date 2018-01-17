@@ -139,7 +139,6 @@ def predKeras(model, le, R, Cl):
     print('  ==================================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
-        #print(i)
         print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',
             str('{:.4f}'.format(100*predictions[0][rosterPred][i])))
     print('  ==================================')
