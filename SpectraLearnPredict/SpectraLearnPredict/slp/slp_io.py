@@ -27,6 +27,7 @@ from datetime import datetime, date
 from .slp_config import *
 from .slp_preprocess import *
 from .slp_tf import *
+from .slp_keras import *
 from .slp_nn import *
 from .slp_svm import *
 from .slp_pca import *
@@ -120,6 +121,9 @@ def trainAccuracy(learnFile, testFile):
             clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A_test, Cl_test, learnFileRoot)
         else:
             clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A_test, Cl_test, learnFileRoot)
+            
+    if kerasDef.runKeras == True:
+        model_keras, le_keras = trainKeras(A, Cl, A_test, Cl_test, learnFileRoot)
 
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:

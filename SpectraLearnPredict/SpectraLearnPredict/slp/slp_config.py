@@ -82,7 +82,19 @@ class Configuration():
             'shuffleTrainDNNTF' : True,
             'shuffleTestDNNTF' : False,
             }
-    
+
+    def kerasDef(self):
+        self.conf['Keras'] = {
+            'runKeras' : True,
+            'hidden_layersKeras' : [400,400],
+            'optimizerKeras' : "sgd",
+            'l2_reg_strengthKeras' : 1e-4,
+            'learning_rateKeras' : 0.1,
+            'activation_functionKeras' : "relu",
+            'dropout_percKeras' : str(None),
+            'trainingStepsKeras' : 1000,
+            }
+
     def nnDef(self):
         self.conf['NNSklearn'] = {
             'runNN' : True,
@@ -167,6 +179,7 @@ class Configuration():
         self.pcaDef = self.conf['PCA']
         self.kmDef = self.conf['KMeans']
         self.tfDef = self.conf['TensorFlow']
+        self.kerasDef = self.conf['Keras']
         self.plotDef = self.conf['Plotting']
         self.sysDef = self.conf['System']
         
@@ -216,6 +229,16 @@ class Configuration():
         except:
             self.shuffleTrainDNNTF = True
             self.shuffleTestDNNTF = False
+        
+        
+        self.runKeras = self.conf.getboolean('Keras','runKeras')
+        self.hidden_layersKeras = eval(self.kerasDef['hidden_layersKeras'])
+        self.optimizerKeras = self.kerasDef['optimizerKeras']
+        self.l2_reg_strengthKeras = self.conf.getfloat('Keras','l2_reg_strengthKeras')
+        self.learning_rateKeras = self.conf.getfloat('Keras','learning_rateKeras')
+        self.activation_functionKeras = self.kerasDef['activation_functionKeras']
+        self.dropout_percKeras = eval(self.kerasDef['dropout_percKeras'])
+        self.trainingStepsKeras = self.conf.getint('Keras','trainingStepsKeras')
         
         self.runNN = self.conf.getboolean('NNSklearn','runNN')
         self.alwaysRetrainNN = self.conf.getboolean('NNSklearn','alwaysRetrainNN')
@@ -400,6 +423,90 @@ class dnntfDef:
 
         if optimizer == "ProximalAdagrad":
             print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
+                  ", l2_reg_strength:", l2_reg_strength,"\n")
+            optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
+                                        l2_regularization_strength=l2_reg_strength,
+                                        use_locking=False,
+                                        name="ProximalAdagrad")
+        if optimizer == "AdamOpt":
+            print(" DNNTF: Using Adam, learn_rate:",learning_rate,"\n")
+            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate,
+                                        beta1=0.9,
+                                        beta2=0.999,
+                                        epsilon=1e-08,
+                                        use_locking=False,
+                                        name="Adam")
+        if optimizer == "Adadelta":
+            print(" DNNTF: Using Adadelta, learn_rate:",learning_rate,"\n")
+            optimizer = tf.train.AdadeltaOptimizer(learning_rate=learning_rate,
+                                        rho=0.95,
+                                        epsilon=1e-08,
+                                        use_locking=False,
+                                        name="Adadelta")
+
+        if optimizer == "GradientDescent":
+            print(" DNNTF: Using GradientDescent, learn_rate:",learning_rate,"\n")
+            optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate,
+                                        use_locking=False,
+                                        name="GradientDescent")
+
+        if optimizer == "ProximalGradientDescent":
+            print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
+                  ", l2_reg_strength:", l2_reg_strength,"\n")
+            optimizer = tf.train.ProximalGradientDescentOptimizer(learning_rate=learning_rate,
+                                        l2_regularization_strength=l2_reg_strength,
+                                        use_locking=False,
+                                        name="ProximalGradientDescent")
+
+#***********************************************************
+''' Deep Neural Networks - Keras'''
+#***********************************************************
+class kerasDef:
+    config = Configuration()
+    config.readConfig(config.configFile)
+    
+    runKeras = config.runKeras
+    
+    # Format: [number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,...]
+    hidden_layers = config.hidden_layersKeras
+
+    # Stock Optimizers: Adagrad (recommended), Adam, Ftrl, RMSProp, SGD
+    # https://www.tensorflow.org/api_guides/python/train
+    #optimizer = "Adagrad"
+
+    # Additional optimizers: ProximalAdagrad, AdamOpt, Adadelta,
+    #                        GradientDescent, ProximalGradientDescent,
+    # https://www.tensorflow.org/api_guides/python/train
+    optimizer = config.optimizerKeras
+    
+    l2_reg_strength = config.l2_reg_strengthKeras
+    
+    learning_rate = config.learning_rateKeras
+    
+    # activation functions: https://www.tensorflow.org/api_guides/python/nn
+    # relu, relu6, crelu, elu, softplus, softsign, dropout, bias_add
+    # sigmoid, tanh, leaky_relu
+    activation_function = config.activation_functionKeras
+    
+    # When not None, the probability of dropout.
+    dropout_perc = config.dropout_percKeras
+    
+    trainingSteps = config.trainingStepsKeras    # number of training steps
+
+    #*************************************************
+    # Setup variables and definitions- do not change.
+    #*************************************************
+    if runKeras == True:
+        import tensorflow as tf
+        import keras.optimizers
+        if activation_function == "sigmoid" or activation_function == "tanh":
+            actFn = "tf."+activation_function
+        else:
+            actFn = "tf.nn."+activation_function
+        activationFn = eval(actFn)
+
+        if optimizer == "ProximalAdagrad":
+            print(" Keras: Using ProximalAdagrad, learn_rate:",learning_rate,
                   ", l2_reg_strength:", l2_reg_strength,"\n")
             optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
                                         l2_regularization_strength=l2_reg_strength,
