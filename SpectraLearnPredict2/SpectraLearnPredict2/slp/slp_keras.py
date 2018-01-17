@@ -90,7 +90,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
           epochs=kerasDef.trainingSteps,
           batch_size=128)
     score = model.evaluate(A_test, Cl2_test, batch_size=128)
-    
+
     if kerasDef.plotModel == True:
         from keras.utils import plot_model
         plot_model(model, to_file='model.png')
@@ -105,7 +105,6 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
 
     return model, le
 
-
 def printInfoKeras():
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: Keras...\033[0m')
@@ -119,37 +118,36 @@ def printInfoKeras():
                 '\n')
 
 #********************************************************************************
-''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''
+''' Predict using Keras model '''
 #********************************************************************************
 def predKeras(model, le, R, Cl):
-    import tensorflow as tf
-    import tensorflow.contrib.learn as skflow
+    import keras
     from sklearn import preprocessing
 
-    predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": R},
-      num_epochs=1,
-      shuffle=False)
-      
-    predictions = list(clf.predict(input_fn=predict_input_fn))
-    pred_class = [p["class_ids"] for p in predictions][0][0]
-    predValue = le.inverse_transform(pred_class)
-    prob = [p["probabilities"] for p in predictions][0]
-    predProb = round(100*prob[pred_class],2)
-    
-    rosterPred = np.where(prob>dnntfDef.thresholdProbabilityPred/100)[0]
+    predictions = model.predict(R, verbose=1)
+    pred_class = np.argmax(predictions)
+    if pred_class.size >0:
+        predValue = le.inverse_transform(pred_class)
+    else:
+        predValue = 0
+
+    predProb = round(100*predictions[0][pred_class],2)
+    rosterPred = np.where(predictions[0]>dnntfDef.thresholdProbabilityPred)[0]
     
     print('\n  ==================================')
-    print('  \033[1mtf.DNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
+    print('  \033[1mKeras\033[0m - Probability >',str(kerasDef.thresholdProbabilityPred),'%')
     print('  ==================================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
-        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*prob[rosterPred][i])))
+        #print(i)
+        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',
+            str('{:.4f}'.format(100*predictions[0][rosterPred][i])))
     print('  ==================================')
     
     print('\033[1m' + '\n Predicted value (tf.DNNClassifier) = ' + predValue +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
+
 
 

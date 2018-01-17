@@ -306,12 +306,15 @@ def predDNNTF2(clf, le, R, Cl):
       
     predictions = list(clf.predict(input_fn=predict_input_fn))
     pred_class = [p["class_ids"] for p in predictions][0][0]
-    predValue = le.inverse_transform(pred_class)
+    if pred_class.size >0:
+        predValue = le.inverse_transform(pred_class)
+    else:
+        predValue = 0
     prob = [p["probabilities"] for p in predictions][0]
     predProb = round(100*prob[pred_class],2)
     
     rosterPred = np.where(prob>dnntfDef.thresholdProbabilityPred/100)[0]
-    
+
     print('\n  ==================================')
     print('  \033[1mtf.DNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
     print('  ==================================')

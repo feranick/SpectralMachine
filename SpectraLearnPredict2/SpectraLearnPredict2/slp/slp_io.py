@@ -77,6 +77,11 @@ def LearnPredictFile(learnFile, sampleFile):
     if tfDef.runTF == True:
         trainTF(A, Cl, A, Cl, learnFileRoot)
         predTF(A, Cl, R, learnFileRoot)
+    
+    ''' Tensorflow '''
+    if kerasDef.runKeras == True:
+        model, le  = trainKeras(A, Cl, A, Cl, learnFileRoot)
+        predKeras(model, le, R, Cl)
 
     ''' Plot Training Data '''
     if plotDef.createTrainingDataPlot == True:

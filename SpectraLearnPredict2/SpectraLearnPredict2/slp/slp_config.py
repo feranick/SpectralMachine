@@ -94,6 +94,7 @@ class Configuration():
             'activation_functionKeras' : "relu",
             'dropout_percKeras' : 0.5,
             'trainingStepsKeras' : 1000,
+            'thresholdProbabilityPredKeras' : 0.01,
             'plotModelKeras' : False,
             }
 
@@ -233,6 +234,7 @@ class Configuration():
         self.activation_functionKeras = self.kerasDef['activation_functionKeras']
         self.dropout_percKeras = eval(self.kerasDef['dropout_percKeras'])
         self.trainingStepsKeras = self.conf.getint('Keras','trainingStepsKeras')
+        self.thresholdProbabilityPredKeras = self.conf.getfloat('Keras','thresholdProbabilityPredKeras')
         self.plotModelKeras = self.conf.getboolean('Keras','plotModelKeras')
         
         self.runNN = self.conf.getboolean('NNSklearn','runNN')
@@ -490,6 +492,8 @@ class kerasDef:
     dropout_perc = config.dropout_percKeras
     
     trainingSteps = config.trainingStepsKeras    # number of training steps
+    thresholdProbabilityPred = config.thresholdProbabilityPredKeras
+    
     plotModel = config.plotModelKeras
 
     #*************************************************
