@@ -101,7 +101,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
               metrics=['accuracy'])
 
         tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=32,
-                write_graph=True, write_grads=False, write_images=False,
+                write_graph=True, write_grads=True, write_images=True,
                 embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
         tbLogs = [tbLog]
         model.fit(A, Cl2,
