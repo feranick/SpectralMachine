@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+#use the script as follows:
+#./sub_slp trainFile testFile | qsub -N jobname
+
+use Cwd;
+#@ARGV > 0 or die "usage: sub_3dpv nnodes inpfile|qsub -N jobname \n";
+@ARGV > 0 or die "usage: sub_3dpv inpfile_train inpfile_test | qsub -N jobname \n";
+#$n=$ARGV[0];
+$n=1;
+$nprocs=$n*1;
+#$inpfile=$ARGV[1];
+$inpfile=$ARGV[0];
+$inpfiletest=$ARGV[1];
+#This part creates necessary directories;
+$execpath="/usr/local/bin";
+$fullpath=getcwd;
+$basedir = $inpfile;
+$basedir =~ s{\.[^.]+$}{};
+#$percvtest=5;
+#$percvtrain=100-$percvtest;
+#$inpfiletest=$basedir."_test-".$percvtest."pc.txt";
+#$inpfiletrain=$basedir."_train-".$percvtrain."pc.txt";
+
+print "#!/bin/sh
+#PBS -l nodes=$n:ppn=7
+#PBS -N SLP
+
+cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
+
+  cd $fullpath
+  #mkdir $basedir
+  #$execpath/CrossValidMaker.py $inpfile $percvtest
+  #cp $inpfile $basedir
+  #cp $inpfiletest $basedir
+  #cd $basedir
+  echo $fullpath
+  echo $inpfile
+  echo $inpfiletest
+
+  # Use argument specific cross validation file:
+  #$execpath/SpectraLearnPredict.py -a $inpfile $inpfiletest 2>&1 | tee -a log_$inpfile
+  $execpath/SpectraLearnPredict2 -a $inpfile $inpfiletest 2>&1 | tee -a log_$inpfile
+
+  # Use randomly created cross validation dataset:
+  #$execpath/SpectraLearnPredict.py -a $inpfile  2>&1 | tee -a log_$inpfile
+  #$execpath/SpectraLearnPredict -a $inpfile  2>&1 | tee -a log_$inpfile
+
+";
