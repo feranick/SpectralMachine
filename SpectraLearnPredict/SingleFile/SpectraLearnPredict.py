@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20180111a
+* version: 20180118a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -401,14 +401,14 @@ class dnntfDef:
         activationFn = eval(actFn)
 
         if optimizer == "ProximalAdagrad":
-            print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
-                  ", l2_reg_strength:", l2_reg_strength,"\n")
+            optimizer_tag = " ProximalAdagrad, learn_rate: "+str(learning_rate)+\
+                  ", l2_reg_strength: "+str(l2_reg_strength)
             optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
                                         l2_regularization_strength=l2_reg_strength,
                                         use_locking=False,
                                         name="ProximalAdagrad")
         if optimizer == "AdamOpt":
-            print(" DNNTF: Using Adam, learn_rate:",learning_rate,"\n")
+            optimizer_tag = " Adam, learn_rate: "+str(learning_rate)
             optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate,
                                         beta1=0.9,
                                         beta2=0.999,
@@ -416,7 +416,7 @@ class dnntfDef:
                                         use_locking=False,
                                         name="Adam")
         if optimizer == "Adadelta":
-            print(" DNNTF: Using Adadelta, learn_rate:",learning_rate,"\n")
+            optimizer_tag = " Adadelta, learn_rate: "+str(learning_rate)
             optimizer = tf.train.AdadeltaOptimizer(learning_rate=learning_rate,
                                         rho=0.95,
                                         epsilon=1e-08,
@@ -424,14 +424,14 @@ class dnntfDef:
                                         name="Adadelta")
 
         if optimizer == "GradientDescent":
-            print(" DNNTF: Using GradientDescent, learn_rate:",learning_rate,"\n")
+            optimizer_tag = " GradientDescent, learn_rate: "+str(learning_rate)
             optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate,
                                         use_locking=False,
                                         name="GradientDescent")
 
         if optimizer == "ProximalGradientDescent":
-            print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
-                  ", l2_reg_strength:", l2_reg_strength,"\n")
+            optimizer_tag = " ProximalAdagrad, learn_rate: "+str(learning_rate)+\
+                  ", l2_reg_strength: "+str(l2_reg_strength)
             optimizer = tf.train.ProximalGradientDescentOptimizer(learning_rate=learning_rate,
                                         l2_regularization_strength=l2_reg_strength,
                                         use_locking=False,
@@ -644,7 +644,8 @@ def main():
                 usage()
                 sys.exit(2)
         total_time = time.clock() - start_time
-        print(" Total time (s):",total_time)
+        print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
+                                                    total_time/60, total_time/3600),"\n")
 
 #**********************************************
 ''' Learn and Predict - File'''
@@ -917,7 +918,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: skflow-DNNClassifier - TensorFlow...\033[0m')
     print('  Hidden layers:', dnntfDef.hidden_layers)
-    print('  Optimizer:',dnntfDef.optimizer,
+    print('  Optimizer:',dnntfDef.optimizer_tag,
                 '\n  Activation function:',dnntfDef.activation_function,
                 '\n  L2:',dnntfDef.l2_reg_strength,
                 '\n  Dropout:', dnntfDef.dropout_perc)
@@ -1156,7 +1157,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
 def printInfo():
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: tf.DNNClassifier - TensorFlow...\033[0m')
-    print('  Optimizer:',dnntfDef.optimizer,
+    print('  Optimizer:',dnntfDef.optimizer_tag,
           '\n  Hidden layers:', dnntfDef.hidden_layers,
           '\n  Activation function:',dnntfDef.activation_function,
           '\n  L2:',dnntfDef.l2_reg_strength,
