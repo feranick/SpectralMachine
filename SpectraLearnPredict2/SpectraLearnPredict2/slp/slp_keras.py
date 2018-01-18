@@ -94,7 +94,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
                     input_dim=A.shape[1],
                     kernel_regularizer=regularizers.l2(kerasDef.l2_reg_strength)))
             model.add(Dropout(kerasDef.dropout_perc))
-        model.add(Dense(np.unique(Cl).size+1, activation='softmax'))
+        model.add(Dense(np.unique(Cl).size+1, activation = kerasDef.activation_function))
 
         model.compile(loss='categorical_crossentropy',
               optimizer=kerasDef.optimizer,
