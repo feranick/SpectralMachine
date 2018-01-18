@@ -5,7 +5,6 @@
 *
 * SpectraLearnPredict2
 * Perform Machine Learning on Spectroscopy Data.
-* Version 20171221a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -27,7 +26,6 @@ from datetime import datetime, date
 
 from .slp_config import *
 from .slp_io import *
-
 
 #**********************************************
 ''' Main '''
@@ -115,17 +113,17 @@ def run():
 def usage():
     print('\n Usage:\n')
     print(' Single files:')
-    print('  python3 SpectraLearnPredict.py -f <learningfile> <spectrafile>\n')
+    print('  python3 SpectraLearnPredict2.py -f <learningfile> <spectrafile>\n')
     print(' Cross-validation for accuracy determination:')
-    print('  python3 SpectraLearnPredict.py -a <learningfile> <testdataset>\n')
+    print('  python3 SpectraLearnPredict2.py -a <learningfile> <testdataset>\n')
     print(' Cross-validation for accuracy determination (automatic splitting):')
-    print('  python3 SpectraLearnPredict.py -a <learningfile>\n')
+    print('  python3 SpectraLearnPredict2.py -a <learningfile>\n')
     print(' Maps (formatted for Horiba LabSpec):')
-    print('  python3 SpectraLearnPredict.py -m <learningfile> <spectramap>\n')
+    print('  python3 SpectraLearnPredict2.py -m <learningfile> <spectramap>\n')
     print(' Batch txt files:')
-    print('  python3 SpectraLearnPredict.py -b <learningfile>\n')
+    print('  python3 SpectraLearnPredict2.py -b <learningfile>\n')
     print(' K-means on maps:')
-    print('  python3 SpectraLearnPredict.py -k <spectramap> <number_of_classes>\n')
+    print('  python3 SpectraLearnPredict2.py -k <spectramap> <number_of_classes>\n')
     print(' Principal component analysis on spectral collection files: ')
-    print('  python3 SpectraLearnPredict.py -p <spectrafile> <#comp>\n')
+    print('  python3 SpectraLearnPredict2.py -p <spectrafile> <#comp>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
