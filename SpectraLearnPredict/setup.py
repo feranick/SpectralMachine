@@ -5,7 +5,7 @@ setup(
     packages=find_packages(),
     install_requires=['numpy', 'matplotlib', 'pandas', 'tensorflow', 'scikit-learn'],
     entry_points={'gui_scripts' : ['SpectraLearnPredict=SpectraLearnPredict.__main__:main']},
-    version='20180111a',
+    version='20180118a',
     description='Machine learning for spectral data',
     long_description= """ Machine learning for spectral data """,
     author='Nicola Ferralis',
