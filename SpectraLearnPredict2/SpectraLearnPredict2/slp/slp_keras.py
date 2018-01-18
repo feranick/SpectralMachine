@@ -134,7 +134,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
 def printInfoKeras():
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: Keras...\033[0m')
-    print('  Optimizer:',kerasDef.optimizer,
+    print('  Optimizer:',kerasDef.optimizer_tag,
                 '\n  Hidden layers:', kerasDef.hidden_layers,
                 '\n  Activation function:',kerasDef.activation_function,
                 '\n  L2:',kerasDef.l2_reg_strength,

@@ -37,7 +37,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: skflow-DNNClassifier - TensorFlow...\033[0m')
     print('  Hidden layers:', dnntfDef.hidden_layers)
-    print('  Optimizer:',dnntfDef.optimizer,
+    print('  Optimizer:',dnntfDef.optimizer_tag,
                 '\n  Activation function:',dnntfDef.activation_function,
                 '\n  L2:',dnntfDef.l2_reg_strength,
                 '\n  Dropout:', dnntfDef.dropout_perc)
@@ -276,7 +276,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
 def printInfo():
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: tf.DNNClassifier - TensorFlow...\033[0m')
-    print('  Optimizer:',dnntfDef.optimizer,
+    print('  Optimizer:',dnntfDef.optimizer_tag,
                 '\n  Hidden layers:', dnntfDef.hidden_layers,
                 '\n  Activation function:',dnntfDef.activation_function,
                 '\n  L2:',dnntfDef.l2_reg_strength,
