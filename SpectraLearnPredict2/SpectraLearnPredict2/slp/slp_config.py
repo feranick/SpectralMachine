@@ -86,6 +86,8 @@ class Configuration():
     def kerasDef(self):
         self.conf['Keras'] = {
             'runKeras' : True,
+            'alwaysRetrainDNNTF' : False,
+            'alwaysImproveDNNTF' : True,
             'hidden_layersKeras' : [400,400],
             'optimizerKeras' : "SGD",
             'l2_reg_strengthKeras' : 1e-4,
@@ -226,6 +228,8 @@ class Configuration():
         self.shuffleTestDNNTF = self.conf.getboolean('DNNClassifier','shuffleTestDNNTF')
         
         self.runKeras = self.conf.getboolean('Keras','runKeras')
+        self.alwaysRetrainKeras = self.conf.getboolean('Keras','alwaysRetrainKeras')
+        self.alwaysImproveKeras = self.conf.getboolean('Keras','alwaysImproveKeras')
         self.hidden_layersKeras = eval(self.kerasDef['hidden_layersKeras'])
         self.optimizerKeras = self.kerasDef['optimizerKeras']
         self.l2_reg_strengthKeras = self.conf.getfloat('Keras','l2_reg_strengthKeras')
@@ -464,6 +468,8 @@ class kerasDef:
     config.readConfig(config.configFile)
     
     runKeras = config.runKeras
+    alwaysRetrain = config.alwaysRetrainKeras
+    alwaysImprove = config.alwaysImproveKeras
     
     # Format: [number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,...]
     hidden_layers = config.hidden_layersKeras
@@ -503,9 +509,7 @@ class kerasDef:
         import tensorflow as tf
         import keras.optimizers as opt
         from keras.layers import Activation
-    
-        activationFn = Activation(activation_function)
-        
+            
         if optimizer == "SGD":
             print(" Keras: Using SGD, learn_rate:",learning_rate,"\n")
             optimizer = opt.SGD(lr=learning_rate, decay=learning_decay_rate,

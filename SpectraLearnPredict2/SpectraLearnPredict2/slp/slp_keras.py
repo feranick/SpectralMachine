@@ -46,9 +46,20 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
     from keras.layers import Dense, Dropout, Activation
     from keras.optimizers import SGD
     from keras import regularizers
+    from keras.models import load_model
     from sklearn import preprocessing
     from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
     import tensorflow as tf
+    
+    #model_directory = Root + "Keras_" + str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])
+    model_directory = "."
+    model_name = model_directory+"/keras_slp.hd5"
+    
+    if kerasDef.alwaysRetrain == False:
+        print("\n  Training model saved in: ", model_name, "\n")
+    else:
+        kerasDef.alwaysImprove = False
+        print("\n  Training model not saved\n")
     
     printInfoKeras()
 
@@ -70,38 +81,47 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
     Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
     Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
     
-    model = Sequential()
-    # Dense(64) is a fully-connected layer with 64 hidden units.
-    # in the first layer, you must specify the expected input data shape:
-    # here, 20-dimensional vectors.
-    for numLayers in kerasDef.hidden_layers:
-        model.add(Dense(numLayers,
-                    activation=kerasDef.activationFn,
+    
+    if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
+        print("TEST")
+        model = Sequential()
+        # Dense(64) is a fully-connected layer with 64 hidden units.
+        # in the first layer, you must specify the expected input data shape:
+        # here, 20-dimensional vectors.
+        for numLayers in kerasDef.hidden_layers:
+            model.add(Dense(numLayers,
+                    activation = kerasDef.activation_function,
                     input_dim=A.shape[1],
                     kernel_regularizer=regularizers.l2(kerasDef.l2_reg_strength)))
-        model.add(Dropout(kerasDef.dropout_perc))
-    model.add(Dense(np.unique(Cl).size+1, activation='softmax'))
+            model.add(Dropout(kerasDef.dropout_perc))
+        model.add(Dense(np.unique(Cl).size+1, activation='softmax'))
 
-    model.compile(loss='categorical_crossentropy',
+        model.compile(loss='categorical_crossentropy',
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
 
-    model.fit(A, Cl2,
-          epochs=kerasDef.trainingSteps,
-          batch_size=128)
-    score = model.evaluate(A_test, Cl2_test, batch_size=128)
+        model.fit(A, Cl2,
+            epochs=kerasDef.trainingSteps,
+            batch_size=128)
+        score = model.evaluate(A_test, Cl2_test, batch_size=128)
+        model.save(model_name)
 
-    if kerasDef.plotModel == True:
-        from keras.utils import plot_model
-        plot_model(model, to_file='model.png')
+        if kerasDef.plotModel == True:
+            from keras.utils import plot_model
+            plot_model(model, to_file=model_directory+'/model.png')
+            
 
-    print('\n  ==================================')
-    print('  \033[1mKeras\033[0m - Accuracy')
-    print('  ==================================')
-    print("\n  Accuracy: {:.2f}%".format(100*score[1]))
-    print("  Loss: {:.2f}".format(score[0]))
-    print("  Global step: {:.2f}\n".format(kerasDef.trainingSteps))
-    print('  ==================================\n')
+        print('\n  ==================================')
+        print('  \033[1mKeras\033[0m - Accuracy')
+        print('  ==================================')
+        print("\n  Accuracy: {:.2f}%".format(100*score[1]))
+        print("  Loss: {:.2f}".format(score[0]))
+        print("  Global step: {:.2f}\n".format(kerasDef.trainingSteps))
+        print('  ==================================\n')
+        
+    else:
+        print(" Retreaving training model from: ", model_name,"\n")
+        model = load_model(model_name)
 
     return model, le
 
