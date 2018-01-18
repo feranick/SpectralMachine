@@ -106,7 +106,8 @@ def run():
                 usage()
                 sys.exit(2)
         total_time = time.clock() - start_time
-        print(" Total time (s):",total_time)
+        print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
+                                                    total_time/60, total_time/3600),"\n")
 
 #************************************
 ''' Lists the program usage '''

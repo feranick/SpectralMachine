@@ -47,13 +47,14 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
     from keras.optimizers import SGD
     from keras import regularizers
     from keras.models import load_model
+    from keras.callbacks import TensorBoard
     from sklearn import preprocessing
     from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
     import tensorflow as tf
     
-    #model_directory = Root + "Keras_" + str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])
+    tb_directory = "keras_" + str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])
     model_directory = "."
-    model_name = model_directory+"/keras_slp.hd5"
+    model_name = model_directory+"/keras_"+str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])+".hd5"
     
     if kerasDef.alwaysRetrain == False:
         print("\n  Training model saved in: ", model_name, "\n")
@@ -83,7 +84,6 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
     
     
     if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
-        print("TEST")
         model = Sequential()
         # Dense(64) is a fully-connected layer with 64 hidden units.
         # in the first layer, you must specify the expected input data shape:
@@ -100,9 +100,15 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
 
+        tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=32,
+                write_graph=True, write_grads=False, write_images=False,
+                embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
+        tbLogs = [tbLog]
         model.fit(A, Cl2,
             epochs=kerasDef.trainingSteps,
-            batch_size=128)
+            batch_size=128,
+            callbacks = tbLogs)
+
         score = model.evaluate(A_test, Cl2_test, batch_size=128)
         model.save(model_name)
 
