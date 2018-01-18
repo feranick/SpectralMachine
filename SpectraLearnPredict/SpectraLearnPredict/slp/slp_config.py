@@ -399,14 +399,14 @@ class dnntfDef:
         activationFn = eval(actFn)
 
         if optimizer == "ProximalAdagrad":
-            print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
-                  ", l2_reg_strength:", l2_reg_strength,"\n")
+            optimizer_tag = " ProximalAdagrad, learn_rate: "+str(learning_rate)+\
+                  ", l2_reg_strength: "+str(l2_reg_strength)
             optimizer = tf.train.ProximalAdagradOptimizer(learning_rate=learning_rate,
                                         l2_regularization_strength=l2_reg_strength,
                                         use_locking=False,
                                         name="ProximalAdagrad")
         if optimizer == "AdamOpt":
-            print(" DNNTF: Using Adam, learn_rate:",learning_rate,"\n")
+            optimizer_tag = " Adam, learn_rate: "+str(learning_rate)
             optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate,
                                         beta1=0.9,
                                         beta2=0.999,
@@ -414,7 +414,7 @@ class dnntfDef:
                                         use_locking=False,
                                         name="Adam")
         if optimizer == "Adadelta":
-            print(" DNNTF: Using Adadelta, learn_rate:",learning_rate,"\n")
+            optimizer_tag = " Adadelta, learn_rate: "+str(learning_rate)
             optimizer = tf.train.AdadeltaOptimizer(learning_rate=learning_rate,
                                         rho=0.95,
                                         epsilon=1e-08,
@@ -422,14 +422,14 @@ class dnntfDef:
                                         name="Adadelta")
 
         if optimizer == "GradientDescent":
-            print(" DNNTF: Using GradientDescent, learn_rate:",learning_rate,"\n")
+            optimizer_tag = " GradientDescent, learn_rate: "+str(learning_rate)
             optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate,
                                         use_locking=False,
                                         name="GradientDescent")
 
         if optimizer == "ProximalGradientDescent":
-            print(" DNNTF: Using ProximalAdagrad, learn_rate:",learning_rate,
-                  ", l2_reg_strength:", l2_reg_strength,"\n")
+            optimizer_tag = " ProximalAdagrad, learn_rate: "+str(learning_rate)+\
+                  ", l2_reg_strength: "+str(l2_reg_strength)
             optimizer = tf.train.ProximalGradientDescentOptimizer(learning_rate=learning_rate,
                                         l2_regularization_strength=l2_reg_strength,
                                         use_locking=False,
