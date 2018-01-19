@@ -171,6 +171,8 @@ class Configuration():
     def sysDef(self):
         self.conf['System'] = {
             'multiproc' : False,
+            'useAllCores' : False,
+            'numCores' : 2,
             }
 
     # Read configuration file into usable variables
@@ -291,7 +293,9 @@ class Configuration():
         self.plotAllSpectra = self.conf.getboolean('Plotting','plotAllSpectra')
         self.stepSpectraPlot = self.conf.getint('Plotting','stepSpectraPlot')
 
-        self.multiproc = self.conf.getboolean('System','multiproc')
+        self.multiProc = self.conf.getboolean('System','multiProc')
+        self.useAllCores = self.conf.getboolean('System','useAllCores')
+        self.numCores = self.conf.getint('System','numCores')
 
     # Create configuration file
     def createConfig(self):
@@ -676,4 +680,20 @@ class plotDef:
     if plotAllSpectra == "False":
         stepSpectraPlot = config.stepSpectraPlot  # steps in the number of spectra to be plotted
 
+#**********************************************
+''' System '''
+#**********************************************
+class sysDef:
+    config = Configuration()
+    config.readConfig(config.configFile)
+
+    multiProc = config.multiProc
+    config.useAllCores
+    import multiprocessing as mp
+    if config.useAllCores == True:
+        numCores = mp.cpu_count()
+        print("\n Multiprocessing batch using max number of cores/processors: ", numCores,"\n")
+    else:
+        numCores = config.numCores
+        print("\n Multiprocessing batch using",numCores, "cores/processors\n")
 
