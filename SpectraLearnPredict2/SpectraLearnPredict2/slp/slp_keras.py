@@ -94,7 +94,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
                     input_dim=A.shape[1],
                     kernel_regularizer=regularizers.l2(kerasDef.l2_reg_strength)))
             model.add(Dropout(kerasDef.dropout_perc))
-        model.add(Dense(np.unique(Cl).size+1, activation = kerasDef.activation_function))
+        model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
 
         model.compile(loss='categorical_crossentropy',
               optimizer=kerasDef.optimizer,
@@ -104,10 +104,14 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
                 write_graph=True, write_grads=True, write_images=True,
                 embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
         tbLogs = [tbLog]
-        model.fit(A, Cl2,
+        log = model.fit(A, Cl2,
             epochs=kerasDef.trainingSteps,
-            batch_size=128,
-            callbacks = tbLogs)
+            batch_size=A.shape[1],
+            callbacks = tbLogs,
+            verbose = 2)
+            
+        accuracy = np.asarray(log.history['acc'])
+        loss = np.asarray(log.history['loss'])
 
         score = model.evaluate(A_test, Cl2_test, batch_size=128)
         model.save(model_name)
@@ -115,16 +119,16 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
         if kerasDef.plotModel == True:
             from keras.utils import plot_model
             plot_model(model, to_file=model_directory+'/model.png', show_shapes=True)
-            
 
-        print('\n  ==================================')
-        print('  \033[1mKeras\033[0m - Accuracy')
-        print('  ==================================')
-        print("\n  Accuracy: {:.2f}%".format(100*score[1]))
-        print("  Loss: {:.2f}".format(score[0]))
-        print("  Global step: {:.2f}\n".format(kerasDef.trainingSteps))
-        print('  ==================================\n')
-        
+        print('\n  ==========================================')
+        print('  \033[1mKeras\033[0m - Training Summary')
+        print('  ==========================================')
+        print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
+        print("\n  Loss - Average: {0:.2f}; Min: {1:.2f}".format(np.average(loss), np.amin(loss)))
+        print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
+        print("\n  Global step: {:.2f}\n".format(kerasDef.trainingSteps))
+        print('  =========================================\n')
+
     else:
         print(" Retreaving training model from: ", model_name,"\n")
         model = load_model(model_name)
