@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20180118a
+* version: 20180119a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *

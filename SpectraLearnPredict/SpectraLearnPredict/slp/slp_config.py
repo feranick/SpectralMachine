@@ -267,7 +267,7 @@ class Configuration():
         self.plotAllSpectra = self.conf.getboolean('Plotting','plotAllSpectra')
         self.stepSpectraPlot = self.conf.getint('Plotting','stepSpectraPlot')
 
-        self.multiproc = self.conf.getboolean('System','multiproc')
+        self.multiProc = self.conf.getboolean('System','multiproc')
 
     # Create configuration file
     def createConfig(self):
@@ -561,4 +561,11 @@ class plotDef:
     if plotAllSpectra == "False":
         stepSpectraPlot = config.stepSpectraPlot  # steps in the number of spectra to be plotted
 
+#**********************************************
+''' System '''
+#**********************************************
+class sysDef:
+    config = Configuration()
+    config.readConfig(config.configFile)
 
+    multiProc = config.multiProc

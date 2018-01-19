@@ -170,7 +170,7 @@ class Configuration():
 
     def sysDef(self):
         self.conf['System'] = {
-            'multiproc' : False,
+            'multiProc' : False,
             'useAllCores' : False,
             'numCores' : 2,
             }

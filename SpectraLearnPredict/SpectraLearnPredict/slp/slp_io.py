@@ -147,7 +147,7 @@ def LearnPredictBatch(learnFile):
     En, Cl, A, YnormXind = readLearnFile(learnFile)
     A, Cl, En, Aorig = preProcessNormLearningData(A, En, Cl, YnormXind, 0)
     
-    if multiproc == True:
+    if sysDef.multiProc == True:
         import multiprocessing as mp
         p = mp.Pool()
         for f in glob.glob('*.txt'):
@@ -177,7 +177,7 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
         else:
             clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A, Cl, learnFileRoot)
             dnntfPred, dnntfProb = predDNNTF2(clf_dnntf, le_dnntf, R, Cl)
-        summaryFile.extend([nnPred, nnProb])
+        summaryFile.extend([dnntfPred, dnntfProb])
         dnntfDef.alwaysRetrain = False
     
     ''' Run Neural Network - sklearn'''
