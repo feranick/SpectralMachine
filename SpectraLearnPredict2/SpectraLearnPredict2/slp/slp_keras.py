@@ -114,7 +114,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
 
         if kerasDef.plotModel == True:
             from keras.utils import plot_model
-            plot_model(model, to_file=model_directory+'/model.png')
+            plot_model(model, to_file=model_directory+'/model.png', show_shapes=True)
             
 
         print('\n  ==================================')
