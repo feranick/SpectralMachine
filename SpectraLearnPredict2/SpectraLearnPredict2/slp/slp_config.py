@@ -517,7 +517,7 @@ class kerasDef:
         if optimizer == "SGD":
             optimizer_tag = " SGD, learn_rate: "+str(learning_rate)
             optimizer = opt.SGD(lr=learning_rate, decay=learning_decay_rate,
-                momentum=0.9, nesterov=False)
+                momentum=0.9, nesterov=True)
             
         if optimizer == "Adagrad":
             optimizer_tag = " Adagrad, learn_rate: "+str(learning_rate)
