@@ -17,7 +17,7 @@ import numpy as np
 import keras, sys, os.path
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Activation, ActivityRegularization, MaxPooling1D
-from keras.optimizers import SGD
+import keras.optimizers as opt
 from keras import regularizers
 from keras.callbacks import TensorBoard
 from keras.utils import plot_model
@@ -67,16 +67,22 @@ batch_size = A.shape[1]
 #batch_size = 64
 
 model = Sequential()
-model.add(Dense(int(A.shape[1]/2), activation = 'relu', input_dim=A.shape[1]))
+model.add(Dense(200, activation = 'relu', input_dim=A.shape[1],
+    kernel_regularizer=regularizers.l2(1e-4)))
 model.add(Dropout(0.5))
-model.add(Dense(int(A.shape[1]/4), activation = 'relu'))
+model.add(Dense(200, activation = 'relu',
+    kernel_regularizer=regularizers.l2(1e-4)))
 model.add(Dropout(0.5))
 model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
 
-sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
+#optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
+optim = opt.Adam(lr=0.0001, beta_1=0.9,
+                                        beta_2=0.999, epsilon=1e-08,
+                                        decay=1e-6,
+                                        amsgrad=False)
 
 model.compile(loss='categorical_crossentropy',
-    optimizer=sgd,
+    optimizer=optim,
     metrics=['accuracy'])
 
 tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=32,
@@ -84,7 +90,7 @@ tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=32,
             embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
 tbLogs = [tbLog]
 log = model.fit(A, Cl2,
-    epochs=500,
+    epochs=2000,
     batch_size=batch_size,
     callbacks = tbLogs,
     verbose=2,
