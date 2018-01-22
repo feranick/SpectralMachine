@@ -130,8 +130,8 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
         print('  \033[1mKeras\033[0m - Training Summary')
         print('  ==========================================')
         print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
-        print("\n  Loss - Average: {0:.2f}; Min: {1:.2f}".format(np.average(loss), np.amin(loss)))
-        print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
+        print("\n  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
+        print("\n  Validation - Loss: {0:.4f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
         print("\n  Global step: {:.2f}\n".format(kerasDef.trainingSteps))
         print('  =========================================\n')
 
