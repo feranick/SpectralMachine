@@ -124,6 +124,8 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
             from keras.utils import plot_model
             plot_model(model, to_file=model_directory+'/model.png', show_shapes=True)
 
+        printInfoKeras()
+
         print('\n  ==========================================')
         print('  \033[1mKeras\033[0m - Training Summary')
         print('  ==========================================')
