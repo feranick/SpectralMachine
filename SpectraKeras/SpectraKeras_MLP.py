@@ -5,7 +5,7 @@
 *
 * SpectraKeras
 *
-* 20180119a
+* 20180122a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -63,6 +63,9 @@ totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
 Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
 #Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
 
+batch_size = A.shape[1]
+#batch_size = 64
+
 model = Sequential()
 model.add(Dense(int(A.shape[1]/2), activation = 'relu', input_dim=A.shape[1]))
 model.add(Dropout(0.5))
@@ -82,13 +85,16 @@ tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=32,
 tbLogs = [tbLog]
 log = model.fit(A, Cl2,
     epochs=500,
-    batch_size=A.shape[1],
+    batch_size=batch_size,
     callbacks = tbLogs,
     verbose=2,
     validation_split=0.05)
 
 accuracy = np.asarray(log.history['acc'])
 loss = np.asarray(log.history['loss'])
+val_loss = np.asarray(log.history['val_loss'])
+val_acc = np.asarray(log.history['val_acc'])
+
 
 #score = model.evaluate(A_test, Cl2_test, batch_size=A.shape[1])
 model.save(model_name)
@@ -98,7 +104,12 @@ print('\n  ==========================================')
 print('  \033[1mKeras\033[0m - Training Summary')
 print('  ==========================================')
 print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
-print("\n  Loss - Average: {0:.2f}; Min: {1:.2f}".format(np.average(loss), np.amin(loss)))
+print("  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
+print('\n\n  ==========================================')
+print('  \033[1mKeras\033[0m - Validation Summary')
+print('  ==========================================')
+print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(val_acc), 100*np.amax(val_acc)))
+print("  Loss - Average: {0:.4f}; Min: {1:.4f}\n".format(np.average(val_loss), np.amin(val_loss)))
 #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
 print('  =========================================\n')
 
