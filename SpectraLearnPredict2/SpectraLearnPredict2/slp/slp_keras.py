@@ -81,9 +81,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
     totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
     Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
     Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
-    
-    print(kerasDef.fullBatch)
-    
+        
     if kerasDef.fullBatch == True:
         batch_size = A.shape[1]
     else:
