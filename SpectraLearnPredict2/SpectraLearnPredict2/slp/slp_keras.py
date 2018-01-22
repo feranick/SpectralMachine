@@ -82,6 +82,10 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
     Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
     Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
     
+    if kerasDef.fullBatch == True:
+        batch_size = A.shape[1]
+    else:
+        batch_size = kerasDef.batchSize
     
     if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
         model = Sequential()
@@ -100,20 +104,20 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
 
-        tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=32,
+        tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=kerasDef.batchSize,
                 write_graph=True, write_grads=True, write_images=True,
                 embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
         tbLogs = [tbLog]
         log = model.fit(A, Cl2,
             epochs=kerasDef.trainingSteps,
-            batch_size=A.shape[1],
+            batch_size=kerasDef.batchSize,
             callbacks = tbLogs,
             verbose = 2)
             
         accuracy = np.asarray(log.history['acc'])
         loss = np.asarray(log.history['loss'])
 
-        score = model.evaluate(A_test, Cl2_test, batch_size=128)
+        score = model.evaluate(A_test, Cl2_test, batch_size=kerasDef.batchSize)
         model.save(model_name)
 
         if kerasDef.plotModel == True:
@@ -144,9 +148,11 @@ def printInfoKeras():
                 '\n  L2:',kerasDef.l2_reg_strength,
                 '\n  Dropout:', kerasDef.dropout_perc,
                 '\n  Learning rate:', kerasDef.learning_rate,
-                '\n  Learning decay rate:', kerasDef.learning_decay_rate,
-                '\n')
-
+                '\n  Learning decay rate:', kerasDef.learning_decay_rate)
+    if kerasDef.fullBatch == True:
+        print('  Full batch size\n')
+    else:
+        print('  Batch size:', kerasDef.batchSize, '\n')
 #********************************************************************************
 ''' Predict using Keras model '''
 #********************************************************************************

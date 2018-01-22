@@ -96,6 +96,8 @@ class Configuration():
             'activation_functionKeras' : "relu",
             'dropout_percKeras' : 0.5,
             'trainingStepsKeras' : 1000,
+            'fullBatchKeras' : True,
+            'batchSizeKeras' : 64,
             'thresholdProbabilityPredKeras' : 0.01,
             'plotModelKeras' : False,
             }
@@ -240,6 +242,8 @@ class Configuration():
         self.activation_functionKeras = self.kerasDef['activation_functionKeras']
         self.dropout_percKeras = eval(self.kerasDef['dropout_percKeras'])
         self.trainingStepsKeras = self.conf.getint('Keras','trainingStepsKeras')
+        self.fullBatchKeras = self.conf.getboolean('Keras','fullBatchKeras')
+        self.batchSizeKeras = self.conf.getint('Keras','batchSizeKeras')
         self.thresholdProbabilityPredKeras = self.conf.getfloat('Keras','thresholdProbabilityPredKeras')
         self.plotModelKeras = self.conf.getboolean('Keras','plotModelKeras')
         
@@ -402,7 +406,6 @@ class dnntfDef:
     dropout_perc = config.dropout_percDNNTF
     
     trainingSteps = config.trainingStepsDNNTF    # number of training steps
-    
     valMonitorSecs = config.valMonitorSecsDNNTF    # perform validation every given seconds
     
     logCheckpoint = config.logCheckpointDNNTF
@@ -502,6 +505,9 @@ class kerasDef:
     dropout_perc = config.dropout_percKeras
     
     trainingSteps = config.trainingStepsKeras    # number of training steps
+    fullBatch = config.fullBatchKeras
+    batchSize = config.batchSizeKeras
+    
     thresholdProbabilityPred = config.thresholdProbabilityPredKeras
     
     plotModel = config.plotModelKeras
