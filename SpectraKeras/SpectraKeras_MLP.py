@@ -14,7 +14,7 @@
 ***********************************************************
 '''
 import numpy as np
-import keras, sys, os.path
+import keras, sys, os.path, time
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Activation, ActivityRegularization, MaxPooling1D
 import keras.optimizers as opt
@@ -26,6 +26,8 @@ from sklearn.model_selection import train_test_split
 from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
 import tensorflow as tf
 
+
+start_time = time.clock()
 learnFile = sys.argv[1]
 print(learnFile)
 
@@ -69,23 +71,23 @@ batch_size = A.shape[1]
 model = Sequential()
 model.add(Dense(200, activation = 'relu', input_dim=A.shape[1],
     kernel_regularizer=regularizers.l2(1e-4)))
-model.add(Dropout(0.5))
+model.add(Dropout(0.3))
 model.add(Dense(200, activation = 'relu',
     kernel_regularizer=regularizers.l2(1e-4)))
-model.add(Dropout(0.5))
+model.add(Dropout(0.3))
 model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
 
 #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
 optim = opt.Adam(lr=0.0001, beta_1=0.9,
                                         beta_2=0.999, epsilon=1e-08,
-                                        decay=1e-6,
+                                        decay=1e-7,
                                         amsgrad=False)
 
 model.compile(loss='categorical_crossentropy',
     optimizer=optim,
     metrics=['accuracy'])
 
-tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=32,
+tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=batch_size,
             write_graph=True, write_grads=True, write_images=True,
             embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
 tbLogs = [tbLog]
@@ -118,4 +120,8 @@ print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(va
 print("  Loss - Average: {0:.4f}; Min: {1:.4f}\n".format(np.average(val_loss), np.amin(val_loss)))
 #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
 print('  =========================================\n')
+
+total_time = time.clock() - start_time
+print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
+                            total_time/60, total_time/3600),"\n")
 
