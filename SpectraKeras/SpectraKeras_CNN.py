@@ -65,7 +65,7 @@ model_name = model_directory+"/keras_model_CNN.hd5"
 listmatrix = []
 for i in range(A.shape[0]):
     spectra = np.dstack([np.ones(En.shape[0]), En])
-    spectra = np.dstack([spectra, A[0]])
+    spectra = np.dstack([spectra, A[i]])
     listmatrix.append(spectra)
 
 x_train = np.stack(listmatrix, axis=0)
