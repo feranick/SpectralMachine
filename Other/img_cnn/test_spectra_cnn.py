@@ -25,6 +25,7 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
 import tensorflow as tf
+import pandas as pd
 
 start_time = time.clock()
 learnFile = sys.argv[1]
@@ -43,24 +44,21 @@ A = np.delete(M,np.s_[0:1],1)
 learnFileRoot = os.path.splitext(learnFile)[0]
 
 
+df = pd.DataFrame()
+for i in range(A.shape[0]):
+    G = np.dstack([np.ones(En.shape[0]), En])
+    G = np.dstack([G, A[0]])
+    S = pd.Series(G.tolist())
+    df[i] = S.values
 
-print(A.shape[0])
-#G = np.zeros((A.shape[0], A.shape[1],3))
+#print(np.asarray([df.iloc[:,1].values[0]]).shape)
 
-m = np.ones(En.shape[0])
-print(m)
-print(m.shape)
+S = np.asarray([df.iloc[:,1].values[0]])
 
-#for i in range(A.shape[0]):
-G = np.dstack([m, En])
-G = np.dstack([G, A[0]])
-
-print(G.shape)
-print(G)
-
-
+'''
 model = Sequential()
-model.add(Conv2D(1, (50, 1), input_shape=G.shape))
+model.add(Conv2D(1, (50, 1), input_shape=S.shape))
+'''
 
 total_time = time.clock() - start_time
 print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
