@@ -5,7 +5,7 @@
 *
 * SpectraKeras - MLP
 *
-* 20180123a
+* 20180124a
 *
 * Uses: Keras, TensorFlow
 *
@@ -70,12 +70,16 @@ batch_size = A.shape[1]
 
 model = Sequential()
 model.add(Dense(200, activation = 'relu', input_dim=A.shape[1],
-    kernel_regularizer=regularizers.l2(1e-4)))
-model.add(Dropout(0.3))
+    kernel_regularizer=regularizers.l2(1e-4),
+    name='dense1'))
+model.add(Dropout(0.3,name='drop2'))
 model.add(Dense(200, activation = 'relu',
-    kernel_regularizer=regularizers.l2(1e-4)))
-model.add(Dropout(0.3))
-model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
+    kernel_regularizer=regularizers.l2(1e-4),
+    name='dense3'))
+model.add(Dropout(0.3,
+    name='drop4'))
+model.add(Dense(np.unique(Cl).size+1, activation = 'softmax',
+    name='dense54'))
 
 #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
 optim = opt.Adam(lr=0.0001, beta_1=0.9,

@@ -5,7 +5,7 @@
 *
 * SpectraKeras - CNN
 *
-* 20180123a
+* 20180124a
 *
 * Uses: Keras, TensorFlow
 *
@@ -79,13 +79,14 @@ model.add(Conv2D(3, (1, 20), activation='relu',
 model.add(Conv2D(3, (1, 20), activation='relu',
     name='conv2'))
 model.add(MaxPooling2D(pool_size=(1, 20),
-    name='maxpool1'))
-model.add(Dropout(0.25))
-model.add(Flatten())
+    name='maxpool3'))
+model.add(Dropout(0.25, name='drop4'))
+model.add(Flatten(name='flat5'))
 model.add(Dense(256, activation='relu',
-    name='Dense3'))
-model.add(Dropout(0.5))
-model.add(Dense(np.unique(Cl).size+1, activation='softmax'))
+    name='dense6'))
+model.add(Dropout(0.5, name='drop7'))
+model.add(Dense(np.unique(Cl).size+1, activation='softmax',
+    name='dense8'))
 optim = opt.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='categorical_crossentropy', optimizer=optim, metrics=['accuracy'])
 

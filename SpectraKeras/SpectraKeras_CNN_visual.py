@@ -76,7 +76,8 @@ plt.plot(En, A[0], label='Training data')
 #plt.show()
 
 model1 = Sequential()
-layer = Conv2D(3, (1, 200), activation = 'relu', input_shape=spectra.shape)
+layer = Conv2D(3, (1, 200), activation = 'relu', input_shape=spectra.shape,
+    name='conv1')
 model1.add(layer)
 weigths = layer.get_weights()
 conv = model1.predict(x_train)
@@ -96,17 +97,20 @@ plt.show()
 
 # Setup Model
 model = Sequential()
-layer = Conv2D(3, (1, 20), activation = 'relu', input_shape=spectra.shape)
-model.add(layer)
-model.add(Conv2D(3, (1, 20), activation = 'relu'))
-
-model.add(Conv2D(32, (1, 20), activation='relu'))
-model.add(MaxPooling2D(pool_size=(1, 20)))
-model.add(Dropout(0.25))
-model.add(Flatten())
-model.add(Dense(256, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(np.unique(Cl).size+1, activation='softmax'))
+model.add(Conv2D(3, (1, 20), activation='relu',
+    name='conv1',
+    input_shape=spectra.shape))
+model.add(Conv2D(3, (1, 20), activation='relu',
+    name='conv2'))
+model.add(MaxPooling2D(pool_size=(1, 20),
+    name='maxpool3'))
+model.add(Dropout(0.25, name='drop4'))
+model.add(Flatten(name='flat5'))
+model.add(Dense(256, activation='relu',
+    name='dense6'))
+model.add(Dropout(0.5, name='drop7'))
+model.add(Dense(np.unique(Cl).size+1, activation='softmax',
+    name='dense8'))
 optim = opt.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='categorical_crossentropy', optimizer=optim, metrics=['accuracy'])
 
