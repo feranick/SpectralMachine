@@ -73,6 +73,7 @@ y_train = Cl2
 
 # Setup Model
 model = Sequential()
+
 model.add(Conv2D(3, (1, 20), activation='relu',
     name='conv1',
     input_shape=spectra.shape))
@@ -124,6 +125,16 @@ print("  Loss - Average: {0:.4f}; Min: {1:.4f}\n".format(np.average(val_loss), n
 #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
 print('  =========================================\n')
 
+# Print info layer by layer
+for layer in model.layers:
+    print(layer)
+    print(layer.get_config())
+    print(layer.get_weights())
+
+# Print info for a particualr layer
+layer1 = model.get_layer('conv1')
+print(layer1.get_weights())
+print(layer1.get_config())
 
 total_time = time.clock() - start_time
 print("\n Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
