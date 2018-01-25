@@ -2,15 +2,10 @@
 # -*- coding: utf-8 -*-
 '''
 **********************************************************
-*
 * SpectraKeras - MLP
-*
 * 20180125a
-*
 * Uses: Keras, TensorFlow
-*
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************************
 '''
 print(__doc__)

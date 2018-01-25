@@ -2,17 +2,14 @@
 # -*- coding: utf-8 -*-
 '''
 **********************************************************
-*
 * SpectraKeras - CNN
-*
 * 20180125a
-*
 * Uses: Keras, TensorFlow
-*
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************************
 '''
+print(__doc__)
+
 import numpy as np
 import keras, sys, os.path, time
 from keras.models import Sequential, load_model
