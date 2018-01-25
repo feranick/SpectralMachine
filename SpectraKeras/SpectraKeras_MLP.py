@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 
 start_time = time.clock()
 learnFile = sys.argv[1]
-print("\n Training set file:",learnFile)
+print("\n Training set file:",learnFile,"\n")
 
 try:
     with open(learnFile, 'r') as f:
@@ -53,12 +53,12 @@ l_rate = 1e-4
 l_rdecay = 1e-7
 
 HL1 = 200
-drop1 = 0.8
+drop1 = 0.3
 l2_1 = 1e-4
 HL2 = 200
 drop2 = 0.3
 l2_2 = 1e-4
-epochs = 20000
+epochs = 200
 cv_split = 0.05
 
 batch_size = A.shape[1]

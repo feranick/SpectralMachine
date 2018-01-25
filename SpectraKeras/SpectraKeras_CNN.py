@@ -5,7 +5,7 @@
 *
 * SpectraKeras - CNN
 *
-* 20180124a
+* 20180125a
 *
 * Uses: Keras, TensorFlow
 *
@@ -26,10 +26,11 @@ from sklearn.model_selection import train_test_split
 from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
 import tensorflow as tf
 import pandas as pd
+import matplotlib.pyplot as plt
 
 start_time = time.clock()
 learnFile = sys.argv[1]
-print(learnFile)
+print("\n Training set file:",learnFile, "\n")
 
 try:
     with open(learnFile, 'r') as f:
@@ -59,7 +60,7 @@ batch_size = A.shape[1]
 
 tb_directory = "keras_CNN"
 model_directory = "."
-model_name = model_directory+"/keras_model_CNN.hd5"
+model_name = model_directory+"/keras_CNN_model.hd5"
 
 # Format spectra as images for loading
 listmatrix = []
@@ -110,7 +111,15 @@ val_loss = np.asarray(log.history['val_loss'])
 val_acc = np.asarray(log.history['val_acc'])
 
 model.save(model_name)
-plot_model(model, to_file=model_directory+'/model.png', show_shapes=True)
+plot_model(model, to_file=model_directory+'/keras_CNN_model.png', show_shapes=True)
+
+print('\n  =============================================')
+print('  \033[1mKeras CNN\033[0m - Model Configuration')
+print('  =============================================')
+print("\n Training set file:",learnFile)
+print("\n Data size:", A.shape,"\n")
+for conf in model.get_config():
+    print(conf,"\n")
 
 print('\n  ==========================================')
 print('  \033[1mKeras CNN\033[0m - Training Summary')
@@ -125,6 +134,7 @@ print("  Loss - Average: {0:.4f}; Min: {1:.4f}\n".format(np.average(val_loss), n
 #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
 print('  =========================================\n')
 
+'''
 # Print info layer by layer
 for layer in model.layers:
     print(layer)
@@ -135,6 +145,29 @@ for layer in model.layers:
 layer1 = model.get_layer('conv1')
 print(layer1.get_weights())
 print(layer1.get_config())
+'''
+### Plotting weights
+plt.figure(tight_layout=True)
+plotInd = 411
+for layer in model.layers:
+    ax = plt.subplot(plotInd)
+    try:
+        w_layer = layer.get_weights()[0]
+        newX = np.arange(En[0], En[-1], (En[-1]-En[0])/w_layer.shape[0])
+        plt.plot(En, np.interp(En, newX, w_layer[:,0]), label=layer.get_config()['name'])
+        plt.legend(loc='upper right')
+        plt.setp(ax.get_xticklabels(), visible=False)
+        plotInd +=1
+    except:
+        ax.remove()
+
+ax1 = plt.subplot(plotInd)
+ax1.plot(En, A[0], label='Sample data')
+
+plt.xlabel('Raman shift [1/cm]')
+plt.legend(loc='upper right')
+plt.savefig('keras_CNN_weights' + '.png', dpi = 160, format = 'png')  # Save plot
+
 
 total_time = time.clock() - start_time
 print("\n Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
