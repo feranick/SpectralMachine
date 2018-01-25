@@ -39,7 +39,7 @@ def input_fn(A, Cl2):
 ''' Keras '''
 ''' https://keras.io/getting-started/sequential-model-guide/#examples'''
 #********************************************************************************
-def trainKeras(A, Cl, A_test, Cl_test, Root):
+def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 
     import keras
     from keras.models import Sequential
@@ -62,8 +62,6 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
         kerasDef.alwaysImprove = False
         print("\n  Training model not saved\n")
     
-    printInfoKeras()
-
     #**********************************************
     ''' Initialize Estimator and training data '''
     #**********************************************
@@ -89,9 +87,6 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
     
     if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
         model = Sequential()
-        # Dense(64) is a fully-connected layer with 64 hidden units.
-        # in the first layer, you must specify the expected input data shape:
-        # here, 20-dimensional vectors.
         for numLayers in kerasDef.hidden_layers:
             model.add(Dense(numLayers,
                     activation = kerasDef.activation_function,
@@ -99,7 +94,6 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
                     kernel_regularizer=regularizers.l2(kerasDef.l2_reg_strength)))
             model.add(Dropout(kerasDef.dropout_perc))
         model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
-        model.summary()
         model.compile(loss='categorical_crossentropy',
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
@@ -113,7 +107,7 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
             batch_size=kerasDef.batchSize,
             callbacks = tbLogs,
             verbose = 2)
-            
+
         accuracy = np.asarray(log.history['acc'])
         loss = np.asarray(log.history['loss'])
 
@@ -122,18 +116,33 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
 
         if kerasDef.plotModel == True:
             from keras.utils import plot_model
-            plot_model(model, to_file=model_directory+'/model.png', show_shapes=True)
+            plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
+            
+            import matplotlib.pyplot as plt
+            plt.figure(tight_layout=True)
+            plotInd = int(len(kerasDef.hidden_layers))*100+11
+            visibleX = True
+            for layer in model.layers:
+                try:
+                    w_layer = layer.get_weights()[0]
+                    ax = plt.subplot(plotInd)
+                    newX = np.arange(En[0], En[-1], (En[-1]-En[0])/w_layer.shape[0])
+                    plt.plot(En, np.interp(En, newX, w_layer[:,0]), label=layer.get_config()['name'])
+                    plt.legend(loc='upper right')
+                    plt.setp(ax.get_xticklabels(), visible=visibleX)
+                    visibleX = False
+                    plotInd +=1
+                except:
+                    pass
 
-        printInfoKeras()
+            plt.xlabel('Raman shift [1/cm]')
+            plt.legend(loc='upper right')
+            plt.savefig('keras_MLP_weights' + '.png', dpi = 160, format = 'png')  # Save plot
 
-        print('\n  =============================================')
-        print('  \033[1mKeras MLP\033[0m - Model Configuration')
-        print('  =============================================')
-        for conf in model.get_config():
-            print(conf,"\n")
+        printInfoKeras(model)
 
         print('\n  ==========================================')
-        print('  \033[1mKeras\033[0m - Training Summary')
+        print('  \033[1mKeras MLP\033[0m - Training Summary')
         print('  ==========================================')
         print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
         print("\n  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
@@ -147,9 +156,16 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
 
     return model, le
 
-def printInfoKeras():
-    print('==========================================================================\n')
-    print('\033[1m Running Deep Neural Networks: Keras...\033[0m')
+def printInfoKeras(model):
+    print('\n  =============================================')
+    print('  \033[1mKeras MLP\033[0m - Model Configuration')
+    print('  =============================================')
+    for conf in model.get_config():
+        print(conf,"\n")
+    model.summary()
+    print('\n  =============================================')
+    print('  \033[1mKeras MLP\033[0m - Parameters')
+    print('  =============================================')
     print('  Optimizer:',kerasDef.optimizer_tag,
                 '\n  Hidden layers:', kerasDef.hidden_layers,
                 '\n  Activation function:',kerasDef.activation_function,

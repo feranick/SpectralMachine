@@ -80,7 +80,7 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Keras '''
     if kerasDef.runKeras == True:
-        model_keras, le_keras  = trainKeras(A, Cl, A, Cl, learnFileRoot)
+        model_keras, le_keras  = trainKeras(En, A, Cl, A, Cl, learnFileRoot)
         predKeras(model_keras, le_keras, R, Cl)
 
     ''' Plot Training Data '''
@@ -127,7 +127,7 @@ def trainAccuracy(learnFile, testFile):
             clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A_test, Cl_test, learnFileRoot)
             
     if kerasDef.runKeras == True:
-        model_keras, le_keras = trainKeras(A, Cl, A_test, Cl_test, learnFileRoot)
+        model_keras, le_keras = trainKeras(En, A, Cl, A_test, Cl_test, learnFileRoot)
 
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
@@ -190,7 +190,7 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
         
     ''' Run Keras'''
     if kerasDef.runKeras == True:
-        model, le_keras  = trainKeras(A, Cl, A, Cl, learnFileRoot)
+        model, le_keras  = trainKeras(En, A, Cl, A, Cl, learnFileRoot)
         kerasPred, kerasProb = predKeras(model_keras, le_keras, R, Cl)
         summaryFile.extend([kerasPred, kerasProb])
     
@@ -253,7 +253,7 @@ def LearnPredictMap(learnFile, mapFile):
             clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A, Cl, learnFileRoot)
 
     if kerasDef.runKeras == True:
-        model_keras, le_keras  = trainKeras(A, Cl, A, Cl, learnFileRoot)
+        model_keras, le_keras  = trainKeras(En, A, Cl, A, Cl, learnFileRoot)
 
     if svmDef.runSVM == True:
         clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
@@ -274,7 +274,6 @@ def LearnPredictMap(learnFile, mapFile):
             
         if dnntfDef.runKeras == True:
             kerasPred[i], temp = predKeras(model_keras, le_keras, r, Cl)
-            
             saveMap(mapFile, 'Keras', 'HC', kerasPred[i], X[i], Y[i], True)
 
         ''' Run Neural Network - sklearn'''

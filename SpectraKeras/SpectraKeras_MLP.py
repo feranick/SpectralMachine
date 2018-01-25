@@ -47,13 +47,13 @@ learnFileRoot = os.path.splitext(learnFile)[0]
 l_rate = 1e-4
 l_rdecay = 1e-7
 
-HL1 = 200
-drop1 = 0.3
-l2_1 = 1e-4
-HL2 = 200
-drop2 = 0.3
-l2_2 = 1e-4
-epochs = 200
+HL1 = 1000
+drop1 = 0.5
+l2_1 = 1e-3
+HL2 = 1000
+drop2 = 0.5
+l2_2 = 1e-3
+epochs = 10000
 cv_split = 0.05
 
 batch_size = A.shape[1]
