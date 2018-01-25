@@ -29,26 +29,6 @@ from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-##########################
-# Parameters
-##########################
-
-l_rate = 1e-4
-l_rdecay = 1e-7
-
-HL1 = 200
-drop1 = 0.8
-l2_1 = 1e-4
-HL2 = 200
-drop2 = 0.3
-l2_2 = 1e-4
-epochs = 100
-cv_split = 0.05
-
-batch_size = A.shape[1]
-#batch_size = 64
-#########################
-
 start_time = time.clock()
 learnFile = sys.argv[1]
 print("\n Training set file:",learnFile)
@@ -65,8 +45,25 @@ Cl = ['{:.2f}'.format(x) for x in M[:,0]]
 A = np.delete(M,np.s_[0:1],1)
 learnFileRoot = os.path.splitext(learnFile)[0]
 
-#A, A_test, Cl, Cl_test = train_test_split(A, Cl, test_size=0.01, random_state=42)
-#En_test = En
+##########################
+# Parameters
+##########################
+
+l_rate = 1e-4
+l_rdecay = 1e-7
+
+HL1 = 200
+drop1 = 0.8
+l2_1 = 1e-4
+HL2 = 200
+drop2 = 0.3
+l2_2 = 1e-4
+epochs = 20000
+cv_split = 0.05
+
+batch_size = A.shape[1]
+#batch_size = 64
+#########################
 
 tb_directory = "keras_MLP"
 model_directory = "."
