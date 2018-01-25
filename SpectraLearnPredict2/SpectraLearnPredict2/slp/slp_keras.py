@@ -126,6 +126,12 @@ def trainKeras(A, Cl, A_test, Cl_test, Root):
 
         printInfoKeras()
 
+        print('\n  =============================================')
+        print('  \033[1mKeras MLP\033[0m - Model Configuration')
+        print('  =============================================')
+        for conf in model.get_config():
+            print(conf,"\n")
+
         print('\n  ==========================================')
         print('  \033[1mKeras\033[0m - Training Summary')
         print('  ==========================================')

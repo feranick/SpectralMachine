@@ -13,6 +13,8 @@
 *
 ***********************************************************
 '''
+print(__doc__)
+
 import numpy as np
 import keras, sys, os.path, time
 from keras.models import Sequential, load_model
@@ -27,9 +29,29 @@ from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+##########################
+# Parameters
+##########################
+
+l_rate = 1e-4
+l_rdecay = 1e-7
+
+HL1 = 200
+drop1 = 0.8
+l2_1 = 1e-4
+HL2 = 200
+drop2 = 0.3
+l2_2 = 1e-4
+epochs = 100
+cv_split = 0.05
+
+batch_size = A.shape[1]
+#batch_size = 64
+#########################
+
 start_time = time.clock()
 learnFile = sys.argv[1]
-print(learnFile)
+print("\n Training set file:",learnFile)
 
 try:
     with open(learnFile, 'r') as f:
@@ -65,29 +87,25 @@ totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
 Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
 #Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
 
-batch_size = A.shape[1]
-#batch_size = 64
-
-
 ### Build model
 model = Sequential()
-model.add(Dense(200, activation = 'relu', input_dim=A.shape[1],
-    kernel_regularizer=regularizers.l2(1e-4),
+model.add(Dense(HL1, activation = 'relu', input_dim=A.shape[1],
+    kernel_regularizer=regularizers.l2(l2_1),
     name='dense1'))
-model.add(Dropout(0.3,name='drop2'))
-model.add(Dense(200, activation = 'relu',
-    kernel_regularizer=regularizers.l2(1e-4),
-    name='dense3'))
-model.add(Dropout(0.3,
-    name='drop4'))
+model.add(Dropout(drop1,name='drop1'))
+model.add(Dense(HL2, activation = 'relu',
+    kernel_regularizer=regularizers.l2(12_2),
+    name='dense2'))
+model.add(Dropout(drop2,
+    name='drop2'))
 model.add(Dense(np.unique(Cl).size+1, activation = 'softmax',
-    name='dense5'))
+    name='dense3'))
 
 #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
-optim = opt.Adam(lr=0.0001, beta_1=0.9,
-                                        beta_2=0.999, epsilon=1e-08,
-                                        decay=1e-7,
-                                        amsgrad=False)
+optim = opt.Adam(lr=l_rate, beta_1=0.9,
+                    beta_2=0.999, epsilon=1e-08,
+                    decay=l_rdecay,
+                    amsgrad=False)
 
 model.compile(loss='categorical_crossentropy',
     optimizer=optim,
@@ -98,11 +116,11 @@ tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=batch_siz
             embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
 tbLogs = [tbLog]
 log = model.fit(A, Cl2,
-    epochs=200,
+    epochs=epochs,
     batch_size=batch_size,
     callbacks = tbLogs,
     verbose=2,
-    validation_split=0.05)
+    validation_split=cv_split)
 
 accuracy = np.asarray(log.history['acc'])
 loss = np.asarray(log.history['loss'])
@@ -112,6 +130,13 @@ val_acc = np.asarray(log.history['val_acc'])
 #score = model.evaluate(A_test, Cl2_test, batch_size=A.shape[1])
 model.save(model_name)
 plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
+print('\n  =============================================')
+print('  \033[1mKeras MLP\033[0m - Model Configuration')
+print('  =============================================')
+print("\n Training set file:",learnFile)
+print("\n Data size:", A.shape,"\n")
+for conf in model.get_config():
+    print(conf,"\n")
 
 print('\n  ==========================================')
 print('  \033[1mKeras MLP\033[0m - Training Summary')
