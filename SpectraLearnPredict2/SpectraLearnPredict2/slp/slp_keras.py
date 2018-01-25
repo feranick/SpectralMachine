@@ -192,7 +192,7 @@ def predKeras(model, le, R, Cl):
         predValue = 0
 
     predProb = round(100*predictions[0][pred_class],2)
-    rosterPred = np.where(predictions[0]>dnntfDef.thresholdProbabilityPred)[0]
+    rosterPred = np.where(predictions[0]>kerasDef.thresholdProbabilityPred)[0]
     
     print('\n  ==================================')
     print('  \033[1mKeras\033[0m - Probability >',str(kerasDef.thresholdProbabilityPred),'%')
@@ -203,7 +203,7 @@ def predKeras(model, le, R, Cl):
             str('{:.4f}'.format(100*predictions[0][rosterPred][i])))
     print('  ==================================')
     
-    print('\033[1m' + '\n Predicted value (tf.DNNClassifier) = ' + predValue +
+    print('\033[1m' + '\n Predicted value (Keras) = ' + predValue +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
