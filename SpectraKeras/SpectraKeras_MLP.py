@@ -68,7 +68,9 @@ Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
 batch_size = A.shape[1]
 #batch_size = 64
 
-#plt.plot(En, A[0], label='Training data')
+plt.plot(En, A[0], label='Training data')
+plt.savefig(learnFileRoot + '.png', dpi = 160, format = 'png')  # Save plot
+plt.close()
 #plt.show()
 
 model = Sequential()
@@ -129,26 +131,25 @@ print("  Loss - Average: {0:.4f}; Min: {1:.4f}\n".format(np.average(val_loss), n
 print('  =========================================\n')
 
 
-'''
+
 for layer in model.layers:
     try:
         print(layer.get_config()['name'])
         w_layer = layer.get_weights()[0]
         newX = np.arange(En[0], En[-1], (En[-1]-En[0])/w_layer.shape[0])
         plt.plot(En, np.interp(En, newX, w_layer[:,0]), label=layer.get_config()['name'])
+        plt.savefig(layer.get_config()['name'] + '.png', dpi = 160, format = 'png')  # Save plot
+        plt.close()
     except:
         pass
 
-plt.title("Visualizing activated nodes on layer")
-plt.xlabel('Raman shift [1/cm]')
-plt.legend(loc='upper right')
-plt.show()
+#plt.xlabel('Raman shift [1/cm]')
+#plt.legend(loc='upper right')
+#plt.show()
 
-w_layer1 = model.get_layer('dense1').get_weights()[0]
-plt.plot(En, w_layer1[:,0], label='convoluted data')
-plt.show()
-
-'''
+#w_layer1 = model.get_layer('dense1').get_weights()[0]
+#plt.plot(En, w_layer1[:,0], label='convoluted data')
+#plt.show()
 
 total_time = time.clock() - start_time
 print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
