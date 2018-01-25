@@ -5,7 +5,7 @@
 *
 * SpectraKeras - MLP
 *
-* 20180124a
+* 20180125a
 *
 * Uses: Keras, TensorFlow
 *
@@ -48,7 +48,7 @@ learnFileRoot = os.path.splitext(learnFile)[0]
 
 tb_directory = "keras_MLP"
 model_directory = "."
-model_name = model_directory+"/keras_model_MLP.hd5"
+model_name = model_directory+"/keras_MLP_model.hd5"
 
 #totA = np.vstack((A, A_test))
 #totCl = np.append(Cl, Cl_test)
@@ -68,11 +68,8 @@ Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
 batch_size = A.shape[1]
 #batch_size = 64
 
-plt.plot(En, A[0], label='Training data')
-plt.savefig(learnFileRoot + '.png', dpi = 160, format = 'png')  # Save plot
-plt.close()
-#plt.show()
 
+### Build model
 model = Sequential()
 model.add(Dense(200, activation = 'relu', input_dim=A.shape[1],
     kernel_regularizer=regularizers.l2(1e-4),
@@ -112,10 +109,9 @@ loss = np.asarray(log.history['loss'])
 val_loss = np.asarray(log.history['val_loss'])
 val_acc = np.asarray(log.history['val_acc'])
 
-
 #score = model.evaluate(A_test, Cl2_test, batch_size=A.shape[1])
 model.save(model_name)
-plot_model(model, to_file=model_directory+'/model.png', show_shapes=True)
+plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
 
 print('\n  ==========================================')
 print('  \033[1mKeras MLP\033[0m - Training Summary')
@@ -131,25 +127,29 @@ print("  Loss - Average: {0:.4f}; Min: {1:.4f}\n".format(np.average(val_loss), n
 print('  =========================================\n')
 
 
-
+### Plotting weights
+plt.figure(tight_layout=True)
+plotInd = 411
 for layer in model.layers:
     try:
-        print(layer.get_config()['name'])
         w_layer = layer.get_weights()[0]
+        ax = plt.subplot(plotInd)
         newX = np.arange(En[0], En[-1], (En[-1]-En[0])/w_layer.shape[0])
         plt.plot(En, np.interp(En, newX, w_layer[:,0]), label=layer.get_config()['name'])
-        plt.savefig(layer.get_config()['name'] + '.png', dpi = 160, format = 'png')  # Save plot
-        plt.close()
+        plt.legend(loc='upper right')
+        plt.setp(ax.get_xticklabels(), visible=False)
+        plotInd +=1
     except:
         pass
 
-#plt.xlabel('Raman shift [1/cm]')
-#plt.legend(loc='upper right')
-#plt.show()
+ax1 = plt.subplot(plotInd)
+ax1.plot(En, A[0], label='Sample data')
 
-#w_layer1 = model.get_layer('dense1').get_weights()[0]
-#plt.plot(En, w_layer1[:,0], label='convoluted data')
-#plt.show()
+plt.xlabel('Raman shift [1/cm]')
+plt.legend(loc='upper right')
+plt.savefig('keras_MLP_weights' + '.png', dpi = 160, format = 'png')  # Save plot
+
+####################
 
 total_time = time.clock() - start_time
 print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
