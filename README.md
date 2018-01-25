@@ -1,17 +1,25 @@
 # SpectralMachine
-Machine learning software for rapid analysis of Raman spectra.
+Machine learning software for rapid Spectral analysis. While Raman spectra were the initilal focus, SpectralMachine is flexible to be applied for classification using any spectra (from XRD, FTIR and beyond).
+The current version 1 is the stable and recommended for use. The next generation (version 2, wil allow for more flexibility in designing custom DNN and CNN).
 
 **Supported algorithms:**
  
  - Deep Neural Networks:
    - multi-layer perceptron (MLP) (L-BFGS Optimizer strongly recommended)
    - DNNClassifier (TensorFlow)
+   - Convolutional Neural Networks (Under development0
  - Support Vector Machine - SVM
  - TensorFlow (basic implementation)
 
 **Additional multivariate analysis:**
 - K-Means
 - Principal component analysis
+
+Credits and References
+==================
+If you use SpectralMachine, we request that you reference the papers/resources on which SpectralMachine is based:
+- N. Ferralis, JC Grossman, RE Summons, ["Mineral and Geochemical Classification from Spectroscopy/Diffraction Through Neural Networks"](https://agu.confex.com/agu/fm17/meetingapp.cgi/Paper/285994), AGU Fall Meeting 2017, New Orleans, LA.
+- N.Ferralis, SpectralMachine (2017), https://github.com/feranick/SpectralMachine
 
 Installation
 =============
@@ -65,7 +73,7 @@ Run in background for accuracy determination during training:
 
 Training data
 =============
-Loosely based on 633nm data from Ferralis et al. [Carbon 108 (2016) 440](http://dx.doi.org/10.1016/j.carbon.2016.07.039).
+We do not provide advanced training sets, some of which can be found online. We only provide a simple Raman dataset mainly for testing purposes: it is loosely based on 633nm data from Ferralis et al. [Carbon 108 (2016) 440](http://dx.doi.org/10.1016/j.carbon.2016.07.039).
 
 
 Data augmentation
