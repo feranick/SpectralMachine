@@ -113,8 +113,8 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
         model.save(model_name)
 
         if kerasDef.plotModel == True:
-            from keras.utils import plot_model
-            plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
+            #from keras.utils import plot_model
+            #plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
             
             import matplotlib.pyplot as plt
             plt.figure(tight_layout=True)
@@ -147,11 +147,16 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     print('\n  ==========================================')
     print('  \033[1mKeras MLP\033[0m - Training Summary')
     print('  ==========================================')
-    if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
-        print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
-        print("\n  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
-    else:
+    #if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
+    print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
+    print("\n  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
+        #else:
+    if os.path.exists(model_name) is True:
         print("\n  Model retrieved from: ", model_name)
+
+    print('\n\n  ==========================================')
+    print('  \033[1mKeras MLP\033[0m - Validation Summary')
+    print('  ==========================================')
     print("\n  Validation - Loss: {0:.4f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
     print("\n  Global step: {:.2f}\n".format(kerasDef.trainingSteps))
     print('  =========================================\n')
