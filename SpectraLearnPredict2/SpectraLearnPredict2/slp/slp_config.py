@@ -86,8 +86,8 @@ class Configuration():
     def kerasDef(self):
         self.conf['Keras'] = {
             'runKeras' : True,
-            'alwaysRetrainDNNTF' : False,
-            'alwaysImproveDNNTF' : True,
+            'alwaysRetrainKeras' : False,
+            'alwaysImproveKeras' : True,
             'hidden_layersKeras' : [400,400],
             'optimizerKeras' : "SGD",
             'l2_reg_strengthKeras' : 1e-4,
