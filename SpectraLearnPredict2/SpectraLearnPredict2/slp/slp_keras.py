@@ -105,7 +105,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
         tbLogs = [tbLog]
         log = model.fit(A, Cl2,
             epochs=kerasDef.trainingSteps,
-            batch_size=kerasDef.batchSize,
+            batch_size=batch_size,
             callbacks = tbLogs,
             verbose = 2)
 
