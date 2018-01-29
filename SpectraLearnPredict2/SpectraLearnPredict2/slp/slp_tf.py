@@ -71,7 +71,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     x,y,y_ = setupTFmodel(totA, totCl)
 
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y))
     
     if tfDef.decayLearnRate == True:
         print(' Using decaying learning rate, start at:',tfDef.learnRate, '\n')
