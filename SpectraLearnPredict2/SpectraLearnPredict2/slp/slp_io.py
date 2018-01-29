@@ -26,6 +26,7 @@ from datetime import datetime, date
 
 from .slp_config import *
 from .slp_preprocess import *
+from .slp_dnntf import *
 from .slp_tf import *
 from .slp_keras import *
 from .slp_nn import *
