@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - CNN
-* 20180125a
+* 20180129a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -52,7 +52,7 @@ Cl2 = le.transform(Cl)
 totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
 Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
 
-batch_size = A.shape[1]
+batch_size = A.shape[0]
 #batch_size = 64
 
 tb_directory = "keras_CNN"

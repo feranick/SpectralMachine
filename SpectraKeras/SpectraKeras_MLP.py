@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - MLP
-* 20180125a
+* 20180129a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -56,7 +56,7 @@ l2_2 = 1e-3
 epochs = 10000
 cv_split = 0.05
 
-batch_size = A.shape[1]
+batch_size = A.shape[0]
 #batch_size = 64
 #########################
 
