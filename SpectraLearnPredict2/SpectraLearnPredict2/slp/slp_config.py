@@ -74,6 +74,8 @@ class Configuration():
             'activation_functionDNNTF' : "tanh",
             'dropout_percDNNTF' : str(None),
             'trainingStepsDNNTF' : 1000,
+            'fullBatchDNNTF' : True,
+            'batchSizeDNNTF' : 64,
             'valMonitorSecsDNNTF' : 200,
             'logCheckpointDNNTF' : True,
             'timeCheckpointDNNTF' : 20,
@@ -223,6 +225,8 @@ class Configuration():
         self.activation_functionDNNTF = self.dnntfDef['activation_functionDNNTF']
         self.dropout_percDNNTF = eval(self.dnntfDef['dropout_percDNNTF'])
         self.trainingStepsDNNTF = self.conf.getint('DNNClassifier','trainingStepsDNNTF')
+        self.fullBatchDNNTF = self.conf.getboolean('DNNClassifier','fullBatchDNNTF')
+        self.batchSizeDNNTF = self.conf.getint('DNNClassifier','batchSizeDNNTF')
         self.valMonitorSecsDNNTF = self.conf.getint('DNNClassifier','valMonitorSecsDNNTF')
         self.logCheckpointDNNTF = self.conf.getboolean('DNNClassifier','logCheckpointDNNTF')
         self.timeCheckpointDNNTF = self.conf.getint('DNNClassifier','timeCheckpointDNNTF')
@@ -410,6 +414,9 @@ class dnntfDef:
     
     logCheckpoint = config.logCheckpointDNNTF
     timeCheckpoint = config.timeCheckpointDNNTF     # number of seconds in between checkpoints
+    
+    fullBatch = config.fullBatchDNNTF
+    batchSize = config.batchSizeDNNTF
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = config.thresholdProbabilityPredDNNTF

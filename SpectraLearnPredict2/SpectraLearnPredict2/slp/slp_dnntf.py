@@ -43,7 +43,6 @@ def input_fn(A, Cl2):
 ''' Train DNNClassifier model training via TensorFlow-Estimators '''
 #********************************************************************************
 def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
-    printInfo()
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
@@ -75,16 +74,27 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     Cl2 = le.transform(Cl)
     Cl2_test = le.transform(Cl_test)
     
+    if dnntfDef.fullBatch == True:
+        batch_size_train = A.shape[0]
+        batch_size_test = A_test.shape[0]
+    else:
+        batch_size_train = dnntfDef.batchSize
+        batch_size_test = dnntfDef.batchSize
+
+    printInfo(A)
+    
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": np.array(A)},
             y=np.array(Cl2),
             num_epochs=None,
+            batch_size=batch_size_train,
             shuffle=dnntfDef.shuffleTrain)
         
     test_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": np.array(A_test)},
             y=np.array(Cl2_test),
             num_epochs=1,
+            batch_size=batch_size_test,
             shuffle=dnntfDef.shuffleTest)
     
     feature_columns = [tf.feature_column.numeric_column("x", shape=[totA.shape[1]])]
@@ -148,7 +158,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
         print("  Retreaving training model from: ", model_directory,"\n")
 
     accuracy_score = clf.evaluate(input_fn=test_input_fn, steps=1)
-    printInfo()
+    printInfo(A)
 
     print('\n  ==================================')
     print('  \033[1mtf.DNNCl\033[0m - Accuracy')
@@ -160,7 +170,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
 
     return clf, le
 
-def printInfo():
+def printInfo(A):
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: tf.DNNClassifier - TensorFlow...\033[0m')
     print('  Optimizer:',dnntfDef.optimizer_tag,
@@ -177,6 +187,10 @@ def printInfo():
         print('  Exponential decay - initial learning rate:',dnntfDef.learning_rate,
                 '\n  Exponential decay rate:', dnntfDef.learning_rate_decay_rate,
                 '\n  Exponential decay steps:', dnntfDef.learning_rate_decay_steps,)
+    if dnntfDef.fullBatch == True:
+        print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)),'\n')
+    else:
+        print('  Batch size:', dnntfDef.batchSize, '\n')
 
 #********************************************************************************
 ''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''
