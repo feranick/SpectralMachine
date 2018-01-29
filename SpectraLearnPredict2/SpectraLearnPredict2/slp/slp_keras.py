@@ -80,10 +80,12 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
     
     if kerasDef.fullBatch == True:
-        batch_size = A.shape[1]
+        batch_size = A.shape[0]
     else:
         batch_size = kerasDef.batchSize
-    
+
+    printParamKeras(A)
+
     if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
         model = Sequential()
         for numLayers in kerasDef.hidden_layers:
@@ -136,23 +138,22 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
             plt.xlabel('Raman shift [1/cm]')
             plt.legend(loc='upper right')
             plt.savefig('keras_MLP_weights' + '.png', dpi = 160, format = 'png')  # Save plot
-
+            
+            print('\n  ==========================================')
+            print('  \033[1mKeras MLP\033[0m - Training Summary')
+            print('  ==========================================')
+            print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
+            print("\n  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
+            if os.path.exists(model_name) is True:
+                print("\n  Model retrieved from: ", model_name)
     else:
         print(" Retreaving training model from: ", model_name,"\n")
         model = load_model(model_name)
+
     
     score = model.evaluate(A_test, Cl2_test, batch_size=kerasDef.batchSize)
-    printInfoKeras(model)
-
-    print('\n  ==========================================')
-    print('  \033[1mKeras MLP\033[0m - Training Summary')
-    print('  ==========================================')
-    #if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
-    print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
-    print("\n  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
-        #else:
-    if os.path.exists(model_name) is True:
-        print("\n  Model retrieved from: ", model_name)
+    printModelKeras(model)
+    printParamKeras(A)
 
     print('\n\n  ==========================================')
     print('  \033[1mKeras MLP\033[0m - Validation Summary')
@@ -163,13 +164,15 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 
     return model, le
 
-def printInfoKeras(model):
+def printModelKeras(model):
     print('\n  =============================================')
     print('  \033[1mKeras MLP\033[0m - Model Configuration')
     print('  =============================================')
     for conf in model.get_config():
         print(conf,"\n")
     model.summary()
+
+def printParamKeras(A):
     print('\n  =============================================')
     print('  \033[1mKeras MLP\033[0m - Parameters')
     print('  =============================================')
@@ -181,7 +184,7 @@ def printInfoKeras(model):
                 '\n  Learning rate:', kerasDef.learning_rate,
                 '\n  Learning decay rate:', kerasDef.learning_decay_rate)
     if kerasDef.fullBatch == True:
-        print('  Full batch size\n')
+        print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)),'\n')
     else:
         print('  Batch size:', kerasDef.batchSize, '\n')
 #********************************************************************************
