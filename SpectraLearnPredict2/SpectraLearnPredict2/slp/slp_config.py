@@ -75,7 +75,8 @@ class Configuration():
             'dropout_percDNNTF' : str(None),
             'trainingStepsDNNTF' : 1000,
             'fullBatchDNNTF' : True,
-            'batchSizeDNNTF' : 64,
+            'batchSizeDNNTF' : 512,
+            'queueCapacityDNNTF' : 5,
             'valMonitorSecsDNNTF' : 200,
             'logCheckpointDNNTF' : True,
             'timeCheckpointDNNTF' : 20,
@@ -227,6 +228,7 @@ class Configuration():
         self.trainingStepsDNNTF = self.conf.getint('DNNClassifier','trainingStepsDNNTF')
         self.fullBatchDNNTF = self.conf.getboolean('DNNClassifier','fullBatchDNNTF')
         self.batchSizeDNNTF = self.conf.getint('DNNClassifier','batchSizeDNNTF')
+        self.queueCapacityDNNTF = self.conf.getint('DNNClassifier','queueCapacityDNNTF')
         self.valMonitorSecsDNNTF = self.conf.getint('DNNClassifier','valMonitorSecsDNNTF')
         self.logCheckpointDNNTF = self.conf.getboolean('DNNClassifier','logCheckpointDNNTF')
         self.timeCheckpointDNNTF = self.conf.getint('DNNClassifier','timeCheckpointDNNTF')
@@ -417,6 +419,7 @@ class dnntfDef:
     
     fullBatch = config.fullBatchDNNTF
     batchSize = config.batchSizeDNNTF
+    queueCapacity = config.queueCapacityDNNTF
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = config.thresholdProbabilityPredDNNTF

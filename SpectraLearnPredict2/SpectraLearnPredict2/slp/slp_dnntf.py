@@ -88,6 +88,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
             y=np.array(Cl2),
             num_epochs=None,
             batch_size=batch_size_train,
+            queue_capacity=dnntfDef.queueCapacity,
             shuffle=dnntfDef.shuffleTrain)
         
     test_input_fn = tf.estimator.inputs.numpy_input_fn(
@@ -95,6 +96,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
             y=np.array(Cl2_test),
             num_epochs=1,
             batch_size=batch_size_test,
+            queue_capacity=1,
             shuffle=dnntfDef.shuffleTest)
     
     feature_columns = [tf.feature_column.numeric_column("x", shape=[totA.shape[1]])]
@@ -188,9 +190,10 @@ def printInfo(A):
                 '\n  Exponential decay rate:', dnntfDef.learning_rate_decay_rate,
                 '\n  Exponential decay steps:', dnntfDef.learning_rate_decay_steps,)
     if dnntfDef.fullBatch == True:
-        print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)),'\n')
+        print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)))
     else:
-        print('  Batch size:', dnntfDef.batchSize, '\n')
+        print('  Batch size:', dnntfDef.batchSize)
+    print('  Queue capacity:', dnntfDef.queueCapacity, '\n')
 
 #********************************************************************************
 ''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''
