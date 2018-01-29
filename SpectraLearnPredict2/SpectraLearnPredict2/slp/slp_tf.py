@@ -106,7 +106,6 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     except:
         init = tf.global_variables_initializer()
         sess.run(init)
-        
         if os.path.isfile(tfTrainedData + '.meta') & tfDef.alwaysImprove == True:
             print('\n Improving TF model...')
             saver.restore(sess, './' + tfTrainedData)
@@ -120,7 +119,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         accuracy_score = 100*accuracy.eval(feed_dict={x:A_test, y_:Cl2_test})
 
-        save_path = saver.save(sess, tfTrainedData)
+        save_path = saver.save(sess, "./"+tfTrainedData)
         print(' Model saved in file: %s\n' % save_path)
         
     if tfDef.enableTensorboard == True:
