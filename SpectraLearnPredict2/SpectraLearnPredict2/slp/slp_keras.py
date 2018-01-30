@@ -137,7 +137,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 
             plt.xlabel('Raman shift [1/cm]')
             plt.legend(loc='upper right')
-            plt.savefig('keras_MLP_weights' + '.png', dpi = 160, format = 'png')  # Save plot
+            plt.savefig('MLP_keras_weights' + '.png', dpi = 160, format = 'png')  # Save plot
             
             print('\n  ==========================================')
             print('  \033[1mKeras MLP\033[0m - Training Summary')
