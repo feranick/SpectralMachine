@@ -64,22 +64,22 @@ class Configuration():
             'runSkflowDNNTF' : False,
             'alwaysRetrainDNNTF' : False,
             'alwaysImproveDNNTF' : True,
-            'hidden_layersDNNTF' : [400,],
+            'hidden_layersDNNTF' : [200,200],
             'optimizerDNNTF' : "ProximalAdagrad",
             'learning_rateDNNTF' : 0.1,
             'learning_rate_decayDNNTF' : False,
             'learning_rate_decay_rateDNNTF' : 0.96,
-            'learning_rate_decay_stepsDNNTF' : 100,
+            'learning_rate_decay_stepsDNNTF' : 10000,
             'l2_reg_strengthDNNTF' : 1e-4,
             'activation_functionDNNTF' : "tanh",
             'dropout_percDNNTF' : str(None),
-            'trainingStepsDNNTF' : 1000,
+            'trainingStepsDNNTF' : 10000,
             'fullBatchDNNTF' : True,
             'batchSizeDNNTF' : 512,
             'queueCapacityDNNTF' : 5,
-            'valMonitorSecsDNNTF' : 200,
+            'valMonitorSecsDNNTF' : 300,
             'logCheckpointDNNTF' : True,
-            'timeCheckpointDNNTF' : 20,
+            'timeCheckpointDNNTF' : 200,
             'thresholdProbabilityPredDNNTF' : 0.01,
             'plotMapDNNTF' : True,
             'shuffleTrainDNNTF' : True,
@@ -88,11 +88,11 @@ class Configuration():
 
     def kerasDef(self):
         self.conf['Keras'] = {
-            'runKeras' : True,
+            'runKeras' : False,
             'alwaysRetrainKeras' : False,
             'alwaysImproveKeras' : True,
-            'hidden_layersKeras' : [400,400],
-            'optimizerKeras' : "SGD",
+            'hidden_layersKeras' : [200,200],
+            'optimizerKeras' : "Adam",
             'l2_reg_strengthKeras' : 1e-4,
             'learning_rateKeras' : 1e-4,
             'learning_decay_rateKeras' : 1e-6,
@@ -100,14 +100,14 @@ class Configuration():
             'dropout_percKeras' : 0.5,
             'trainingStepsKeras' : 1000,
             'fullBatchKeras' : True,
-            'batchSizeKeras' : 64,
+            'batchSizeKeras' : 512,
             'thresholdProbabilityPredKeras' : 0.01,
             'plotModelKeras' : False,
             }
 
     def nnDef(self):
         self.conf['NNSklearn'] = {
-            'runNN' : True,
+            'runNN' : False,
             'alwaysRetrainNN' : False,
             'hidden_layersNN' : (400),
             'optimizerNN' : "adam",
@@ -121,7 +121,7 @@ class Configuration():
 
     def svmDef(self):
         self.conf['SVM'] = {
-            'runSVM' : True,
+            'runSVM' : False,
             'alwaysRetrainSVM' : False,
             'thresholdProbabilityPredSVM' : 3,
             'CfactorSVM' : 20,
