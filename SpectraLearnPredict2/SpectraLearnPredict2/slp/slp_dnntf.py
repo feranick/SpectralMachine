@@ -42,7 +42,7 @@ def input_fn(A, Cl2):
 #********************************************************************************
 ''' Train DNNClassifier model training via TensorFlow-Estimators '''
 #********************************************************************************
-def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
+def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
@@ -198,7 +198,7 @@ def printInfo(A):
 #********************************************************************************
 ''' Predict using tf.estimator.DNNClassifier model via TensorFlow '''
 #********************************************************************************
-def predDNNTF2(clf, le, R, Cl):
+def predDNNTF(clf, le, R, Cl):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
@@ -239,7 +239,7 @@ def predDNNTF2(clf, le, R, Cl):
 #********************************************************************************
 ''' Train DNNClassifier model training via TensorFlow-skflow '''
 #********************************************************************************
-def trainDNNTF(A, Cl, A_test, Cl_test, Root):
+def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     print('==========================================================================\n')
     print('\033[1m Running Deep Neural Networks: skflow-DNNClassifier - TensorFlow...\033[0m')
     print('  Hidden layers:', dnntfDef.hidden_layers)
@@ -255,7 +255,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         tf.logging.set_verbosity(tf.logging.INFO)
     
     if dnntfDef.alwaysRetrain == False:
-        model_directory = Root + "/DNN-TF_" + str(len(dnntfDef.hidden_layers))+"HL_"+str(dnntfDef.hidden_layers[0])
+        model_directory = Root + "/DNN-TF-SK_" + str(len(dnntfDef.hidden_layers))+"HL_"+str(dnntfDef.hidden_layers[0])
         print("\n  Training model saved in: ", model_directory, "\n")
     else:
         dnntfDef.alwaysImprove = True
@@ -321,7 +321,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
 #********************************************************************************
 ''' Predict using DNNClassifier model via TensorFlow-skflow '''
 #********************************************************************************
-def predDNNTF(clf, le, R, Cl):
+def predDNNTF2(clf, le, R, Cl):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing

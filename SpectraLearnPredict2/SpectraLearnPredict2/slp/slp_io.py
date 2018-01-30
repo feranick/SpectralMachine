@@ -57,7 +57,7 @@ def LearnPredictFile(learnFile, sampleFile):
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
         dnntfDef.alwaysImprove = False
-        if dnntfDef.runSkflowDNNTF == True:
+        if dnntfDef.runSkflowDNNTF == False:
             clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
             predDNNTF(clf_dnntf, le_dnntf, R, Cl)
         else:
@@ -122,7 +122,7 @@ def trainAccuracy(learnFile, testFile):
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        if dnntfDef.runSkflowDNNTF == True:
+        if dnntfDef.runSkflowDNNTF == False:
             clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A_test, Cl_test, learnFileRoot)
         else:
             clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A_test, Cl_test, learnFileRoot)
@@ -180,7 +180,7 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     
     ''' Run Neural Network - TensorFlow'''
     if dnntfDef.runDNNTF == True:
-        if dnntfDef.runSkflowDNNTF == True:
+        if dnntfDef.runSkflowDNNTF == False:
             clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
             dnntfPred, dnntfProb = predDNNTF(clf_dnntf, le_dnntf, R, Cl)
         else:
@@ -248,7 +248,7 @@ def LearnPredictMap(learnFile, mapFile):
         clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
 
     if dnntfDef.runDNNTF == True:
-        if dnntfDef.runSkflowDNNTF == True:
+        if dnntfDef.runSkflowDNNTF == False:
             clf_dnntf, le_dnntf  = trainDNNTF(A, Cl, A, Cl, learnFileRoot)
         else:
             clf_dnntf, le_dnntf  = trainDNNTF2(A, Cl, A, Cl, learnFileRoot)
@@ -265,7 +265,7 @@ def LearnPredictMap(learnFile, mapFile):
         
         ''' Run Neural Network - TensorFlow'''
         if dnntfDef.runDNNTF == True:
-            if dnntfDef.runSkflowDNNTF == True:
+            if dnntfDef.runSkflowDNNTF == False:
                 dnntfPred[i], temp = predDNNTF(cl_dnntf, le_dnntf, r, Cl)
             else:
                 dnntfPred[i], temp = predDNNTF2(cl_dnntf, le_dnntf, r, Cl)
