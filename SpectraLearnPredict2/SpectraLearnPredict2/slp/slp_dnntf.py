@@ -84,16 +84,16 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     printInfo(A)
     
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"x": np.array(A)},
-            y=np.array(Cl2),
+            x={"x": A},
+            y = Cl2,
             num_epochs=None,
             batch_size=batch_size_train,
             queue_capacity=dnntfDef.queueCapacity,
             shuffle=dnntfDef.shuffleTrain)
         
     test_input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={"x": np.array(A_test)},
-            y=np.array(Cl2_test),
+            x={"x": A_test},
+            y = Cl2_test,
             num_epochs=1,
             batch_size=batch_size_test,
             queue_capacity=1,
