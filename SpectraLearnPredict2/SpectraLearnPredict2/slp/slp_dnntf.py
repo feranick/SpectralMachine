@@ -89,7 +89,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
             num_epochs=None,
             batch_size=batch_size_train,
             queue_capacity=dnntfDef.queueCapacity,
-            shuffle=dnntfDef.shuffleTrain)
+            shuffle=dnntfDef.shuffleTrain,
+            num_threads=dnntfDef.numThreadsInput)
         
     test_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": A_test},
@@ -97,7 +98,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
             num_epochs=1,
             batch_size=batch_size_test,
             queue_capacity=1,
-            shuffle=dnntfDef.shuffleTest)
+            shuffle=dnntfDef.shuffleTest,
+            num_threads=1)
     
     feature_columns = [tf.feature_column.numeric_column("x", shape=[totA.shape[1]])]
     

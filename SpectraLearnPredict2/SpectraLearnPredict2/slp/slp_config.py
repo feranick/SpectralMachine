@@ -420,6 +420,7 @@ class dnntfDef:
     fullBatch = config.fullBatchDNNTF
     batchSize = config.batchSizeDNNTF
     queueCapacity = config.queueCapacityDNNTF
+    numThreadsInput = 4
     
     # threshold in % of probabilities for listing prediction results
     thresholdProbabilityPred = config.thresholdProbabilityPredDNNTF
