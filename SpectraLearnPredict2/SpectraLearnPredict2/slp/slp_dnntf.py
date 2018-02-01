@@ -87,8 +87,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
             x={"x": A},
             y = Cl2,
             num_epochs=1,
-            batch_size=batch_size_train,
-            queue_capacity=dnntfDef.queueCapacity,
+            batch_size=batch_size_train,            # Default: 128
+            queue_capacity=dnntfDef.queueCapacity,  # Default: 1000
             shuffle=dnntfDef.shuffleTrain,
             num_threads=dnntfDef.numThreadsInput)
                     
@@ -96,8 +96,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
             x={"x": A_test},
             y = Cl2_test,
             num_epochs=1,
-            batch_size=batch_size_test,
-            queue_capacity=1,
+            batch_size=batch_size_test,   # Default: 128
+            queue_capacity=1000,          # Default: 1000
             shuffle=dnntfDef.shuffleTest,
             num_threads=1)
     
