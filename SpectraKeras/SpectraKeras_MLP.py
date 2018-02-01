@@ -53,7 +53,7 @@ l2_1 = 1e-3
 HL2 = 1000
 drop2 = 0.5
 l2_2 = 1e-3
-epochs = 10000
+epochs = 100
 cv_split = 0.05
 
 batch_size = A.shape[0]

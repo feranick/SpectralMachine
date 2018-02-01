@@ -138,44 +138,54 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
             plt.xlabel('Raman shift [1/cm]')
             plt.legend(loc='upper right')
             plt.savefig('MLP_keras_weights' + '.png', dpi = 160, format = 'png')  # Save plot
-            
-            print('\n  ==========================================')
-            print('  \033[1mKeras MLP\033[0m - Training Summary')
-            print('  ==========================================')
-            print("\n  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
-            print("\n  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
-            if os.path.exists(model_name) is True:
-                print("\n  Model retrieved from: ", model_name)
+        
+        printModelKeras(model)
+        printParamKeras(A)
+        printTrainSummary(accuracy,loss)
+        
     else:
         print(" Retreaving training model from: ", model_name,"\n")
         model = load_model(model_name)
-
+        printModelKeras(model)
+        printParamKeras(A)
     
     score = model.evaluate(A_test, Cl2_test, batch_size=kerasDef.batchSize)
-    printModelKeras(model)
-    printParamKeras(A)
-
-    print('\n\n  ==========================================')
-    print('  \033[1mKeras MLP\033[0m - Validation Summary')
-    print('  ==========================================')
-    print("\n  Validation - Loss: {0:.4f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
-    print("\n  Global step: {:.2f}\n".format(kerasDef.trainingSteps))
-    print('  =========================================\n')
-
+    printEvalSummary(model_name, score)
     return model, le
 
+#***********************************************
+''' Summary visualization panels '''
+#***********************************************
+def printTrainSummary(accuracy,loss):
+    print('\n  ================================================')
+    print('  \033[1mKeras MLP\033[0m - Training Summary')
+    print('  ================================================')
+    print("  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
+    print("  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
+    print('  ================================================\n\n')
+
+def printEvalSummary(model_name, score):
+    print('\n\n  ================================================')
+    print('  \033[1mKeras MLP\033[0m - Evaluation Summary')
+    print('  ================================================')
+    print("  Evaluationn - Loss: {0:.4f}; Accuracy: {1:.2f}%".format(score[0], 100*score[1]))
+    print("  Global step: {:.2f}".format(kerasDef.trainingSteps))
+    if os.path.exists(model_name) is True:
+        print("\n  Model saved in:", model_name)
+    print('  ================================================\n')
+
 def printModelKeras(model):
-    print('\n  =============================================')
+    print('\n  ================================================')
     print('  \033[1mKeras MLP\033[0m - Model Configuration')
-    print('  =============================================')
+    print('  ================================================')
     for conf in model.get_config():
         print(conf,"\n")
     model.summary()
 
 def printParamKeras(A):
-    print('\n  =============================================')
+    print('\n  ================================================')
     print('  \033[1mKeras MLP\033[0m - Parameters')
-    print('  =============================================')
+    print('  ================================================')
     print('  Optimizer:',kerasDef.optimizer_tag,
                 '\n  Hidden layers:', kerasDef.hidden_layers,
                 '\n  Activation function:',kerasDef.activation_function,
@@ -184,9 +194,11 @@ def printParamKeras(A):
                 '\n  Learning rate:', kerasDef.learning_rate,
                 '\n  Learning decay rate:', kerasDef.learning_decay_rate)
     if kerasDef.fullBatch == True:
-        print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)),'\n')
+        print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)))
     else:
-        print('  Batch size:', kerasDef.batchSize, '\n')
+        print('  Batch size:', kerasDef.batchSize)
+    print('  ================================================\n')
+
 #********************************************************************************
 ''' Predict using Keras model '''
 #********************************************************************************
