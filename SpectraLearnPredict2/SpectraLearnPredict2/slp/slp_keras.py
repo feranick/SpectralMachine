@@ -107,10 +107,13 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
             epochs=kerasDef.trainingSteps,
             batch_size=batch_size,
             callbacks = tbLogs,
-            verbose = 2)
+            verbose = 2,
+            validation_data=(A_test, Cl2_test))
 
         accuracy = np.asarray(log.history['acc'])
         loss = np.asarray(log.history['loss'])
+        val_acc = np.asarray(log.history['val_acc'])
+        val_loss = np.asarray(log.history['val_loss'])
 
         model.save(model_name)
 
@@ -141,7 +144,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
         
         printModelKeras(model)
         printParamKeras(A)
-        printTrainSummary(accuracy,loss)
+        printTrainSummary(accuracy, loss, val_acc, val_loss)
         
     else:
         print(" Retreaving training model from: ", model_name,"\n")
@@ -156,19 +159,23 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 #***********************************************
 ''' Summary visualization panels '''
 #***********************************************
-def printTrainSummary(accuracy,loss):
+def printTrainSummary(accuracy,loss, val_acc, val_loss):
     print('\n  ================================================')
     print('  \033[1mKeras MLP\033[0m - Training Summary')
     print('  ================================================')
     print("  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
     print("  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
+    print("\n  Validation ({0:.0f}%) - Average: {1:.2f}%; Max: {2:.2f}%".format(100*preprocDef.percentCrossValid,
+                100*np.average(val_acc), 100*np.amax(val_acc)))
+    print("  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(val_loss), np.amin(val_loss)))
     print('  ================================================\n\n')
 
 def printEvalSummary(model_name, score):
     print('\n\n  ================================================')
     print('  \033[1mKeras MLP\033[0m - Evaluation Summary')
     print('  ================================================')
-    print("  Evaluationn - Loss: {0:.4f}; Accuracy: {1:.2f}%".format(score[0], 100*score[1]))
+    print("  Evaluation ({0:.0f}%) - Loss: {1:.4f}; Accuracy: {2:.2f}%".format(100*preprocDef.percentCrossValid,
+                score[0], 100*score[1]))
     print("  Global step: {:.2f}".format(kerasDef.trainingSteps))
     if os.path.exists(model_name) is True:
         print("\n  Model saved in:", model_name)
