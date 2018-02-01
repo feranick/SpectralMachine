@@ -86,7 +86,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
             x={"x": A},
             y = Cl2,
-            num_epochs=1,
+            num_epochs=None,
             batch_size=batch_size_train,            # Default: 128
             queue_capacity=dnntfDef.queueCapacity,  # Default: 1000
             shuffle=dnntfDef.shuffleTrain,
