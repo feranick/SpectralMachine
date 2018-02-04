@@ -62,11 +62,11 @@ def run():
             except:
                 preprocDef.subsetCrossValid = True
                 testFile = "tmp"
-            try:
-                trainAccuracy(sys.argv[2], testFile)
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            trainAccuracy(sys.argv[2], testFile)
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-m" , "--map"):
             try:

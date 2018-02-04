@@ -99,9 +99,10 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
 
-        tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=batch_size,
-                write_graph=True, write_grads=True, write_images=True,
-                embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
+        tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=kerasDef.tbHistogramFreq, 
+                batch_size=batch_size, write_graph=True, write_grads=True, write_images=True,
+                embeddings_freq=0, embeddings_layer_names=None, 
+                embeddings_metadata=None)
         #tbLog.set_model(model)
         tbLogs = [tbLog]
         log = model.fit(A, Cl2,

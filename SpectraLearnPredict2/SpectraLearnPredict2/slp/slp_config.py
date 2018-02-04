@@ -101,6 +101,7 @@ class Configuration():
             'trainingStepsKeras' : 1000,
             'fullBatchKeras' : True,
             'batchSizeKeras' : 512,
+            'tbIstogramFreqKeras' : 100,
             'thresholdProbabilityPredKeras' : 0.01,
             'plotModelKeras' : False,
             }
@@ -250,6 +251,7 @@ class Configuration():
         self.trainingStepsKeras = self.conf.getint('Keras','trainingStepsKeras')
         self.fullBatchKeras = self.conf.getboolean('Keras','fullBatchKeras')
         self.batchSizeKeras = self.conf.getint('Keras','batchSizeKeras')
+        self.tbHistogramFreqKeras = self.conf.getint('Keras','tbHistogramFreqKeras')
         self.thresholdProbabilityPredKeras = self.conf.getfloat('Keras','thresholdProbabilityPredKeras')
         self.plotModelKeras = self.conf.getboolean('Keras','plotModelKeras')
         
@@ -518,6 +520,9 @@ class kerasDef:
     trainingSteps = config.trainingStepsKeras    # number of training steps
     fullBatch = config.fullBatchKeras
     batchSize = config.batchSizeKeras
+    
+    # Setting them both to zero disables Histograms tracnking in tensorboard
+    tbHistogramFreq = config.tbHistogramFreqKeras
     
     thresholdProbabilityPred = config.thresholdProbabilityPredKeras
     
