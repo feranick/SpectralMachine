@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20171130a
+* version: 20180203a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -34,6 +34,8 @@ class defParam:
     # values for intensities when to
     # fill in in absence of data
     useMinForBoundary = False
+
+    saveAsBinary = True
 
 def main():
     if len(sys.argv) < 5:
@@ -107,6 +109,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
 ''' Add data to Training file '''
 #**********************************************
 def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
+    learnFileRoot = os.path.splitext(learnFile)[0]
     print('\n Process file in class #: ' + str(param))
     try:
         with open(sampleFile, 'r') as f:
@@ -147,8 +150,13 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
         print(' Added spectra to \"' + learnFile + '\"\n')
         newTrain = np.vstack((newTrain, np.append(float(param),R)))
 
-    with open(learnFile, 'ab') as f:
-        np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
+    if defParam.saveAsBinary == False:
+        with open(learnFile, 'ab') as f:
+            np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
+        print("Training file saved as text in:", learnFile)
+    else:
+        np.save(learnFileRoot, M, '%10.6f')
+        print("Training file saved as binary in:", learnFileRoot+"npy")
 
     return True
 
