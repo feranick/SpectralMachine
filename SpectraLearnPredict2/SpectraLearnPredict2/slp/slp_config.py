@@ -101,7 +101,7 @@ class Configuration():
             'trainingStepsKeras' : 1000,
             'fullBatchKeras' : True,
             'batchSizeKeras' : 512,
-            'tbIstogramFreqKeras' : 100,
+            'tbHistogramFreqKeras' : 100,
             'thresholdProbabilityPredKeras' : 0.01,
             'plotModelKeras' : False,
             }
