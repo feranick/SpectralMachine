@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20180119a
+* version: 20180203a
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -1553,8 +1553,11 @@ def KmMap(mapFile, numKMcomp):
 #************************************
 def readLearnFile(learnFile):
     try:
-        with open(learnFile, 'r') as f:
-            M = np.loadtxt(f, unpack =False)
+        if os.path.splitext(learnFile)[1] == ".npy":
+            M = np.load(learnFile)
+        else:
+            with open(learnFile, 'r') as f:
+                M = np.loadtxt(f, unpack =False)
     except:
         print('\033[1m' + ' Learning file not found \n' + '\033[0m')
         return
