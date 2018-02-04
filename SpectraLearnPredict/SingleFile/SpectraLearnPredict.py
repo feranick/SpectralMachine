@@ -1052,7 +1052,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
-    from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
+    #from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
     
     if dnntfDef.logCheckpoint ==True:
         tf.logging.set_verbosity(tf.logging.INFO)
@@ -1091,10 +1091,6 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
             y=np.array(Cl2_test),
             num_epochs=1,
             shuffle=dnntfDef.shuffleTest)
-    
-    validation_monitor = [skflow.monitors.ValidationMonitor(input_fn=test_input_fn,
-                                                           eval_steps=1,
-                                                           every_n_steps=dnntfDef.valMonitorSecs)]
 
     feature_columns = [tf.feature_column.numeric_column("x", shape=[totA.shape[1]])]
     
@@ -1116,7 +1112,18 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
             config=tf.estimator.RunConfig().replace(save_summary_steps=dnntfDef.timeCheckpoint),
             dropout=dnntfDef.dropout_perc)
            
+    '''
+    # Validation monitors are deprecated
+    validation_monitor = [skflow.monitors.ValidationMonitor(input_fn=test_input_fn,
+            eval_steps=1,
+            every_n_steps=dnntfDef.valMonitorSecs)]
     hooks = monitor_lib.replace_monitors_with_hooks(validation_monitor, clf)
+    '''
+    hooks = [tf.train.SummarySaverHook(
+            save_secs = dnntfDef.valMonitorSecs,
+            output_dir=model_directory,
+            scaffold= tf.train.Scaffold(),
+            summary_op=tf.summary.merge_all())]
 
     #**********************************************
     ''' Define parameters for savedmodel '''
@@ -1999,7 +2006,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     #**********************************************
     x,y,y_ = setupTFmodel(totA, totCl)
 
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y))
     
     if tfDef.decayLearnRate == True:
         print(' Using decaying learning rate, start at:',tfDef.learnRate, '\n')
@@ -2048,7 +2055,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         accuracy_score = 100*accuracy.eval(feed_dict={x:A_test, y_:Cl2_test})
 
-        save_path = saver.save(sess, tfTrainedData)
+        save_path = saver.save(sess, "./"+tfTrainedData)
         print(' Model saved in file: %s\n' % save_path)
         
     if tfDef.enableTensorboard == True:
