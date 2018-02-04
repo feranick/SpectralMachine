@@ -156,7 +156,7 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
         print("Training file saved as text in:", learnFile)
     else:
         np.save(learnFileRoot, M, '%10.6f')
-        print("Training file saved as binary in:", learnFileRoot+"npy")
+        print("Training file saved as binary in:", learnFileRoot+".npy")
 
     return True
 
