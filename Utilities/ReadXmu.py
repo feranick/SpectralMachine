@@ -6,7 +6,7 @@
 * ReadXmu
 * Convert Xanes Xmu to ASCII
 * File must be in xmu format
-* version: 20180206a
+* version: 20180206b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -26,7 +26,8 @@ def main():
 
     try:
         with open(sys.argv[1], 'r') as f:
-            M = np.loadtxt(f, skiprows = 40, unpack=True)
+            #M = np.loadtxt(f, skiprows = 40, unpack=True)
+            M = np.loadtxt(f, unpack=True)
         print(str(' ' + sys.argv[1]) + '\n File OK, converting to ASCII... \n')
     except:
         print('\033[1m ' + str(sys.argv[1]) + ' file not found \n' + '\033[0m')

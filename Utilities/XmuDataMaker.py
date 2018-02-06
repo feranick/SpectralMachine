@@ -6,7 +6,7 @@
 * XmuDataMaker
 * Adds spectra to single file for classification
 * File must be in Xmu
-* version: 20180206a
+* version: 20180206b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -112,8 +112,8 @@ def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
     print('\n Process file in class #: ' + str(param))
     try:
         with open(sampleFile, 'r') as f:
-            M = np.loadtxt(f, unpack = True, skiprows = 40)
-        
+            #M = np.loadtxt(f, unpack = True, skiprows = 40)
+            M = np.loadtxt(f, unpack = True)
         En = M[0]
         R = M[1]
             

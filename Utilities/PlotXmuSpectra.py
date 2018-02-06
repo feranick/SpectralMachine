@@ -6,7 +6,7 @@
 * PlotXmuSpectra
 * Plot Xmu spectra
 * Files must be in Xmu
-* version: 20180206a
+* version: 20180206b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -43,7 +43,8 @@ def main():
         try:
             if os.path.splitext(file)[-1] == ".xmu":
                 with open(file, 'r') as f:
-                    M = np.loadtxt(f, unpack = True, skiprows = 40)
+                    #M = np.loadtxt(f, unpack = True, skiprows = 40)
+                    M = np.loadtxt(f, unpack = True)
                 En = M[0]
                 R = M[1]
                 print(file + '\n File OK, converting to ASCII...')
