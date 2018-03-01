@@ -35,8 +35,6 @@ class defParam:
     # fill in in absence of data
     useMinForBoundary = False
 
-    saveAsBinary = False
-
 def main():
     if len(sys.argv) < 5:
         enInit = 100
@@ -54,10 +52,10 @@ def main():
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
     
-    #try:
-    processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
-    #except:
-    #   usage()
+    try:
+        processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
+    except:
+        usage()
     sys.exit(2)
 
 #**********************************************
@@ -74,9 +72,6 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
         sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
             ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+\
             ",threshold="+str(threshold)+"\n")
-    
-    EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
-    newTrainMatrix = np.zeros((EnT.shape[0]+1))
         
     for ind, f in enumerate(sorted(os.listdir("."))):
         if (f != learnFile and os.path.splitext(f)[-1] == ".txt"):
@@ -87,7 +82,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
                 compound.append(f.partition("_")[0])
                 index = len(compound)-1
             
-            success, newTrainMatrix = makeFile(f, learnFile, index, EnT, threshold, newTrainMatrix)
+            success = makeFile(f, learnFile, index, enInit, enFin, enStep, threshold)
             with open(summary_filename, "a") as sum_file:
                 if success == True:
                     sum_file.write(str(index) + ',,,' + f +'\n')
@@ -97,8 +92,6 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     print('\n Energy scale: [', str(enInit),',',
             str(enFin), ']; Step:', str(enStep),
             '; Threshold:', str(threshold),'\n')
-
-    saveTrainMatrix(learnFile, newTrainMatrix)
 
     Cl2 = np.zeros((size, size))
     for i in range(size):
@@ -113,7 +106,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
 #**********************************************
 ''' Add data to Training file '''
 #**********************************************
-def makeFile(sampleFile, learnFile, param, EnT, threshold, newTrainMatrix):
+def makeFile(sampleFile, learnFile, param, enInit, enFin, enStep, threshold):
     learnFileRoot = os.path.splitext(learnFile)[0]
     print('\n Process file in class #: ' + str(param))
     try:
@@ -131,6 +124,7 @@ def makeFile(sampleFile, learnFile, param, EnT, threshold, newTrainMatrix):
         print('\033[1m' + sampleFile + ' file not found \n' + '\033[0m')
         return False
 
+    EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
     if EnT.shape[0] == En.shape[0]:
         print(' Number of points in the learning dataset: ' + str(EnT.shape[0]))
     else:
@@ -146,31 +140,19 @@ def makeFile(sampleFile, learnFile, param, EnT, threshold, newTrainMatrix):
         R = np.interp(EnT, En, R, left = defParam.leftBoundary, right = defParam.rightBoundary)
         print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
 
-    if newTrainMatrix.ndim != 1:
+    if os.path.exists(learnFile):
         newTrain = np.append(float(param),R).reshape(1,-1)
-        newTrainMatrix = np.vstack((newTrainMatrix, newTrain))
     else:
         print('\n\033[1m' + ' Train data file not found. Creating...' + '\033[0m')
         newTrain = np.append([0], EnT)
         print(' Added spectra to \"' + learnFile + '\"\n')
         newTrain = np.vstack((newTrain, np.append(float(param),R)))
-        newTrainMatrix = newTrain
 
-    return True, newTrainMatrix
+    with open(learnFile, 'ab') as f:
+        np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
+    print("Training file saved as text in:", learnFile)
 
-#**********************************************
-''' Save Training Matrix to File '''
-#**********************************************
-def saveTrainMatrix(learnFile, newTrainMatrix):
-    learnFileRoot = os.path.splitext(learnFile)[0]
-    if defParam.saveAsBinary == False:
-        with open(learnFile, 'ab') as f:
-            np.savetxt(f, newTrainMatrix, delimiter='\t', fmt='%10.6f')
-        print("Training file saved as text in:", learnFile)
-    else:
-        file = open(learnFileRoot+".npy", 'ab')
-        np.save(file, newTrainMatrix, '%10.6f')
-        print("Training file saved as binary in:", learnFileRoot+".npy")
+    return True
 
 #************************************
 ''' Lists the program usage '''
@@ -178,7 +160,6 @@ def saveTrainMatrix(learnFile, newTrainMatrix):
 def usage():
     print('\n Usage:\n')
     print('  python3 RruffDataMaker.py <learnfile> <enInitial> <enFinal> <enStep> <threshold> \n')
-    print(' Adding to existing <learnfile> is possible only in text (no binary) mode \n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
