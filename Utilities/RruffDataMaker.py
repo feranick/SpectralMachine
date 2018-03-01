@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20180228a
+* version: 20180301a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -54,10 +54,10 @@ def main():
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
     
-    try:
-        processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
-    except:
-        usage()
+    #try:
+    processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
+    #except:
+    #   usage()
     sys.exit(2)
 
 #**********************************************
@@ -87,7 +87,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
                 compound.append(f.partition("_")[0])
                 index = len(compound)-1
             
-            success, newTrainMatrix = makeFile(f, learnFile, index, enT, threshold, newTrainMatrix)
+            success, newTrainMatrix = makeFile(f, learnFile, index, EnT, threshold, newTrainMatrix)
             with open(summary_filename, "a") as sum_file:
                 if success == True:
                     sum_file.write(str(index) + ',,,' + f +'\n')
@@ -146,7 +146,7 @@ def makeFile(sampleFile, learnFile, param, EnT, threshold, newTrainMatrix):
         R = np.interp(EnT, En, R, left = defParam.leftBoundary, right = defParam.rightBoundary)
         print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
 
-        if newTrainMatrix.ndim != 1:
+    if newTrainMatrix.ndim != 1:
         newTrain = np.append(float(param),R).reshape(1,-1)
         newTrainMatrix = np.vstack((newTrainMatrix, newTrain))
     else:
@@ -156,7 +156,6 @@ def makeFile(sampleFile, learnFile, param, EnT, threshold, newTrainMatrix):
         newTrain = np.vstack((newTrain, np.append(float(param),R)))
         newTrainMatrix = newTrain
 
-    print(newTrainMatrix.shape)
     return True, newTrainMatrix
 
 #**********************************************
