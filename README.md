@@ -18,9 +18,8 @@ The current version 1 is the stable and recommended for use. The next generation
 Credits and References
 ==================
 If you use SpectralMachine, we request that you reference the papers/resources on which SpectralMachine is based:
+- N Ferralis, SpectralMachine (2017), https://github.com/feranick/SpectralMachine
 - N. Ferralis, JC Grossman, RE Summons, ["Mineral and Geochemical Classification from Spectroscopy/Diffraction Through Neural Networks"](https://agu.confex.com/agu/fm17/meetingapp.cgi/Paper/285994), AGU Fall Meeting 2017, New Orleans, LA.
-- N.Ferralis, SpectralMachine (2017), https://github.com/feranick/SpectralMachine
-
 Installation
 =============
 
