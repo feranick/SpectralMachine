@@ -11,7 +11,7 @@ setup(
     author='Nicola Ferralis',
     author_email='ferralis@mit.edu',
     url='https://github.com/feranick/SpectralMachine',
-    download_url='https://github.com/feranick/SpectralMachine/archive/20171002c.zip',
+    download_url='https://github.com/feranick/SpectralMachine/releases',
     keywords=['Machine learning', 'physics', 'spectroscopy', 'diffraction'],
     license='GPLv2',
     platforms='any',

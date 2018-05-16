@@ -1,13 +1,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='SpectraLearnPredict2',
+    name='SpectraLearnPredict',
     packages=find_packages(),
-    install_requires=['numpy', 'matplotlib', 'pandas', 'scikit-learn', 'keras',
-                    'pydot', 'graphviz', 'h5py', 'tensorflow'],
-    entry_points={'gui_scripts' : ['SpectraLearnPredict2=SpectraLearnPredict2.__main__:main']},
-    version='20180205a',
-    description='Machine learning for spectral data',
+    install_requires=['numpy', 'matplotlib', 'pandas', 'tensorflow-gpu', 'scikit-learn'],
+    entry_points={'gui_scripts' : ['SpectraLearnPredict=SpectraLearnPredict.__main__:main']},
+    version='20180203a',
+    description='Machine learning for spectral data - GPU version',
     long_description= """ Machine learning for spectral data """,
     author='Nicola Ferralis',
     author_email='ferralis@mit.edu',
