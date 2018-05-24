@@ -154,7 +154,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
         printModelKeras(model)
         printParamKeras(A)
     
-    score = model.evaluate(A_test, Cl2_test, batch_size=kerasDef.batchSize)
+    score = model.evaluate(A_test, Cl2_test, batch_size=batch_size)
     printEvalSummary(model_name, score)
     return model, le
 
