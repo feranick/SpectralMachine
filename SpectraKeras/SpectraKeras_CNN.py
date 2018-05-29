@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - CNN
-* 20180129a
+* 20180529a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -11,7 +11,7 @@
 print(__doc__)
 
 import numpy as np
-import keras, sys, os.path, time
+import keras, sys, os.path, time, pydot, graphviz
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Activation, Conv2D, MaxPooling2D, Flatten
 import keras.optimizers as opt
@@ -52,8 +52,8 @@ Cl2 = le.transform(Cl)
 totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
 Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
 
-batch_size = A.shape[0]
-#batch_size = 64
+#batch_size = A.shape[0]
+batch_size = 64
 
 tb_directory = "keras_CNN"
 model_directory = "."
@@ -72,16 +72,16 @@ y_train = Cl2
 # Setup Model
 model = Sequential()
 
-model.add(Conv2D(3, (1, 20), activation='relu',
+model.add(Conv2D(30, (1, 20), activation='relu',
     name='conv1',
     input_shape=spectra.shape))
-model.add(Conv2D(3, (1, 20), activation='relu',
+model.add(Conv2D(30, (1, 20), activation='relu',
     name='conv2'))
-model.add(MaxPooling2D(pool_size=(1, 20),
+model.add(MaxPooling2D(pool_size=(1, 100),
     name='maxpool3'))
 model.add(Dropout(0.25, name='drop4'))
 model.add(Flatten(name='flat5'))
-model.add(Dense(256, activation='relu',
+model.add(Dense(43, activation='relu',
     name='dense6'))
 model.add(Dropout(0.5, name='drop7'))
 model.add(Dense(np.unique(Cl).size+1, activation='softmax',
@@ -95,11 +95,11 @@ tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=batch_siz
 tbLogs = [tbLog]
 
 log = model.fit(x_train, y_train,
-    batch_size=32,
-    epochs=10,
+    batch_size=batch_size,
+    epochs=5000,
     callbacks = tbLogs,
     verbose=2,
-    validation_split=0.05)
+    validation_split=0.01)
 #score = model.evaluate(x_test, y_test, batch_size=32)
 
 accuracy = np.asarray(log.history['acc'])

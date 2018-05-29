@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - MLP
-* 20180129a
+* 20180529a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -11,7 +11,7 @@
 print(__doc__)
 
 import numpy as np
-import keras, sys, os.path, time
+import keras, sys, os.path, time, pydot, graphviz
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Activation, ActivityRegularization, MaxPooling1D
 import keras.optimizers as opt
@@ -44,20 +44,20 @@ learnFileRoot = os.path.splitext(learnFile)[0]
 # Parameters
 ##########################
 
-l_rate = 1e-4
-l_rdecay = 1e-7
+l_rate = 0.0001
+l_rdecay = 0.0
 
 HL1 = 1000
 drop1 = 0.5
-l2_1 = 1e-3
-HL2 = 1000
+l2_1 = 1e-4
+HL2 = 1600
 drop2 = 0.5
-l2_2 = 1e-3
-epochs = 100
-cv_split = 0.05
+l2_2 = 1e-4
+epochs = 5000
+cv_split = 0.01
 
-batch_size = A.shape[0]
-#batch_size = 64
+#batch_size = A.shape[0]
+batch_size = 512
 #########################
 
 tb_directory = "keras_MLP"
@@ -86,7 +86,7 @@ model.add(Dense(HL1, activation = 'relu', input_dim=A.shape[1],
     name='dense1'))
 model.add(Dropout(drop1,name='drop1'))
 model.add(Dense(HL2, activation = 'relu',
-    kernel_regularizer=regularizers.l2(12_2),
+    kernel_regularizer=regularizers.l2(l2_2),
     name='dense2'))
 model.add(Dropout(drop2,
     name='drop2'))
