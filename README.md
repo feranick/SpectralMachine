@@ -1,13 +1,13 @@
 # SpectralMachine
 Machine learning software for rapid Spectral analysis. While Raman spectra were the initilal focus, SpectralMachine is flexible to be applied for classification using any spectra (from XRD, FTIR and beyond).
-The current version 1 is the stable and recommended for use. The next generation (version 2, wil allow for more flexibility in designing custom DNN and CNN).
+The current version 2 is the stable and recommended for use. Version 1 is no longer supported.
 
 **Supported algorithms:**
  
  - Deep Neural Networks:
    - multi-layer perceptron (MLP) (L-BFGS Optimizer strongly recommended)
-   - DNNClassifier (TensorFlow)
-   - Convolutional Neural Networks (Under development0
+   - DNNClassifier (TensorFlow and keras)
+   - Convolutional Neural Networks (Under development - via keras)
  - Support Vector Machine - SVM
  - TensorFlow (basic implementation)
 
@@ -20,14 +20,25 @@ Credits and References
 If you use SpectralMachine, we request that you reference the papers/resources on which SpectralMachine is based:
 - N Ferralis, SpectralMachine (2017), https://github.com/feranick/SpectralMachine
 - N. Ferralis, JC Grossman, RE Summons, ["Mineral and Geochemical Classification from Spectroscopy/Diffraction Through Neural Networks"](https://agu.confex.com/agu/fm17/meetingapp.cgi/Paper/285994), AGU Fall Meeting 2017, New Orleans, LA.
+
 Installation
 =============
 
-This software requires Python (3.3 or higher). It has been tested with Python 3.5 or hiher which is the recommended platform. It is not compatible with python 2.x. Additional required packages:
+This software requires Python (3.3 or higher). It has been tested with Python 3.5 or higher which is the recommended platform. It is not compatible with python 2.x. Additional required packages:
 
     numpy
     scikit-learn (>=0.18)
-    matplotlib 
+    matplotlib
+    pandas
+    keras
+    pydot
+    graphviz
+    h5py
+    
+In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
+    
+    python3-tk
+    graphviz
 
 These are found in Unix based systems using common repositories (apt-get for Debian/Ubuntu Linux, or MacPorts for MacOS). More details in the [scikit-learn installation page](http://scikit-learn.org/stable/install.html).
 
