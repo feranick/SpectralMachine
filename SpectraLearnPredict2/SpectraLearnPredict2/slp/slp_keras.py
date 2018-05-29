@@ -18,7 +18,7 @@ if matplotlib.get_backend() == 'TkAgg':
     matplotlib.use('Agg')
 
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path, getopt, glob, csv, pydot, graphviz
 import random, time, configparser, os
 from os.path import exists, splitext
 from os import rename
@@ -120,8 +120,8 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
         model.save(model_name)
 
         if kerasDef.plotModel == True:
-            #from keras.utils import plot_model
-            #plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
+            from keras.utils import plot_model
+            plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
             
             import matplotlib.pyplot as plt
             plt.figure(tight_layout=True)
