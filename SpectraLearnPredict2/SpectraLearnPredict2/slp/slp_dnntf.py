@@ -116,7 +116,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
                         staircase=True)
 
     # Use this to restrict GPU memory allocation in TF
-    opts = tf.GPUOptions(per_process_gpu_memory_fraction=1)
+    opts = tf.GPUOptions(per_process_gpu_memory_fraction=sysDef.fractionGPUmemory)
     conf = tf.ConfigProto(gpu_options=opts)
     #conf.gpu_options.allow_growth = True
     

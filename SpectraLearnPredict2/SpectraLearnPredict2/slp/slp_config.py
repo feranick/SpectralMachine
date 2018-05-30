@@ -179,6 +179,7 @@ class Configuration():
             'multiProc' : False,
             'useAllCores' : False,
             'numCores' : 2,
+            'fractionGPUmemory' : 1,
             }
 
     # Read configuration file into usable variables
@@ -308,6 +309,7 @@ class Configuration():
         self.multiProc = self.conf.getboolean('System','multiProc')
         self.useAllCores = self.conf.getboolean('System','useAllCores')
         self.numCores = self.conf.getint('System','numCores')
+        self.fractionGPUmemory = eval(self.sysDef['fractionGPUmemory'])
 
     # Create configuration file
     def createConfig(self):
@@ -718,4 +720,6 @@ class sysDef:
     else:
         numCores = config.numCores
         print("\n Multiprocessing batch using",numCores, "cores/processors\n")
+
+    fractionGPUmemory = config.fractionGPUmemory
 
