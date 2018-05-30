@@ -118,7 +118,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     clf = tf.estimator.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
             optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
             activation_fn=dnntfDef.activationFn, model_dir=model_directory,
-            config=tf.estimator.RunConfig().replace(save_summary_steps=dnntfDef.timeCheckpoint),
+            config=tf.estimator.RunConfig().replace(save_checkpoints_secs=dnntfDef.timeCheckpoint),
             dropout=dnntfDef.dropout_perc)
          
     '''
