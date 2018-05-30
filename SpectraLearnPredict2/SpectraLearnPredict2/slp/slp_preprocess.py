@@ -74,8 +74,9 @@ def readLearnFile(learnFile):
         else:
             YnormXind = YnormXind_temp
 
-    print(' Number of datapoints = ' + str(A.shape[0]))
-    print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
+    print(' Number of spectra = ' + str(A.shape[0]))
+    print(' Number of points in each spectra = ' + str(A.shape[1]))
+    print(' Number of unique classes = ' + str(len(np.unique(Cl))) + '\n')
     return En, Cl, A, YnormXind
 
 #**********************************************

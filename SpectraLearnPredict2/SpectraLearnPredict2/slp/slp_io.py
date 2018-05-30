@@ -102,10 +102,12 @@ def trainAccuracy(learnFile, testFile):
     
     if preprocDef.subsetCrossValid == True:
         print(" Cross-validation training using: ",str(preprocDef.percentCrossValid*100),
-              "% of training file as test subset\n")
+              "% of training file as test subset")
 
         A, Cl, A_test, Cl_test = formatSubset(A, Cl, preprocDef.percentCrossValid)
         En_test = En
+        print(" Number of training spectra = " + str(len(A)))
+        print(" Number of evaluation spectra = " + str(len(A_test)) + "\n")
     else:
         print(" Cross-validation training using: privided test subset (",testFile,")\n")
         En_test, Cl_test, A_test, YnormXind2 = readLearnFile(testFile)
