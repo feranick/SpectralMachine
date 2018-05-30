@@ -115,10 +115,15 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
                         dnntfDef.learning_rate_decay_rate,
                         staircase=True)
 
+    # Use this to restrict GPU memory allocation in TF
+    opts = tf.GPUOptions(per_process_gpu_memory_fraction=1)
+    conf = tf.ConfigProto(gpu_options=opts)
+    #conf.gpu_options.allow_growth = True
+    
     clf = tf.estimator.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
             optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
             activation_fn=dnntfDef.activationFn, model_dir=model_directory,
-            config=tf.estimator.RunConfig().replace(save_checkpoints_secs=dnntfDef.timeCheckpoint),
+            config=tf.estimator.RunConfig().replace(session_config=conf, save_checkpoints_secs=dnntfDef.timeCheckpoint),
             dropout=dnntfDef.dropout_perc)
          
     '''
