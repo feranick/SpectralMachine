@@ -161,7 +161,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     else:
         print("  Retreaving training model from: ", model_directory,"\n")
 
-    accuracy_score = clf.evaluate(input_fn=test_input_fn, steps=1)
+    accuracy_score = clf.evaluate(input_fn=test_input_fn, steps=1, hooks=hooks)
     printInfo(A)
 
     print('\n  ==================================')
