@@ -716,10 +716,12 @@ class sysDef:
     import multiprocessing as mp
     if config.useAllCores == True:
         numCores = mp.cpu_count()
-        print("\n Multiprocessing batch using max number of cores/processors: ", numCores,"\n")
+        print("\n Multiprocessing batch using max number of cores/processors: ", numCores)
     else:
         numCores = config.numCores
-        print("\n Multiprocessing batch using",numCores, "cores/processors\n")
+        print("\n Multiprocessing batch using",numCores, "cores/processors")
 
     fractionGPUmemory = config.fractionGPUmemory
+    print(" GPU memory reserved (if GPU is used) = ", str(fractionGPUmemory*100), "%\n")
+
 
