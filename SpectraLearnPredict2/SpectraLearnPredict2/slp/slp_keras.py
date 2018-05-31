@@ -40,6 +40,14 @@ def input_fn(A, Cl2):
 ''' https://keras.io/getting-started/sequential-model-guide/#examples'''
 #********************************************************************************
 def trainKeras(En, A, Cl, A_test, Cl_test, Root):
+    import tensorflow as tf
+    from keras.backend.tensorflow_backend import set_session
+    # Use this to restrict GPU memory allocation in TF
+    opts = tf.GPUOptions(per_process_gpu_memory_fraction=sysDef.fractionGPUmemory)
+    conf = tf.ConfigProto(gpu_options=opts)
+    #conf.gpu_options.allow_growth = True
+    set_session(tf.Session(config=conf))
+    
     import keras
     from keras.models import Sequential
     from keras.layers import Dense, Dropout, Activation
@@ -49,7 +57,6 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     from keras.callbacks import TensorBoard
     from sklearn import preprocessing
     from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
-    import tensorflow as tf
     
     tb_directory = "keras_" + str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])
     model_directory = "."
