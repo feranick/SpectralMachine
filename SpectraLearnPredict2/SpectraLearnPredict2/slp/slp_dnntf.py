@@ -134,11 +134,17 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     hooks = monitor_lib.replace_monitors_with_hooks(validation_monitor, clf)
     '''
 
-    hooks = [tf.train.SummarySaverHook(
-        save_secs = dnntfDef.valMonitorSecs,
-        output_dir=model_directory,
-        scaffold= tf.train.Scaffold(),
-        summary_op=tf.summary.merge_all())]
+    hooks = [
+        tf.train.SummarySaverHook(
+            save_secs = dnntfDef.valMonitorSecs,
+            output_dir=model_directory,
+            scaffold= tf.train.Scaffold(),
+            summary_op=tf.summary.merge_all()),
+        tf.train.ProfilerHook(save_secs=60,
+            output_dir=model_directory+"/profiler",
+            show_memory = False,
+            show_dataflow = False),
+        ]
 
     #**********************************************
     ''' Define parameters for savedmodel '''
