@@ -25,6 +25,7 @@ print "#!/bin/sh
 #PBS -l nodes=$n:ppn=7
 #PBS -N SLP
 
+#export LD_LIBRARY_PATH=/usr/local/cuda-9.1/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
 
   cd $fullpath
