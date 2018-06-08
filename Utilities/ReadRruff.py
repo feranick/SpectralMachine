@@ -14,7 +14,6 @@
 '''
 print(__doc__)
 
-
 import numpy as np
 import sys, os.path, getopt, glob, csv
 

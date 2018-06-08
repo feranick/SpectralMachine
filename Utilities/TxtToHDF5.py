@@ -12,6 +12,7 @@
 *
 ***********************************************************
 '''
+print(__doc__)
 
 import numpy as np
 import h5py, sys, os.path
