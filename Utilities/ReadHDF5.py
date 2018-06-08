@@ -6,7 +6,7 @@
 * ReadHDF5
 * Read HDF5 learning data
 *
-* version: 20180608a
+* version: 20180608b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -37,13 +37,15 @@ def main():
 def readLearnFile(learnFile):
 
     with h5py.File(learnFile, 'r') as hf:
-        En = hf["En"][:]
-        A = hf["A"][:]
-        Cl = hf["Cl"][:].astype('<U4')
+        #En = hf["En"][:]
+        #A = hf["A"][:]
+        #Cl = hf["Cl"][:].astype('<U4')
+        M = hf["M"][:]
         
-    print("En: ", En)
-    print("A: ",A)
-    print("Cl: ",Cl)
+    #print("En: ", En)
+    #print("A: ",A)
+    #print("Cl: ",Cl)
+    print("M: ", M)
     return 0
 #************************************
 ''' Main initialization routine '''

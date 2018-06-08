@@ -6,7 +6,7 @@
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
 *
-* version: 20180608a
+* version: 20180608b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -45,16 +45,17 @@ def saveLearnFile(learnFile):
         print('\033[1m' + ' Learning file not found \n' + '\033[0m')
         return
 
-    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(M,np.s_[0:1],0)
-    Cl = np.asarray(['{:.2f}'.format(x) for x in M[:,0]])
-    A = np.delete(M,np.s_[0:1],1)
+    #En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+    #M = np.delete(M,np.s_[0:1],0)
+    #Cl = np.asarray(['{:.2f}'.format(x) for x in M[:,0]])
+    #A = np.delete(M,np.s_[0:1],1)
 
     with h5py.File(learnFileRoot+'.h5', 'w') as hf:
-        hf.create_dataset("En",  data=En)
-        #hf.create_dataset("M",  data=M)
-        hf.create_dataset("Cl",  data=Cl.astype('|S9'))
-        hf.create_dataset("A",  data=A)
+        #hf.create_dataset("En",  data=En)
+        hf.create_dataset("M",  data=M)
+        #hf.create_dataset("Cl",  data=Cl.astype('|S9'))
+        #hf.create_dataset("A",  data=A)
+        
 
     print("Learning file converted to hdf5")
 

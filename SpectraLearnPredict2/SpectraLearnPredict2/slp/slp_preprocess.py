@@ -33,6 +33,9 @@ def readLearnFile(learnFile):
     try:
         if os.path.splitext(learnFile)[1] == ".npy":
             M = np.load(learnFile)
+        else if os.path.splitext(learnFile)[1] == ".h5":
+            with h5py.File(learnFile, 'r') as hf:
+                M = hf["M"][:]
         else:
             with open(learnFile, 'r') as f:
                 M = np.loadtxt(f, unpack =False)
