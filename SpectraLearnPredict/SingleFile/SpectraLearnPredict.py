@@ -5,7 +5,7 @@
 *
 * SpectraLearnPredict
 * Perform Machine Learning on Spectroscopy Data.
-* version: 20180203a
+* version: 20180608b
 *
 * Uses: Deep Neural Networks, TensorFlow, SVM, PCA, K-Means
 *
@@ -21,7 +21,7 @@ if matplotlib.get_backend() == 'TkAgg':
 
 import numpy as np
 import sys, os.path, getopt, glob, csv
-import random, time, configparser, os
+import random, time, configparser, os, h5py
 from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
@@ -1562,6 +1562,9 @@ def readLearnFile(learnFile):
     try:
         if os.path.splitext(learnFile)[1] == ".npy":
             M = np.load(learnFile)
+        elif os.path.splitext(learnFile)[1] == ".h5":
+            with h5py.File(learnFile, 'r') as hf:
+                M = hf["M"][:]
         else:
             with open(learnFile, 'r') as f:
                 M = np.loadtxt(f, unpack =False)
