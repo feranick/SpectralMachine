@@ -17,7 +17,7 @@ import numpy as np
 import h5py, sys, os.path
 
 #************************************
-''' Read Learning file '''
+''' Main '''
 #************************************
 def main():
 
@@ -31,7 +31,7 @@ def main():
     saveLearnFile(file)
 
 #************************************
-''' Read Learning file '''
+''' Convert Learning file to HDF5 '''
 #************************************
 def saveLearnFile(learnFile):
     learnFileRoot = os.path.splitext(learnFile)[0]
@@ -54,7 +54,7 @@ def saveLearnFile(learnFile):
         hf.create_dataset("En",  data=En)
         #hf.create_dataset("M",  data=M)
         hf.create_dataset("Cl",  data=Cl.astype('|S9'))
-        hf.create_dataset("A",  data=En)
+        hf.create_dataset("A",  data=A)
 
     print("Learning file converted to hdf5")
 
