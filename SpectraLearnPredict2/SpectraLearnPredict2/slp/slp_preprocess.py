@@ -19,7 +19,7 @@ if matplotlib.get_backend() == 'TkAgg':
 
 import numpy as np
 import sys, os.path, getopt, glob, csv
-import random, time, configparser, os
+import random, time, configparser, os, h5py
 from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
@@ -33,7 +33,7 @@ def readLearnFile(learnFile):
     try:
         if os.path.splitext(learnFile)[1] == ".npy":
             M = np.load(learnFile)
-        else if os.path.splitext(learnFile)[1] == ".h5":
+        elif os.path.splitext(learnFile)[1] == ".h5":
             with h5py.File(learnFile, 'r') as hf:
                 M = hf["M"][:]
         else:
