@@ -43,10 +43,18 @@ def readLearnFile(learnFile):
         print('\033[1m' + ' Learning file not found \n' + '\033[0m')
         return
 
+    '''
+    # Obsolete
     En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
     M = np.delete(M,np.s_[0:1],0)
     Cl = ['{:.2f}'.format(x) for x in M[:,0]]
     A = np.delete(M,np.s_[0:1],1)
+    '''
+    
+    En = M[0,1:]
+    A = M[1:,1:]
+    Cl = M[1:,0]
+    
     Atemp = A[:,range(len(preprocDef.enSel))]
 
     if preprocDef.cherryPickEnPoint == True and preprocDef.enRestrictRegion == False:
