@@ -6,7 +6,7 @@
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
 *
-* version: 20180611a
+* version: 20180611b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -65,6 +65,8 @@ def saveLearnFile(learnFile):
         A = M[1:,1:]
         YnormXind = np.where(M[0,1:]>0)[0].tolist()
         for i in range(0,A.shape[0]):
+            if(np.amin(A[i]) <= 0):
+                A[i,:] = A[i,:] - np.amin(A[i,:]) + 1e-8
             A[i,:] = np.multiply(A[i,:], defParam.YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
         M[1:,1:] = A
 
