@@ -6,7 +6,7 @@
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
 *
-* version: 20180611b
+* version: 20180611c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -40,6 +40,7 @@ def main():
 #************************************
 def saveLearnFile(learnFile):
     learnFileRoot = os.path.splitext(learnFile)[0]
+    learnFileNorm = learnFileRoot+'_norm'
     try:
         if os.path.splitext(learnFile)[1] == ".npy":
             M = np.load(learnFile)
@@ -60,7 +61,6 @@ def saveLearnFile(learnFile):
     #Cl = M[1:,0]
 
     if defParam.Ynorm ==True:
-        learnFileNorm = learnFileRoot+'_norm'
         print(" Normalizing spectra to:",defParam.YnormTo)
         A = M[1:,1:]
         YnormXind = np.where(M[0,1:]>0)[0].tolist()
@@ -70,18 +70,24 @@ def saveLearnFile(learnFile):
             A[i,:] = np.multiply(A[i,:], defParam.YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
         M[1:,1:] = A
 
-        with open(learnFileNorm+'.txt', 'ab') as f:
-            np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
-        print(" Normalized training spectra saved in:",learnFileNorm+'.txt',"\n")
+        if os.path.isfile(learnFileNorm+'.txt') is False:
+            with open(learnFileNorm+'.txt', 'ab') as f:
+                np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
+            print(" Normalized training spectra saved in:",learnFileNorm+'.txt',"\n")
+        else:
+            print(" Normalized training file in txt format already exists. Not saving...\n")
         learnFileRoot = learnFileNorm
 
-    with h5py.File(learnFileRoot+'.h5', 'w') as hf:
-        #hf.create_dataset("En",  data=En)
-        hf.create_dataset("M",  data=M)
-        #hf.create_dataset("Cl",  data=Cl.astype('|S9'))
-        #hf.create_dataset("A",  data=A)
+    if os.path.isfile(learnFileRoot+'.h5') is False:
+        with h5py.File(learnFileRoot+'.h5', 'w') as hf:
+            #hf.create_dataset("En",  data=En)
+            hf.create_dataset("M",  data=M)
+            #hf.create_dataset("Cl",  data=Cl.astype('|S9'))
+            #hf.create_dataset("A",  data=A)
+        print(" Learning file converted to hdf5: "+learnFileRoot+".h5\n")
 
-    print(" Learning file converted to hdf5: "+learnFileRoot+".h5\n")
+    else:
+            print(" Normalized training file in hdf5 format already exists. Not saving... \n")
 
 #************************************
 ''' Main initialization routine '''
