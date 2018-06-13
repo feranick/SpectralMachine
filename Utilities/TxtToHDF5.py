@@ -6,7 +6,7 @@
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
 *
-* version: 20180611c
+* version: 20180613a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -50,11 +50,6 @@ def saveLearnFile(learnFile):
     except:
         print('\033[1m' + ' Learning file not found \n' + '\033[0m')
         return
-
-    #En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    #M = np.delete(M,np.s_[0:1],0)
-    #Cl = np.asarray(['{:.2f}'.format(x) for x in M[:,0]])
-    #A = np.delete(M,np.s_[0:1],1)
     
     #En = M[0,1:]
     #A = M[1:,1:]
@@ -67,7 +62,7 @@ def saveLearnFile(learnFile):
         for i in range(0,A.shape[0]):
             if(np.amin(A[i]) <= 0):
                 A[i,:] = A[i,:] - np.amin(A[i,:]) + 1e-8
-            A[i,:] = np.multiply(A[i,:], defParam.YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
+            A[i,:] = np.multiply(A[i,:], defParam.YnormTo/max(A[i][:]))
         M[1:,1:] = A
 
         if os.path.isfile(learnFileNorm+'.txt') is False:
