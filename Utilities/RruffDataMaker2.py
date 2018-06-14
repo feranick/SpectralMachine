@@ -23,7 +23,7 @@ from datetime import datetime, date
 #**********************************************
 
 class defParam:
-    saveAsTxt = False
+    saveAsTxt = True
     saveFormatClass = False
 
     # set boundaries intensities for when to
