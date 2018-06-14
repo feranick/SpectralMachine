@@ -6,7 +6,7 @@
 * Make Cross Validation Dataset from Learing Set
 * Uses CSV with selected spectra from log file.
 *
-* version: 20180614c
+* version: 20180614d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -44,10 +44,14 @@ def main():
     En, M = readLearnFile(sys.argv[1])
     I = readIndexFile(sys.argv[2])
     L = np.zeros(0)
-    
+
     for i in range(0,I.shape[0]):
         if I[i] != 0:
             L = np.append(L,[i])
+
+    if len(L) ==0:
+        print(" No test validation spectra have been specified in the csv file. Exiting.\n")
+        return
 
     cvSize = L.shape[0]*100/I.shape[0]
     
@@ -74,6 +78,7 @@ def main():
 ''' Open Learning Data '''
 #************************************
 def readLearnFile(learnFile):
+    print(" Opening learning file: "+learnFile+"\n")
     try:
         if os.path.splitext(learnFile)[1] == ".npy":
             M = np.load(learnFile)
@@ -84,7 +89,7 @@ def readLearnFile(learnFile):
             with open(learnFile, 'r') as f:
                 M = np.loadtxt(f, unpack =False)
     except:
-        print('\033[1m' + ' Learning file not found \n' + '\033[0m')
+        print("\033[1m" + " Learning file not found \n" + "\033[0m")
         return
 
     En = M[0,1:]
