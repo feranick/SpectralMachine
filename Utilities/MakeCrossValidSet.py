@@ -103,22 +103,19 @@ def readLearnFile(learnFile):
 #***************************************
 def saveCVFiles(newTrain, newTest, trainFile, testFile):
     if defParam.saveAsTxt == True:
-        print("\n Saving new training file (txt) in", trainFile)
+        print("\n Saving new training file (txt) in:", trainFile)
         with open(trainFile, 'ab') as f:
             np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
-
         print(" Saving new cross validation (txt) in:", testFile, '\n')
         with open(testFile, 'ab') as f:
             np.savetxt(f, newTest, delimiter='\t', fmt='%10.6f')
-    
     else:
+        print("\n Saving new training file (hdf5) in: "+trainFile)
         with h5py.File(trainFile, 'w') as hf:
             hf.create_dataset("M",  data=newTrain)
-        print("\n Saving new training file (hdf5) in: "+trainFile)
-        
+        print(" Saving new cross validation file (hfd5) in:"+testFile+"\n")
         with h5py.File(testFile, 'w') as hf:
             hf.create_dataset("M",  data=newTest)
-        print(" Saving new cross validation file (hfd5) in:"+testFile+"\n")
 
 #************************************
 ''' Open Index File '''
