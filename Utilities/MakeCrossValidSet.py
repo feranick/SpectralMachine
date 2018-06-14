@@ -20,7 +20,7 @@ import sys, os.path, h5py
 ''' Main '''
 #************************************
 class defParam:
-    saveAsTxt = True
+    saveAsTxt = False
 
 def main():
     if len(sys.argv) < 3:
