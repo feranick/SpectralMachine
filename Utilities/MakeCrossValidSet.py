@@ -6,7 +6,7 @@
 * Make Cross Validation Dataset from Learing Set
 * Uses CSV with selected spectra from log file.
 *
-* version: 20180614a
+* version: 20180614b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -20,7 +20,7 @@ import sys, os.path, h5py
 ''' Main '''
 #************************************
 class defParam:
-    saveAsTxt = False
+    saveAsTxt = True
 
 def main():
     if len(sys.argv) < 3:
@@ -79,11 +79,11 @@ def main():
             
     else:
         with h5py.File(trainFile, 'w') as hf:
-            hf.create_dataset("M",  data=M)
+            hf.create_dataset("M",  data=newTrain)
         print("\n Saving new training file (hdf5) in: "+trainFile)
         
         with h5py.File(testFile, 'w') as hf:
-            hf.create_dataset("M",  data=M)
+            hf.create_dataset("M",  data=newTest)
         print(" Saving new cross validation file (hfd5) in:"+testFile+"\n")
 
     print(' Done!\n')
