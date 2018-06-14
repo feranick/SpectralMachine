@@ -6,7 +6,7 @@
 * Make Cross Validation Dataset from Learing Set
 * Uses CSV with selected spectra from log file.
 *
-* version: 20180614d
+* version: 20180614e
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -29,17 +29,6 @@ def main():
         print('  for the corresponding spectra in the csv index file\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
-    
-    if defParam.saveAsTxt == True:
-        trainFile = os.path.splitext(sys.argv[1])[0] + '_train.txt'
-        testFile = os.path.splitext(sys.argv[1])[0] + '_test.txt'
-    else:
-        trainFile = os.path.splitext(sys.argv[1])[0] + '_train.h5'
-        testFile = os.path.splitext(sys.argv[1])[0] + '_test.h5'
-
-    if os.path.exists(trainFile) or os.path.exists(testFile) == True:
-        print(" Training or cross validation test files exist. Exiting.\n")
-        return
 
     En, M = readLearnFile(sys.argv[1])
     I = readIndexFile(sys.argv[2])
@@ -59,6 +48,17 @@ def main():
           "\n Size of final training set:", str(I.shape[0]-L.shape[0]),
           "\n Size of final testing set: ",str(L.shape[0]),
           " ({:.2f}%)\n".format(cvSize))
+
+    if defParam.saveAsTxt == True:
+        trainFile = os.path.splitext(sys.argv[1])[0] + "_train-cv{:.2f}".format(cvSize) + ".txt"
+        testFile = os.path.splitext(sys.argv[1])[0] + "_test-cv{:.2f}".format(cvSize) + ".txt"
+    else:
+        trainFile = os.path.splitext(sys.argv[1])[0] + "_train-cv{:.2f}".format(cvSize) + ".h5"
+        testFile = os.path.splitext(sys.argv[1])[0] + "_test-cv{:.2f}".format(cvSize) + ".h5"
+
+    if os.path.exists(trainFile) or os.path.exists(testFile) == True:
+        print(" Training or cross validation test files exist. Exiting.\n")
+        return
         
     L = L.reshape(-1,1)
     newTest = np.append([0], En)
