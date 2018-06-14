@@ -53,10 +53,10 @@ def main():
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
     
-    #try:
-    processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
-    #except:
-    #    usage()
+    try:
+        processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
+    except:
+        usage()
     sys.exit(2)
 
 #**********************************************
@@ -69,14 +69,11 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     compound=[]
     learnFileRoot = os.path.splitext(learnFile)[0]
     learnFileExt = os.path.splitext(learnFile)[1]
-    print(learnFileExt)
     
     if learnFileExt == ".h5":
         defParam.saveAsTxt = False
     else:
         defParam.saveAsTxt = True
-
-    print(defParam.saveAsTxt)
 
     summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
     with open(summary_filename, "a") as sum_file:
