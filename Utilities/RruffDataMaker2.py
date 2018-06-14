@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20180614b
+* version: 20180614d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -76,10 +76,9 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
         defParam.saveAsTxt = True
 
     summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
-    with open(summary_filename, "a") as sum_file:
-        sum_file.write(str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
+    summary = str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
             ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+\
-            ",threshold="+str(threshold)+"\n")
+            ",threshold="+str(threshold)+"\n"
     
     # Read, if exisiting, learnFile
     if os.path.exists(learnFile):
@@ -100,18 +99,20 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
                 index = len(compound)-1
             
             success, M = makeFile(f, EnT, M, index, threshold)
-            with open(summary_filename, "a") as sum_file:
-                if success == True:
-                    sum_file.write(str(index) + ',,,' + f +'\n')
-                    size = size + 1
-                else:
-                    sum_file.write(str(index) + ',,NO,' + f +'\n')
+            if success == True:
+                summary += str(index) + ',,,' + f +'\n'
+                size = size + 1
+            else:
+                summary += str(index) + ',,,' + f +'\n'
 
     print('\n Energy scale: [', str(enInit),',',
             str(enFin), ']; Step:', str(enStep),
             '; Threshold:', str(threshold),'\n')
 
     saveLearningFile(M, os.path.splitext(learnFile)[0])
+    
+    with open(summary_filename, "a") as sum_file:
+        sum_file.write(summary)
 
     Cl2 = np.zeros((size, size))
     for i in range(size):
@@ -133,7 +134,7 @@ def makeFile(sampleFile, EnT, M, param, threshold):
             En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
             if(En.size == 0):
                 print('\n Empty file \n' )
-                return False
+                return False, M
         with open(sampleFile, 'r') as f:
             R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = ',', skiprows = 10)
         R[R<float(threshold)*np.amax(R)/100] = 0
@@ -141,7 +142,7 @@ def makeFile(sampleFile, EnT, M, param, threshold):
         print(' Setting datapoints below ', threshold, '% of max (',str(np.amax(R)),')')
     except:
         print('\033[1m' + sampleFile + ' file not found \n' + '\033[0m')
-        return False
+        return False, M
 
     if EnT.shape[0] == En.shape[0]:
         print(' Number of points in the learning dataset: ' + str(EnT.shape[0]))
