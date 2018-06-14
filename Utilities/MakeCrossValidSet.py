@@ -20,7 +20,7 @@ import sys, os.path, h5py
 ''' Main '''
 #************************************
 class defParam:
-    saveAsTxt = False
+    saveAsTxt = True
 
 def main():
     if len(sys.argv) < 3:
@@ -50,11 +50,11 @@ def main():
           " ({:.2f}%)\n".format(cvSize))
 
     if defParam.saveAsTxt == True:
-        trainFile = os.path.splitext(sys.argv[1])[0] + "_train-cv{:.2f}".format(cvSize) + ".txt"
-        testFile = os.path.splitext(sys.argv[1])[0] + "_test-cv{:.2f}".format(cvSize) + ".txt"
+        trainFile = os.path.splitext(sys.argv[1])[0] + "_train-cv{:.2f}".format(cvSize) + "pc.txt"
+        testFile = os.path.splitext(sys.argv[1])[0] + "_test-cv{:.2f}".format(cvSize) + "pc.txt"
     else:
-        trainFile = os.path.splitext(sys.argv[1])[0] + "_train-cv{:.2f}".format(cvSize) + ".h5"
-        testFile = os.path.splitext(sys.argv[1])[0] + "_test-cv{:.2f}".format(cvSize) + ".h5"
+        trainFile = os.path.splitext(sys.argv[1])[0] + "_train-cv{:.2f}".format(cvSize) + "pc.h5"
+        testFile = os.path.splitext(sys.argv[1])[0] + "_test-cv{:.2f}".format(cvSize) + "pc.h5"
 
     if os.path.exists(trainFile) or os.path.exists(testFile) == True:
         print(" Training or cross validation test files exist. Exiting.\n")
@@ -96,7 +96,7 @@ def readLearnFile(learnFile):
     A = M[1:,1:]
     Cl = M[1:,0]
 
-    return En, M
+    return En, M, Cl
 
 #***************************************
 ''' Save split CV Learning/test Data '''

@@ -6,7 +6,7 @@
 * Create Random Cross Validation Datasets
 * Train + Test
 *
-* version: 20170724a
+* version: 20180614a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -14,9 +14,11 @@
 '''
 print(__doc__)
 
-
 import numpy as np
-import sys, os, getopt, glob, csv
+import sys, os, csv, h5py
+
+class defParam:
+    saveAsTxt = False
 
 def main():
     if(len(sys.argv)<3):
@@ -24,14 +26,21 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
-    print(' Opening initial training file:', sys.argv[1])
     En, A, Cl = readLearnFile(sys.argv[1])
 
     percTrain = str('{:.0f}'.format(100-float(sys.argv[2])))
     percTest = str('{:.0f}'.format(float(sys.argv[2])))
-                    
-    newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-' + percTrain + 'pc.txt'
-    newTestFile = os.path.splitext(sys.argv[1])[0] + '_test-' + percTest + 'pc.txt'
+
+    if defParam.saveAsTxt == True:
+        newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv' + percTrain + 'pc.txt'
+        newTestFile = os.path.splitext(sys.argv[1])[0] + '_test-cv' + percTest + 'pc.txt'
+    else:
+        newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv' + percTrain + 'pc.h5'
+        newTestFile = os.path.splitext(sys.argv[1])[0] + '_test-cv' + percTest + 'pc.h5'
+
+    if os.path.exists(newTrainFile) or os.path.exists(newTestFile) == True:
+        print(" Training or cross validation test files exist. Exiting.\n")
+        return
 
     print(' Splitting', sys.argv[1], ' (Train:', percTrain,'%; Test:',percTest,'%)\n')
     A_train, Cl_train, A_test, Cl_test = formatSubset(A, Cl, float(sys.argv[2])/100)
@@ -47,20 +56,24 @@ def main():
 ''' Read Learning file '''
 #************************************
 def readLearnFile(learnFile):
+    print(" Opening learning file: "+learnFile+"\n")
     try:
-        with open(learnFile, 'r') as f:
-            M = np.loadtxt(f, unpack =False)
+        if os.path.splitext(learnFile)[1] == ".npy":
+            M = np.load(learnFile)
+        elif os.path.splitext(learnFile)[1] == ".h5":
+            with h5py.File(learnFile, 'r') as hf:
+                M = hf["M"][:]
+        else:
+            with open(learnFile, 'r') as f:
+                M = np.loadtxt(f, unpack =False)
     except:
-        print('\033[1m' + ' Learn data file not found \n' + '\033[0m')
+        print("\033[1m" + " Learning file not found \n" + "\033[0m")
         return
 
-    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(M,np.s_[0:1],0)
-    Cl = ['{:.2f}'.format(x) for x in M[:,0]]
-    A = np.delete(M,np.s_[0:1],1)
+    En = M[0,1:]
+    A = M[1:,1:]
+    Cl = M[1:,0]
 
-    print(' Number of datapoints = ' + str(A.shape[0]))
-    print(' Size of each datapoint = ' + str(A.shape[1]) + '\n')
     return En, A, Cl
 
 #*****************************************
@@ -68,11 +81,17 @@ def readLearnFile(learnFile):
 #*****************************************
 def writeFile(File, En, A, Cl):
     print(' Number of datapoints:', str(A.shape[0]))
-    with open(File, 'ab') as f:
-        if os.stat(File).st_size == 0:
-            np.savetxt(f, np.append([0], En).reshape(1,-1), fmt='%5s')
-        for i in range(len(Cl)):
-            np.savetxt(f, np.append(Cl[i], A[i]).reshape(1,-1), fmt='%5s')
+    
+    newMatrix = np.append([0], En).reshape(1,-1)
+    for i in range(len(Cl)):
+        newMatrix = np.vstack((newMatrix, np.append(Cl[i], A[i])))
+    
+    if defParam.saveAsTxt == True:
+        with open(File, 'ab') as f:
+            np.savetxt(f, newMatrix, delimiter='\t', fmt='%10.6f')
+    else:
+        with h5py.File(File, 'w') as hf:
+            hf.create_dataset("M",  data=newMatrix)
 
 #************************************
 ''' Format subset '''
