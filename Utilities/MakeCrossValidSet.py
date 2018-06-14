@@ -6,7 +6,7 @@
 * Make Cross Validation Dataset from Learing Set
 * Uses CSV with selected spectra from log file.
 *
-* version: 20170724d
+* version: 20180614a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -14,18 +14,28 @@
 '''
 print(__doc__)
 
-
 import numpy as np
-import sys, os.path, getopt, glob
+import sys, os.path, h5py
+#************************************
+''' Main '''
+#************************************
+class defParam:
+    saveAsTxt = False
 
 def main():
     if len(sys.argv) < 3:
         print(' Usage:\n  python3 MakeCrossValidSet.py <learnData> <index_csv_data>\n')
+        print('  To select validation spectra, add a \"1\" in the second column')
+        print('  for the corresponding spectra in the csv index file\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
-    trainFile = os.path.splitext(sys.argv[1])[0] + '_train.txt'
-    testFile = os.path.splitext(sys.argv[1])[0] + '_test.txt'
+    if defParam.saveAsTxt == True:
+        trainFile = os.path.splitext(sys.argv[1])[0] + '_train.txt'
+        testFile = os.path.splitext(sys.argv[1])[0] + '_test.txt'
+    else:
+        trainFile = os.path.splitext(sys.argv[1])[0] + '_train.h5'
+        testFile = os.path.splitext(sys.argv[1])[0] + '_test.h5'
 
     if os.path.exists(trainFile) or os.path.exists(testFile) == True:
         print(" Training or cross validation test files exist. Exiting.\n")
@@ -57,13 +67,24 @@ def main():
         else:
             newTrain = np.vstack((newTrain, M[i]))
 
-    print('\n Saving new training file in', trainFile)
-    with open(trainFile, 'ab') as f:
-        np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
 
-    print(' Saving new cross validation file in:', testFile, '\n')
-    with open(testFile, 'ab') as f:
-        np.savetxt(f, newTest, delimiter='\t', fmt='%10.6f')
+    if defParam.saveAsTxt == True:
+        print("\n Saving new training file (txt) in", trainFile)
+        with open(trainFile, 'ab') as f:
+            np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
+
+        print(" Saving new cross validation (txt) in:", testFile, '\n')
+        with open(testFile, 'ab') as f:
+            np.savetxt(f, newTest, delimiter='\t', fmt='%10.6f')
+            
+    else:
+        with h5py.File(trainFile, 'w') as hf:
+            hf.create_dataset("M",  data=M)
+        print("\n Saving new training file (hdf5) in: "+trainFile)
+        
+        with h5py.File(testFile, 'w') as hf:
+            hf.create_dataset("M",  data=M)
+        print(" Saving new cross validation file (hfd5) in:"+testFile+"\n")
 
     print(' Done!\n')
 
@@ -72,13 +93,22 @@ def main():
 #************************************
 def readLearnFile(learnFile):
     try:
-        with open(learnFile, 'r') as f:
-            M = np.loadtxt(f, unpack =False)
+        if os.path.splitext(learnFile)[1] == ".npy":
+            M = np.load(learnFile)
+        elif os.path.splitext(learnFile)[1] == ".h5":
+            with h5py.File(learnFile, 'r') as hf:
+                M = hf["M"][:]
+        else:
+            with open(learnFile, 'r') as f:
+                M = np.loadtxt(f, unpack =False)
     except:
-        print('\033[1m' + ' Learn data file not found \n' + '\033[0m')
+        print('\033[1m' + ' Learning file not found \n' + '\033[0m')
         return
-    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(M,np.s_[0:1],0)
+
+    En = M[0,1:]
+    A = M[1:,1:]
+    Cl = M[1:,0]
+
     return En, M
 
 #************************************
