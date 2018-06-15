@@ -3,7 +3,7 @@
 '''
 *********************************************
 * Plot train data split in different files
-* version: 20180616a
+* version: 20180615a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************

@@ -7,7 +7,7 @@
 * Offset is randomly set
 * For augmentation of data
 *
-* version: 20180614a
+* version: 20180615a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -77,9 +77,9 @@ def readLearnFile(learnFile):
         return
 
     En = M[0,1:]
-    #A = M[1:,1:]
+    A = M[1:,:]
     #Cl = M[1:,0]
-    return En, M
+    return En, A
 
 #***************************************
 ''' Save new learning Data '''
