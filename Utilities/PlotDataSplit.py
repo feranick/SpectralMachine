@@ -3,14 +3,14 @@
 '''
 *********************************************
 * Plot train data split in different files
-* version: 20171013b
+* version: 20180616a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
 print(__doc__)
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path, csv, h5py
 import matplotlib.pyplot as plt
 
 def main():
@@ -34,23 +34,25 @@ def main():
 ''' Open Learning Data '''
 #************************************
 def readLearnFile(learnFile):
+    print(" Opening learning file: "+learnFile+"\n")
     try:
-        with open(learnFile, 'r') as f:
-            M = np.loadtxt(f, unpack =False)
+        if os.path.splitext(learnFile)[1] == ".npy":
+            M = np.load(learnFile)
+        elif os.path.splitext(learnFile)[1] == ".h5":
+            with h5py.File(learnFile, 'r') as hf:
+                M = hf["M"][:]
+        else:
+            with open(learnFile, 'r') as f:
+                M = np.loadtxt(f, unpack =False)
     except:
-        print('\033[1m' + ' Learn data file not found \n' + '\033[0m')
+        print("\033[1m" + " Learning file not found \n" + "\033[0m")
         return
-
-    learnFileRoot = os.path.splitext(learnFile)[0]
-
-    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(np.array(M[:,1:]),np.s_[0:1],0)
     
-    print("En:",En.shape)
-    print("M:",M.shape)
-    #print ("En:",En)
-    #print("M:",M)
-    return En, M, learnFileRoot
+    learnFileRoot = os.path.splitext(learnFile)[0]
+    En = M[0,1:]
+    A = M[1:,1:]
+    #Cl = M[1:,0]
+    return En, A, learnFileRoot
 
 #************************************
 ''' Plot data '''
@@ -64,7 +66,6 @@ def plotTrainData(En, M, learnFileRoot, nplots):
             max = (j+1)*nplots
         else:
             max = M.shape[0]
-        print(max)
 
         if nplots == 1:
             nplots = M.shape[0]
