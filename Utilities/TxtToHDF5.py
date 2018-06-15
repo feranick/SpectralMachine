@@ -6,7 +6,7 @@
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
 *
-* version: 20180615a
+* version: 20180615c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -15,7 +15,7 @@
 print(__doc__)
 
 import numpy as np
-import h5py, sys, os.path
+import h5py, sys, os.path, getopt
 
 #************************************
 ''' Main '''
@@ -26,15 +26,20 @@ class defParam:
     saveNormAsTxt = False
 
 def main():
-
-    if len(sys.argv) < 2:
-        print(' Usage:\n  python3 TxtToHDF5.py <Learning File prepared with RruffDataMaker>\n')
-        print(' Requires python 3.x. Not compatible with python 2.x\n')
-        return
-    else:
-        file =  sys.argv[1]
-
-    saveLearnFile(file)
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],
+                                   "nkh:", ["norm", "key", "help"])
+        if len(sys.argv) < 2:
+            usage()
+            return
+        else:
+            if "-n" in [x[0] for x in opts] :
+                defParam.Ynorm = True
+            file =  args[0]
+        saveLearnFile(file)
+    except:
+        usage()
+        sys.exit(2)
 
 #************************************
 ''' Convert Learning file to HDF5 '''
@@ -59,7 +64,6 @@ def saveLearnFile(learnFile):
     if defParam.Ynorm ==True:
         print(" Normalizing spectra to:",defParam.YnormTo)
         A = M[1:,1:]
-        YnormXind = np.where(M[0,1:]>0)[0].tolist()
         for i in range(0,A.shape[0]):
             if(np.amin(A[i]) <= 0):
                 A[i,:] = A[i,:] - np.amin(A[i,:]) + 1e-8
@@ -85,6 +89,14 @@ def saveLearnFile(learnFile):
 
     else:
             print(" Normalized training file in hdf5 format already exists. Not saving... \n")
+
+#************************************
+''' Lists the program usage '''
+#************************************
+def usage():
+    print(' Usage:\n  python3 TxtToHDF5.py <Learning File prepared with RruffDataMaker>\n')
+    print(' With Normalization:\n  python3 TxtToHDF5.py -n <Learning File prepared with RruffDataMaker>\n')
+    print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
 ''' Main initialization routine '''
