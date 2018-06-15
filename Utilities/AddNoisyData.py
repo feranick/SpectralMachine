@@ -28,7 +28,8 @@ class defParam:
 
 def main():
     if len(sys.argv) < 4:
-        print(' Usage:\n  python3 AddNoisyData.py <learnData> <#additions> <offset>\n')
+        print(' Usage:\n  python3 AddNoisyData.py <learnData> <#additions> <offset>')
+        print('  Data is by default normalized to 1, before noise is added.\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
