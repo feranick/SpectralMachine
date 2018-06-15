@@ -6,7 +6,7 @@
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
 *
-* version: 20180613a
+* version: 20180616a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -23,6 +23,7 @@ import h5py, sys, os.path
 class defParam:
     Ynorm = False
     YnormTo = 1
+    saveNormAsTxt = False
 
 def main():
 
@@ -65,12 +66,13 @@ def saveLearnFile(learnFile):
             A[i,:] = np.multiply(A[i,:], defParam.YnormTo/max(A[i][:]))
         M[1:,1:] = A
 
-        if os.path.isfile(learnFileNorm+'.txt') is False:
-            with open(learnFileNorm+'.txt', 'ab') as f:
-                np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
-            print(" Normalized training spectra saved in:",learnFileNorm+'.txt',"\n")
-        else:
-            print(" Normalized training file in txt format already exists. Not saving...\n")
+        if defParam.saveNormAsTxt == True:
+            if os.path.isfile(learnFileNorm+'.txt') is False:
+                with open(learnFileNorm+'.txt', 'ab') as f:
+                    np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
+                print(" Normalized training spectra saved in:",learnFileNorm+'.txt',"\n")
+            else:
+                print(" Normalized training file in txt format already exists. Not saving...\n")
         learnFileRoot = learnFileNorm
 
     if os.path.isfile(learnFileRoot+'.h5') is False:
