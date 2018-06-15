@@ -7,7 +7,7 @@
 * Offset is randomly set
 * For augmentation of data
 *
-* version: 20180615a
+* version: 20180615b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -21,15 +21,17 @@ import sys, os.path, h5py
 ''' Main '''
 #************************************
 class defParam:
-    saveAsTxt = True
+    saveAsTxt = False
     addToFlatland = False
+    Ynorm = True
+    YnormTo = 1
 
 def main():
     if len(sys.argv) < 4:
         print(' Usage:\n  python3 AddNoisyData.py <learnData> <#additions> <offset>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
-    
+
     newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2] + '_offs' + sys.argv[3]
     learnFileExt = os.path.splitext(sys.argv[1])[1]
 
@@ -46,6 +48,10 @@ def main():
         print(' Adding', sys.argv[2], 'sets with random noise with offset:', sys.argv[3], '\n')
 
     En, M = readLearnFile(sys.argv[1])
+    
+    if defParam.Ynorm ==True:
+        M = normalizeSpectra(M)
+        newFile += '_norm'
 
     if os.path.exists(newFile) == False:
         newTrain = np.append([0], En)
@@ -108,6 +114,17 @@ def scrambleNoise(M, offset):
         else:
             if M[:,i].any() == 0:
                 M[:,i] += offset*uniform(-1,1)
+    return M
+
+#************************************
+''' Normalize '''
+#************************************
+def normalizeSpectra(M):
+    print(" Normalizing spectra to:",defParam.YnormTo)
+    for i in range(0,M.shape[0]):
+        if(np.amin(M[i]) <= 0):
+            M[i,:] = M[i,:] - np.amin(M[i,:]) + 1e-8
+        M[i,:] = np.multiply(M[i,:], defParam.YnormTo/max(M[i][:]))
     return M
 
 #************************************
