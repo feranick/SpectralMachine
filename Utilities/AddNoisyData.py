@@ -7,7 +7,7 @@
 * Offset is randomly set
 * For augmentation of data
 *
-* version: 20180615b
+* version: 20180615c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -35,11 +35,13 @@ def main():
     newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2] + '_offs' + sys.argv[3]
     learnFileExt = os.path.splitext(sys.argv[1])[1]
 
+    '''
     if learnFileExt == ".h5":
         defParam.saveAsTxt = False
     else:
         defParam.saveAsTxt = True
-    
+    '''
+
     if len(sys.argv) == 5:
         defParam.addToFlatland = True
         newFile += '_back'
