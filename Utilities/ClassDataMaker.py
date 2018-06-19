@@ -5,7 +5,7 @@
 *
 * ClassDataMaker
 * Adds spectra to single file for classification
-* version: 20170320d
+* version: 20180619a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -31,7 +31,7 @@ def main():
 #**********************************************
 ''' Open and process inividual files '''
 #**********************************************
-def processMultiFile(leearnFile):
+def processMultiFile(learnFile):
     index = 1
     success = False
     learnFileRoot = os.path.splitext(learnFile)[0]
