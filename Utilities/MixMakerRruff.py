@@ -6,7 +6,7 @@
 * MixMakerRruff
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20180619a
+* version: 20180619b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -36,11 +36,11 @@ def main():
         enFin =  sys.argv[2]
         enStep = sys.argv[3]
         if len(sys.argv)<5:
-            print("No threshold defined, setting to zero\n")
+            print("No threshold defined, setting to zero")
             threshold = 0
         else:
             threshold = sys.argv[4]
-            print("Setting threshold to:", threshold,"%\n")
+            print("Setting threshold to:", threshold,"%")
 
     rootMixFile = "mixture"
     dateTimeStamp = str(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
@@ -64,7 +64,7 @@ def main():
                     R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = ',', skiprows = 10)
                     
                 R[R<float(threshold)*np.amax(R)/100] = 0
-                print(file + '\n File OK, converting to ASCII...')
+                print('\n' + file + '\n File OK, converting to ASCII...')
 
                 EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
             
@@ -122,12 +122,12 @@ def main():
 def saveMixFile(M, learnFile):
     if defParam.saveAsTxt == True:
         learnFile += '.txt'
-        print(" Saving mixture file (txt) in:", learnFile+"\n")
+        print("\n Saving mixture file (txt) in:\033[1m", learnFile+"\033[0m \n")
         with open(learnFile, 'ab') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
     else:
         learnFile += '.h5'
-        print(" Saving mixture file (hdf5) in: "+learnFile+"\n")
+        print("\n Saving mixture file (hdf5) in:\033[1m"+learnFile+"\033[0m \n")
         with h5py.File(learnFile, 'w') as hf:
             hf.create_dataset("M",  data=M)
 
@@ -140,9 +140,9 @@ def saveAsASCII(EnT, R, file):
         convertR = np.transpose(np.vstack((EnT, R)))
         with open(convertFile, 'ab') as f:
             np.savetxt(f, convertR, delimiter='\t', fmt='%10.6f')
-        print(" Saving spectra as ASCII in: "+file+"\n")
+        print(" Saving spectra as ASCII in: "+file)
     except:
-        print(" Saving spectra as ASCII failed\n")
+        print(" Saving spectra as ASCII failed")
 
 #************************************
 ''' Main initialization routine '''
