@@ -6,7 +6,7 @@
 * MixMakerRruff
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20171208d
+* version: 20180619a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -15,9 +15,16 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, getopt, glob, csv, re
+import sys, os.path, glob, csv, re, h5py
 from datetime import datetime, date
 import matplotlib.pyplot as plt
+
+#************************************
+''' Main '''
+#************************************
+class defParam:
+    saveAsTxt = True
+    saveAsASCII = False
 
 def main():
     if len(sys.argv) < 4:
@@ -37,7 +44,7 @@ def main():
 
     rootMixFile = "mixture"
     dateTimeStamp = str(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-    mixFile = rootMixFile+"_"+dateTimeStamp+".txt"
+    mixFile = rootMixFile+"_"+dateTimeStamp
     summaryMixFile = rootMixFile+"-summary_"+dateTimeStamp+".csv"
     plotFile = rootMixFile+"-plot_"+dateTimeStamp
     plt.figure(num=plotFile)
@@ -50,7 +57,7 @@ def main():
 
     for ind, file in enumerate(sorted(os.listdir("."))):
         try:
-            if file[:7] != "mixture" and os.path.splitext(file)[-1] == ".txt":
+            if file[:7] != "mixture" and os.path.splitext(file)[-1] == ".txt" and file[-10:] != "_ASCII.txt":
                 with open(file, 'r') as f:
                     En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
                 with open(file, 'r') as f:
@@ -81,15 +88,10 @@ def main():
                 index += 1
 
                 print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
-                '''
-                try:
-                    convertFile = os.path.splitext(file)[0] + '_ASCII.txt'
-                    convertR = np.transpose(np.vstack((EnT, R)))
-                    with open(convertFile, 'ab') as f:
-                        np.savetxt(f, convertR, delimiter='\t', fmt='%10.6f')
-                except:
-                    pass
-                '''
+
+                if defParam.saveAsASCII == True:
+                    saveAsASCII(EnT,R,file)
+                
                 label = re.search('(.+?)__',file).group(1)
                 with open(summaryMixFile, "a") as sum_file:
                     sum_file.write(str(index) + ',,,' + label + ','+file+'\n')
@@ -103,18 +105,44 @@ def main():
     except:
         print("No usable files found\n ")
         return
-    with open(mixFile, 'ab') as f:
-        np.savetxt(f, newR, delimiter='\t', fmt='%10.6f')
-    print("\nMixtures saved in:",mixFile, "\n")
+
+    saveMixFile(newR, mixFile)
 
     plt.plot(EnT, mixR, linewidth=3, label=r'Mixture')
-
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
     plt.legend(loc='upper right')
     plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
     plt.show()
     plt.close()
+
+#***************************************
+''' Save new learning Data '''
+#***************************************
+def saveMixFile(M, learnFile):
+    if defParam.saveAsTxt == True:
+        learnFile += '.txt'
+        print(" Saving mixture file (txt) in:", learnFile+"\n")
+        with open(learnFile, 'ab') as f:
+            np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
+    else:
+        learnFile += '.h5'
+        print(" Saving mixture file (hdf5) in: "+learnFile+"\n")
+        with h5py.File(learnFile, 'w') as hf:
+            hf.create_dataset("M",  data=M)
+
+#***************************************
+''' Save mixture file in ASCII '''
+#***************************************
+def saveAsASCII(EnT, R, file):
+    try:
+        convertFile = os.path.splitext(file)[0] + '_ASCII.txt'
+        convertR = np.transpose(np.vstack((EnT, R)))
+        with open(convertFile, 'ab') as f:
+            np.savetxt(f, convertR, delimiter='\t', fmt='%10.6f')
+        print(" Saving spectra as ASCII in: "+file+"\n")
+    except:
+        print(" Saving spectra as ASCII failed\n")
 
 #************************************
 ''' Main initialization routine '''
