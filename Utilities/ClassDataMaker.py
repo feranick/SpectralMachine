@@ -54,12 +54,12 @@ def processMultiFile(learnFile):
 def makeFile(sampleFile, learnFile, param):
     try:
         with open(sampleFile, 'r') as f:
-            En = np.loadtxt(f, unpack = True, skiprows = 10, usecols=range(0,1))
+            En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
             if(En.size == 0):
                 print('\n Empty file \n' )
                 return False
         with open(sampleFile, 'r') as f:
-            R = np.loadtxt(f, unpack = True, usecols=range(1,2))
+            R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = ',', skiprows = 10)
         print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
     except:
         print('\033[1m' + ' Sample data file not found \n' + '\033[0m')
