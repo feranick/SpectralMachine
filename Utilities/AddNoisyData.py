@@ -54,7 +54,7 @@ def main():
     
     if defParam.Ynorm ==True:
         M = normalizeSpectra(M)
-        newFile += '_norm'
+        newFile += '_norm1'
 
     if os.path.exists(newFile) == False:
         newTrain = np.append([0], En)
