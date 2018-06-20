@@ -4,8 +4,10 @@
 *********************************************
 *
 * AddSpectraToLearnFile
+*
 * Adds spectra to Training File
-* version: 20180619c
+* Spectra can be ASCII or Rruff
+* version: 20180619d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -20,9 +22,6 @@ from datetime import datetime, date
 #**********************************************
 ''' main '''
 #**********************************************
-class defParam:
-    isRruff = False
-
 def main():
     try:
         makeFile(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
@@ -33,13 +32,14 @@ def main():
 #**********************************************
 ''' Make Training file '''
 #**********************************************
-def makeFile(trainFile, sampleTag, sampleFile, param):
+def makeFile(learnFile, sampleTag, sampleFile, param):
     #**********************************************
     ''' Open and process training data '''
     #**********************************************
     try:
+        firstline = open(sampleFile).readline()
         with open(sampleFile, 'r') as f:
-            if defParam.isRruff:
+            if firstline[:7] == "##NAMES":
                 En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
             else:
                 En = np.loadtxt(f, unpack = True, usecols=range(0,1))
@@ -49,57 +49,80 @@ def makeFile(trainFile, sampleTag, sampleFile, param):
         return
 
     with open(sampleFile, 'r') as f:
-        if defParam.isRruff:
+        if firstline[:7] == "##NAMES":
             R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = ',', skiprows = 10)
         else:
             R = np.loadtxt(f, unpack = True, usecols=range(1,2))
 
-    if os.path.exists(trainFile):
-        with open(trainFile, 'r') as f:
-            M = np.loadtxt(f, unpack =False)
-            sampleSize = M.shape[0]+1
-            print(' Number of samples in \"' + trainFile + '\": ' + str(sampleSize))
-            EnT = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-            if EnT.shape[0] == En.shape[0]:
-                print(' Number of points in the map dataset: ' + str(EnT.shape[0]))
-            else:
-                print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
-                R = np.interp(EnT, En, R, left = 0, right = 0)
-                print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
-            print('\n Added spectra to: \"' + trainFile + '\"')
-            newTrain = np.append(float(param),R).reshape(1,-1)
+    if os.path.exists(learnFile):
+        if os.path.splitext(learnFile)[1] == ".npy":
+            M = np.load(learnFile)
+        elif os.path.splitext(learnFile)[1] == ".h5":
+            with h5py.File(learnFile, 'r') as hf:
+                M = hf["M"][:]
+        else:
+            with open(learnFile, 'r') as f:
+                M = np.loadtxt(f, unpack =False)
+            
+        sampleSize = M.shape[0]+1
+        print(' Number of samples in \"' + learnFile + '\": ' + str(sampleSize))
+        EnT = np.delete(np.array(M[0,:]),np.s_[0:1],0)
+        if EnT.shape[0] == En.shape[0]:
+            print(' Number of points in the map dataset: ' + str(EnT.shape[0]))
+        else:
+            print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
+            R = np.interp(EnT, En, R, left = 0, right = 0)
+            print('\033[1m' + ' Mismatch corrected: datapoints in sample: ' + str(R.shape[0]) + '\033[0m')
+        newTrain = np.append(float(param),R).reshape(1,-1)
     else:
         print('\n\033[1m' + ' Train data file not found. Creating...' + '\033[0m')
         newTrain = np.append([0], En)
-        print(' Added spectra to: \"' + trainFile + '\"')
         newTrain = np.vstack((newTrain, np.append(float(param),R)))
         sampleSize = 2
-    
-    with open(trainFile, 'ab') as f:
-        np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
 
+    saveLearnFile(newTrain, learnFile)
+    
     if os.path.exists(sampleTag):
-        trainFileInfo = sampleTag
+        learnFileInfo = sampleTag
         summary=""
     else:
-        trainFileInfo = os.path.splitext(trainFile)[0] + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
-        trainFileInfo = sampleTag
+        learnFileInfo = os.path.splitext(learnFile)[0] + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
+        learnFileInfo = sampleTag
         print('\033[1m' + ' Train info file not found. Creating...' + '\033[0m')
         summary = str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+"\n"
 
     summary += str(param) + ',,,' + sampleFile +'\n'
         
-    with open(trainFileInfo, 'ab') as f:
+    with open(learnFileInfo, 'ab') as f:
         f.write(summary.encode())
 
-    print(' Added info to \"' + trainFileInfo + '\"\n')
+    print(' Added info to \"' + learnFileInfo + '\"\n')
+
+#***************************************
+''' Save new learning Data '''
+#***************************************
+def saveLearnFile(M, learnFile):
+    if os.path.splitext(learnFile)[1] == '.txt':
+        print(" Saving updated training file (txt) in:", learnFile+"\n")
+        with open(learnFile, 'ab') as f:
+            np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
+    elif os.path.splitext(sys.argv[1])[1] == '.h5':
+        print(" Saving updated training file (hdf5) in: "+learnFile+"\n")
+        with h5py.File(learnFile, 'w') as hf:
+            hf.create_dataset("M",  data=M)
+    elif os.path.splitext(sys.argv[1])[1] == '.npy':
+        print(" Saving updated training file (npy) in: "+learnFile+"\n")
+        with open(learnFile, 'ab') as f:
+            np.save(f, M, '%10.6f')
+    else:
+        print(" Format of training file, "+learnFile+", not supported\n")
 
 #************************************
 ''' Lists the program usage '''
 #************************************
 def usage():
     print('\n Usage:\n')
-    print('  python3 TrainingDataMaker.py <trainingfile> <info_file> <spectrafile> <parameter>\n')
+    print('  python3 AddSpectraToLearnFile.py <trainingfile> <info_file> <spectrafile> <parameter>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
