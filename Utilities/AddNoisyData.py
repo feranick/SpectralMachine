@@ -7,7 +7,7 @@
 * Offset is randomly set
 * For augmentation of data
 *
-* version: 20180615c
+* version: 20180620a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -126,8 +126,8 @@ def normalizeSpectra(M):
     print(" Normalizing spectra to:",defParam.YnormTo)
     for i in range(0,M.shape[0]):
         if(np.amin(M[i]) <= 0):
-            M[i,:] = M[i,:] - np.amin(M[i,:]) + 1e-8
-        M[i,:] = np.multiply(M[i,:], defParam.YnormTo/max(M[i][:]))
+            M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
+        M[i,1:] = np.multiply(M[i,1:], defParam.YnormTo/max(M[i][1:]))
     return M
 
 #************************************
