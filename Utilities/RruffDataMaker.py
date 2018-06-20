@@ -21,7 +21,6 @@ from datetime import datetime, date
 #**********************************************
 ''' main '''
 #**********************************************
-
 class defParam:
     saveAsTxt = True
     saveFormatClass = False
