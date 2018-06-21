@@ -7,7 +7,7 @@
 * Offset is randomly set
 * For augmentation of data
 *
-* version: 20180620a
+* version: 20180621a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -33,7 +33,7 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
-    newFile = os.path.splitext(sys.argv[1])[0] + '_num' + sys.argv[2] + '_offs' + sys.argv[3]
+    newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2] + '_offs' + sys.argv[3]
     learnFileExt = os.path.splitext(sys.argv[1])[1]
 
     '''
