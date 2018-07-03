@@ -6,7 +6,7 @@
 * NormLearnFile
 * Normalize spectral intensity in Learning File
 *
-* version: 20180620a
+* version: 20180703a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -25,13 +25,14 @@ class defParam:
 
 def main():
     if len(sys.argv) < 2:
-        print(' Usage:\n  python3 AddNoisyData.py <learnData> <Ymax>')
+        print(' Usage:\n  python3 NormLearnFile.py <learnData> <Ymax>\n')
+        print(' Usage (norm intensity to 1):\n  python3 NormLearnFile.py <learnData>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
-    elif len(sys.argv) <= 3:
-        defParam.YnormTo = sys.argv[2]
+    elif len(sys.argv) < 3:
+        defParam.YnormTo = 1
     else:
-        pass
+        defParam.YnormTo = sys.argv[2]
 
     newFile = os.path.splitext(sys.argv[1])[0] + '_norm' + str(defParam.YnormTo)
     learnFileExt = os.path.splitext(sys.argv[1])[1]
