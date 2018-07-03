@@ -29,7 +29,7 @@ class defParam:
 def main():
     if len(sys.argv) < 4:
         print(' Usage:\n  python3 AddNoisyData.py <learnData> <#additions> <offset>')
-        print('  Data is by default normalized to 1, before noise is added.\n')
+        print('  Data is by default normalized to 1\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
@@ -51,6 +51,11 @@ def main():
         print(' Adding', sys.argv[2], 'sets with random noise with offset:', sys.argv[3], '\n')
 
     En, M = readLearnFile(sys.argv[1])
+    
+    if defParam.Ynorm ==True:
+        print(" Normalizing Learning Spectra to:",defParam.YnormTo)
+        M = normalizeSpectra(M)
+        newFile += '_norm1'
 
     if os.path.exists(newFile) == False:
         newTrain = np.append([0], En)
@@ -62,8 +67,8 @@ def main():
         newTrain = np.vstack((newTrain, scrambleNoise(M, float(sys.argv[3]))))
 
     if defParam.Ynorm ==True:
+        print(" Normalizing Learning + Noisy Spectra to:",defParam.YnormTo,"\n")
         newTrain = normalizeSpectra(newTrain)
-        newFile += '_norm1'
 
     saveLearnFile(newTrain, newFile)
 
@@ -123,7 +128,6 @@ def scrambleNoise(M, offset):
 ''' Normalize '''
 #************************************
 def normalizeSpectra(M):
-    print(" Normalizing spectra to:",defParam.YnormTo)
     for i in range(1,M.shape[0]):
         if(np.amin(M[i]) <= 0):
             M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
