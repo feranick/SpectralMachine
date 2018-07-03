@@ -6,7 +6,7 @@
 * NormLearnFile
 * Normalize spectral intensity in Learning File
 *
-* version: 20180703a
+* version: 20180703b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -30,16 +30,15 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     elif len(sys.argv) < 3:
-        defParam.YnormTo = 1
+        pass
     else:
         defParam.YnormTo = sys.argv[2]
 
     newFile = os.path.splitext(sys.argv[1])[0] + '_norm' + str(defParam.YnormTo)
     learnFileExt = os.path.splitext(sys.argv[1])[1]
 
-    En, M = readLearnFile(sys.argv[1])
+    M = readLearnFile(sys.argv[1])
     M = normalizeSpectra(M)
-
     saveLearnFile(M, newFile)
 
 #************************************
@@ -59,11 +58,8 @@ def readLearnFile(learnFile):
     except:
         print("\033[1m" + " Learning file not found \n" + "\033[0m")
         return
-
-    En = M[0,1:]
-    A = M[1:,:]
-    #Cl = M[1:,0]
-    return En, A
+    
+    return M
 
 #***************************************
 ''' Save new learning Data '''
@@ -85,7 +81,7 @@ def saveLearnFile(M, learnFile):
 #************************************
 def normalizeSpectra(M):
     print(" Normalizing max spectral intensity to:",defParam.YnormTo,"\n")
-    for i in range(0,M.shape[0]):
+    for i in range(1,M.shape[0]):
         if(np.amin(M[i]) <= 0):
             M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
         M[i,1:] = np.multiply(M[i,1:], float(defParam.YnormTo)/max(M[i][1:]))

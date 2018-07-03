@@ -7,7 +7,7 @@
 * Offset is randomly set
 * For augmentation of data
 *
-* version: 20180621a
+* version: 20180703b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -51,10 +51,6 @@ def main():
         print(' Adding', sys.argv[2], 'sets with random noise with offset:', sys.argv[3], '\n')
 
     En, M = readLearnFile(sys.argv[1])
-    
-    if defParam.Ynorm ==True:
-        M = normalizeSpectra(M)
-        newFile += '_norm1'
 
     if os.path.exists(newFile) == False:
         newTrain = np.append([0], En)
@@ -64,6 +60,10 @@ def main():
 
     for j in range(int(sys.argv[2])):
         newTrain = np.vstack((newTrain, scrambleNoise(M, float(sys.argv[3]))))
+
+    if defParam.Ynorm ==True:
+        newTrain = normalizeSpectra(newTrain)
+        newFile += '_norm1'
 
     saveLearnFile(newTrain, newFile)
 
@@ -124,7 +124,7 @@ def scrambleNoise(M, offset):
 #************************************
 def normalizeSpectra(M):
     print(" Normalizing spectra to:",defParam.YnormTo)
-    for i in range(0,M.shape[0]):
+    for i in range(1,M.shape[0]):
         if(np.amin(M[i]) <= 0):
             M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
         M[i,1:] = np.multiply(M[i,1:], defParam.YnormTo/max(M[i][1:]))
