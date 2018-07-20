@@ -39,11 +39,11 @@ cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
   echo $inpfiletest
 
   # Use argument specific cross validation file:
-  #$execpath/SpectraLearnPredict.py -a $inpfile $inpfiletest 2>&1 | tee -a log_$inpfile
-  #$execpath/SpectraLearnPredict2 -a $inpfile $inpfiletest 2>&1 | tee -a log_$inpfile
+  #$execpath/SpectraLearnPredict.py -a $inpfile $inpfiletest 2>&1 | tee -a log_$basedir.txt
+  #$execpath/SpectraLearnPredict2 -a $inpfile $inpfiletest 2>&1 | tee -a log_$basedir.txt
 
   # Use randomly created cross validation dataset:
-  #$execpath/SpectraLearnPredict.py -a $inpfile  2>&1 | tee -a log_$inpfile
-  $execpath/SpectraLearnPredict2 -a $inpfile  2>&1 | tee -a log_$inpfile
+  #$execpath/SpectraLearnPredict.py -a $inpfile  2>&1 | tee -a log_$basedir.txt
+  $execpath/SpectraLearnPredict2 -a $inpfile  2>&1 | tee -a log_$basedir.txt
 
 ";
