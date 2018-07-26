@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20180725a
+* version: 20180725b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -69,10 +69,10 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     learnFileRoot = os.path.splitext(learnFile)[0]
     learnFileExt = os.path.splitext(learnFile)[1]
     
-    if learnFileExt == ".h5":
-        defParam.saveAsTxt = False
-    else:
+    if learnFileExt == ".txt" :
         defParam.saveAsTxt = True
+    else:
+        defParam.saveAsTxt = False
 
     summary_filename = learnFileRoot + str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))
     summary = str(datetime.now().strftime('Classification started: %Y-%m-%d %H:%M:%S'))+\
