@@ -6,7 +6,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20180614d
+* version: 20180725a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -22,7 +22,7 @@ from datetime import datetime, date
 ''' main '''
 #**********************************************
 class defParam:
-    saveAsTxt = True
+    saveAsTxt = False
     saveFormatClass = False
 
     # set boundaries intensities for when to
