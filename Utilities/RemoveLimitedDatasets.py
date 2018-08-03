@@ -6,7 +6,7 @@
 * RemoveLimitedDatasets
 * Remove data with little representation based on threshold
 *
-* version: 20180803c
+* version: 20180803d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -59,6 +59,11 @@ def main():
         else:
             tempTrain=np.vstack((tempTrain,M[i,:]))
             num +=1
+
+    print("\n Original number of unique classes:", np.unique(M[:,0]).size)
+    print(" Number of included unique classes:",
+        np.unique(M[:,0]).size - np.unique(exclIndex).size)
+    print(" Number of excluded unique classes:",np.unique(exclIndex).size)
 
     print("\n Original number of spectra in training set:", M.shape[0])
     print(" Number of spectra included in new training set:", newTrain.shape[0]-1)

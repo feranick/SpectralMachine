@@ -6,7 +6,7 @@
 * InfoLimitedDatasets
 * Info data with little representation based on threshold
 *
-* version: 20180803c
+* version: 20180803d
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -32,7 +32,7 @@ def main():
     exclIndex = []
     totNumIncl = 0
     totNumExcl = 0
-
+    
     for i in range(M.shape[0]):
         #print("initial: ", M[i,0], num)
         if M[i,0] != ind or i == M.shape[0]-1:
@@ -49,6 +49,11 @@ def main():
             num = 1
         else:
             num +=1
+
+    print("\n Original number of unique classes:", np.unique(M[:,0]).size)
+    print(" Number of included unique classes:",
+        np.unique(M[:,0]).size - np.unique(exclIndex).size)
+    print(" Number of excluded unique classes:",np.unique(exclIndex).size)
 
     print("\n Original number of spectra in training set:", M.shape[0])
     print(" Number of spectra included in new training set:", totNumIncl)
