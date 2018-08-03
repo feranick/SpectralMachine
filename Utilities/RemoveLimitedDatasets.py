@@ -60,6 +60,7 @@ def main():
             tempTrain=np.vstack((tempTrain,M[i,:]))
             num +=1
 
+    print("\n Number of points per spectra:", M[0,1:].size)
     print("\n Original number of unique classes:", np.unique(M[:,0]).size)
     print(" Number of included unique classes:",
         np.unique(M[:,0]).size - np.unique(exclIndex).size)
