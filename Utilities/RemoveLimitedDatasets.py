@@ -55,10 +55,10 @@ def main():
         #print("initial: ", M[i,0], num)
         if M[i,0] != ind or i == M.shape[0]-1:
             if num >= float(sys.argv[2]):
-                print(" Class: ",ind, "- number per class: ", num)
+                print(" Class: ",ind, "\t- number per class:", num)
                 newTrain = np.vstack((newTrain,tempTrain))
             else:
-                print(" Class: ",ind, "- number per class: ", num, " EXCLUDED")
+                print(" Class: ",ind, "\t- number per class:", num, " EXCLUDED")
                 exclIndex.append(ind)
                 exclTrain = np.vstack((exclTrain,tempTrain))
             tempTrain = M[i,:]
@@ -67,7 +67,10 @@ def main():
         else:
             tempTrain=np.vstack((tempTrain,M[i,:]))
             num +=1
-    print("\n")
+
+    print("\n Original number of spectra in training set:", M.shape[0])
+    print(" Number of spectra included in new training set:", newTrain.shape[0]-1)
+    print(" Number of spectra excluded in new training set:", exclTrain.shape[0]-1,"\n")
 
     saveLearnFile(newTrain, newFile)
     saveLearnFile(exclTrain, exclFile)
