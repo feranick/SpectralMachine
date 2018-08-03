@@ -6,7 +6,7 @@
 * RemoveLimitedDatasets
 * Remove data with little representation based on threshold
 *
-* version: 20180803b
+* version: 20180803c
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -20,10 +20,7 @@ import sys, os.path, h5py
 ''' Main '''
 #************************************
 class defParam:
-    saveAsTxt = True
-    addToFlatland = False
-    Ynorm = True
-    YnormTo = 1
+    saveAsTxt = False
 
 def main():
     if len(sys.argv) < 3:
@@ -34,13 +31,6 @@ def main():
     newFile = os.path.splitext(sys.argv[1])[0] + '_above' + sys.argv[2]
     exclFile = os.path.splitext(sys.argv[1])[0] + '_excludeBelow' + sys.argv[2]
     learnFileExt = os.path.splitext(sys.argv[1])[1]
-
-    '''
-    if learnFileExt == ".h5":
-        defParam.saveAsTxt = False
-    else:
-        defParam.saveAsTxt = True
-    '''
 
     En, M = readLearnFile(sys.argv[1])
     newTrain = np.append([0], En)
@@ -54,6 +44,8 @@ def main():
     for i in range(M.shape[0]):
         #print("initial: ", M[i,0], num)
         if M[i,0] != ind or i == M.shape[0]-1:
+            if i == M.shape[0]-1:
+                num += 1
             if num >= float(sys.argv[2]):
                 print(" Class: ",ind, "\t- number per class:", num)
                 newTrain = np.vstack((newTrain,tempTrain))
