@@ -37,15 +37,15 @@ def input_fn(A, Cl2):
 
 #********************************************************************************
 ''' TensorFlow '''
-''' Run tf.estimator.DNNClassifier '''
+''' Run tf.estimator.DNNClassifier or tf.estimator.DNNRegressor'''
 ''' https://www.tensorflow.org/api_docs/python/tf/estimator/DNNClassifier'''
+''' https://www.tensorflow.org/api_docs/python/tf/estimator/DNNRegressor'''
 #********************************************************************************
 ''' Train DNNClassifier model training via TensorFlow-Estimators '''
 #********************************************************************************
 def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     import tensorflow as tf
     import tensorflow.contrib.learn as skflow
-    from sklearn import preprocessing
     #from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
     
     if dnntfDef.logCheckpoint ==True:
@@ -69,10 +69,24 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     totCl = np.append(Cl, Cl_test)
     numTotClasses = np.unique(totCl).size
     
+    ###############################
+    ### Uncomment for DNNClassifier
+    
+    from sklearn import preprocessing
     le = preprocessing.LabelEncoder()
+    
     totCl2 = le.fit_transform(totCl)
     Cl2 = le.transform(Cl)
     Cl2_test = le.transform(Cl_test)
+    
+    ### Uncomment for DNNRegressor
+    '''
+    le = 0
+    totCl2 = totCl
+    Cl2 = Cl
+    Cl2_test = Cl_test
+    '''
+    #############################
     
     if dnntfDef.fullBatch == True:
         batch_size_train = A.shape[0]
@@ -103,6 +117,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     
     feature_columns = [tf.feature_column.numeric_column("x", shape=[totA.shape[1]])]
     
+    print(tf.feature_column.numeric_column("x", shape=[totA.shape[1]]))
+    
     #**********************************************
     ''' Define learning rate '''
     #**********************************************
@@ -120,12 +136,24 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     conf = tf.ConfigProto(gpu_options=opts)
     #conf.gpu_options.allow_growth = True
     
+    ###############################
+    ### To enable DNNClassifier or the DNNRegressor, comment/uncomment the corresponding call.
+    ### In the future a proper flag will enable this from the configuration
+
     clf = tf.estimator.DNNClassifier(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
             optimizer=dnntfDef.optimizer, n_classes=numTotClasses,
             activation_fn=dnntfDef.activationFn, model_dir=model_directory,
             config=tf.estimator.RunConfig().replace(session_config=conf, save_checkpoints_secs=dnntfDef.timeCheckpoint),
             dropout=dnntfDef.dropout_perc)
-         
+    '''
+    clf = tf.estimator.DNNRegressor(feature_columns=feature_columns, hidden_units=dnntfDef.hidden_layers,
+            optimizer=dnntfDef.optimizer,
+            activation_fn=dnntfDef.activationFn, model_dir=model_directory,
+            config=tf.estimator.RunConfig().replace(session_config=conf, save_checkpoints_secs=dnntfDef.timeCheckpoint),
+            dropout=dnntfDef.dropout_perc)
+    '''
+    ###############################
+
     '''
     # Validation monitors are deprecated
     validation_monitor = [skflow.monitors.ValidationMonitor(input_fn=test_input_fn,
@@ -176,9 +204,19 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     printInfo(A)
 
     print('\n  ==================================')
-    print('  \033[1mtf.DNNCl\033[0m - Accuracy')
+    print('  \033[1mtf.DNN Classifier \033[0m - Accuracy')
+    #print('  \033[1mtf.DNN Regressor \033[0m - Prediction')
     print('  ==================================')
-    print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"]))
+
+    ###############################
+    ### The output message is different for the DNNClassifier and the DNNRegressor,
+    ### Comment/uncomment the corresponding printing call.
+    ### In the future a proper flag will enable this from the configuration
+
+    print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"])) # this is for classifier
+    ###############################
+
+    print("  Average Loss: {:.2f}%".format(100*accuracy_score["average_loss"]))
     print("  Loss: {:.2f}".format(accuracy_score["loss"]))
     print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
     print('  ==================================\n')
@@ -187,7 +225,8 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
 
 def printInfo(A):
     print('==========================================================================\n')
-    print('\033[1m Running Deep Neural Networks: tf.DNNClassifier - TensorFlow...\033[0m')
+    print('\033[1m Running Deep Neural Networks: tf.DNN Classifier - TensorFlow...\033[0m')
+    #print('\033[1m Running Deep Neural Networks: tf.DNN Regressor - TensorFlow...\033[0m')
     print('  Optimizer:',dnntfDef.optimizer_tag,
                 '\n  Hidden layers:', dnntfDef.hidden_layers,
                 '\n  Activation function:',dnntfDef.activation_function,
@@ -223,6 +262,7 @@ def predDNNTF(clf, le, R, Cl):
       
     predictions = list(clf.predict(input_fn=predict_input_fn))
     pred_class = [p["class_ids"] for p in predictions][0][0]
+    
     if pred_class.size >0:
         predValue = le.inverse_transform(pred_class)
     else:
@@ -232,18 +272,44 @@ def predDNNTF(clf, le, R, Cl):
     
     rosterPred = np.where(prob>dnntfDef.thresholdProbabilityPred/100)[0]
 
-    print('\n  ==================================')
-    print('  \033[1mtf.DNN-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
-    print('  ==================================')
+    print('\n  =============================================')
+    print('  \033[1mtf.DNN Classifier-TF\033[0m - Probability >',str(dnntfDef.thresholdProbabilityPred),'%')
+    print('  =============================================')
     print('  Prediction\tProbability [%]')
     for i in range(rosterPred.shape[0]):
         print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*prob[rosterPred][i])))
-    print('  ==================================')
+    print('  =============================================')
     
-    print('\033[1m' + '\n Predicted value (tf.DNNClassifier) = ' + predValue +
+    print('\033[1m' + '\n Predicted value (tf.DNNClassifier) = ' + str(predValue) +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
+
+#********************************************************************************
+''' Predict using tf.estimator.DNNRegressor model via TensorFlow '''
+#********************************************************************************
+def predDNNTF_Regressor(clf, le, R, Cl):
+    import tensorflow as tf
+    import tensorflow.contrib.learn as skflow
+
+    predict_input_fn = tf.estimator.inputs.numpy_input_fn(
+      x={"x": R},
+      num_epochs=1,
+      shuffle=False)
+      
+    predictions = list(clf.predict(input_fn=predict_input_fn))
+    pred = [p["predictions"] for p in predictions][0][0]
+    if pred.size >0:
+        predValue = pred
+    else:
+        predValue = 0
+
+    print('\n  ==================================')
+    print('  \033[1mtf.DNN Regressor - TF\033[0m')
+    print('  ==================================')
+    print('\033[1m' + '\n Predicted value (tf.DNNRegressor) = ' + str(predValue) +'\033[0m\n')
+
+    return predValue, 0
 
 #********************************************************************************
 ''' TensorFlow '''

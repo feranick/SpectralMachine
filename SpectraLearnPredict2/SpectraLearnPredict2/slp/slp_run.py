@@ -65,8 +65,8 @@ def run():
             try:
                 trainAccuracy(sys.argv[2], testFile)
             except:
-                usage()
-                sys.exit(2)
+               usage()
+               sys.exit(2)
 
         if o in ("-m" , "--map"):
             try:
