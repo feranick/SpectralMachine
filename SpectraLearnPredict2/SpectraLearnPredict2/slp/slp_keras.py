@@ -241,7 +241,7 @@ def predKeras(model, le, R, Cl):
             str('{:.4f}'.format(100*predictions[0][rosterPred][i])))
     print('  ==================================')
     
-    print('\033[1m' + '\n Predicted value (Keras) = ' + predValue +
+    print('\033[1m' + '\n Predicted value (Keras) = ' + str(predValue) +
           '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
