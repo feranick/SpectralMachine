@@ -62,6 +62,7 @@ class Configuration():
         self.conf['DNNClassifier'] = {
             'runDNNTF' : True,
             'runSkflowDNNTF' : False,
+            'useRegressorDNNTF' : False,
             'alwaysRetrainDNNTF' : False,
             'alwaysImproveDNNTF' : True,
             'hidden_layersDNNTF' : [200,200],
@@ -216,6 +217,7 @@ class Configuration():
         
         self.runDNNTF = self.conf.getboolean('DNNClassifier','runDNNTF')
         self.runSkflowDNNTF = self.conf.getboolean('DNNClassifier','runSkflowDNNTF')
+        self.useRegressorDNNTF = self.conf.getboolean('DNNClassifier','useRegressorDNNTF')
         self.alwaysRetrainDNNTF = self.conf.getboolean('DNNClassifier','alwaysRetrainDNNTF')
         self.alwaysImproveDNNTF = self.conf.getboolean('DNNClassifier','alwaysImproveDNNTF')
         self.hidden_layersDNNTF = eval(self.dnntfDef['hidden_layersDNNTF'])
@@ -238,7 +240,6 @@ class Configuration():
         self.plotMapDNNTF = self.conf.getboolean('DNNClassifier','plotMapDNNTF')
         self.shuffleTrainDNNTF = self.conf.getboolean('DNNClassifier','shuffleTrainDNNTF')
         self.shuffleTestDNNTF = self.conf.getboolean('DNNClassifier','shuffleTestDNNTF')
-        self.useRegressorDNNTF = False
         
         self.runKeras = self.conf.getboolean('Keras','runKeras')
         self.alwaysRetrainKeras = self.conf.getboolean('Keras','alwaysRetrainKeras')

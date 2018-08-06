@@ -278,8 +278,6 @@ def predDNNTF(clf, le, R, Cl):
             predValue = pred
         else:
             predValue = 0
-
-
         print('\n  ==================================')
         print('  \033[1mtf.DNN Regressor - TF\033[0m')
         print('  ==================================')
