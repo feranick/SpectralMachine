@@ -238,6 +238,7 @@ class Configuration():
         self.plotMapDNNTF = self.conf.getboolean('DNNClassifier','plotMapDNNTF')
         self.shuffleTrainDNNTF = self.conf.getboolean('DNNClassifier','shuffleTrainDNNTF')
         self.shuffleTestDNNTF = self.conf.getboolean('DNNClassifier','shuffleTestDNNTF')
+        self.useRegressorDNNTF = True
         
         self.runKeras = self.conf.getboolean('Keras','runKeras')
         self.alwaysRetrainKeras = self.conf.getboolean('Keras','alwaysRetrainKeras')
@@ -433,6 +434,8 @@ class dnntfDef:
     
     shuffleTrain = config.shuffleTrainDNNTF
     shuffleTest = config.shuffleTestDNNTF
+    
+    useRegressor = config.useRegressorDNNTF
 
     #*************************************************
     # Setup variables and definitions- do not change.
