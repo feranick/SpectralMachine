@@ -3,6 +3,7 @@
 #./sub_slp trainFile testFile | qsub -N jobname
 
 use Cwd;
+use File::Basename;
 #@ARGV > 0 or die "usage: sub_3dpv nnodes inpfile|qsub -N jobname \n";
 @ARGV > 0 or die "usage: sub_3dpv inpfile_train inpfile_test | qsub -N jobname \n";
 #$n=$ARGV[0];
@@ -14,12 +15,14 @@ $inpfiletest=$ARGV[1];
 #This part creates necessary directories;
 $execpath="/usr/local/bin";
 $fullpath=getcwd;
-$basedir = $inpfile;
-$basedir =~ s{\.[^.]+$}{};
+$basefile = basename($inpfile);
+$basefile =~ s{\.[^.]+$}{};
+$folder=basename($fullpath);
 #$percvtest=5;
 #$percvtrain=100-$percvtest;
 #$inpfiletest=$basedir."_test-".$percvtest."pc.txt";
 #$inpfiletrain=$basedir."_train-".$percvtrain."pc.txt";
+$logname=$basefile."_".$folder;
 
 print "#!/bin/sh
 #PBS -l nodes=$n:ppn=7
@@ -37,13 +40,14 @@ cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
   echo $fullpath
   echo $inpfile
   echo $inpfiletest
+  echo $logname
 
   # Use argument specific cross validation file:
-  #$execpath/SpectraLearnPredict.py -a $inpfile $inpfiletest 2>&1 | tee -a log_$basedir.txt
-  #$execpath/SpectraLearnPredict2 -a $inpfile $inpfiletest 2>&1 | tee -a log_$basedir.txt
+  #$execpath/SpectraLearnPredict.py -a $inpfile $inpfiletest 2>&1 | tee -a log_$logname.txt
+  #$execpath/SpectraLearnPredict2 -a $inpfile $inpfiletest 2>&1 | tee -a log_$logname.txt
 
   # Use randomly created cross validation dataset:
-  #$execpath/SpectraLearnPredict.py -a $inpfile  2>&1 | tee -a log_$basedir.txt
-  $execpath/SpectraLearnPredict2 -a $inpfile  2>&1 | tee -a log_$basedir.txt
+  #$execpath/SpectraLearnPredict.py -a $inpfile  2>&1 | tee -a log_$logname.txt
+  $execpath/SpectraLearnPredict -a $inpfile  2>&1 | tee -a log_$logname.txt
 
 ";
