@@ -1583,10 +1583,9 @@ def readLearnFile(learnFile):
     En = M[0,1:]
     A = M[1:,1:]
     Cl = M[1:,0]
-    
-    Atemp = A[:,range(len(preprocDef.enSel))]
 
     if preprocDef.cherryPickEnPoint == True and preprocDef.enRestrictRegion == False:
+        Atemp = A[:,range(len(preprocDef.enSel))]
         enPoints = list(preprocDef.enSel)
         enRange = list(preprocDef.enSel)
 
