@@ -203,7 +203,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     else:
         print('  \033[1mtf.DNN Regressor \033[0m - Prediction')
     print('  ==================================')
-    print("  Average Loss: {:.2f}%".format(100*accuracy_score["average_loss"]))
+    print("  Average Loss: {:.2f}".format(100*accuracy_score["average_loss"]))
     print("  Loss: {:.2f}".format(accuracy_score["loss"]))
     print("  Global step: {:.2f}\n".format(accuracy_score["global_step"]))
     print('  ==================================\n')
