@@ -177,9 +177,9 @@ def preProcessNormPredData(R, Rx, En, YnormXind, type):
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
     #**********************************************************************************
-    if(R.shape[0] != En.shape):
+    if(R.shape[0] != En.shape[0]):
         if type == 0:
-            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape) + ') and sample (' + str(R.shape[0]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
+            print('\033[1m' + '  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape[0]) + ') and sample (' + str(R.shape[0]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
         R = np.interp(En, Rx, R)
     R = R.reshape(1,-1)
     Rorig = np.copy(R)
