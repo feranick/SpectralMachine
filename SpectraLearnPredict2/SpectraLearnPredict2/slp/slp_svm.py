@@ -35,12 +35,14 @@ def trainSVM(A, Cl, A_test, Cl_test, Root):
     from sklearn import svm
     from sklearn.externals import joblib
     from sklearn import preprocessing
-    svmTrainedData = Root + '.svmModel.pkl'
+    
     print('==========================================================================\n')
     print('\033[1m Running Support Vector Machine (kernel: ' + svmDef.kernel + ')\033[0m')
-    le = preprocessing.LabelEncoder()
-    model_le = Root + '.labelEnc.pkl'
     
+    svmTrainedData = Root + '.svmModel.pkl'
+    model_le = Root + '.svmLabelEnc.pkl'
+
+    le = preprocessing.LabelEncoder()
     try:
         if svmDef.alwaysRetrain == False:
             with open(svmTrainedData):
