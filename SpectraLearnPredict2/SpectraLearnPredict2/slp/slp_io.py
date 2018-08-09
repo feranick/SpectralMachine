@@ -66,8 +66,8 @@ def LearnPredictFile(learnFile, sampleFile):
     
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
-        predNN(clf_nn, A, Cl, R)
+        clf_nn, le_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
+        predNN(clf_nn, A, Cl, R, le_nn)
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
@@ -134,11 +134,11 @@ def trainAccuracy(learnFile, testFile):
 
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, A_test, Cl_test, learnFileRoot)
+        clf_nn, le_nn = trainNN(A, Cl, A_test, Cl_test, learnFileRoot)
     
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        clf_svm = trainSVM(A, Cl, A_test, Cl_test, learnFileRoot)
+        clf_svm, le_svm = trainSVM(A, Cl, A_test, Cl_test, learnFileRoot)
     
     ''' Tensorflow '''
     if tfDef.runTF == True:
@@ -199,15 +199,15 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     
     ''' Run Neural Network - sklearn'''
     if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
-        nnPred, nnProb = predNN(clf_nn, A, Cl, R)
+        clf_nn, le_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
+        nnPred, nnProb = predNN(clf_nn, A, Cl, R, le_nn)
         summaryFile.extend([nnPred, nnProb])
         nnDef.alwaysRetrain = False
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
-        svmPred, svmProb = predSVM(clf_svm, A, Cl, En, R)
+        clf_svm, le_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
+        svmPred, svmProb = predSVM(clf_svm, A, Cl, En, R, le_svm)
         summaryFile.extend([svmPred, svmProb])
         svmDef.alwaysRetrain = False
 
@@ -247,7 +247,7 @@ def LearnPredictMap(learnFile, mapFile):
     print(' Processing map...' )
     
     if nnDef.runNN == True:
-        clf_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
+        clf_nn, le_nn = trainNN(A, Cl, A, Cl, learnFileRoot)
 
     if dnntfDef.runDNNTF == True:
         if dnntfDef.runSkflowDNNTF == False:
@@ -259,7 +259,7 @@ def LearnPredictMap(learnFile, mapFile):
         model_keras, le_keras  = trainKeras(En, A, Cl, A, Cl, learnFileRoot)
 
     if svmDef.runSVM == True:
-        clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
+        clf_svm, le_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
 
     for r in R[:]:
         r, rorig = preProcessNormPredData(r, Rx, En, YnormXind, type)
@@ -281,13 +281,13 @@ def LearnPredictMap(learnFile, mapFile):
 
         ''' Run Neural Network - sklearn'''
         if nnDef.runNN == True:
-            nnPred[i], temp = predNN(clf_nn, A, Cl, r)
+            nnPred[i], temp = predNN(clf_nn, A, Cl, r, le_nn)
             saveMap(mapFile, 'NN', 'HC', nnPred[i], X[i], Y[i], True)
             nnDef.alwaysRetrain = False
         
         ''' Run Support Vector Machines '''
         if svmDef.runSVM == True:
-            svmPred[i], temp = predSVM(clf_svm, A, Cl, En, r)
+            svmPred[i], temp = predSVM(clf_svm, A, Cl, En, r, le_svm)
             saveMap(mapFile, 'svm', 'HC', svmPred[i], X[i], Y[i], True)
             svmDef.alwaysRetrain = False
 

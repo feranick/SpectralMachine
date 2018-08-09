@@ -12,7 +12,6 @@
 *
 ***********************************************************
 '''
-
 import matplotlib
 if matplotlib.get_backend() == 'TkAgg':
     matplotlib.use('Agg')
@@ -23,6 +22,7 @@ import random, time, configparser, os
 from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
+from sklearn import preprocessing
 
 from .slp_config import *
 
@@ -42,6 +42,9 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
     else:
         nnTrainedData = Root + '.nnModelR.pkl'
 
+    model_le = Root + '.nnLabelEnc.pkl'
+    le = preprocessing.LabelEncoder()
+
     print('==========================================================================\n')
     print('\033[1m Running Neural Network: multi-layer perceptron (MLP)\033[0m')
     print('  Hidden layers with neuron count:', nnDef.hidden_layers)
@@ -53,6 +56,7 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
             with open(nnTrainedData):
                 print('  Opening NN training model...\n')
                 clf = joblib.load(nnTrainedData)
+                le = joblib.load(model_le)
         else:
             raise ValueError('  Force NN retraining.')
     except:
@@ -70,9 +74,15 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
                                hidden_layer_sizes=nnDef.hidden_layers, random_state=1)
             Cl = np.array(Cl,dtype=float)
 
-        clf.fit(A, Cl)
+        totA = np.vstack((A, A_test))
+        totCl = np.append(Cl, Cl_test)
+        totCl2 = le.fit_transform(totCl)
+        Cl2 = le.transform(Cl)
+        Cl2_test = le.transform(Cl_test)
+
+        clf.fit(A, Cl2)
         print("  Training on the full training dataset\n")
-        accur = clf.score(A_test,Cl_test)
+        accur = clf.score(A_test,Cl2_test)
 
         if nnDef.MLPRegressor is False:
             print('  Accuracy: ',100*accur,'%\n  Loss: {:.5f}'.format(clf.loss_),'\n')
@@ -81,13 +91,14 @@ def trainNN(A, Cl, A_test, Cl_test, Root):
                   '\n  Loss: {:.5f}'.format(clf.loss_),'\n')
 
         joblib.dump(clf, nnTrainedData)
+        joblib.dump(le, model_le)
 
-    return clf
+    return clf, le
 
 #********************************************************************************
 ''' Evaluate Neural Network - sklearn '''
 #********************************************************************************
-def predNN(clf, A, Cl, R):
+def predNN(clf, A, Cl, R, le):
     if nnDef.MLPRegressor is False:
         prob = clf.predict_proba(R)[0].tolist()
         rosterPred = np.where(clf.predict_proba(R)[0]>nnDef.thresholdProbabilityPred/100)[0]
@@ -99,7 +110,12 @@ def predNN(clf, A, Cl, R):
             print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.4f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
         print('  ==============================')
         
-        predValue = clf.predict(R)[0]
+        R_pred = clf.predict(R)[0]
+        if R_pred.size >0:
+            predValue = le.inverse_transform(R_pred)
+        else:
+            predValue = 0
+        
         predProb = round(100*max(prob),4)
         print('\033[1m' + '\n Predicted classifier value (Deep Neural Networks - sklearn) = ' + str(predValue) +
               '  (probability = ' + str(predProb) + '%)\033[0m\n')
