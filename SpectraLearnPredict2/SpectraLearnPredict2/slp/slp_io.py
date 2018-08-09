@@ -71,8 +71,8 @@ def LearnPredictFile(learnFile, sampleFile):
 
     ''' Run Support Vector Machines '''
     if svmDef.runSVM == True:
-        clf_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
-        predSVM(clf_svm, A, Cl, R)
+        clf_svm, le_svm = trainSVM(A, Cl, A, Cl, learnFileRoot)
+        predSVM(clf_svm, A, Cl, R, le_svm)
 
     ''' Tensorflow '''
     if tfDef.runTF == True:

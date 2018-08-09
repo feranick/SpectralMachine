@@ -17,14 +17,13 @@ if matplotlib.get_backend() == 'TkAgg':
     matplotlib.use('Agg')
 
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path, getopt, glob, csv, pickle
 import random, time, configparser, os
 from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
 
 from .slp_config import *
-
 
 #********************************************************************************
 ''' Support Vector Machines - SVM '''
@@ -35,17 +34,28 @@ from .slp_config import *
 def trainSVM(A, Cl, A_test, Cl_test, Root):
     from sklearn import svm
     from sklearn.externals import joblib
+    from sklearn import preprocessing
     svmTrainedData = Root + '.svmModel.pkl'
     print('==========================================================================\n')
     print('\033[1m Running Support Vector Machine (kernel: ' + svmDef.kernel + ')\033[0m')
+    le = preprocessing.LabelEncoder()
+    model_le = Root + '.labelEnc.pkl'
+    
     try:
         if svmDef.alwaysRetrain == False:
             with open(svmTrainedData):
                 print('  Opening SVM training model...\n')
                 clf = joblib.load(svmTrainedData)
+                le = joblib.load(model_le)
         else:
             raise ValueError('  Force retraining SVM model')
     except:
+        totA = np.vstack((A, A_test))
+        totCl = np.append(Cl, Cl_test)
+        totCl2 = le.fit_transform(totCl)
+        Cl2 = le.transform(Cl)
+        Cl2_test = le.transform(Cl_test)
+        
         #**********************************************
         ''' Retrain training model if not available'''
         #**********************************************
@@ -53,26 +63,31 @@ def trainSVM(A, Cl, A_test, Cl_test, Root):
         clf = svm.SVC(C = svmDef.Cfactor, decision_function_shape = 'ovr', probability=True)
         
         print("  Training on the full training dataset\n")
-        clf.fit(A,Cl)
-        accur = clf.score(A_test,Cl_test)
+        clf.fit(A,Cl2)
+        accur = clf.score(A_test,Cl2_test)
         print('  Mean accuracy: ',100*accur,'%')
 
         Z = clf.decision_function(A)
         print('\n  Number of classes = ' + str(Z.shape[1]))
         joblib.dump(clf, svmTrainedData)
+        joblib.dump(le, model_le)
         if svmDef.showClasses == True:
             print('  List of classes: ' + str(clf.classes_))
 
     print('\n==========================================================================\n')
-    return clf
+    return clf, le
 
 #********************************************************************************
 ''' Predict using SVM '''
 #********************************************************************************
-def predSVM(clf, A, Cl, R):
-    R_pred = clf.predict(R)
+def predSVM(clf, A, Cl, R, le):
+    R_pred_le = clf.predict(R)
     prob = clf.predict_proba(R)[0].tolist()
     
+    if R_pred_le.size >0:
+        R_pred = le.inverse_transform(R_pred_le)
+    else:
+        R_pred = 0
     rosterPred = np.where(clf.predict_proba(R)[0]>svmDef.thresholdProbabilitySVMPred/100)[0]
     print('\n  ==============================')
     print('  \033[1mSVM\033[0m - Probability >',str(svmDef.thresholdProbabilitySVMPred),'%')
