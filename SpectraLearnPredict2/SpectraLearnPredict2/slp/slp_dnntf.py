@@ -333,6 +333,10 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
     totCl2 = le.fit_transform(totCl)
     Cl2 = le.transform(Cl)
     Cl2_test = le.transform(Cl_test)
+    model_le = "dnntf_le.pkl"
+    print("\n Label Encoder saved in:", model_le)
+    with open(model_le, 'ab') as f:
+        f.write(pickle.dumps(le))
     
     validation_monitor = skflow.monitors.ValidationMonitor(input_fn=lambda: input_fn(A_test, Cl2_test),
                                                            eval_steps=1,
