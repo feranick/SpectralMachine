@@ -18,7 +18,7 @@ if matplotlib.get_backend() == 'TkAgg':
     matplotlib.use('Agg')
 
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path, getopt, glob, csv, pickle
 import random, time, configparser, os
 from os.path import exists, splitext
 from os import rename
@@ -45,7 +45,7 @@ def input_fn(A, Cl2):
 #********************************************************************************
 def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     import tensorflow as tf
-    import tensorflow.contrib.learn as skflow
+    #import tensorflow.contrib.learn as skflow
     #from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
     
     if dnntfDef.logCheckpoint == True:
@@ -77,6 +77,10 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         totCl2 = le.fit_transform(totCl)
         Cl2 = le.transform(Cl)
         Cl2_test = le.transform(Cl_test)
+        model_le = "dnntf_le.pkl"
+        print("\n Label Encoder saved in:", model_le)
+        with open(model_le, 'ab') as f:
+            f.write(pickle.dumps(le))
     else:
         le = 0
         totCl2 = totCl
@@ -242,7 +246,7 @@ def printInfo(A):
 #********************************************************************************
 def predDNNTF(clf, le, R, Cl):
     import tensorflow as tf
-    import tensorflow.contrib.learn as skflow
+    #import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
 
     predict_input_fn = tf.estimator.inputs.numpy_input_fn(
