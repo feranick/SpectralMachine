@@ -19,7 +19,7 @@ if matplotlib.get_backend() == 'TkAgg':
 
 import numpy as np
 import sys, os.path, getopt, glob, csv, pydot, graphviz
-import random, time, configparser, os
+import random, time, configparser, os, pickle
 from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
@@ -61,6 +61,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     tb_directory = "keras_" + str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])
     model_directory = "."
     model_name = model_directory+"/keras_"+str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])+".hd5"
+    model_le = model_directory+"/keras_model_le.pkl"
     
     if kerasDef.alwaysRetrain == False:
         print(" Training model saved in: ", model_name, "\n")
@@ -85,6 +86,9 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
     Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
     Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
+    print(" Label Encoder saved in:", model_le)
+    with open(model_le, 'ab') as f:
+        f.write(pickle.dumps(le))
     
     if kerasDef.fullBatch == True:
         batch_size = A.shape[0]
@@ -221,7 +225,8 @@ def printParamKeras(A):
 def predKeras(model, le, R, Cl):
     import keras
     from sklearn import preprocessing
-
+    
+    #le = pickle.loads(open(model_le, "rb").read())
     predictions = model.predict(R, verbose=1)
     pred_class = np.argmax(predictions)
     if pred_class.size >0:
