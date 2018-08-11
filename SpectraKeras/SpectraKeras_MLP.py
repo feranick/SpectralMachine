@@ -11,7 +11,7 @@
 print(__doc__)
 
 import numpy as np
-import keras, sys, os.path, time, pydot, graphviz
+import keras, sys, os.path, time, pydot, graphviz, pickle
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Activation, ActivityRegularization, MaxPooling1D
 import keras.optimizers as opt
@@ -60,7 +60,8 @@ batch_size = 512
 
 tb_directory = "keras_MLP"
 model_directory = "."
-model_name = model_directory+"/keras_MLP_model.hd5"
+model_name = model_directory+"/keras_model.hd5"
+model_le = model_directory+"/keras_le.pkl"
 
 #totA = np.vstack((A, A_test))
 #totCl = np.append(Cl, Cl_test)
@@ -72,6 +73,9 @@ le = preprocessing.LabelEncoder()
 totCl2 = le.fit_transform(totCl)
 Cl2 = le.transform(Cl)
 #Cl2_test = le.transform(Cl_test)
+print(" Label Encoder saved in:", model_le)
+with open(model_le, 'ab') as f:
+    f.write(pickle.dumps(le))
 
 totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
 Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
@@ -87,7 +91,6 @@ for i in range(3):
         kernel_regularizer=regularizers.l2(l2)))
     model.add(Dropout(drop))
 model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
-
 
 #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
 optim = opt.Adam(lr=l_rate, beta_1=0.9,
