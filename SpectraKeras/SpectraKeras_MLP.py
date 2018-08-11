@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - MLP
-* 20180529a
+* 20180810a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -47,13 +47,11 @@ learnFileRoot = os.path.splitext(learnFile)[0]
 l_rate = 0.0001
 l_rdecay = 0.0
 
-HL1 = 1000
-drop1 = 0.5
-l2_1 = 1e-4
-HL2 = 1600
-drop2 = 0.5
-l2_2 = 1e-4
-epochs = 5000
+HL=[10,20,30]
+drop = 0
+l2 = 1e-4
+
+epochs = 100
 cv_split = 0.01
 
 #batch_size = A.shape[0]
@@ -81,17 +79,15 @@ Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
 
 ### Build model
 model = Sequential()
-model.add(Dense(HL1, activation = 'relu', input_dim=A.shape[1],
-    kernel_regularizer=regularizers.l2(l2_1),
-    name='dense1'))
-model.add(Dropout(drop1,name='drop1'))
-model.add(Dense(HL2, activation = 'relu',
-    kernel_regularizer=regularizers.l2(l2_2),
-    name='dense2'))
-model.add(Dropout(drop2,
-    name='drop2'))
-model.add(Dense(np.unique(Cl).size+1, activation = 'softmax',
-    name='dense3'))
+for i in range(3):
+    print(HL[i])
+    model.add(Dense(HL[i],
+        activation = 'relu',
+        input_dim=A.shape[1],
+        kernel_regularizer=regularizers.l2(l2)))
+    model.add(Dropout(drop))
+model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
+
 
 #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
 optim = opt.Adam(lr=l_rate, beta_1=0.9,
