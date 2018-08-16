@@ -1,11 +1,10 @@
 #!/usr/bin/perl
 #use the script as follows:
-#./sub_slp trainFile testFile | qsub -N jobname
+#./sub_slp2 trainFile testFile | qsub -N jobname
 
 use Cwd;
 use File::Basename;
-#@ARGV > 0 or die "usage: sub_3dpv nnodes inpfile|qsub -N jobname \n";
-@ARGV > 0 or die "usage: sub_3dpv inpfile_train inpfile_test | qsub -N jobname \n";
+@ARGV > 0 or die "usage: sub_slp2 inpfile_train inpfile_test | qsub -N jobname \n";
 #$n=$ARGV[0];
 $n=1;
 $nprocs=$n*1;
