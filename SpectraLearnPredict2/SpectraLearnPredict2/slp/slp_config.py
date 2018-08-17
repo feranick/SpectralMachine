@@ -533,46 +533,52 @@ class kerasDef:
     thresholdProbabilityPred = config.thresholdProbabilityPredKeras
     
     plotModel = config.plotModelKeras
+    
+    useTFKeras = False
 
     #*************************************************
     # Setup variables and definitions- do not change.
     #*************************************************
     if runKeras == True:
         import tensorflow as tf
-        import keras.optimizers as opt
-        from keras.layers import Activation
-            
+        if useTFKeras:
+            print("Using tf.keras API")
+            import tensorflow.keras as keras  #tf.keras
+        else:
+            print("Using pure keras API")
+            import keras   # pure keras
+
         if optimizer == "SGD":
             optimizer_tag = " SGD, learn_rate: "+str(learning_rate)
-            optimizer = opt.SGD(lr=learning_rate, decay=learning_decay_rate,
+            optimizer = keras.optimizers.SGD(lr=learning_rate, decay=learning_decay_rate,
                 momentum=0.9, nesterov=True)
             
         if optimizer == "Adagrad":
             optimizer_tag = " Adagrad, learn_rate: "+str(learning_rate)
-            optimizer = opt.Adagrad(lr=learning_rate, epsilon=1e-08,
+            optimizer = keras.optimizers.Adagrad(lr=learning_rate, epsilon=1e-08,
                 decay=learning_decay_rate)
         
         if optimizer == "Adadelta":
             optimizer_tag = " AdaDelta, learn_rate: "+str(learning_rate)
-            optimizer = opt.Adadelta(lr=learning_rate, epsilon=1e-08, rho=0.95,
+            optimizer = keras.optimizers.Adadelta(lr=learning_rate, epsilon=1e-08, rho=0.95,
                 decay=learning_decay_rate)
             
         if optimizer == "Adam":
             optimizer_tag = " Adam, learn_rate: "+str(learning_rate)
-            optimizer = opt.Adam(lr=learning_rate, beta_1=0.9,
+            optimizer = keras.optimizers.Adam(lr=learning_rate, beta_1=0.9,
                                         beta_2=0.999, epsilon=1e-08,
                                         decay=learning_decay_rate,
                                         amsgrad=False)
 
         if optimizer == "Adamax":
             optimizer_tag = " Adamax, learn_rate: "+str(learning_rate)
-            optimizer = opt.Adamax(lr=learning_rate, beta_1=0.9,
+            optimizer = keras.optimizers.Adamax(lr=learning_rate, beta_1=0.9,
                                         beta_2=0.999, epsilon=1e-08,
                                         decay=learning_decay_rate)
 
         if optimizer == "RMSprop":
             optimizer_tag = " RMSprop, learn_rate: "+str(learning_rate)
-            optimizer = opt.RMSprop(lr=learning_rate, rho=0.95,
+            optimizer = keras.optimizers.RMSprop(lr=learning_rate, rho=0.95,
                                         epsilon=1e-08,
                                         decay=learning_decay_rate)
 

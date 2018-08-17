@@ -41,20 +41,20 @@ def input_fn(A, Cl2):
 #********************************************************************************
 def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     import tensorflow as tf
-    from keras.backend.tensorflow_backend import set_session
+    
     # Use this to restrict GPU memory allocation in TF
     opts = tf.GPUOptions(per_process_gpu_memory_fraction=sysDef.fractionGPUmemory)
     conf = tf.ConfigProto(gpu_options=opts)
     #conf.gpu_options.allow_growth = True
-    set_session(tf.Session(config=conf))
     
-    import keras
-    from keras.models import Sequential
-    from keras.layers import Dense, Dropout, Activation
-    from keras.optimizers import SGD
-    from keras import regularizers
-    from keras.models import load_model
-    from keras.callbacks import TensorBoard
+    if kerasDef.useTFKeras:
+        import tensorflow.keras as keras  #tf.keras
+        tf.Session(config=conf)
+    else:
+        import keras   # pure keras
+        from keras.backend.tensorflow_backend import set_session
+        set_session(tf.Session(config=conf))
+    
     from sklearn import preprocessing
     from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
     
@@ -98,22 +98,20 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     printParamKeras(A)
 
     if kerasDef.alwaysImprove == True or os.path.exists(model_name) is False:
-        model = Sequential()
+        model = keras.models.Sequential()
         for numLayers in kerasDef.hidden_layers:
-            model.add(Dense(numLayers,
+            model.add(keras.layers.Dense(numLayers,
                     activation = kerasDef.activation_function,
                     input_dim=A.shape[1],
-                    kernel_regularizer=regularizers.l2(kerasDef.l2_reg_strength)))
-            model.add(Dropout(kerasDef.dropout_perc))
-        model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
+                    kernel_regularizer=keras.regularizers.l2(kerasDef.l2_reg_strength)))
+            model.add(keras.layers.Dropout(kerasDef.dropout_perc))
+        model.add(keras.layers.Dense(np.unique(Cl).size+1, activation = 'softmax'))
         model.compile(loss='categorical_crossentropy',
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
 
-        tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=kerasDef.tbHistogramFreq, 
-                batch_size=batch_size, write_graph=True, write_grads=True, write_images=True,
-                embeddings_freq=0, embeddings_layer_names=None, 
-                embeddings_metadata=None)
+        tbLog = keras.callbacks.TensorBoard(log_dir=tb_directory, histogram_freq=kerasDef.tbHistogramFreq,
+                batch_size=batch_size, write_graph=True, write_grads=True, write_images=True)
         #tbLog.set_model(model)
         tbLogs = [tbLog]
         log = model.fit(A, Cl2,
@@ -132,7 +130,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 
         if kerasDef.plotModel == True:
             from keras.utils import plot_model
-            plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
+            keras.utils.plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
             
             import matplotlib.pyplot as plt
             plt.figure(tight_layout=True)
@@ -223,7 +221,11 @@ def printParamKeras(A):
 ''' Predict using Keras model '''
 #********************************************************************************
 def predKeras(model, le, R, Cl):
-    import keras
+    if kerasDef.useTFKeras:
+        import tensorflow.keras as keras  #tf.keras
+    else:
+        import keras   # pure keras
+    
     from sklearn import preprocessing
     
     #le = pickle.loads(open(model_le, "rb").read())
