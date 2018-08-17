@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - MLP
-* 20180810b
+* 20180817a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -11,15 +11,13 @@
 print(__doc__)
 
 import numpy as np
-import keras, sys, os.path, time, pydot, graphviz, pickle
-from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Activation, ActivityRegularization, MaxPooling1D
-import keras.optimizers as opt
-from keras import regularizers
-from keras.callbacks import TensorBoard
-from keras.utils import plot_model
+import sys, os.path, time, pydot, graphviz, pickle
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
+    
+#import keras   # pure keras
+import tensorflow.keras as keras  #tf.keras
 from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
 
 #************************************
@@ -78,17 +76,17 @@ def main():
     #Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
 
     ### Build model
-    model = Sequential()
+    model = keras.models.Sequential()
     for i in range(3):
-        model.add(Dense(dP.HL[i],
+        model.add(keras.layers.Dense(dP.HL[i],
             activation = 'relu',
             input_dim=A.shape[1],
-            kernel_regularizer=regularizers.l2(dP.l2)))
-        model.add(Dropout(dP.drop))
-    model.add(Dense(np.unique(Cl).size+1, activation = 'softmax'))
+            kernel_regularizer=keras.regularizers.l2(dP.l2)))
+        model.add(keras.layers.Dropout(dP.drop))
+    model.add(keras.layers.Dense(np.unique(Cl).size+1, activation = 'softmax'))
 
     #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
-    optim = opt.Adam(lr=dP.l_rate, beta_1=0.9,
+    optim = keras.optimizers.Adam(lr=dP.l_rate, beta_1=0.9,
                     beta_2=0.999, epsilon=1e-08,
                     decay=dP.l_rdecay,
                     amsgrad=False)
@@ -97,7 +95,7 @@ def main():
         optimizer=optim,
         metrics=['accuracy'])
 
-    tbLog = TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=dP.batch_size,
+    tbLog = keras.callbacks.TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=dP.batch_size,
             write_graph=True, write_grads=True, write_images=True,
             embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
     tbLogs = [tbLog]
@@ -115,7 +113,7 @@ def main():
 
     #score = model.evaluate(A_test, Cl2_test, batch_size=A.shape[1])
     model.save(model_name)
-    plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
+    keras.utils.plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
     
     print('\n  =============================================')
     print('  \033[1mKeras MLP\033[0m - Model Configuration')
