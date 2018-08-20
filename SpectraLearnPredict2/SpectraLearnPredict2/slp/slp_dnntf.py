@@ -198,9 +198,13 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         print("  Retreaving training model from: ", model_directory,"\n")
 
     accuracy_score = clf.evaluate(input_fn=test_input_fn, steps=1, hooks=hooks)
+    
+    print('\n  Number of spectra = ' + str(A.shape[0]))
+    print('  Number of points in each spectra = ' + str(A.shape[1]))
+    print('  Number of unique classes = ' + str(len(np.unique(Cl))))
     printInfo(A)
 
-    print('\n  ==================================')
+    print('  ==================================')
     if dnntfDef.useRegressor == False:
         print('  \033[1mtf.DNN Classifier \033[0m - Accuracy')
         print("\n  Accuracy: {:.2f}%".format(100*accuracy_score["accuracy"])) # this is for classifier
@@ -215,11 +219,12 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     return clf, le
 
 def printInfo(A):
-    print('==========================================================================\n')
+    print('\n  ================================================================')
     if dnntfDef.useRegressor == False:
-        print('\033[1m Running Deep Neural Networks: tf.DNN Classifier - TensorFlow...\033[0m')
+        print('\033[1m  Running Deep Neural Networks: tf.DNN Classifier - TensorFlow...\033[0m')
     else:
-        print('\033[1m Running Deep Neural Networks: tf.DNN Regressor - TensorFlow...\033[0m')
+        print('\033[1m  Running Deep Neural Networks: tf.DNN Regressor - TensorFlow...\033[0m')
+    print('  ================================================================')
     print('  Optimizer:',dnntfDef.optimizer_tag,
                 '\n  Hidden layers:', dnntfDef.hidden_layers,
                 '\n  Activation function:',dnntfDef.activation_function,
@@ -238,7 +243,8 @@ def printInfo(A):
         print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)))
     else:
         print('  Batch size:', dnntfDef.batchSize)
-    print('  Queue capacity:', dnntfDef.queueCapacity, '\n')
+    print('  Queue capacity:', dnntfDef.queueCapacity)
+    print('  ================================================\n')
 
 #********************************************************************************
 ''' Predict using tf.estimator.DNNClassifier or tf.estimator.DNNRegressor

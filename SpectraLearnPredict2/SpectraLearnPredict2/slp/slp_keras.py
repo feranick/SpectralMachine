@@ -152,8 +152,12 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
             plt.xlabel('Raman shift [1/cm]')
             plt.legend(loc='upper right')
             plt.savefig('keras_weights_MLP' + '.png', dpi = 160, format = 'png')  # Save plot
-        
+
         printModelKeras(model)
+
+        print('\n  Number of spectra = ' + str(A.shape[0]))
+        print('  Number of points in each spectra = ' + str(A.shape[1]))
+        print('  Number of unique classes = ' + str(len(np.unique(Cl))))
         printParamKeras(A)
         printTrainSummary(accuracy, loss, val_acc, val_loss)
         
