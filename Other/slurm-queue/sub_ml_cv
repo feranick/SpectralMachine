@@ -22,8 +22,8 @@ logname="log_"${PWD##*/}".txt"
 
 # Use argument specific cross validation file:
 #SpectraLearnPredict2 -a $base/$1 $base/$2 2>&1 | tee -a $logname
-SpectraLearnPredict2 -a $1 $2 2>&1 | tee -a $logname
+#SpectraLearnPredict2 -a $1 $2 2>&1 | tee -a $logname
 
 # Use randomly created cross validation dataset:
 #SpectraLearnPredict2 -a $base/$1 2>&1 | tee -a $logname
-#SpectraLearnPredict2 -a $1 2>&1 | tee -a $logname
+SpectraLearnPredict2 -a $1 2>&1 | tee -a $logname
