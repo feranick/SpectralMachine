@@ -27,10 +27,12 @@ class dP:
     l_rate = 0.001
     l_rdecay = 1e-4
 
-    HL=[10,20,30]
     CL=[30]
     CL_size=[20]
     max_pooling=100
+    
+    HL=[10,20,30]
+    
     drop = 0.4
     l2 = 1e-4
 
