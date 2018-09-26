@@ -30,6 +30,7 @@ class dP:
     HL=[10,20,30]
     CL=[30]
     CL_size=[20]
+    max_pooling=100
     drop = 0.4
     l2 = 1e-4
 
@@ -96,7 +97,7 @@ def main():
             activation='relu',
             input_shape=spectra.shape))
 
-    model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.CL[i])))
+    model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
 
     model.add(keras.layers.Dropout(dP.drop))
     model.add(keras.layers.Flatten())
