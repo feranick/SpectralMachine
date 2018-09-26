@@ -64,7 +64,7 @@ def main():
     totCl2 = le.fit_transform(totCl)
     Cl2 = le.transform(Cl)
     
-    print(" Tutal number of points per data:",En.size)
+    print(" Total number of points per data:",En.size)
     print(" Total number of classes:",numTotClasses)
     #Cl2_test = le.transform(Cl_test)
     print("\n Label Encoder saved in:", model_le,"\n")
@@ -96,8 +96,7 @@ def main():
         metrics=['accuracy'])
 
     tbLog = keras.callbacks.TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=dP.batch_size,
-            write_graph=True, write_grads=True, write_images=True,
-            embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
+            write_graph=True, write_grads=True, write_images=True,)
     tbLogs = [tbLog]
     log = model.fit(A, Cl2,
         epochs=dP.epochs,
