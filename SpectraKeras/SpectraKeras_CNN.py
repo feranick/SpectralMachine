@@ -11,7 +11,7 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, time, pydot, graphviz, pickle
+import sys, os.path, time, pydot, graphviz, pickle, h5py
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
