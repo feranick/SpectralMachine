@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - MLP
-* 20180817a
+* 20180926a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -77,7 +77,7 @@ def main():
 
     ### Build model
     model = keras.models.Sequential()
-    for i in range(3):
+    for i in range(len(dP.HL)):
         model.add(keras.layers.Dense(dP.HL[i],
             activation = 'relu',
             input_dim=A.shape[1],
