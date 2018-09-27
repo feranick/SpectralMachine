@@ -33,7 +33,7 @@ class Conf():
             self.createConfig()
         self.readConfig(self.configFile)
             
-    def datamlDef(self):
+    def SKDef(self):
         self.conf['Parameters'] = {
             'l_rate' : 0.001,
             'l_rdecay' : 1e-4,
@@ -55,12 +55,12 @@ class Conf():
     def readConfig(self,configFile):
         try:
             self.conf.read(configFile)
-            self.datamlDef = self.conf['Parameters']
+            self.SKDef = self.conf['Parameters']
             self.sysDef = self.conf['System']
         
             self.l_rate = self.conf.getfloat('Parameters','l_rate')
             self.l_rdecay = self.conf.getfloat('Parameters','l_rdecay')
-            self.HL = eval(self.datamlDef['HL'])
+            self.HL = eval(self.SKDef['HL'])
             self.drop = self.conf.getfloat('Parameters','drop')
             self.l2 = self.conf.getfloat('Parameters','l2')
             self.epochs = self.conf.getint('Parameters','epochs')
@@ -147,7 +147,7 @@ def train(learnFile):
 
     tb_directory = "keras_MLP"
     model_directory = "."
-    model_name = model_directory+"/keras_model.hd5"
+    model_name = model_directory+"/keras_MLP_model.hd5"
     model_le = model_directory+"/keras_le.pkl"
     
     totA = A
@@ -278,7 +278,7 @@ def predict(testFile):
     Rx=Rtot[0,:]
     
     le = pickle.loads(open("keras_le.pkl", "rb").read())
-    model = keras.models.load_model("keras_model.hd5")
+    model = keras.models.load_model("keras_MLP_model.hd5")
     predictions = model.predict(R, verbose=1)
     pred_class = np.argmax(predictions)
     
@@ -402,9 +402,9 @@ class MultiClassReductor():
 def usage():
     print('\n Usage:\n')
     print(' Train:')
-    print('  python3 DataML.py -t <learningFile>\n')
+    print('  python3 SpectraKeras_MLP.py -t <learningFile>\n')
     print(' Predict:')
-    print('  python3 DataML.py -p <testFile>\n')
+    print('  python3 SpectraKeras_MLP.py -p <testFile>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
