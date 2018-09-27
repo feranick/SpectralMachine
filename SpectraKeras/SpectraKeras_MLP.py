@@ -16,7 +16,7 @@ import sys, os.path, getopt, time, configparser, pickle, h5py
 #***************************************************
 ''' This is needed for installation through pip '''
 #***************************************************
-def DataML():
+def SpectraKeras_MLP():
     main()
 
 #************************************
