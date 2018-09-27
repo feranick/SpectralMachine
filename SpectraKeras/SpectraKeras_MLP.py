@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - MLP
-* 20180926a
+* 20180927a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -11,40 +11,136 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, time, pydot, graphviz, pickle, h5py
-from sklearn import preprocessing
-from sklearn.model_selection import train_test_split
-import tensorflow as tf
-    
-#import keras   # pure keras
-import tensorflow.keras as keras  #tf.keras
-from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
+import sys, os.path, getopt, time, configparser, pickle, h5py
+
+#***************************************************
+''' This is needed for installation through pip '''
+#***************************************************
+def DataML():
+    main()
 
 #************************************
 ''' Parameters '''
 #************************************
-class dP:
-    l_rate = 0.001
-    l_rdecay = 1e-4
+class Conf():
+    def __init__(self):
+        confFileName = "SpectraKeras_MLP.ini"
+        self.configFile = os.getcwd()+"/"+confFileName
+        self.conf = configparser.ConfigParser()
+        self.conf.optionxform = str
+        if os.path.isfile(self.configFile) is False:
+            print(" Configuration file: \""+confFileName+"\" does not exist: Creating one.\n")
+            self.createConfig()
+        self.readConfig(self.configFile)
+            
+    def datamlDef(self):
+        self.conf['Parameters'] = {
+            'l_rate' : 0.001,
+            'l_rdecay' : 1e-4,
+            'HL' : [20,30,40,50,60,70],
+            'drop' : 0,
+            'l2' : 1e-4,
+            'epochs' : 100,
+            'cv_split' : 0.01,
+            'fullSizeBatch' : True,
+            'batch_size' : 64,
+            'numLabels' : 1,
+            'plotWeightsFlag' : False,
+            }
+    def sysDef(self):
+        self.conf['System'] = {
+            'useTFKeras' : False,
+            }
 
-    HL=[10,20,30]
-    drop = 0
-    l2 = 1e-4
+    def readConfig(self,configFile):
+        try:
+            self.conf.read(configFile)
+            self.datamlDef = self.conf['Parameters']
+            self.sysDef = self.conf['System']
+        
+            self.l_rate = self.conf.getfloat('Parameters','l_rate')
+            self.l_rdecay = self.conf.getfloat('Parameters','l_rdecay')
+            self.HL = eval(self.datamlDef['HL'])
+            self.drop = self.conf.getfloat('Parameters','drop')
+            self.l2 = self.conf.getfloat('Parameters','l2')
+            self.epochs = self.conf.getint('Parameters','epochs')
+            self.cv_split = self.conf.getfloat('Parameters','cv_split')
+            self.fullSizeBatch = self.conf.getboolean('Parameters','fullSizeBatch')
+            self.batch_size = self.conf.getint('Parameters','batch_size')
+            self.numLabels = self.conf.getint('Parameters','numLabels')
+            self.plotWeightsFlag = self.conf.getboolean('Parameters','plotWeightsFlag')
+            self.useTFKeras = self.conf.getboolean('System','useTFKeras')
+        except:
+            print(" Error in reading configuration file. Please check it\n")
 
-    epochs = 100
-    cv_split = 0.01
-    
-    #batch_size = A.shape[0]
-    batch_size = 512
-
-    plotWeightsFlag = False
+    # Create configuration file
+    def createConfig(self):
+        try:
+            self.datamlDef()
+            self.sysDef()
+            with open(self.configFile, 'w') as configfile:
+                self.conf.write(configfile)
+        except:
+            print("Error in creating configuration file")
 
 #************************************
-''' Parameters '''
+''' Main '''
 #************************************
 def main():
     start_time = time.clock()
-    learnFile = sys.argv[1]
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],
+                                   "tph:", ["train", "predict", "help"])
+    except:
+        usage()
+        sys.exit(2)
+
+    if opts == []:
+        usage()
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ("-t" , "--train"):
+            try:
+                train(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
+
+        if o in ("-p" , "--predict"):
+            try:
+                predict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
+
+    total_time = time.clock() - start_time
+    print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
+                            total_time/60, total_time/3600),"\n")
+
+#************************************
+''' Training '''
+#************************************
+def train(learnFile):
+    import tensorflow as tf
+    dP = Conf()
+    
+    # Use this to restrict GPU memory allocation in TF
+    opts = tf.GPUOptions(per_process_gpu_memory_fraction=1)
+    conf = tf.ConfigProto(gpu_options=opts)
+    #conf.gpu_options.allow_growth = True
+    
+    if dP.useTFKeras:
+        print("Using tf.keras API")
+        import tensorflow.keras as keras  #tf.keras
+        tf.Session(config=conf)
+    else:
+        print("Using pure keras API")
+        import keras   # pure keras
+        from keras.backend.tensorflow_backend import set_session
+        set_session(tf.Session(config=conf))
+
+    from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
 
     En, A, Cl = readLearnFile(learnFile)
     learnFileRoot = os.path.splitext(learnFile)[0]
@@ -53,28 +149,44 @@ def main():
     model_directory = "."
     model_name = model_directory+"/keras_model.hd5"
     model_le = model_directory+"/keras_le.pkl"
-
-    #totA = np.vstack((A, A_test))
-    #totCl = np.append(Cl, Cl_test)
+    
     totA = A
     totCl = Cl
     
-    numTotClasses = np.unique(totCl).size
+    #************************************
+    ''' Label Encoding '''
+    #************************************
+    
+    # sklearn preprocessing is only for single labels
+    from sklearn import preprocessing
     le = preprocessing.LabelEncoder()
     totCl2 = le.fit_transform(totCl)
     Cl2 = le.transform(Cl)
-    
+    '''
+    le = MultiClassReductor()
+    le.fit(np.unique(Cl, axis=0))
+    Cl2 = le.transform(Cl)
+    '''
+
+    numUniqueClasses = np.unique(Cl2).size
+    print(" Number of learning labels:",dP.numLabels)
+    print(" Number unique classes: ", numUniqueClasses)
     print(" Total number of points per data:",En.size)
-    print(" Total number of classes:",numTotClasses)
-    #Cl2_test = le.transform(Cl_test)
+    
     print("\n Label Encoder saved in:", model_le,"\n")
     with open(model_le, 'ab') as f:
         f.write(pickle.dumps(le))
 
-    totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
+    #************************************
+    ''' Training '''
+    #************************************
+    #totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
     Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
     #Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
 
+    if dP.fullSizeBatch == True:
+        dP.batch_size = A.shape[0]
+    
     ### Build model
     model = keras.models.Sequential()
     for i in range(len(dP.HL)):
@@ -95,15 +207,16 @@ def main():
         optimizer=optim,
         metrics=['accuracy'])
 
-    tbLog = keras.callbacks.TensorBoard(log_dir=tb_directory, histogram_freq=0, batch_size=dP.batch_size,
-            write_graph=True, write_grads=True, write_images=True,)
+    tbLog = keras.callbacks.TensorBoard(log_dir=tb_directory, histogram_freq=120,
+            batch_size=dP.batch_size,
+            write_graph=True, write_grads=True, write_images=True)
     tbLogs = [tbLog]
     log = model.fit(A, Cl2,
         epochs=dP.epochs,
         batch_size=dP.batch_size,
         callbacks = tbLogs,
         verbose=2,
-        validation_split=dP.cv_split)
+	validation_split=dP.cv_split)
 
     accuracy = np.asarray(log.history['acc'])
     loss = np.asarray(log.history['loss'])
@@ -122,6 +235,9 @@ def main():
     for conf in model.get_config():
         print(conf,"\n")
 
+    print(" Number of learning labels:",dP.numLabels)
+    print(" Number unique classes: ", numUniqueClasses)
+    print(" Total number of points per data:",En.size)
     printParam()
 
     print('\n  ==========================================')
@@ -140,15 +256,53 @@ def main():
     if dP.plotWeightsFlag == True:
         plotWeights(En, A, model)
 
-    total_time = time.clock() - start_time
-    print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
-                            total_time/60, total_time/3600),"\n")
+#************************************
+''' Open Learning Data '''
+#************************************
+def predict(testFile):
+    dP = Conf()
+    if dP.useTFKeras:
+        import tensorflow.keras as keras  #tf.keras
+    else:
+        import keras   # pure Keras
+    
+    try:
+        with open(testFile, 'r') as f:
+            print('\n Opening sample data for prediction...')
+            Rtot = np.loadtxt(f, unpack =True)
+    except:
+        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
+        return
+
+    R=np.array([Rtot[1,:]])
+    Rx=Rtot[0,:]
+    
+    le = pickle.loads(open("keras_le.pkl", "rb").read())
+    model = keras.models.load_model("keras_model.hd5")
+    predictions = model.predict(R, verbose=1)
+    pred_class = np.argmax(predictions)
+    
+    if pred_class.size >0:
+        predValue = le.inverse_transform(pred_class)
+    else:
+        predValue = 0
+
+    predProb = round(100*predictions[0][pred_class],2)
+    rosterPred = np.where(predictions[0]>0.1)[0]
+
+    if dP.numLabels == 1:
+        print('\033[1m' + '\n Predicted value (Keras) = ' + str(predValue) +
+          '  (probability = ' + str(predProb) + '%)\033[0m\n')
+    else:
+        print('\n ==========================================')
+        print('\033[1m' + ' Predicted value \033[0m(probability = ' + str(predProb) + '%)')
+        print(' ==========================================\n')
 
 #************************************
 ''' Open Learning Data '''
 #************************************
 def readLearnFile(learnFile):
-    print(" Opening learning file: "+learnFile+"\n")
+    print("\n Opening learning file: "+learnFile+"\n")
     try:
         if os.path.splitext(learnFile)[1] == ".npy":
             M = np.load(learnFile)
@@ -162,15 +316,21 @@ def readLearnFile(learnFile):
         print("\033[1m" + " Learning file not found \n" + "\033[0m")
         return
 
-    En = M[0,1:]
-    A = M[1:,1:]
-    Cl = M[1:,0]
+    dP = Conf()
+    En = M[0,dP.numLabels:]
+    A = M[1:,dP.numLabels:]
+    if dP.numLabels == 1:
+        Cl = M[1:,0]
+    else:
+        Cl = M[1:,[0,dP.numLabels-1]]
+
     return En, A, Cl
 
 #************************************
 ''' Print NN Info '''
 #************************************
 def printParam():
+    dP = Conf()
     print('\n  ================================================')
     print('  \033[1mKeras MLP\033[0m - Parameters')
     print('  ================================================')
@@ -181,10 +341,11 @@ def printParam():
                 '\n  Dropout:', dP.drop,
                 '\n  Learning rate:', dP.l_rate,
                 '\n  Learning decay rate:', dP.l_rdecay)
-    #if kerasDef.fullBatch == True:
-    #    print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)))
-    #else:
-    print('  Batch size:', dP.batch_size)
+    if dP.fullSizeBatch == True:
+        print('  Batch size: full')
+    else:
+        print('  Batch size:', dP.batch_size)
+    print('  Number of labels:', dP.numLabels)
     #print('  ================================================\n')
 
 #************************************
@@ -212,6 +373,39 @@ def plotWeights(En, A, model):
     plt.xlabel('Raman shift [1/cm]')
     plt.legend(loc='upper right')
     plt.savefig('keras_MLP_weights' + '.png', dpi = 160, format = 'png')  # Save plot
+
+#************************************
+''' MultiClassReductor '''
+#************************************
+class MultiClassReductor():
+    def __self__(self):
+        self.name = name
+    
+    def fit(self,tc):
+        self.totalClass = tc.tolist()
+    
+    def transform(self,y):
+        Cl = np.zeros(y.shape[0])
+        for j in range(len(y)):
+            Cl[j] = self.totalClass.index(np.array(y[j]).tolist())
+        return Cl
+    
+    def inverse_transform(self,a):
+        return self.totalClass[int(a)]
+
+    def classes_(self):
+        return self.totalClass
+
+#************************************
+''' Lists the program usage '''
+#************************************
+def usage():
+    print('\n Usage:\n')
+    print(' Train:')
+    print('  python3 DataML.py -t <learningFile>\n')
+    print(' Predict:')
+    print('  python3 DataML.py -p <testFile>\n')
+    print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
 ''' Main initialization routine '''
