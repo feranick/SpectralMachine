@@ -38,8 +38,8 @@ class Conf():
             'l_rate' : 0.001,
             'l_rdecay' : 1e-4,
             'CL' : [30],
-            'CL_size' = [20],
-            'max_pooling' = 100,
+            'CL_size' : [20],
+            'max_pooling' : 100,
             'HL' : [20,30,40,50,60,70],
             'drop' : 0,
             'l2' : 1e-4,
@@ -84,7 +84,7 @@ class Conf():
     # Create configuration file
     def createConfig(self):
         try:
-            self.datamlDef()
+            self.SKDef()
             self.sysDef()
             with open(self.configFile, 'w') as configfile:
                 self.conf.write(configfile)
@@ -109,11 +109,11 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            try:
-                train(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            train(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-p" , "--predict"):
             try:
@@ -240,7 +240,7 @@ def train(learnFile):
             batch_size=dP.batch_size,
             write_graph=True, write_grads=True, write_images=True)
     tbLogs = [tbLog]
-    log = model.fit(A, Cl2,
+    log = model.fit(x_train, y_train,
         epochs=dP.epochs,
         batch_size=dP.batch_size,
         callbacks = tbLogs,
@@ -259,11 +259,11 @@ def train(learnFile):
     print('\n  =============================================')
     print('  \033[1mKeras CNN\033[0m - Model Configuration')
     print('  =============================================')
-    print("\n Training set file:",learnFile)
-    print("\n Data size:", A.shape,"\n")
     for conf in model.get_config():
         print(conf,"\n")
 
+    print(" Training set file:",learnFile)
+    print(" Data size:", A.shape,"\n")
     print(" Number of learning labels:",dP.numLabels)
     print(" Number unique classes: ", numUniqueClasses)
     print(" Total number of points per data:",En.size)
