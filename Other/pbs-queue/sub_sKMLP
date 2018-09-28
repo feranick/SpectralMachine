@@ -41,6 +41,6 @@ cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
   echo $inpfiletest
   echo $logname
 
-  SpectraKeras_MLP -t $inpfile | tee -a log_CNN_$logname.txt
+  $execpath/SpectraKeras_MLP -t $inpfile | tee -a log_CNN_$logname.txt
 
 ";
