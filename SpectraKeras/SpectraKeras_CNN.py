@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - CNN
-* 20180927a
+* 20180928a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -96,6 +96,7 @@ class Conf():
 #************************************
 def main():
     start_time = time.clock()
+    dP = Conf()
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    "tph:", ["train", "predict", "help"])
