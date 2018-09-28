@@ -1,0 +1,46 @@
+#!/usr/bin/perl
+#use the script as follows:
+#./sub_sKCNN trainFile testFile | qsub -N jobname
+
+use Cwd;
+use File::Basename;
+@ARGV > 0 or die "usage: sub_sKCNN inpfile_train | qsub -N jobname \n";
+#$n=$ARGV[0];
+$n=1;
+$nprocs=$n*1;
+#$inpfile=$ARGV[1];
+$inpfile=$ARGV[0];
+$inpfiletest=$ARGV[1];
+#This part creates necessary directories;
+$execpath="/usr/local/bin";
+$fullpath=getcwd;
+$basefile = basename($inpfile);
+$basefile =~ s{\.[^.]+$}{};
+$folder=basename($fullpath);
+#$percvtest=5;
+#$percvtrain=100-$percvtest;
+#$inpfiletest=$basedir."_test-".$percvtest."pc.txt";
+#$inpfiletrain=$basedir."_train-".$percvtrain."pc.txt";
+$logname=$basefile."_".$folder;
+
+print "#!/bin/sh
+#PBS -l nodes=$n:ppn=7
+#PBS -N SLP
+
+#export LD_LIBRARY_PATH=/usr/local/cuda-9.2/extras/CUPTI/lib64:$LD_LIBRARY_PATH
+cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
+
+  cd $fullpath
+  #mkdir $basedir
+  #$execpath/CrossValidMaker.py $inpfile $percvtest
+  #cp $inpfile $basedir
+  #cp $inpfiletest $basedir
+  #cd $basedir
+  echo $fullpath
+  echo $inpfile
+  echo $inpfiletest
+  echo $logname
+
+  SpectraKeras_CNN -t $inpfile | tee -a log_CNN_$logname.txt
+
+";
