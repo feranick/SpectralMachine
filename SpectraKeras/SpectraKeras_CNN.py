@@ -208,7 +208,7 @@ def train(learnFile):
     ### Build model
     model = keras.models.Sequential()
 
-    for i in range(len(dP.CL)):
+    for i in range(len(dP.CL_filter)):
         model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
             activation='relu',
             input_shape=spectra.shape))
