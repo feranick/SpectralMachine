@@ -37,7 +37,7 @@ class Conf():
         self.conf['Parameters'] = {
             'l_rate' : 0.001,
             'l_rdecay' : 1e-4,
-            'CL' : [30],
+            'CL_filter' : [30],
             'CL_size' : [20],
             'max_pooling' : 100,
             'HL' : [20,30,40,50,60,70],
@@ -63,8 +63,7 @@ class Conf():
         
             self.l_rate = self.conf.getfloat('Parameters','l_rate')
             self.l_rdecay = self.conf.getfloat('Parameters','l_rdecay')
-            self.CL = eval(self.SKDef['CL'])
-            self.CL = eval(self.SKDef['CL'])
+            self.CL_filter = eval(self.SKDef['CL_filter'])
             self.CL_size = eval(self.SKDef['CL_size'])
             self.max_pooling = eval(self.SKDef['max_pooling'])
             
@@ -210,7 +209,7 @@ def train(learnFile):
     model = keras.models.Sequential()
 
     for i in range(len(dP.CL)):
-        model.add(keras.layers.Conv2D(dP.CL[i], (1, dP.CL_size[i]),
+        model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
             activation='relu',
             input_shape=spectra.shape))
 
@@ -365,7 +364,7 @@ def printParam():
     print('  \033[1mKeras CNN\033[0m - Parameters')
     print('  ================================================')
     print('  Optimizer:','Adam',
-                '\n  Convolutional layers:', dP.CL,
+                '\n  Convolutional layers:', dP.CL_filter,
                 '\n  Convolutional layers size:', dP.CL_size,
                 '\n  Max Pooling:', dP.max_pooling,
                 '\n  Hidden layers:', dP.HL,
