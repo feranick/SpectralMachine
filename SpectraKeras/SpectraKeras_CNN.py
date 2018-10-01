@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - CNN
-* 20180928a
+* 20181001a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -212,8 +212,12 @@ def train(learnFile):
         model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
             activation='relu',
             input_shape=spectra.shape))
-
-    model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
+    try:
+        model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
+    except:
+        dP.max_pooling -= dP.CL_size[-1] - 1
+        print(" Rescaled pool size: ", dP.max_pooling, "\n")
+        model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
 
     model.add(keras.layers.Dropout(dP.drop))
     model.add(keras.layers.Flatten())
