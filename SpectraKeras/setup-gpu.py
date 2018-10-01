@@ -7,7 +7,7 @@ setup(
     entry_points={'console_scripts' : ['SpectraKeras_MLP=SpectraKeras_MLP:SpectraKeras_MLP',
         'SpectraKeras_CNN=SpectraKeras_CNN:SpectraKeras_CNN']},
     py_modules=['SpectraKeras_MLP','SpectraKeras_CNN'],
-    version='20180928a',
+    version='20181001a',
     description='Machine learning for spectral data',
     long_description= """ Machine learning for spectral data """,
     author='Nicola Ferralis',
