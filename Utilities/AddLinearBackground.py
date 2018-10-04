@@ -8,7 +8,7 @@
 * slope parameter.
 * For augmentation of data
 *
-* version: 20181004a
+* version: 20181004b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -24,6 +24,9 @@ import sys, os.path, h5py
 class defParam:
     saveAsTxt = False
     addToFlatland = False
+    randomSlope = True
+    Ynorm = True
+    YnormTo = 1
 
 def main():
     if len(sys.argv) < 4:
@@ -52,6 +55,10 @@ def main():
 
     for j in range(int(sys.argv[2])):
         newTrain = np.vstack((newTrain, linBackground(En, M, float(sys.argv[3]))))
+
+    if defParam.Ynorm ==True:
+        print(" Normalizing Learning + Noisy Spectra to:",defParam.YnormTo,"\n")
+        newTrain = normalizeSpectra(newTrain)
 
     saveLearnFile(newTrain, newFile)
 
@@ -99,12 +106,25 @@ def saveLearnFile(M, learnFile):
 def linBackground(En, M, slope):
     from random import uniform
     for j in range(0, M.shape[0]):
+        rSlope = slope
+        if defParam.randomSlope == True:
+            rSlope *= uniform(0,1)
         for i in range(0, En.shape[0]):
             if defParam.addToFlatland == False:
-                M[j,i+1] += slope*En[i] - M[j,1]
+                M[j,i+1] += rSlope*En[i] - M[j,1]
             else:
                 if M[j,i+1].any() == 0:
-                    M[j,i+1] += slope*En[i] - M[j,1]
+                    M[j,i+1] += rSlope*En[i] - M[j,1]
+    return M
+
+#************************************
+''' Normalize '''
+#************************************
+def normalizeSpectra(M):
+    for i in range(1,M.shape[0]):
+        if(np.amin(M[i]) <= 0):
+            M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
+        M[i,1:] = np.multiply(M[i,1:], defParam.YnormTo/max(M[i][1:]))
     return M
 
 #************************************
