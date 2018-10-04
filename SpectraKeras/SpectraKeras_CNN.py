@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras - CNN
-* 20181001a
+* 20181004a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -258,7 +258,7 @@ def train(learnFile):
 
     #score = model.evaluate(A_test, Cl2_test, batch_size=A.shape[1])
     model.save(model_name)
-    keras.utils.plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
+    keras.utils.plot_model(model, to_file=model_directory+'/keras_CNN_model.png', show_shapes=True)
     
     print('\n  =============================================')
     print('  \033[1mKeras CNN\033[0m - Model Configuration')
