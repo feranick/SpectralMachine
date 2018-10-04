@@ -8,7 +8,7 @@
 * slope parameter.
 * For augmentation of data
 *
-* version: 20180615a
+* version: 20181004a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -31,7 +31,7 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
-    newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2] + '_sLinBack' + sys.argv[3]
+    newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2] + '_sLinBack-' + sys.argv[3]
     
     if len(sys.argv) == 5:
         defParam.addToFlatland = True
@@ -41,7 +41,7 @@ def main():
 
     print(' Adding', sys.argv[2], 'sets with linear background with slope:', sys.argv[3], '\n')
 
-    newFile += '.txt'
+    #newFile += '.txt'
     En, M = readLearnFile(sys.argv[1])
 
     if os.path.exists(newFile) == False:
