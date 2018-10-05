@@ -8,7 +8,7 @@
 * slope parameter.
 * For augmentation of data
 *
-* version: 20181004b
+* version: 20181005a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -109,13 +109,14 @@ def linBackground(En, M, slope):
         rSlope = slope
         if defParam.randomSlope == True:
             rSlope *= uniform(0,1)
+        S = np.zeros(M.shape)
         for i in range(0, En.shape[0]):
             if defParam.addToFlatland == False:
-                M[j,i+1] += rSlope*En[i] - M[j,1]
+                S[j,i+1] = M[j,i+1] + rSlope*En[i] - M[j,1]
             else:
                 if M[j,i+1].any() == 0:
-                    M[j,i+1] += rSlope*En[i] - M[j,1]
-    return M
+                    S[j,i+1] = M[j,i+1] + rSlope*En[i] - M[j,1]
+    return S
 
 #************************************
 ''' Normalize '''
