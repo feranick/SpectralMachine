@@ -8,7 +8,7 @@
 * slope parameter.
 * For augmentation of data
 *
-* version: 20181005a
+* version: 20181005b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -25,7 +25,7 @@ class defParam:
     saveAsTxt = False
     addToFlatland = False
     randomSlope = True
-    Ynorm = True
+    Ynorm = False
     YnormTo = 1
 
 def main():
@@ -41,6 +41,10 @@ def main():
         newFile += '_back'
     else:
         pass
+
+    if defParam.Ynorm ==True:
+        print(" Normalizing Learning Spectra to:",defParam.YnormTo)
+        newFile += '_norm'+str(defParam.YnormTo)
 
     print(' Adding', sys.argv[2], 'sets with linear background with slope:', sys.argv[3], '\n')
 
