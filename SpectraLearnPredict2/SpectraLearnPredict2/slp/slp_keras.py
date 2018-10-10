@@ -84,8 +84,8 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     Cl2_test = le.transform(Cl_test)
 
     totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
-    Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(Cl).size+1)
-    Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(Cl).size+1)
+    Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(totCl).size+1)
+    Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(totCl).size+1)
     print(" Label Encoder saved in:", model_le)
     with open(model_le, 'ab') as f:
         f.write(pickle.dumps(le))
@@ -105,7 +105,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
                     input_dim=A.shape[1],
                     kernel_regularizer=keras.regularizers.l2(kerasDef.l2_reg_strength)))
             model.add(keras.layers.Dropout(kerasDef.dropout_perc))
-        model.add(keras.layers.Dense(np.unique(Cl).size+1, activation = 'softmax'))
+        model.add(keras.layers.Dense(np.unique(totCl).size+1, activation = 'softmax'))
         model.compile(loss='categorical_crossentropy',
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
@@ -155,9 +155,12 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 
         printModelKeras(model)
 
-        print('\n  Number of spectra = ' + str(A.shape[0]))
-        print('  Number of points in each spectra = ' + str(A.shape[1]))
-        print('  Number of unique classes = ' + str(len(np.unique(Cl))))
+        print("\n  Number of spectra = ",A.shape[0])
+        print("  Number of points in each spectra = ", A.shape[1])
+        print("  Number unique classes (training): ", np.unique(Cl).size)
+        print("  Number unique classes (validation):", np.unique(Cl_test).size)
+        print("  Number unique classes (total): ", np.unique(totCl).size)
+
         printParamKeras(A)
         printTrainSummary(accuracy, loss, val_acc, val_loss)
         

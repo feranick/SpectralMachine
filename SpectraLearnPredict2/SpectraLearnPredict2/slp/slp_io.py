@@ -109,7 +109,7 @@ def trainAccuracy(learnFile, testFile):
         print(" Number of training spectra = " + str(len(A)))
         print(" Number of evaluation spectra = " + str(len(A_test)) + "\n")
     else:
-        print(" Cross-validation training using: privided test subset (",testFile,")\n")
+        print(" Cross-validation training using: provided test subset (",testFile,")\n")
         En_test, Cl_test, A_test, YnormXind2 = readLearnFile(testFile)
     
     learnFileRoot = os.path.splitext(learnFile)[0]
