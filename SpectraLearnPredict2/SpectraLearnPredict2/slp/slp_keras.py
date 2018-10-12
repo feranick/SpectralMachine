@@ -239,7 +239,7 @@ def predKeras(model, le, R, Cl):
     predictions = model.predict(R, verbose=1)
     pred_class = np.argmax(predictions)
     if pred_class.size >0:
-        predValue = le.inverse_transform(pred_class)
+        predValue = le.inverse_transform([pred_class])[0]
     else:
         predValue = 0
 
