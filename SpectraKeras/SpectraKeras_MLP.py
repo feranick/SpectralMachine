@@ -426,8 +426,10 @@ class MultiClassReductor():
 #************************************
 def usage():
     print('\n Usage:\n')
-    print(' Train:')
+    print(' Train (Random cross validation):')
     print('  python3 SpectraKeras_MLP.py -t <learningFile>\n')
+    print(' Train (with external validation):')
+    print('  python3 SpectraKeras_MLP.py -t <learningFile> <validationFile>\n')
     print(' Predict:')
     print('  python3 SpectraKeras_MLP.py -p <testFile>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
