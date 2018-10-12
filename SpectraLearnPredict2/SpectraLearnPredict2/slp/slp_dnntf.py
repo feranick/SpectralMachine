@@ -265,7 +265,7 @@ def predDNNTF(clf, le, R, Cl):
         pred_class = [p["class_ids"] for p in predictions][0][0]
     
         if pred_class.size >0:
-            predValue = le.inverse_transform(pred_class)
+            predValue = le.inverse_transform([pred_class])[0]
         else:
             predValue = 0
         prob = [p["probabilities"] for p in predictions][0]
