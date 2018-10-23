@@ -52,7 +52,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         tf.logging.set_verbosity(tf.logging.INFO)
     
     if dnntfDef.alwaysRetrain == False:
-        model_directory = Root + "/DNN-TF_" + str(len(dnntfDef.hidden_layers))+"HL_"+str(dnntfDef.hidden_layers[0])
+        model_directory = "./DNN-TF_" + str(len(dnntfDef.hidden_layers))+"HL_"+str(dnntfDef.hidden_layers[0])
         print("\n  Training model saved in: ", model_directory, "\n")
     else:
         dnntfDef.alwaysImprove = True
@@ -318,7 +318,7 @@ def trainDNNTF2(A, Cl, A_test, Cl_test, Root):
         tf.logging.set_verbosity(tf.logging.INFO)
     
     if dnntfDef.alwaysRetrain == False:
-        model_directory = Root + "/DNN-TF-SK_" + str(len(dnntfDef.hidden_layers))+"HL_"+str(dnntfDef.hidden_layers[0])
+        model_directory = "./DNN-TF-SK_" + str(len(dnntfDef.hidden_layers))+"HL_"+str(dnntfDef.hidden_layers[0])
         print("\n  Training model saved in: ", model_directory, "\n")
     else:
         dnntfDef.alwaysImprove = True
