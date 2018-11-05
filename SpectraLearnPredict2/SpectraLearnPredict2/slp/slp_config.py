@@ -92,6 +92,7 @@ class Configuration():
             'runKeras' : False,
             'alwaysRetrainKeras' : False,
             'alwaysImproveKeras' : True,
+            'regressorKeras' : False,
             'hidden_layersKeras' : [200,200],
             'optimizerKeras' : "Adam",
             'l2_reg_strengthKeras' : 1e-4,
@@ -244,6 +245,7 @@ class Configuration():
         self.runKeras = self.conf.getboolean('Keras','runKeras')
         self.alwaysRetrainKeras = self.conf.getboolean('Keras','alwaysRetrainKeras')
         self.alwaysImproveKeras = self.conf.getboolean('Keras','alwaysImproveKeras')
+        self.regressorKeras = self.conf.getboolean('Keras','regressorKeras')
         self.hidden_layersKeras = eval(self.kerasDef['hidden_layersKeras'])
         self.optimizerKeras = self.kerasDef['optimizerKeras']
         self.l2_reg_strengthKeras = self.conf.getfloat('Keras','l2_reg_strengthKeras')
@@ -496,6 +498,7 @@ class kerasDef:
     runKeras = config.runKeras
     alwaysRetrain = config.alwaysRetrainKeras
     alwaysImprove = config.alwaysImproveKeras
+    regressor = config.regressorKeras
     
     # Format: [number_neurons_HL1, number_neurons_HL2, number_neurons_HL3,...]
     hidden_layers = config.hidden_layersKeras

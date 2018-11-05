@@ -60,7 +60,10 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
     
     tb_directory = "keras_" + str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])
     model_directory = "."
-    model_name = model_directory+"/keras_"+str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])+".hd5"
+    if kerasDef.regressor:
+        model_name = model_directory+"/keras_regressor_"+str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])+".hd5"
+    else:
+        model_name = model_directory+"/keras_"+str(len(kerasDef.hidden_layers))+"HL_"+str(kerasDef.hidden_layers[0])+".hd5"
     model_le = model_directory+"/keras_model_le.pkl"
     
     if kerasDef.alwaysRetrain == False:
@@ -76,19 +79,26 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 
     totA = np.vstack((A, A_test))
     totCl = np.append(Cl, Cl_test)
-    
-    numTotClasses = np.unique(totCl).size
-    le = preprocessing.LabelEncoder()
-    totCl2 = le.fit_transform(totCl)
-    Cl2 = le.transform(Cl)
-    Cl2_test = le.transform(Cl_test)
 
-    totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
-    Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(totCl).size+1)
-    Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(totCl).size+1)
-    print(" Label Encoder saved in:", model_le)
-    with open(model_le, 'ab') as f:
-        f.write(pickle.dumps(le))
+    
+    if kerasDef.regressor:
+        Cl2 = np.copy(Cl)
+        Cl2_test = np.copy(Cl_test)
+        le = None
+    else:
+
+        numTotClasses = np.unique(totCl).size
+        le = preprocessing.LabelEncoder()
+        totCl2 = le.fit_transform(totCl)
+        Cl2 = le.transform(Cl)
+        Cl2_test = le.transform(Cl_test)
+
+        totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
+        Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(totCl).size+1)
+        Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(totCl).size+1)
+        print(" Label Encoder saved in:", model_le)
+        with open(model_le, 'ab') as f:
+            f.write(pickle.dumps(le))
     
     if kerasDef.fullBatch == True:
         batch_size = A.shape[0]
@@ -105,8 +115,15 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
                     input_dim=A.shape[1],
                     kernel_regularizer=keras.regularizers.l2(kerasDef.l2_reg_strength)))
             model.add(keras.layers.Dropout(kerasDef.dropout_perc))
-        model.add(keras.layers.Dense(np.unique(totCl).size+1, activation = 'softmax'))
-        model.compile(loss='categorical_crossentropy',
+
+        if kerasDef.regressor:
+            model.add(keras.layers.Dense(1))
+            model.compile(loss='mse',
+                optimizer=kerasDef.optimizer,
+                metrics=['mae'])
+        else:
+            model.add(keras.layers.Dense(np.unique(totCl).size+1, activation = 'softmax'))
+            model.compile(loss='categorical_crossentropy',
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
 
@@ -121,10 +138,15 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
             verbose = 2,
             validation_data=(A_test, Cl2_test))
 
-        accuracy = np.asarray(log.history['acc'])
         loss = np.asarray(log.history['loss'])
-        val_acc = np.asarray(log.history['val_acc'])
         val_loss = np.asarray(log.history['val_loss'])
+
+        if kerasDef.regressor:
+            accuracy = None
+            val_acc = None
+        else:
+            accuracy = np.asarray(log.history['acc'])
+            val_acc = np.asarray(log.history['val_acc'])
 
         model.save(model_name)
 
@@ -157,9 +179,10 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 
         print("\n  Number of spectra = ",A.shape[0])
         print("  Number of points in each spectra = ", A.shape[1])
-        print("  Number unique classes (training): ", np.unique(Cl).size)
-        print("  Number unique classes (validation):", np.unique(Cl_test).size)
-        print("  Number unique classes (total): ", np.unique(totCl).size)
+        if kerasDef.regressor == False:
+            print("  Number unique classes (training): ", np.unique(Cl).size)
+            print("  Number unique classes (validation):", np.unique(Cl_test).size)
+            print("  Number unique classes (total): ", np.unique(totCl).size)
 
         printParamKeras(A)
         printTrainSummary(accuracy, loss, val_acc, val_loss)
@@ -178,23 +201,32 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
 ''' Summary visualization panels '''
 #***********************************************
 def printTrainSummary(accuracy,loss, val_acc, val_loss):
-    print('\n  ================================================')
-    print('  \033[1mKeras MLP\033[0m - Training Summary')
-    print('  ================================================')
-    print("  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
-    print("  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
-    print("\n  Validation ({0:.0f}%) - Average: {1:.2f}%; Max: {2:.2f}%".format(100*preprocDef.percentCrossValid,
+    if kerasDef.regressor:
+        print('\n  ========================================================')
+        print('  \033[1mKeras MLP - Regressor\033[0m - Training Summary')
+        print('  ========================================================')
+        print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(loss), np.amin(loss), loss[-1]))
+        print('  ========================================================\n')
+    else:
+        print('\n  ================================================')
+        print('  \033[1mKeras MLP - Classifier \033[0m - Training Summary')
+        print('  ================================================')
+        print("  Accuracy - Average: {0:.2f}%; Max: {1:.2f}%".format(100*np.average(accuracy), 100*np.amax(accuracy)))
+        print("  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(loss), np.amin(loss)))
+        print("\n  Validation ({0:.0f}%) - Average: {1:.2f}%; Max: {2:.2f}%".format(100*preprocDef.percentCrossValid,
                 100*np.average(val_acc), 100*np.amax(val_acc)))
-    print("  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(val_loss), np.amin(val_loss)))
-    print('  ================================================\n\n')
+        print("  Loss - Average: {0:.4f}; Min: {1:.4f}".format(np.average(val_loss), np.amin(val_loss)))
+        print('  ================================================\n\n')
 
 def printEvalSummary(model_name, score):
     print('\n\n  ================================================')
     print('  \033[1mKeras MLP\033[0m - Evaluation Summary')
     print('  ================================================')
-    print("  Evaluation ({0:.0f}%) - Loss: {1:.4f}; Accuracy: {2:.2f}%".format(100*preprocDef.percentCrossValid,
-                score[0], 100*score[1]))
-    print("  Global step: {:.2f}".format(kerasDef.trainingSteps))
+    print("  Evaluation ({0:.0f}%) - Loss: {1:.4f}".format(100*preprocDef.percentCrossValid,
+                score[0]))
+    if kerasDef.regressor == False:
+        print("  Accuracy: {0:.2f}%".format(100*score[1]))
+    print("  Global step: {:d}".format(kerasDef.trainingSteps))
     if os.path.exists(model_name) is True:
         print("\n  Model saved in:", model_name)
     print('  ================================================\n')
@@ -209,7 +241,10 @@ def printModelKeras(model):
 
 def printParamKeras(A):
     print('\n  ================================================')
-    print('  \033[1mKeras MLP\033[0m - Parameters')
+    if kerasDef.regressor:
+        print('  \033[1mKeras MLP - Regressor \033[0m - Parameters')
+    else:
+        print('  \033[1mKeras MLP - Classifier \033[0m - Parameters')
     print('  ================================================')
     print('  Optimizer:',kerasDef.optimizer_tag,
                 '\n  Hidden layers:', kerasDef.hidden_layers,
@@ -235,28 +270,37 @@ def predKeras(model, le, R, Cl):
     
     from sklearn import preprocessing
     
-    #le = pickle.loads(open(model_le, "rb").read())
-    predictions = model.predict(R, verbose=1)
-    pred_class = np.argmax(predictions)
-    if pred_class.size >0:
-        predValue = le.inverse_transform([pred_class])[0]
+    if kerasDef.regressor:
+        predictions = model.predict(R).flatten()[0]
+        print('  ========================================================')
+        print('  \033[1mKeras MLP - Regressor\033[0m - Prediction')
+        print('  ========================================================')
+        predValue = predictions
+        print('\033[1m\n  Predicted value = {0:.4f}\033[0m\n'.format(predValue))
+        print('  ========================================================\n')
+        predProb = 0
     else:
-        predValue = 0
+        predictions = model.predict(R, verbose=1)
+        pred_class = np.argmax(predictions)
+        if pred_class.size >0:
+            predValue = le.inverse_transform([pred_class])[0]
+        else:
+            predValue = 0
 
-    predProb = round(100*predictions[0][pred_class],2)
-    rosterPred = np.where(predictions[0]>kerasDef.thresholdProbabilityPred)[0]
+        predProb = round(100*predictions[0][pred_class],2)
+        rosterPred = np.where(predictions[0]>kerasDef.thresholdProbabilityPred)[0]
     
-    print('\n  ==================================')
-    print('  \033[1mKeras\033[0m - Probability >',str(kerasDef.thresholdProbabilityPred),'%')
-    print('  ==================================')
-    print('  Prediction\tProbability [%]')
-    for i in range(rosterPred.shape[0]):
-        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',
-            str('{:.4f}'.format(100*predictions[0][rosterPred][i])))
-    print('  ==================================')
+        print('\n  ==================================')
+        print('  \033[1mKeras\033[0m - Probability >',str(kerasDef.thresholdProbabilityPred),'%')
+        print('  ==================================')
+        print('  Prediction\tProbability [%]')
+        for i in range(rosterPred.shape[0]):
+            print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',
+                str('{:.4f}'.format(100*predictions[0][rosterPred][i])))
+        print('  ==================================')
     
-    print('\033[1m' + '\n Predicted value (Keras) = ' + str(predValue) +
-          '  (probability = ' + str(predProb) + '%)\033[0m\n')
+        print('\033[1m' + '\n Predicted value (Keras) = ' + str(predValue) +
+            '  (probability = ' + str(predProb) + '%)\033[0m\n')
 
     return predValue, predProb
 
