@@ -288,15 +288,14 @@ def predKeras(model, le, R, Cl):
             predValue = 0
 
         predProb = round(100*predictions[0][pred_class],2)
-        rosterPred = np.where(predictions[0]>kerasDef.thresholdProbabilityPred)[0]
-    
         print('\n  ==================================')
         print('  \033[1mKeras\033[0m - Probability >',str(kerasDef.thresholdProbabilityPred),'%')
         print('  ==================================')
         print('  Prediction\tProbability [%]')
-        for i in range(rosterPred.shape[0]):
-            print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',
-                str('{:.4f}'.format(100*predictions[0][rosterPred][i])))
+        for i in range(len(predictions[0])-1):
+            if predictions[0][i]>kerasDef.thresholdProbabilityPred:
+                print(' ',str(np.unique(Cl)[i]),'\t\t',
+                    str('{:.2f}'.format(100*predictions[0][i])))
         print('  ==================================')
     
         print('\033[1m' + '\n Predicted value (Keras) = ' + str(predValue) +
