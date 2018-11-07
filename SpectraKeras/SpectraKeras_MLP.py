@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 '''
 **********************************************************
-* SpectraKeras - MLP - Classifier and Regressor
-* 20181105a
+* SpectraKeras_MLP Classifier and Regressor
+* 20181107a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -11,8 +11,9 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, getopt, time, configparser, pickle, h5py
-from libSpectraKeras import Normalizer
+import pandas as pd
+import sys, os.path, getopt, time, configparser, pickle, h5py, csv
+from libSpectraKeras import *
 
 #***************************************************
 # This is needed for installation through pip
@@ -93,7 +94,7 @@ def main():
     start_time = time.clock()
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "tph:", ["train", "predict", "help"])
+                                   "tpbh:", ["train", "predict", "batch", "help"])
     except:
         usage()
         sys.exit(2)
@@ -114,14 +115,24 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            if len(sys.argv)<4:
-                predict(sys.argv[2], None)
-            else:
-                predict(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #sys.exit(2)
+            try:
+                if len(sys.argv)<4:
+                    predict(sys.argv[2], None)
+                else:
+                    predict(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
+                
+        if o in ("-b" , "--batch"):
+            try:
+                if len(sys.argv)<4:
+                    batchPredict(sys.argv[2], None)
+                else:
+                    batchPredict(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
     total_time = time.clock() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -269,7 +280,6 @@ def train(learnFile, testFile):
             verbose=2,
 	        validation_split=dP.cv_split)
 
-    #score = model.evaluate(A_test, Cl2_test, batch_size=A.shape[1])
     model.save(model_name)
     keras.utils.plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
 
@@ -287,22 +297,26 @@ def train(learnFile, testFile):
     val_loss = np.asarray(log.history['val_loss'])
 
     if dP.regressor:
+        val_mae = np.asarray(log.history['val_mean_absolute_error'])
         predictions = model.predict(A_test)
         printParam()
-        print('\n  ========================================================')
+        print('\n  ==========================================================')
         print('  \033[1mKeras MLP - Regressor\033[0m - Training Summary')
-        print('  ========================================================')
+        print('  ==========================================================')
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(loss), np.amin(loss), loss[-1]))
-        print('\n\n  ========================================================')
+        print('\n\n  ==========================================================')
         print('  \033[1mKeras MLP - Regressor \033[0m - Validation Summary')
         print('  ========================================================')
-        print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
-        #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
-        print("  Real value | Predicted value")
-        print("  ----------------------------")
+        print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
+        print("  \033[1mMean Abs Err\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_mae), np.amin(val_mae), val_mae[-1]))
+        print('  ========================================================')
+        print("  Real value | Predicted value | val_loss | val_mean_abs_err")
+        print("  -----------------------------------------------------------")
         for i in range(0,len(predictions)):
-            print("  {0:.2f}       | {1:.2f}".format(Cl2_test[i], predictions[i][0]))
-        print('  ========================================================\n')
+            score = model.evaluate(np.array([A_test[i]]), np.array([Cl_test[i]]), batch_size=dP.batch_size, verbose = 0)
+            print("  {0:.2f}\t\t| {1:.2f}\t\t| {2:.4f}\t| {3:.4f} ".format(Cl2_test[i],
+                predictions[i][0], score[0], score[1]))
+        print('\n  ==========================================================\n')
     else:
         accuracy = np.asarray(log.history['acc'])
         val_acc = np.asarray(log.history['val_acc'])
@@ -324,8 +338,19 @@ def train(learnFile, testFile):
         print("\n  \033[1mAccuracy\033[0m - Average: {0:.2f}%; Max: {1:.2f}%; Last: {2:.2f}%".format(100*np.average(val_acc),
         100*np.amax(val_acc), 100*val_acc[-1]))
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
+
+        print('  ========================================================')
+        print("  Real class\t| Predicted class\t| Probability")
+        print("  ---------------------------------------------------")
+        predictions = model.predict(A_test)
+        for i in range(predictions.shape[0]):
+            predClass = np.argmax(predictions[i])
+            predProb = round(100*predictions[i][predClass],2)
+            predValue = le.inverse_transform([predClass])[0]
+            realValue = Cl_test[i]
+            print("  {0:.2f}\t\t| {1:.2f}\t\t\t| {2:.2f}".format(realValue, predValue, predProb))
         #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
-        print('  ========================================================\n')
+        print('\n  ========================================================\n')
 
     if dP.plotWeightsFlag == True:
         plotWeights(En, A, model)
@@ -352,12 +377,12 @@ def predict(testFile, normFile):
     Rx=Rtot[0,:]
 
     if normFile != None:
-        #try:
-        norm = pickle.loads(open(normFile, "rb").read())
-        print("\n Opening pkl file with normalization data:",normFile,"\n")
-        #except:
-        #    print("\033[1m" + " pkl file not found \n" + "\033[0m")
-        #    return
+        try:
+            norm = pickle.loads(open(normFile, "rb").read())
+            print("\n  Opening pkl file with normalization data:",normFile)
+        except:
+            print("\033[1m pkl file not found \033[0m")
+            return
     
     if dP.regressor:
         model = keras.models.load_model("keras_model_regressor.hd5")
@@ -381,7 +406,7 @@ def predict(testFile, normFile):
         predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
 
-        print('\n  ========================================================')
+        print('  ========================================================')
         print('  \033[1mKeras MLP - Classifier\033[0m - Prediction')
         print('  ========================================================')
 
@@ -409,10 +434,82 @@ def predict(testFile, normFile):
             print(' ==========================================\n')
 
 #************************************
+# Batch Prediction
+#************************************
+def batchPredict(testFile, normFile):
+    dP = Conf()
+    if dP.useTFKeras:
+        import tensorflow.keras as keras  #tf.keras
+    else:
+        import keras   # pure Keras
+
+    En_test, A_test, Cl_test = readLearnFile(testFile)
+
+    try:
+        norm = pickle.loads(open(normFile, "rb").read())
+        print("\n  Opening pkl file with normalization data:",normFile,"\n")
+    except:
+        print("\033[1m" + " pkl file not found \n" + "\033[0m")
+        return
+
+    if dP.regressor:
+        summaryFileName = os.path.splitext(testFile)[0]+"_regressor-summary.csv"
+        summaryFile = np.array([['SpectraKeras_MLP','Regressor','',''],['Real Value','Prediction','val_loss','val_abs_mean_error']])
+        model = keras.models.load_model("keras_model_regressor.hd5")
+        predictions = model.predict(A_test)
+        score = model.evaluate(A_test, Cl_test, batch_size=dP.batch_size, verbose = 0)
+        print('  ==========================================================')
+        print('  \033[1mKeras MLP - Regressor\033[0m - Batch Prediction')
+        print('  ==========================================================')
+        print("  \033[1mOverall val_loss:\033[0m {0:.4f}; \033[1moverall val_abs_mean_loss:\033[0m {1:.4f}\n".format(score[0], score[1]))
+        print('  ==========================================================')
+        print("  Real value | Predicted value | val_loss | val_mean_abs_err")
+        print("  -----------------------------------------------------------")
+        for i in range(0,len(predictions)):
+            score = model.evaluate(np.array([A_test[i]]), np.array([Cl_test[i]]), batch_size=dP.batch_size, verbose = 0)
+            if normFile != None:
+                predValue = norm.transform_inverse_single(predictions[i][0])
+                realValue = norm.transform_inverse_single(Cl_test[i])
+            else:
+                realValue = Cl_test[i]
+                predValue = predictions[i][0]
+            
+            print("  {0:.2f}\t\t| {1:.2f}\t\t| {2:.4f}\t| {3:.4f} ".format(realValue, predValue, score[0], score[1]))
+            summaryFile = np.vstack((summaryFile,[realValue,predValue,score[0], score[1]]))
+        print('  ==========================================================\n')
+    else:
+        summaryFileName = os.path.splitext(testFile)[0]+"_classifier-summary.csv"
+        summaryFile = np.array([['SpectraKeras_MLP','Classifier',''],['Real Class','Predicted Class', 'Probability']])
+        le = pickle.loads(open("keras_le.pkl", "rb").read())
+        model = keras.models.load_model("keras_model.hd5")
+        predictions = model.predict(A_test)
+        print('  ========================================================')
+        print('  \033[1mKeras MLP - Classifier\033[0m - Batch Prediction')
+        print('  ========================================================')
+        print("  Real class\t| Predicted class\t| Probability")
+        print("  ---------------------------------------------------")
+        for i in range(predictions.shape[0]):
+            predClass = np.argmax(predictions[i])
+            predProb = round(100*predictions[i][predClass],2)
+            if normFile != None:
+                predValue = norm.transform_inverse_single(le.inverse_transform([predClass])[0])
+                realValue = norm.transform_inverse_single(Cl_test[i])
+            else:
+                predValue = le.inverse_transform([predClass])[0]
+                realValue = Cl_test[i]
+            print("  {0:.2f}\t\t| {1:.2f}\t\t\t| {2:.2f}".format(realValue, predValue, predProb))
+            summaryFile = np.vstack((summaryFile,[realValue,predValue,predProb]))
+        print('  ========================================================\n')
+
+    df = pd.DataFrame(summaryFile)
+    df.to_csv(summaryFileName, index=False, header=False)
+    print(" Prediction summary saved in:",summaryFileName,"\n")
+
+#************************************
 # Open Learning Data
 #************************************
 def readLearnFile(learnFile):
-    print("\n  Opening learning file: "+learnFile+"\n")
+    print("\n  Opening learning file: ",learnFile)
     try:
         if os.path.splitext(learnFile)[1] == ".npy":
             M = np.load(learnFile)
@@ -423,7 +520,7 @@ def readLearnFile(learnFile):
             with open(learnFile, 'r') as f:
                 M = np.loadtxt(f, unpack =False)
     except:
-        print("\033[1m" + "  Learning file not found \n" + "\033[0m")
+        print("\033[1m Learning file not found\033[0m")
         return
 
     dP = Conf()
@@ -485,28 +582,6 @@ def plotWeights(En, A, model):
     plt.savefig('keras_MLP_weights' + '.png', dpi = 160, format = 'png')  # Save plot
 
 #************************************
-# MultiClassReductor
-#************************************
-class MultiClassReductor():
-    def __self__(self):
-        self.name = name
-    
-    def fit(self,tc):
-        self.totalClass = tc.tolist()
-    
-    def transform(self,y):
-        Cl = np.zeros(y.shape[0])
-        for j in range(len(y)):
-            Cl[j] = self.totalClass.index(np.array(y[j]).tolist())
-        return Cl
-    
-    def inverse_transform(self,a):
-        return [self.totalClass[int(a[0])]]
-
-    def classes_(self):
-        return self.totalClass
-
-#************************************
 # Lists the program usage
 #************************************
 def usage():
@@ -519,6 +594,10 @@ def usage():
     print('  python3 SpectraKeras_MLP.py -p <testFile>\n')
     print(' Predict (labels normalized with pkl file):')
     print('  python3 SpectraKeras_MLP.py -p <testFile> <pkl normalization file>\n')
+    print(' Batch predict (no label normalization used):')
+    print('  python3 SpectraKeras_MLP.py -b <validationFile>\n')
+    print(' Batch predict (labels normalized with pkl file):')
+    print('  python3 SpectraKeras_MLP.py -b <validationFile> <pkl normalization file>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
