@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libDataML - Library for DataML
-* 20181102c
+* 20181108a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -44,23 +44,23 @@ class Normalizer(object):
     def transform_matrix(self,y):
         Mn = np.copy(y)
         if self.normalizeLabel:
-            Mn[1:,0] = np.multiply(y[1:,0] - self.min[0], self.YnormTo/(self.max[0] - 
-self.min[0]))
+            Mn[1:,0] = np.multiply(y[1:,0] - self.min[0],
+                self.YnormTo/(self.max[0] - self.min[0]))
             if self.useCustomRound:
                 customData = CustomRound(self.data)
                 for i in range(1,y.shape[0]):
                     Mn[i,0] = customData(Mn[i,0])
 
         for i in range(1,y.shape[1]):
-            Mn[1:,i] = np.multiply(y[1:,i] - self.min[i], self.YnormTo/(self.max[i] - 
-self.min[i]))
+            Mn[1:,i] = np.multiply(y[1:,i] - self.min[i],
+                self.YnormTo/(self.max[i] - self.min[i]))
         return Mn
-        
+    
     def transform_valid(self,V):
         Vn = np.copy(V)
         for i in range(0,V.shape[0]):
-            Vn[i,1] = np.multiply(V[i,1] - self.min[i], self.YnormTo/(self.max[i] - 
-self.min[i]))
+            Vn[i,1] = np.multiply(V[i,1] - self.min[i+1],
+                self.YnormTo/(self.max[i+1] - self.min[i+1]))
         return Vn
     
     def transform_inverse_single(self,v):
