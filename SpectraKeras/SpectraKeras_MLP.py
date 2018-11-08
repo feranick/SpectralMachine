@@ -445,12 +445,13 @@ def batchPredict(testFile, normFile):
 
     En_test, A_test, Cl_test = readLearnFile(testFile)
 
-    try:
-        norm = pickle.loads(open(normFile, "rb").read())
-        print("\n  Opening pkl file with normalization data:",normFile,"\n")
-    except:
-        print("\033[1m" + " pkl file not found \n" + "\033[0m")
-        return
+    if normFile != None:
+        try:
+            norm = pickle.loads(open(normFile, "rb").read())
+            print("\n  Opening pkl file with normalization data:",normFile,"\n")
+        except:
+            print("\033[1m  pkl file not found\033[0m \n")
+            return
 
     if dP.regressor:
         summaryFileName = os.path.splitext(testFile)[0]+"_regressor-summary.csv"
