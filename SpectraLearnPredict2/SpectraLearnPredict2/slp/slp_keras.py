@@ -189,7 +189,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
         
     else:
         print(" Retreaving training model from: ", model_name,"\n")
-        model = load_model(model_name)
+        model = keras.models.load_model(model_name)
         printModelKeras(model)
         printParamKeras(A)
     
