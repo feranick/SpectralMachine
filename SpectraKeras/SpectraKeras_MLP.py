@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20181120b
+* 20181120c
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -12,7 +12,7 @@ print(__doc__)
 
 import numpy as np
 import pandas as pd
-import sys, os.path, getopt, time, configparser, pickle, h5py, csv
+import sys, os.path, getopt, time, configparser, pickle, h5py, csv, glob
 from libSpectraKeras import *
 
 #***************************************************
@@ -46,7 +46,7 @@ class Conf():
             'l2' : 1e-4,
             'epochs' : 100,
             'cv_split' : 0.01,
-            'fullSizeBatch' : True,
+            'fullSizeBatch' : False,
             'batch_size' : 64,
             'numLabels' : 1,
             'plotWeightsFlag' : False,
@@ -126,10 +126,7 @@ def main():
                 
         if o in ("-b" , "--batch"):
             try:
-                if len(sys.argv)<4:
-                    batchPredict(sys.argv[2], None)
-                else:
-                    batchPredict(sys.argv[2], sys.argv[3])
+                batchPredict()
             except:
                 usage()
                 sys.exit(2)
@@ -370,27 +367,15 @@ def predict(testFile):
     else:
         import keras   # pure Keras
     
-    try:
-        with open(testFile, 'r') as f:
-            print('\n Opening sample data for prediction...')
-            Rtot = np.loadtxt(f, unpack =True)
-    except:
-        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
-        return
+    #try:
+    with open(testFile, 'r') as f:
+        print('\n Opening sample data for prediction...')
+        Rtot = np.loadtxt(f, unpack =True)
+    #except:
+    #    print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
+    #    return
 
-    En = np.array([pickle.loads(open("keras_spectral_range.pkl", "rb").read())])
-
-    R=np.array([Rtot[1,:]])
-    Rx=np.array([Rtot[0,:]])
-
-    if(R.shape[1] != En.shape[1]):
-        print('\033[1m\n  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape[1]) + ') and sample (' + str(R.shape[1]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
-        R = np.interp(En[0], Rx[0], R[0])
-        R = R.reshape(1,-1)
-
-    if dP.normalize:
-        norm = Normalizer()
-        R = norm.transform_single(R)
+    R = preprocess(Rtot)
 
     if dP.regressor:
         model = keras.models.load_model("keras_model_regressor.hd5")
@@ -436,72 +421,57 @@ def predict(testFile):
 #************************************
 # Batch Prediction
 #************************************
-def batchPredict(testFile, normFile):
+def batchPredict():
     dP = Conf()
     if dP.useTFKeras:
         import tensorflow.keras as keras  #tf.keras
     else:
         import keras   # pure Keras
 
-    En_test, A_test, Cl_test = readLearnFile(testFile)
-
-    if normFile != None:
-        try:
-            norm = pickle.loads(open(normFile, "rb").read())
-            print("\n  Opening pkl file with normalization data:",normFile,"\n")
-        except:
-            print("\033[1m  pkl file not found\033[0m \n")
-            return
-
     if dP.regressor:
-        summaryFileName = os.path.splitext(testFile)[0]+"_regressor-summary.csv"
-        summaryFile = np.array([['SpectraKeras_MLP','Regressor','',''],['Real Value','Prediction','val_loss','val_abs_mean_error']])
         model = keras.models.load_model("keras_model_regressor.hd5")
-        predictions = model.predict(A_test)
-        score = model.evaluate(A_test, Cl_test, batch_size=dP.batch_size, verbose = 0)
-        print('  ==========================================================')
-        print('  \033[1mKeras MLP - Regressor\033[0m - Batch Prediction')
-        print('  ==========================================================')
-        print("  \033[1mOverall val_loss:\033[0m {0:.4f}; \033[1moverall val_abs_mean_loss:\033[0m {1:.4f}\n".format(score[0], score[1]))
-        print('  ==========================================================')
-        print("  Real value | Predicted value | val_loss | val_mean_abs_err")
-        print("  -----------------------------------------------------------")
-        for i in range(0,len(predictions)):
-            score = model.evaluate(np.array([A_test[i]]), np.array([Cl_test[i]]), batch_size=dP.batch_size, verbose = 0)
-            if normFile != None:
-                predValue = norm.transform_inverse_single(predictions[i][0])
-                realValue = norm.transform_inverse_single(Cl_test[i])
-            else:
-                realValue = Cl_test[i]
-                predValue = predictions[i][0]
-            
-            print("  {0:.2f}\t\t| {1:.2f}\t\t| {2:.4f}\t| {3:.4f} ".format(realValue, predValue, score[0], score[1]))
-            summaryFile = np.vstack((summaryFile,[realValue,predValue,score[0], score[1]]))
-        print('  ==========================================================\n')
-    else:
-        summaryFileName = os.path.splitext(testFile)[0]+"_classifier-summary.csv"
-        summaryFile = np.array([['SpectraKeras_MLP','Classifier',''],['Real Class','Predicted Class', 'Probability']])
-        le = pickle.loads(open("keras_le.pkl", "rb").read())
-        model = keras.models.load_model("keras_model.hd5")
-        predictions = model.predict(A_test)
+        summaryFileName = "keras_summary_regressor.csv"
+        summaryFile = np.array([['SpectraKeras_MLP','Regressor','',],['Prediction','']])
         print('  ========================================================')
-        print('  \033[1mKeras MLP - Classifier\033[0m - Batch Prediction')
+        print('  \033[1mKeras MLP - Regressor\033[0m - Prediction')
         print('  ========================================================')
-        print("  Real class\t| Predicted class\t| Probability")
-        print("  ---------------------------------------------------")
-        for i in range(predictions.shape[0]):
-            predClass = np.argmax(predictions[i])
-            predProb = round(100*predictions[i][predClass],2)
-            if normFile != None:
-                predValue = norm.transform_inverse_single(le.inverse_transform([predClass])[0])
-                realValue = norm.transform_inverse_single(Cl_test[i])
-            else:
-                predValue = le.inverse_transform([predClass])[0]
-                realValue = Cl_test[i]
-            print("  {0:.2f}\t\t| {1:.2f}\t\t\t| {2:.2f}".format(realValue, predValue, predProb))
-            summaryFile = np.vstack((summaryFile,[realValue,predValue,predProb]))
+        for file in glob.glob('*.txt'):
+            with open(file, 'r') as f:
+                print('\n Opening sample data file for prediction:', file)
+                Rtot = np.loadtxt(f, unpack =True)
+            R = preprocess(Rtot)
+            predictions = model.predict(R).flatten()[0]
+            predValue = predictions
+            print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
+            summaryFile = np.vstack((summaryFile,[predValue,'']))
         print('  ========================================================\n')
 
+    else:
+        le = pickle.loads(open("keras_le.pkl", "rb").read())
+        model = keras.models.load_model("keras_model.hd5")
+        summaryFileName = "keras_summary_classifier.csv"
+        summaryFile = np.array([['SpectraKeras_MLP','Classifier'],['Predicted Class', 'Probability']])
+        print('  ========================================================')
+        print('  \033[1mKeras MLP - Classifier\033[0m - Prediction')
+        print('  ========================================================')
+        for file in glob.glob('*.txt'):
+            with open(file, 'r') as f:
+                print('\n Opening sample data file for prediction:', file)
+                Rtot = np.loadtxt(f, unpack =True)
+            R = preprocess(Rtot)
+            predictions = model.predict(R, verbose=0)
+            pred_class = np.argmax(predictions)
+            predProb = round(100*predictions[0][pred_class],2)
+            rosterPred = np.where(predictions[0]>0.1)[0]
+        
+            if pred_class.size >0:
+                predValue = le.inverse_transform([pred_class])[0]
+                print('\033[1m\n  Predicted value (normalized) = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
+            else:
+                predValue = 0
+                print('\033[1m\n  No predicted value (probability = {0:.2f}%)\033[0m\n'.format(predProb))
+            summaryFile = np.vstack((summaryFile,[predValue,predProb]))
+        print('  ========================================================\n')
     df = pd.DataFrame(summaryFile)
     df.to_csv(summaryFileName, index=False, header=False)
     print(" Prediction summary saved in:",summaryFileName,"\n")
@@ -538,6 +508,25 @@ def readLearnFile(learnFile):
         Cl = M[1:,[0,dP.numLabels-1]]
 
     return En, A, Cl
+
+#****************************************************
+# Check Energy Range and convert to fit training set
+#****************************************************
+def preprocess(Rtot):
+    dP = Conf()
+    En = np.array([pickle.loads(open("keras_spectral_range.pkl", "rb").read())])
+    R=np.array([Rtot[1,:]])
+    Rx=np.array([Rtot[0,:]])
+    
+    if dP.normalize:
+        norm = Normalizer()
+        R = norm.transform_single(R)
+    
+    if(R.shape[1] != En.shape[1]):
+        print('\033[1m\n  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape[1]) + ') and sample (' + str(R.shape[1]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
+        R = np.interp(En[0], Rx[0], R[0])
+        R = R.reshape(1,-1)
+    return R
 
 #************************************
 # Print NN Info
@@ -599,7 +588,7 @@ def usage():
     print(' Predict:')
     print('  python3 SpectraKeras_MLP.py -p <testFile>\n')
     print(' Batch predict:')
-    print('  python3 SpectraKeras_MLP.py -b <validationFile>\n')
+    print('  python3 SpectraKeras_MLP.py -b\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
