@@ -533,8 +533,7 @@ def readLearnFile(learnFile):
     A = M[1:,dP.numLabels:]
     
     if dP.normalize:
-        norm = Normalizer(A)
-        norm.show()
+        norm = Normalizer()
         A = norm.transform_matrix(A)
 
     if dP.numLabels == 1:

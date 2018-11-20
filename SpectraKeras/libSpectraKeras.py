@@ -15,33 +15,23 @@ from bisect import bisect_left
 # Normalizer
 #************************************
 class Normalizer(object):
-    def __init__(self, M):
-        self.M = M
+    def __init__(self):
         self.YnormTo = 1
-        self.min = np.zeros([self.M.shape[0]])
-        self.max = np.zeros([self.M.shape[0]])
-        for i in range(0,M.shape[0]):
-            self.min[i] = np.amin(self.M[i,:])
-            self.max[i] = np.amax(self.M[i,:])
-
-    def show(self):
-        print(self.min, self.max)
-        print(self.M.shape)
-        print(self.min.shape)
-        print(self.max.shape)
+        print("  Normalizing spectra between 0 and 1 \n")
 
     def transform_matrix(self,y):
         yn = np.copy(y)
         for i in range(0,y.shape[0]):
-            yn[i,:] = np.multiply(y[i,:] - self.min[i],
-                self.YnormTo/(self.max[i] - self.min[i]))
+            yn[i,:] = np.multiply(y[i,:] - np.amin(y[i,:]),
+                self.YnormTo/(np.amax(y[i,:]) - np.amin(y[i,:])))
         print(yn)
-        print(yn.shape)
         return yn
     
-    def transform_inverse(self,Vn):
-        V = (np.multiply(Vn,(self.max - self.min)/self.YnormTo) + self.min).astype(int)
-        return V
+    def transform_single(self,y):
+        yn = np.copy(y)
+        yn = np.multiply(y - np.amin(y),
+                self.YnormTo/(np.amax(y) - np.amin(y)))
+        return yn
 
     def save(self, name):
         with open(name, 'ab') as f:
