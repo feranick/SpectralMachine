@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20181120a
+* 20181120b
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -112,16 +112,16 @@ def main():
                 train(sys.argv[2], None)
             else:
                 train(sys.argv[2], sys.argv[3])
-            #except:
-            #   usage()
-            #   sys.exit(2)
+            except:
+               usage()
+               sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            predict(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                predict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
                 
         if o in ("-b" , "--batch"):
             try:
@@ -383,9 +383,9 @@ def predict(testFile):
     Rx=np.array([Rtot[0,:]])
 
     if(R.shape[1] != En.shape[1]):
-        print('\033[1m\n  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape[1]) + ') and sample (' + str(R.shape[1]) + ') data.\n  Reformatting x-axis of sample data...\n\033[0m')
+        print('\033[1m\n  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape[1]) + ') and sample (' + str(R.shape[1]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
         R = np.interp(En[0], Rx[0], R[0])
-    R = R.reshape(1,-1)
+        R = R.reshape(1,-1)
 
     if dP.normalize:
         norm = Normalizer()
@@ -404,7 +404,7 @@ def predict(testFile):
     else:
         le = pickle.loads(open("keras_le.pkl", "rb").read())
         model = keras.models.load_model("keras_model.hd5")
-        predictions = model.predict(R, verbose=1)
+        predictions = model.predict(R, verbose=0)
         pred_class = np.argmax(predictions)
         predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
