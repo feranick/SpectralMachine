@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20181119b
+* 20181120a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -38,6 +38,7 @@ class Conf():
     def SKDef(self):
         self.conf['Parameters'] = {
             'regressor' : False,
+            'normalize' : False,
             'l_rate' : 0.001,
             'l_rdecay' : 1e-4,
             'HL' : [20,30,40,50,60,70],
@@ -62,6 +63,7 @@ class Conf():
             self.sysDef = self.conf['System']
         
             self.regressor = self.conf.getboolean('Parameters','regressor')
+            self.normalize = self.conf.getboolean('Parameters','normalize')
             self.l_rate = self.conf.getfloat('Parameters','l_rate')
             self.l_rdecay = self.conf.getfloat('Parameters','l_rdecay')
             self.HL = eval(self.SKDef['HL'])
@@ -105,14 +107,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            try:
-                if len(sys.argv)<4:
-                    train(sys.argv[2], None)
-                else:
-                    train(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            if len(sys.argv)<4:
+                train(sys.argv[2], None)
+            else:
+                train(sys.argv[2], sys.argv[3])
+            #except:
+            #   usage()
+            #   sys.exit(2)
 
         if o in ("-p" , "--predict"):
             try:
@@ -309,14 +311,16 @@ def train(learnFile, testFile):
         print('  ========================================================')
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
         print("  \033[1mMean Abs Err\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_mae), np.amin(val_mae), val_mae[-1]))
-        print('  ========================================================')
-        print("  Real value | Predicted value | val_loss | val_mean_abs_err")
-        print("  -----------------------------------------------------------")
-        for i in range(0,len(predictions)):
-            score = model.evaluate(np.array([A_test[i]]), np.array([Cl_test[i]]), batch_size=dP.batch_size, verbose = 0)
-            print("  {0:.2f}\t\t| {1:.2f}\t\t| {2:.4f}\t| {3:.4f} ".format(Cl2_test[i],
-                predictions[i][0], score[0], score[1]))
-        print('\n  ==========================================================\n')
+        
+        if testFile != None:
+            print('  ========================================================')
+            print("  Real value | Predicted value | val_loss | val_mean_abs_err")
+            print("  -----------------------------------------------------------")
+            for i in range(0,len(predictions)):
+                score = model.evaluate(np.array([A_test[i]]), np.array([Cl_test[i]]), batch_size=dP.batch_size, verbose = 0)
+                print("  {0:.2f}\t\t| {1:.2f}\t\t| {2:.4f}\t| {3:.4f} ".format(Cl2_test[i],
+                    predictions[i][0], score[0], score[1]))
+            print('\n  ==========================================================\n')
     else:
         accuracy = np.asarray(log.history['acc'])
         val_acc = np.asarray(log.history['val_acc'])
@@ -338,19 +342,19 @@ def train(learnFile, testFile):
         print("\n  \033[1mAccuracy\033[0m - Average: {0:.2f}%; Max: {1:.2f}%; Last: {2:.2f}%".format(100*np.average(val_acc),
         100*np.amax(val_acc), 100*val_acc[-1]))
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
-
-        print('  ========================================================')
-        print("  Real class\t| Predicted class\t| Probability")
-        print("  ---------------------------------------------------")
-        predictions = model.predict(A_test)
-        for i in range(predictions.shape[0]):
-            predClass = np.argmax(predictions[i])
-            predProb = round(100*predictions[i][predClass],2)
-            predValue = le.inverse_transform([predClass])[0]
-            realValue = Cl_test[i]
-            print("  {0:.2f}\t\t| {1:.2f}\t\t\t| {2:.2f}".format(realValue, predValue, predProb))
-        #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
-        print('\n  ========================================================\n')
+        if testFile != None:
+            print('  ========================================================')
+            print("  Real class\t| Predicted class\t| Probability")
+            print("  ---------------------------------------------------")
+            predictions = model.predict(A_test)
+            for i in range(predictions.shape[0]):
+                predClass = np.argmax(predictions[i])
+                predProb = round(100*predictions[i][predClass],2)
+                predValue = le.inverse_transform([predClass])[0]
+                realValue = Cl_test[i]
+                print("  {0:.2f}\t\t| {1:.2f}\t\t\t| {2:.2f}".format(realValue, predValue, predProb))
+            #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
+            print('\n  ========================================================\n')
 
     if dP.plotWeightsFlag == True:
         plotWeights(En, A, model)
@@ -527,6 +531,12 @@ def readLearnFile(learnFile):
     dP = Conf()
     En = M[0,dP.numLabels:]
     A = M[1:,dP.numLabels:]
+    
+    if dP.normalize:
+        norm = Normalizer(A)
+        norm.show()
+        A = norm.transform_matrix(A)
+
     if dP.numLabels == 1:
         Cl = M[1:,0]
     else:

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
 **********************************************************
-* libSpectraKeras - Library for SpectraKeras
-* 20181119b
+* libSpectraKeas - Library for SpectraKeras
+* 20181120a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -14,6 +14,41 @@ from bisect import bisect_left
 #************************************
 # Normalizer
 #************************************
+class Normalizer(object):
+    def __init__(self, M):
+        self.M = M
+        self.YnormTo = 1
+        self.min = np.zeros([self.M.shape[0]])
+        self.max = np.zeros([self.M.shape[0]])
+        for i in range(0,M.shape[0]):
+            self.min[i] = np.amin(self.M[i,:])
+            self.max[i] = np.amax(self.M[i,:])
+
+    def show(self):
+        print(self.min, self.max)
+        print(self.M.shape)
+        print(self.min.shape)
+        print(self.max.shape)
+
+    def transform_matrix(self,y):
+        yn = np.copy(y)
+        for i in range(0,y.shape[0]):
+            yn[i,:] = np.multiply(y[i,:] - self.min[i],
+                self.YnormTo/(self.max[i] - self.min[i]))
+        print(yn)
+        print(yn.shape)
+        return yn
+    
+    def transform_inverse(self,Vn):
+        V = (np.multiply(Vn,(self.max - self.min)/self.YnormTo) + self.min).astype(int)
+        return V
+
+    def save(self, name):
+        with open(name, 'ab') as f:
+            f.write(pickle.dumps(self))
+
+
+'''
 class Normalizer(object):
     def __init__(self, M, dP):
         self.M = M
@@ -70,7 +105,7 @@ class Normalizer(object):
     def save(self, name):
         with open(name, 'ab') as f:
             f.write(pickle.dumps(self))
-
+'''
 #************************************
 # CustomRound
 #************************************
