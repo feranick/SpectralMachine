@@ -115,7 +115,7 @@ def main():
                     train(sys.argv[2], sys.argv[3])
             except:
                usage()
-               sys.exit(2)
+              sys.exit(2)
 
         if o in ("-p" , "--predict"):
             try:
@@ -596,14 +596,10 @@ def usage():
     print('  python3 SpectraKeras_MLP.py -t <learningFile>\n')
     print(' Train (with external validation):')
     print('  python3 SpectraKeras_MLP.py -t <learningFile> <validationFile>\n')
-    print(' Predict (no label normalization used):')
+    print(' Predict:')
     print('  python3 SpectraKeras_MLP.py -p <testFile>\n')
-    print(' Predict (labels normalized with pkl file):')
-    print('  python3 SpectraKeras_MLP.py -p <testFile> <pkl normalization file>\n')
-    print(' Batch predict (no label normalization used):')
+    print(' Batch predict:')
     print('  python3 SpectraKeras_MLP.py -b <validationFile>\n')
-    print(' Batch predict (labels normalized with pkl file):')
-    print('  python3 SpectraKeras_MLP.py -b <validationFile> <pkl normalization file>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************

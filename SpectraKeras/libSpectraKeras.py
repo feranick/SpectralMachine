@@ -22,8 +22,11 @@ class Normalizer(object):
     def transform_matrix(self,y):
         yn = np.copy(y)
         for i in range(0,y.shape[0]):
-            yn[i,:] = np.multiply(y[i,:] - np.amin(y[i,:]),
-                self.YnormTo/(np.amax(y[i,:]) - np.amin(y[i,:])))
+            if np.amax(y[i,:]) - np.amin(y[i,:]) == 0:
+                pass
+            else:
+                yn[i,:] = np.multiply(y[i,:] - np.amin(y[i,:]),
+                    self.YnormTo/(np.amax(y[i,:]) - np.amin(y[i,:])))
         return yn
     
     def transform_single(self,y):
@@ -38,6 +41,9 @@ class Normalizer(object):
         with open(name, 'ab') as f:
             f.write(pickle.dumps(self))
 
+#************************************
+# Normalize Label
+#************************************
 class NormalizeLabel(object):
     def __init__(self, M, dP):
         self.M = M
