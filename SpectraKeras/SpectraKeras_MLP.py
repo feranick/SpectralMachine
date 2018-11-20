@@ -118,10 +118,7 @@ def main():
 
         if o in ("-p" , "--predict"):
             try:
-                if len(sys.argv)<4:
-                    predict(sys.argv[2], None)
-                else:
-                    predict(sys.argv[2], sys.argv[3])
+                predict(sys.argv[2])
             except:
                 usage()
                 sys.exit(2)
@@ -362,7 +359,7 @@ def train(learnFile, testFile):
 #************************************
 # Prediction
 #************************************
-def predict(testFile, normFile):
+def predict(testFile):
     dP = Conf()
     if dP.useTFKeras:
         import tensorflow.keras as keras  #tf.keras
@@ -380,26 +377,17 @@ def predict(testFile, normFile):
     R=np.array([Rtot[1,:]])
     Rx=Rtot[0,:]
 
-    if normFile != None:
-        try:
-            norm = pickle.loads(open(normFile, "rb").read())
-            print("\n  Opening pkl file with normalization data:",normFile)
-        except:
-            print("\033[1m pkl file not found \033[0m")
-            return
-    
+    if dP.normalize:
+        norm = Normalizer()
+        R = norm.transform_single(R)
     if dP.regressor:
         model = keras.models.load_model("keras_model_regressor.hd5")
         predictions = model.predict(R).flatten()[0]
         print('  ========================================================')
         print('  \033[1mKeras MLP - Regressor\033[0m - Prediction')
         print('  ========================================================')
-        if normFile != None:
-            predValue = norm.transform_inverse_single(predictions)
-            print('\033[1m\n  Predicted value = {0:.2f}\033[0m (normalized: {1:.2f})\n'.format(predValue, predictions))
-        else:
-            predValue = predictions
-            print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
+        predValue = predictions
+        print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
         print('  ========================================================\n')
         
     else:
@@ -417,12 +405,8 @@ def predict(testFile, normFile):
         if dP.numLabels == 1:
 
             if pred_class.size >0:
-                if normFile != None:
-                    predValue = norm.transform_inverse_single(le.inverse_transform([pred_class])[0])
-                    print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
-                else:
-                    predValue = le.inverse_transform([pred_class])[0]
-                    print('\033[1m\n  Predicted value (normalized) = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
+                predValue = le.inverse_transform([pred_class])[0]
+                print('\033[1m\n  Predicted value (normalized) = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
             else:
                 predValue = 0
                 print('\033[1m\n  No predicted value (probability = {0:.2f}%)\033[0m\n'.format(predProb))

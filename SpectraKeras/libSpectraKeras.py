@@ -24,22 +24,21 @@ class Normalizer(object):
         for i in range(0,y.shape[0]):
             yn[i,:] = np.multiply(y[i,:] - np.amin(y[i,:]),
                 self.YnormTo/(np.amax(y[i,:]) - np.amin(y[i,:])))
-        print(yn)
         return yn
     
     def transform_single(self,y):
         yn = np.copy(y)
         yn = np.multiply(y - np.amin(y),
                 self.YnormTo/(np.amax(y) - np.amin(y)))
+        print(y.shape)
+        print(yn.shape)
         return yn
 
     def save(self, name):
         with open(name, 'ab') as f:
             f.write(pickle.dumps(self))
 
-
-'''
-class Normalizer(object):
+class NormalizeLabel(object):
     def __init__(self, M, dP):
         self.M = M
         self.normalizeLabel = dP.normalizeLabel
@@ -95,7 +94,7 @@ class Normalizer(object):
     def save(self, name):
         with open(name, 'ab') as f:
             f.write(pickle.dumps(self))
-'''
+
 #************************************
 # CustomRound
 #************************************
