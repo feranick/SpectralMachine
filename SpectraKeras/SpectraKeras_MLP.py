@@ -94,6 +94,7 @@ class Conf():
 #************************************
 def main():
     start_time = time.clock()
+    dP = Conf()
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    "tpbh:", ["train", "predict", "batch", "help"])
