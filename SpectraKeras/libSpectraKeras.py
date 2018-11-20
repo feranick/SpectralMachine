@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 **********************************************************
-* libDataML - Library for DataML
+* libSpectraKeras - Library for SpectraKeras
 * 20181119b
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
@@ -91,3 +91,25 @@ class CustomRound:
         if abs(x-x0) < abs(x-x1):
             return x0
         return x1
+
+#************************************
+# MultiClassReductor
+#************************************
+class MultiClassReductor():
+    def __self__(self):
+        self.name = name
+    
+    def fit(self,tc):
+        self.totalClass = tc.tolist()
+    
+    def transform(self,y):
+        Cl = np.zeros(y.shape[0])
+        for j in range(len(y)):
+            Cl[j] = self.totalClass.index(np.array(y[j]).tolist())
+        return Cl
+    
+    def inverse_transform(self,a):
+        return [self.totalClass[int(a[0])]]
+
+    def classes_(self):
+        return self.totalClass
