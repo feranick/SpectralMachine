@@ -117,11 +117,11 @@ def main():
             #   sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            try:
-                predict(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            predict(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
                 
         if o in ("-b" , "--batch"):
             try:
@@ -181,6 +181,9 @@ def train(learnFile, testFile):
     else:
         totA = A
         totCl = Cl
+
+    with open("keras_spectral_range.pkl", 'ab') as f:
+        f.write(pickle.dumps(En))
 
     print("  Total number of points per data:",En.size)
     print("  Number of learning labels: {0:d}\n".format(int(dP.numLabels)))
@@ -374,12 +377,20 @@ def predict(testFile):
         print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
         return
 
+    En = np.array([pickle.loads(open("keras_spectral_range.pkl", "rb").read())])
+
     R=np.array([Rtot[1,:]])
-    Rx=Rtot[0,:]
+    Rx=np.array([Rtot[0,:]])
+
+    if(R.shape[1] != En.shape[1]):
+        print('\033[1m\n  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape[1]) + ') and sample (' + str(R.shape[1]) + ') data.\n  Reformatting x-axis of sample data...\n\033[0m')
+        R = np.interp(En[0], Rx[0], R[0])
+    R = R.reshape(1,-1)
 
     if dP.normalize:
         norm = Normalizer()
         R = norm.transform_single(R)
+
     if dP.regressor:
         model = keras.models.load_model("keras_model_regressor.hd5")
         predictions = model.predict(R).flatten()[0]
