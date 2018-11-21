@@ -108,14 +108,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            try:
-                if len(sys.argv)<4:
-                    train(sys.argv[2], None)
-                else:
-                    train(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            if len(sys.argv)<4:
+                train(sys.argv[2], None)
+            else:
+                train(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-p" , "--predict"):
             try:
@@ -125,11 +125,11 @@ def main():
                 sys.exit(2)
                 
         if o in ("-b" , "--batch"):
-            try:
-                batchPredict()
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            batchPredict()
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
     total_time = time.clock() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -298,7 +298,6 @@ def train(learnFile, testFile):
 
     if dP.regressor:
         val_mae = np.asarray(log.history['val_mean_absolute_error'])
-        predictions = model.predict(A_test)
         printParam()
         print('\n  ==========================================================')
         print('  \033[1mKeras MLP - Regressor\033[0m - Training Summary')
@@ -311,6 +310,7 @@ def train(learnFile, testFile):
         print("  \033[1mMean Abs Err\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_mae), np.amin(val_mae), val_mae[-1]))
         
         if testFile != None:
+            predictions = model.predict(A_test)
             print('  ========================================================')
             print("  Real value | Predicted value | val_loss | val_mean_abs_err")
             print("  -----------------------------------------------------------")
@@ -430,47 +430,55 @@ def batchPredict():
 
     if dP.regressor:
         model = keras.models.load_model("keras_model_regressor.hd5")
+    else:
+        model = keras.models.load_model("keras_model.hd5")
+
+    predictions = np.zeros((0,0))
+    fileName = []
+    for file in glob.glob('*.txt'):
+        with open(file, 'r') as f:
+            print('\n  Opening sample data file for prediction:\n  ', file)
+            Rtot = np.loadtxt(f, unpack =True)
+        R = preprocess(Rtot)
+        try:
+            predictions = np.vstack((predictions,model.predict(R).flatten()))
+        except:
+            predictions = np.array([model.predict(R).flatten()])
+        fileName.append(file)
+
+    if dP.regressor:
+        model = keras.models.load_model("keras_model_regressor.hd5")
         summaryFileName = "keras_summary_regressor.csv"
-        summaryFile = np.array([['SpectraKeras_MLP','Regressor','',],['Prediction','']])
-        print('  ========================================================')
+        summaryFile = np.array([['SpectraKeras_MLP','Regressor','',],['File name','Prediction','']])
+        print('\n  ========================================================')
         print('  \033[1mKeras MLP - Regressor\033[0m - Prediction')
         print('  ========================================================')
-        for file in glob.glob('*.txt'):
-            with open(file, 'r') as f:
-                print('\n Opening sample data file for prediction:', file)
-                Rtot = np.loadtxt(f, unpack =True)
-            R = preprocess(Rtot)
-            predictions = model.predict(R).flatten()[0]
-            predValue = predictions
-            print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
-            summaryFile = np.vstack((summaryFile,[predValue,'']))
+        for i in range(predictions.shape[0]):
+            predValue = predictions[i][0]
+            print('  {0:s}:\033[1m\n   Predicted value = {1:.2f}\033[0m\n'.format(fileName[i],predValue))
+            summaryFile = np.vstack((summaryFile,[fileName[i],predValue,'']))
         print('  ========================================================\n')
 
     else:
         le = pickle.loads(open("keras_le.pkl", "rb").read())
         model = keras.models.load_model("keras_model.hd5")
         summaryFileName = "keras_summary_classifier.csv"
-        summaryFile = np.array([['SpectraKeras_MLP','Classifier'],['Predicted Class', 'Probability']])
-        print('  ========================================================')
+        summaryFile = np.array([['SpectraKeras_MLP','Classifier',''],['File name','Predicted Class', 'Probability']])
+        print('\n  ========================================================')
         print('  \033[1mKeras MLP - Classifier\033[0m - Prediction')
         print('  ========================================================')
-        for file in glob.glob('*.txt'):
-            with open(file, 'r') as f:
-                print('\n Opening sample data file for prediction:', file)
-                Rtot = np.loadtxt(f, unpack =True)
-            R = preprocess(Rtot)
-            predictions = model.predict(R, verbose=0)
-            pred_class = np.argmax(predictions)
+        for i in range(predictions.shape[0]):
+            pred_class = np.argmax(predictions[i])
             predProb = round(100*predictions[0][pred_class],2)
-            rosterPred = np.where(predictions[0]>0.1)[0]
+            rosterPred = np.where(predictions[i][0]>0.1)[0]
         
             if pred_class.size >0:
                 predValue = le.inverse_transform([pred_class])[0]
-                print('\033[1m\n  Predicted value (normalized) = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
+                print('  {0:s}:\033[1m\n   Predicted value = {1:.2f} (probability = {2:.2f}%)\033[0m\n'.format(fileName[i],predValue, predProb))
             else:
                 predValue = 0
-                print('\033[1m\n  No predicted value (probability = {0:.2f}%)\033[0m\n'.format(predProb))
-            summaryFile = np.vstack((summaryFile,[predValue,predProb]))
+                print('  {0:s}:\033[1m\n   No predicted value (probability = {1:.2f}%)\033[0m\n'.format(fileName[i],predProb))
+            summaryFile = np.vstack((summaryFile,[fileName[i], predValue,predProb]))
         print('  ========================================================\n')
     df = pd.DataFrame(summaryFile)
     df.to_csv(summaryFileName, index=False, header=False)
@@ -523,7 +531,7 @@ def preprocess(Rtot):
         R = norm.transform_single(R)
     
     if(R.shape[1] != En.shape[1]):
-        print('\033[1m\n  WARNING: Different number of datapoints for the x-axis\n  for training (' + str(En.shape[1]) + ') and sample (' + str(R.shape[1]) + ') data.\n  Reformatting x-axis of sample data...\n' + '\033[0m')
+        print('    Rescaling x-axis from',str(R.shape[1]),' to ',str(En.shape[1]))
         R = np.interp(En[0], Rx[0], R[0])
         R = R.reshape(1,-1)
     return R
