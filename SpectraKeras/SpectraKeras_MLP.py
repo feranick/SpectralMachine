@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20181120c
+* 20181121a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -34,6 +34,19 @@ class Conf():
             print(" Configuration file: \""+confFileName+"\" does not exist: Creating one.\n")
             self.createConfig()
         self.readConfig(self.configFile)
+        if self.regressor:
+            self.modelName = "keras_model_regressor.hd5"
+            self.summaryFileName = "keras_summary_regressor.csv"
+        else:
+            self.modelName = "keras_model.hd5"
+            self.summaryFileName = "keras_summary_classifier.csv"
+        
+        self.tb_directory = "keras_MLP"
+        self.model_directory = "./"
+        self.model_name = self.model_directory+self.modelName
+        self.model_le = self.model_directory+"keras_le.pkl"
+        self.spectral_range = "keras_spectral_range.pkl"
+        self.model_png = self.model_directory+"/keras_MLP_model.png"
             
     def SKDef(self):
         self.conf['Parameters'] = {
@@ -51,6 +64,7 @@ class Conf():
             'numLabels' : 1,
             'plotWeightsFlag' : False,
             }
+
     def sysDef(self):
         self.conf['System'] = {
             'useTFKeras' : False,
@@ -108,14 +122,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            #try:
-            if len(sys.argv)<4:
-                train(sys.argv[2], None)
-            else:
-                train(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                if len(sys.argv)<4:
+                    train(sys.argv[2], None)
+                else:
+                    train(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-p" , "--predict"):
             try:
@@ -125,11 +139,11 @@ def main():
                 sys.exit(2)
                 
         if o in ("-b" , "--batch"):
-            #try:
-            batchPredict()
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                batchPredict()
+            except:
+                usage()
+                sys.exit(2)
 
     total_time = time.clock() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -157,19 +171,7 @@ def train(learnFile, testFile):
         from keras.backend.tensorflow_backend import set_session
         set_session(tf.Session(config=conf))
 
-    tb_directory = "keras_MLP"
-    model_directory = "."
     learnFileRoot = os.path.splitext(learnFile)[0]
-
-    if dP.regressor:
-        print("Using SpectraKeras_MLP as Regressor")
-        model_name = model_directory+"/keras_model_regressor.hd5"
-    else:
-        print("Using SpectraKeras_MLP as Classifier")
-        model_name = model_directory+"/keras_model.hd5"
-        model_le = model_directory+"/keras_le.pkl"
-
-    #from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
 
     En, A, Cl = readLearnFile(learnFile)
     if testFile != None:
@@ -180,7 +182,7 @@ def train(learnFile, testFile):
         totA = A
         totCl = Cl
 
-    with open("keras_spectral_range.pkl", 'ab') as f:
+    with open(dP.spectral_range, 'ab') as f:
         f.write(pickle.dumps(En))
 
     print("  Total number of points per data:",En.size)
@@ -215,8 +217,8 @@ def train(learnFile, testFile):
             print("  Number unique classes (validation):", np.unique(Cl_test).size)
             print("  Number unique classes (total): ", np.unique(totCl).size)
             
-        print("\n  Label Encoder saved in:", model_le,"\n")
-        with open(model_le, 'ab') as f:
+        print("\n  Label Encoder saved in:", dP.model_le,"\n")
+        with open(dP.model_le, 'ab') as f:
             f.write(pickle.dumps(le))
 
         #totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
@@ -261,7 +263,7 @@ def train(learnFile, testFile):
             optimizer=optim,
             metrics=['accuracy'])
 
-    tbLog = keras.callbacks.TensorBoard(log_dir=tb_directory, histogram_freq=120,
+    tbLog = keras.callbacks.TensorBoard(log_dir=dP.tb_directory, histogram_freq=120,
             batch_size=dP.batch_size,
             write_graph=True, write_grads=True, write_images=True)
     tbLogs = [tbLog]
@@ -280,14 +282,13 @@ def train(learnFile, testFile):
             verbose=2,
 	        validation_split=dP.cv_split)
 
-    model.save(model_name)
-    keras.utils.plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
+    model.save(dP.model_name)
+    keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
 
     print('\n  =============================================')
     print('  \033[1mKeras MLP\033[0m - Model Configuration')
     print('  =============================================')
-    #for conf in model.get_config():
-    #    print(conf,"\n")
+
     print("  Training set file:",learnFile)
     print("  Data size:", A.shape,"\n")
     print("  Number of learning labels:",dP.numLabels)
@@ -367,20 +368,17 @@ def predict(testFile):
     else:
         import keras   # pure Keras
     
-    #try:
-    with open(testFile, 'r') as f:
-        print('\n Opening sample data for prediction...')
-        Rtot = np.loadtxt(f, unpack =True)
-    #except:
-    #    print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
-    #    return
+    model = keras.models.load_model(dP.modelName)
 
-    R = preprocess(Rtot)
+    try:
+        R = readTestFile(testFile)
+    except:
+        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
+        return
 
     if dP.regressor:
-        model = keras.models.load_model("keras_model_regressor.hd5")
         predictions = model.predict(R).flatten()[0]
-        print('  ========================================================')
+        print('\n  ========================================================')
         print('  \033[1mKeras MLP - Regressor\033[0m - Prediction')
         print('  ========================================================')
         predValue = predictions
@@ -388,14 +386,13 @@ def predict(testFile):
         print('  ========================================================\n')
         
     else:
-        le = pickle.loads(open("keras_le.pkl", "rb").read())
-        model = keras.models.load_model("keras_model.hd5")
+        le = pickle.loads(open(dP.model_le, "rb").read())
         predictions = model.predict(R, verbose=0)
         pred_class = np.argmax(predictions)
         predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
 
-        print('  ========================================================')
+        print('\n  ========================================================')
         print('  \033[1mKeras MLP - Classifier\033[0m - Prediction')
         print('  ========================================================')
 
@@ -428,18 +425,12 @@ def batchPredict():
     else:
         import keras   # pure Keras
 
-    if dP.regressor:
-        model = keras.models.load_model("keras_model_regressor.hd5")
-    else:
-        model = keras.models.load_model("keras_model.hd5")
+    model = keras.models.load_model(dP.modelName)
 
     predictions = np.zeros((0,0))
     fileName = []
     for file in glob.glob('*.txt'):
-        with open(file, 'r') as f:
-            print('\n  Opening sample data file for prediction:\n  ', file)
-            Rtot = np.loadtxt(f, unpack =True)
-        R = preprocess(Rtot)
+        R = readTestFile(file)
         try:
             predictions = np.vstack((predictions,model.predict(R).flatten()))
         except:
@@ -447,8 +438,6 @@ def batchPredict():
         fileName.append(file)
 
     if dP.regressor:
-        model = keras.models.load_model("keras_model_regressor.hd5")
-        summaryFileName = "keras_summary_regressor.csv"
         summaryFile = np.array([['SpectraKeras_MLP','Regressor','',],['File name','Prediction','']])
         print('\n  ========================================================')
         print('  \033[1mKeras MLP - Regressor\033[0m - Prediction')
@@ -460,9 +449,7 @@ def batchPredict():
         print('  ========================================================\n')
 
     else:
-        le = pickle.loads(open("keras_le.pkl", "rb").read())
-        model = keras.models.load_model("keras_model.hd5")
-        summaryFileName = "keras_summary_classifier.csv"
+        le = pickle.loads(open(dP.model_le, "rb").read())
         summaryFile = np.array([['SpectraKeras_MLP','Classifier',''],['File name','Predicted Class', 'Probability']])
         print('\n  ========================================================')
         print('  \033[1mKeras MLP - Classifier\033[0m - Prediction')
@@ -481,8 +468,8 @@ def batchPredict():
             summaryFile = np.vstack((summaryFile,[fileName[i], predValue,predProb]))
         print('  ========================================================\n')
     df = pd.DataFrame(summaryFile)
-    df.to_csv(summaryFileName, index=False, header=False)
-    print(" Prediction summary saved in:",summaryFileName,"\n")
+    df.to_csv(dP.summaryFileName, index=False, header=False)
+    print(" Prediction summary saved in:",dP.summaryFileName,"\n")
 
 #************************************
 # Open Learning Data
@@ -516,6 +503,17 @@ def readLearnFile(learnFile):
         Cl = M[1:,[0,dP.numLabels-1]]
 
     return En, A, Cl
+
+#************************************
+# Open Testing Data
+#************************************
+def readTestFile(testFile):
+
+    with open(testFile, 'r') as f:
+        print('\n  Opening sample data for prediction:\n  ',testFile)
+        Rtot = np.loadtxt(f, unpack =True)
+    R = preprocess(Rtot)
+    return R
 
 #****************************************************
 # Check Energy Range and convert to fit training set
