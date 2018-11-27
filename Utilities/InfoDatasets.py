@@ -47,7 +47,7 @@ def main():
 
     print("\n Number of points per spectra:", M[0,1:].size)
     print(" Number of unique classes:", np.unique(M[:,0]).size)
-    print(" Original number of spectra in training set:", M.shape[0],"\
+    print(" Original number of spectra in training set:", M.shape[0],"\n")
 
 #************************************
 ''' Open Learning Data '''
