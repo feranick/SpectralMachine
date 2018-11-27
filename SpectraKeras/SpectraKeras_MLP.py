@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20181126a
+* 20181127a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -349,7 +349,7 @@ def train(learnFile, testFile):
             for i in range(predictions.shape[0]):
                 predClass = np.argmax(predictions[i])
                 predProb = round(100*predictions[i][predClass],2)
-                predValue = le.inverse_transform([predClass])[0]
+                predValue = le.inverse_transform(predClass)[0]
                 realValue = Cl_test[i]
                 print("  {0:.2f}\t\t| {1:.2f}\t\t\t| {2:.2f}".format(realValue, predValue, predProb))
             #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
@@ -391,19 +391,22 @@ def predict(testFile):
         pred_class = np.argmax(predictions)
         predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
-
         print('\n  ========================================================')
         print('  \033[1mKeras MLP - Classifier\033[0m - Prediction')
         print('  ========================================================')
 
         if dP.numLabels == 1:
-
             if pred_class.size >0:
-                predValue = le.inverse_transform([pred_class])[0]
-                print('\033[1m\n  Predicted value (normalized) = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
+                predValue = le.inverse_transform(pred_class)[0]
             else:
                 predValue = 0
-                print('\033[1m\n  No predicted value (probability = {0:.2f}%)\033[0m\n'.format(predProb))
+            print('  Prediction\tProbability [%]')
+            print('  -----------------------------')
+            for i in range(len(predictions[0])-1):
+                if predictions[0][i]>0.01:
+                    print(' ',le.inverse_transform(i)[0],'\t\t',
+                        str('{:.2f}'.format(100*predictions[0][i])))
+            print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
             print('  ========================================================\n')
 
         else:
@@ -460,7 +463,7 @@ def batchPredict():
             rosterPred = np.where(predictions[i][0]>0.1)[0]
         
             if pred_class.size >0:
-                predValue = le.inverse_transform([pred_class])[0]
+                predValue = le.inverse_transform(pred_class)[0]
                 print('  {0:s}:\033[1m\n   Predicted value = {1:.2f} (probability = {2:.2f}%)\033[0m\n'.format(fileName[i],predValue, predProb))
             else:
                 predValue = 0
@@ -529,7 +532,7 @@ def preprocess(Rtot):
         R = norm.transform_single(R)
     
     if(R.shape[1] != En.shape[1]):
-        print('    Rescaling x-axis from',str(R.shape[1]),' to ',str(En.shape[1]))
+        print('  Rescaling x-axis from',str(R.shape[1]),'to',str(En.shape[1]))
         R = np.interp(En[0], Rx[0], R[0])
         R = R.reshape(1,-1)
     return R

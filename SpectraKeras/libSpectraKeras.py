@@ -33,8 +33,6 @@ class Normalizer(object):
         yn = np.copy(y)
         yn = np.multiply(y - np.amin(y),
                 self.YnormTo/(np.amax(y) - np.amin(y)))
-        print(y.shape)
-        print(yn.shape)
         return yn
 
     def save(self, name):
@@ -139,7 +137,7 @@ class MultiClassReductor():
         return Cl
     
     def inverse_transform(self,a):
-        return [self.totalClass[int(a[0])]]
+        return [self.totalClass[int(a)]]
 
     def classes_(self):
         return self.totalClass
