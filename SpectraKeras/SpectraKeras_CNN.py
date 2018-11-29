@@ -138,11 +138,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            predict(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                predict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
                 
         if o in ("-b" , "--batch"):
             try:
@@ -266,7 +266,6 @@ def train(learnFile, testFile):
     #************************************
     model = keras.models.Sequential()
 
-    print("input_shape",spectra.shape)
     for i in range(len(dP.CL_filter)):
         model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
             activation='relu',
@@ -274,9 +273,13 @@ def train(learnFile, testFile):
     try:
         model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
     except:
-        dP.max_pooling -= dP.CL_size[-1] - 1
-        print(" Rescaled pool size: ", dP.max_pooling, "\n")
-        model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
+        if dP.max_pooling > dP.CL_size[-1]:
+            dP.max_pooling -= dP.CL_size[-1] - 1
+            print(" Rescaled pool size: ", dP.max_pooling, "\n")
+            model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
+        else:
+            print(" Final conv-layer needs to be smaller than pooling layer")
+            return
 
     model.add(keras.layers.Dropout(dP.drop))
     model.add(keras.layers.Flatten())
