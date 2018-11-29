@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20181127a
+* 20181129a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -330,7 +330,7 @@ def train(learnFile, testFile):
             print("  Number unique classes (total): ", np.unique(totCl).size)
         printParam()
         print('\n  ========================================================')
-        print('  \033[1mKeras MLP - Classiefier \033[0m - Training Summary')
+        print('  \033[1mKeras MLP - Classifier \033[0m - Training Summary')
         print('  ========================================================')
         print("\n  \033[1mAccuracy\033[0m - Average: {0:.2f}%; Max: {1:.2f}%; Last: {2:.2f}%".format(100*np.average(accuracy),
             100*np.amax(accuracy), 100*accuracy[-1]))
@@ -523,18 +523,19 @@ def readTestFile(testFile):
 #****************************************************
 def preprocess(Rtot):
     dP = Conf()
-    En = np.array([pickle.loads(open("keras_spectral_range.pkl", "rb").read())])
-    R=np.array([Rtot[1,:]])
-    Rx=np.array([Rtot[0,:]])
+    En = pickle.loads(open(dP.spectral_range, "rb").read())
+    R = np.array([Rtot[1,:]])
+    Rx = np.array([Rtot[0,:]])
     
     if dP.normalize:
         norm = Normalizer()
         R = norm.transform_single(R)
     
-    if(R.shape[1] != En.shape[1]):
-        print('  Rescaling x-axis from',str(R.shape[1]),'to',str(En.shape[1]))
-        R = np.interp(En[0], Rx[0], R[0])
+    if(R.shape[1] != len(En)):
+        print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
+        R = np.interp(En, Rx[0], R[0])
         R = R.reshape(1,-1)
+
     return R
 
 #************************************
