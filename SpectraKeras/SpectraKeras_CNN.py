@@ -583,7 +583,6 @@ def formatForCNN(A,En):
         spectra = np.dstack([A[i]])
         listmatrix.append(spectra)
     x = np.stack(listmatrix, axis=0)
-    print(x.shape)
     return x
 
 #************************************
