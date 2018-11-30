@@ -270,6 +270,7 @@ def train(learnFile, testFile):
         model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
             activation='relu',
             input_shape=spectra.shape))
+    model.add(keras.layers.Dropout(dP.drop))
     try:
         model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
     except:
@@ -281,7 +282,6 @@ def train(learnFile, testFile):
             print(" Final conv-layer needs to be smaller than pooling layer")
             return
 
-    model.add(keras.layers.Dropout(dP.drop))
     model.add(keras.layers.Flatten())
 
     for i in range(len(dP.HL)):
