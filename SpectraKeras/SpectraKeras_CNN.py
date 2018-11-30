@@ -577,10 +577,13 @@ def preprocess(Rtot):
 def formatForCNN(A,En):
     listmatrix = []
     for i in range(A.shape[0]):
-        spectra = np.dstack([np.ones(En.shape[0]), En])
-        spectra = np.dstack([spectra, A[i]])
+        #spectra = np.dstack([np.ones(En.shape[0]), En])
+        #spectra = np.dstack([spectra, A[i]])
+        #spectra = np.dstack([En, A[i]])
+        spectra = np.dstack([A[i]])
         listmatrix.append(spectra)
     x = np.stack(listmatrix, axis=0)
+    print(x.shape)
     return x
 
 #************************************
