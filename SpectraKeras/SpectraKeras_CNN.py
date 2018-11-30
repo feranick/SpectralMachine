@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20181129a
+* 20181130a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -239,20 +239,14 @@ def train(learnFile, testFile):
     if dP.fullSizeBatch == True:
         dP.batch_size = A.shape[0]
 
-
     #************************************
     # CNN specific
     # Format spectra as images for loading
     #************************************
-    listmatrix = []
-    for i in range(A.shape[0]):
-        spectra = np.dstack([np.ones(En.shape[0]), En])
-        spectra = np.dstack([spectra, A[i]])
-        listmatrix.append(spectra)
+    x_train = formatForCNN(A,En)
+    if testFile != None:
+        x_test = formatForCNN(A_test,En)
 
-    x_train = np.stack(listmatrix, axis=0)
-    y_train = Cl2
-    
     #************************************
     ### Define optimizer
     #************************************
@@ -269,7 +263,7 @@ def train(learnFile, testFile):
     for i in range(len(dP.CL_filter)):
         model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
             activation='relu',
-            input_shape=spectra.shape))
+            input_shape=x_train[0].shape))
     model.add(keras.layers.Dropout(dP.drop))
     try:
         model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
@@ -307,14 +301,14 @@ def train(learnFile, testFile):
             write_graph=True, write_grads=True, write_images=True)
     tbLogs = [tbLog]
     if testFile != None:
-        log = model.fit(x_train, y_train,
+        log = model.fit(x_train, Cl2,
             epochs=dP.epochs,
             batch_size=dP.batch_size,
             callbacks = tbLogs,
             verbose=2,
-            validation_data=(A_test, Cl2_test))
+            validation_data=(x_test, Cl2_test))
     else:
-        log = model.fit(x_train, y_train,
+        log = model.fit(x_train, Cl2,
             epochs=dP.epochs,
             batch_size=dP.batch_size,
             callbacks = tbLogs,
@@ -576,6 +570,18 @@ def preprocess(Rtot):
 
     R = np.array([np.dstack([np.dstack([np.ones(len(En)), En]), R])])
     return R
+
+#****************************************************
+# Format data for CNN
+#****************************************************
+def formatForCNN(A,En):
+    listmatrix = []
+    for i in range(A.shape[0]):
+        spectra = np.dstack([np.ones(En.shape[0]), En])
+        spectra = np.dstack([spectra, A[i]])
+        listmatrix.append(spectra)
+    x = np.stack(listmatrix, axis=0)
+    return x
 
 #************************************
 # Print NN Info
