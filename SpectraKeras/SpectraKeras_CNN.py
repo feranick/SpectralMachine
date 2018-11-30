@@ -128,28 +128,28 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            try:
-                if len(sys.argv)<4:
-                    train(sys.argv[2], None)
-                else:
-                    train(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            if len(sys.argv)<4:
+                train(sys.argv[2], None)
+            else:
+                train(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            try:
-                predict(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            predict(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
                 
         if o in ("-b" , "--batch"):
-            try:
-                batchPredict()
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            batchPredict()
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
     total_time = time.clock() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -349,7 +349,7 @@ def train(learnFile, testFile):
             print("  Real value | Predicted value | val_loss | val_mean_abs_err")
             print("  -----------------------------------------------------------")
             for i in range(0,len(predictions)):
-                score = model.evaluate(np.array([A_test[i]]), np.array([Cl_test[i]]), batch_size=dP.batch_size, verbose = 0)
+                score = model.evaluate(np.array([x_test[i]]), np.array([Cl_test[i]]), batch_size=dP.batch_size, verbose = 0)
                 print("  {0:.2f}\t\t| {1:.2f}\t\t| {2:.4f}\t| {3:.4f} ".format(Cl2_test[i],
                     predictions[i][0], score[0], score[1]))
             print('\n  ==========================================================\n')
@@ -378,7 +378,7 @@ def train(learnFile, testFile):
             print('  ========================================================')
             print("  Real class\t| Predicted class\t| Probability")
             print("  ---------------------------------------------------")
-            predictions = model.predict(A_test)
+            predictions = model.predict(x_test)
             for i in range(predictions.shape[0]):
                 predClass = np.argmax(predictions[i])
                 predProb = round(100*predictions[i][predClass],2)
@@ -433,12 +433,11 @@ def predict(testFile):
                 predValue = le.inverse_transform(pred_class)[0]
             else:
                 predValue = 0
-            print('  Prediction\tProbability [%]')
-            print('  -----------------------------')
+            print('  Prediction\t| Probability [%]')
+            print('  ----------------------------- ')
             for i in range(len(predictions[0])-1):
                 if predictions[0][i]>0.01:
-                    print(' ',le.inverse_transform(i)[0],'\t\t',
-                        str('{:.2f}'.format(100*predictions[0][i])))
+                    print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]))
             print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
             print('  ========================================================\n')
 
@@ -568,7 +567,9 @@ def preprocess(Rtot):
         R = np.interp(En, Rx[0], R[0])
         R = R.reshape(1,-1)
 
-    R = np.array([np.dstack([np.dstack([np.ones(len(En)), En]), R])])
+    #R = np.array([np.dstack([np.dstack([np.ones(len(En)), En]), R])])
+    R = formatForCNN(R,En)
+    print(R.shape)
     return R
 
 #****************************************************
