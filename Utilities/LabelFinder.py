@@ -4,7 +4,7 @@
 *****************************************************
 * LabelFinder
 * Find label corresponding to class in training data
-* version: 20181127b
+* version: 20181130a
 * By: Nicola Ferralis <feranick@hotmail.com>
 *****************************************************
 '''
@@ -24,7 +24,7 @@ def main():
 
     learnFile = sys.argv[1]
     
-    R = np.array([np.fromstring(sys.argv[2], dtype='uint8', sep=',')])
+    R = np.array([np.fromstring(sys.argv[2], dtype='uint64', sep=',')])
     
     print(" Opening learning info file:",learnFile,"\n")
     try:
