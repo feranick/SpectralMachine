@@ -62,7 +62,7 @@ def trainSVM(A, Cl, A_test, Cl_test, Root):
         ''' Retrain training model if not available'''
         #**********************************************
         print('  Retraining SVM data...')
-        clf = svm.SVC(C = svmDef.Cfactor, decision_function_shape = 'ovr', probability=True)
+        clf = svm.SVC(C = svmDef.Cfactor, decision_function_shape = 'ovr', probability=True, gamma='auto')
         
         print("  Training on the full training dataset\n")
         clf.fit(A,Cl2)
@@ -76,7 +76,7 @@ def trainSVM(A, Cl, A_test, Cl_test, Root):
         if svmDef.showClasses == True:
             print('  List of classes: ' + str(clf.classes_))
 
-    print('\n==========================================================================\n')
+    print('==========================================================================\n')
     return clf, le
 
 #********************************************************************************
@@ -85,19 +85,20 @@ def trainSVM(A, Cl, A_test, Cl_test, Root):
 def predSVM(clf, A, Cl, R, le):
     R_pred_le = clf.predict(R)
     prob = clf.predict_proba(R)[0].tolist()
-    
+
     if R_pred_le.size >0:
         R_pred = le.inverse_transform(R_pred_le)
     else:
         R_pred = 0
     rosterPred = np.where(clf.predict_proba(R)[0]>svmDef.thresholdProbabilitySVMPred/100)[0]
-    print('\n  ==============================')
+
+    print('  ================================')
     print('  \033[1mSVM\033[0m - Probability >',str(svmDef.thresholdProbabilitySVMPred),'%')
-    print('  ==============================')
-    print('  Prediction\tProbability [%]')
+    print('  ================================')
+    print('  Prediction\t| Probability [%]')
     for i in range(rosterPred.shape[0]):
-        print(' ',str(np.unique(Cl)[rosterPred][i]),'\t\t',str('{:.1f}'.format(100*clf.predict_proba(R)[0][rosterPred][i])))
-    print('  ==============================')
+        print("  {0:.2f}\t\t| {1:.1f}".format(np.unique(Cl)[rosterPred][i],100*clf.predict_proba(R)[0][rosterPred][i]))
+    print('  ================================')
 
     print('\033[1m' + '\n Predicted value (SVM) = ' + str(R_pred[0]) + ' (probability = ' +
       str(round(100*max(prob),1)) + '%)\033[0m\n')

@@ -39,23 +39,16 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
     else:
         numKMcomp = kmDef.numKMcomponents
     kmeans = KMeans(n_clusters=numKMcomp, random_state=0).fit(A)
-    
-    '''
-    for i in range(0, numKMcomp):
-        print('\n Class: ' + str(i) + '\n  ',end="")
-        for j in range(0,kmeans.labels_.shape[0]):
-            if kmeans.labels_[j] == i:
-                print(' ' + str(Cl[j]), end="")
-    '''
-    print('\n  ==============================')
-    print('  \033[1mKM\033[0m - Predicted class: \033[1m',str(kmeans.predict(R)[0]),'\033[0m')
-    print('  ==============================')
-    print('  Prediction')
-    for j in range(0,kmeans.labels_.shape[0]):
-        if kmeans.labels_[j] == 22:
-            print('  ' + str(Cl[j]))
-    print('  ==============================\n')
+    prediction = kmeans.predict(R)[0]
 
+    print('\n  ==============================')
+    print('  \033[1mK-Means\033[0m - Prediction')
+    print('  ==============================')
+    print('  Class\t| Value')
+    for j in range(0,kmeans.labels_.shape[0]):
+        if kmeans.labels_[j] == prediction:
+            print("  {0:d}\t| {1:.2f}".format(prediction,Cl[j]))
+    print('  ==============================\n')
 
     if kmDef.plotKM == True:
         import matplotlib.pyplot as plt
@@ -69,7 +62,6 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
         plt.legend()
         plt.show()
     return kmeans.predict(R)[0]
-
 
 #**********************************************
 ''' K-Means - Maps'''
