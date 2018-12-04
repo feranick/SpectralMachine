@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20181130a
+* 20181204a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -165,7 +165,7 @@ def train(learnFile, testFile):
     # Use this to restrict GPU memory allocation in TF
     opts = tf.GPUOptions(per_process_gpu_memory_fraction=1)
     conf = tf.ConfigProto(gpu_options=opts)
-    #conf.gpu_options.allow_growth = True
+    conf.gpu_options.allow_growth = True
     
     if dP.useTFKeras:
         print("Using tf.keras API")
