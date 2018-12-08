@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20181204b
+* 20181207a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -56,9 +56,10 @@ class Conf():
             'l_rdecay' : 1e-4,
             'CL_filter' : [1],
             'CL_size' : [10],
-            'max_pooling' : 20,
+            'max_pooling' : [20],
+            'dropCNN' : [0],
             'HL' : [40,70],
-            'drop' : 0,
+            'dropFCL' : 0,
             'l2' : 1e-4,
             'epochs' : 100,
             'cv_split' : 0.01,
@@ -87,8 +88,9 @@ class Conf():
             self.CL_filter = eval(self.SKDef['CL_filter'])
             self.CL_size = eval(self.SKDef['CL_size'])
             self.max_pooling = eval(self.SKDef['max_pooling'])
+            self.dropCNN = eval(self.SKDef['dropCNN'])
             self.HL = eval(self.SKDef['HL'])
-            self.drop = self.conf.getfloat('Parameters','drop')
+            self.dropFCL = self.conf.getfloat('Parameters','dropFCL')
             self.l2 = self.conf.getfloat('Parameters','l2')
             self.epochs = self.conf.getint('Parameters','epochs')
             self.cv_split = self.conf.getfloat('Parameters','cv_split')
@@ -266,7 +268,13 @@ def train(learnFile, testFile):
         model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
             activation='relu',
             input_shape=x_train[0].shape))
-    model.add(keras.layers.Dropout(dP.drop))
+        model.add(keras.layers.Dropout(dP.dropCNN[i]))
+        try:
+            model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling[i])))
+        except:
+            print("  WARNING: Pooling layer is larger than last convolution layer\n  Aborting\n")
+            return
+    '''
     try:
         model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
     except:
@@ -277,7 +285,7 @@ def train(learnFile, testFile):
         else:
             print(" Final conv-layer needs to be smaller than pooling layer")
             return
-
+    '''
     model.add(keras.layers.Flatten())
 
     for i in range(len(dP.HL)):
@@ -285,7 +293,7 @@ def train(learnFile, testFile):
             activation = 'relu',
             input_dim=A.shape[1],
             kernel_regularizer=keras.regularizers.l2(dP.l2)))
-        model.add(keras.layers.Dropout(dP.drop))
+        model.add(keras.layers.Dropout(dP.dropFCL))
 
     if dP.regressor:
         model.add(keras.layers.Dense(1))
@@ -319,6 +327,7 @@ def train(learnFile, testFile):
 
     model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
+    model.summary()
 
     print('\n  =============================================')
     print('  \033[1mKeras CNN\033[0m - Model Configuration')
@@ -600,10 +609,11 @@ def printParam():
                 '\n  Convolutional layers:', dP.CL_filter,
                 '\n  Convolutional layers size:', dP.CL_size,
                 '\n  Max Pooling:', dP.max_pooling,
+                '\n  Dropout CNN:', dP.dropCNN,
                 '\n  Hidden layers:', dP.HL,
                 '\n  Activation function:','relu',
                 '\n  L2:',dP.l2,
-                '\n  Dropout:', dP.drop,
+                '\n  Dropout HL:', dP.dropFCL,
                 '\n  Learning rate:', dP.l_rate,
                 '\n  Learning decay rate:', dP.l_rdecay)
     if dP.fullSizeBatch == True:
