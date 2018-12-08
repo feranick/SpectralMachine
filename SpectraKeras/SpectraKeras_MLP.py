@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20181204b
+* 20181207a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -286,6 +286,7 @@ def train(learnFile, testFile):
 
     model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
+    model.summary()
 
     print('\n  =============================================')
     print('  \033[1mKeras MLP\033[0m - Model Configuration')
