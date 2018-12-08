@@ -269,6 +269,9 @@ def train(learnFile, testFile):
             batch_size=dP.batch_size,
             write_graph=True, write_grads=True, write_images=True)
     tbLogs = [tbLog]
+    
+    model.summary()
+    
     if testFile != None:
         log = model.fit(A, Cl2,
             epochs=dP.epochs,
