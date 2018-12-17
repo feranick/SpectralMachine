@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20181217a
+* 20181217b
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -126,7 +126,7 @@ def main():
     dP = Conf()
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "tpbh:", ["train", "predict", "batch", "help"])
+                                   "tnpbh:", ["train", "net", "predict", "batch", "help"])
     except:
         usage()
         sys.exit(2)
@@ -139,9 +139,19 @@ def main():
         if o in ("-t" , "--train"):
             try:
                 if len(sys.argv)<4:
-                    train(sys.argv[2], None)
+                    train(sys.argv[2], None, False)
                 else:
-                    train(sys.argv[2], sys.argv[3])
+                    train(sys.argv[2], sys.argv[3], False)
+            except:
+                usage()
+                sys.exit(2)
+
+        if o in ("-n" , "--net"):
+            try:
+                if len(sys.argv)<4:
+                    train(sys.argv[2], None, True)
+                else:
+                    train(sys.argv[2], sys.argv[3], True)
             except:
                 usage()
                 sys.exit(2)
@@ -167,7 +177,7 @@ def main():
 #************************************
 # Training
 #************************************
-def train(learnFile, testFile):
+def train(learnFile, testFile, flag):
     import tensorflow as tf
     dP = Conf()
     
@@ -197,8 +207,9 @@ def train(learnFile, testFile):
         totA = A
         totCl = Cl
 
-    with open(dP.spectral_range, 'ab') as f:
-        f.write(pickle.dumps(En))
+    if flag == False:
+        with open(dP.spectral_range, 'ab') as f:
+            f.write(pickle.dumps(En))
 
     print("  Total number of points per data:",En.size)
     print("  Number of learning labels: {0:d}\n".format(int(dP.numLabels)))
@@ -232,9 +243,10 @@ def train(learnFile, testFile):
             print("  Number unique classes (validation):", np.unique(Cl_test).size)
             print("  Number unique classes (total): ", np.unique(totCl).size)
             
-        print("\n  Label Encoder saved in:", dP.model_le,"\n")
-        with open(dP.model_le, 'ab') as f:
-            f.write(pickle.dumps(le))
+        if flag == False:
+            print("\n  Label Encoder saved in:", dP.model_le,"\n")
+            with open(dP.model_le, 'ab') as f:
+                f.write(pickle.dumps(le))
 
         #totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
         Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(totCl).size+1)
@@ -317,6 +329,9 @@ def train(learnFile, testFile):
     tbLogs = [tbLog]
     
     model.summary()
+    
+    if flag:
+        return
     
     if testFile != None:
         log = model.fit(x_train, Cl2,
@@ -727,6 +742,8 @@ def usage():
     print('  python3 SpectraKeras_CNN.py -p <testFile>\n')
     print(' Batch predict:')
     print('  python3 SpectraKeras_CNN.py -b\n')
+    print(' Display Neural Netwrok Configuration:')
+    print('  python3 SpectraKeras_CNN.py -n <learningFile>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
