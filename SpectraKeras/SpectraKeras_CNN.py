@@ -47,6 +47,8 @@ class Conf():
         self.model_le = self.model_directory+"keras_le.pkl"
         self.spectral_range = "keras_spectral_range.pkl"
         self.model_png = self.model_directory+"/keras_CNN_model.png"
+        self.conv1dActPlotTrain = self.model_directory+"/keras_CNN_conv1d-activations.png"
+        self.conv1dActPlotPredict = self.model_directory+"/keras_CNN_activations.png"
         self.sizeColPlot = 5
             
     def SKDef(self):
@@ -333,7 +335,7 @@ def train(learnFile, testFile):
 
 
     #############################################
-    # Plot activations - Experimental
+    # Plot activations
     #############################################
     if dP.plotActivations:
         import matplotlib.pyplot as plt
@@ -346,12 +348,11 @@ def train(learnFile, testFile):
         print(weight_conv2d_1[0,:,1].shape)
         for row in range(0,row_size):
             for col in range(0,col_size):
-                #plt.plot(weight_conv2d_1[:,:,filter_index][0])
-                #print("Act #",filter_index,":",weight_conv2d_1[:,:,filter_index][0])
                 #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
                 ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
                 filter_index += 1
-        plt.show()
+        #plt.show()
+        plt.savefig(dP.conv1dActPlotTrain, dpi = 160, format = 'png')  # Save plot
     #############################################
 
     model.save(dP.model_name)
@@ -495,8 +496,6 @@ def predict(testFile):
     #############################################
     if dP.plotActivations:
         import matplotlib.pyplot as plt
-        plt.plot(R[0,0,:,0])
-        #plt.show()
 
         from keras.models import Model
         layer_outputs = [layer.output for layer in model.layers]
@@ -506,14 +505,17 @@ def predict(testFile):
         def display_activation(activations, col_size, row_size, act_index):
             activation = activations[act_index]
             activation_index=0
-            fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
-            for row in range(0,row_size):
+            fig, ax = plt.subplots(row_size+1, col_size, figsize=(row_size*2.5,col_size*1.5))
+            for col in range(0,col_size):
+                ax[0][col].plot(R[0,0,:,0],'r')
+            for row in range(1,row_size+1):
                 for col in range(0,col_size):
                     #ax[row][col].imshow(activation[0, :, :, activation_index], cmap='gray')
                     ax[row][col].plot(activation[0, :, :, activation_index][0])
                     activation_index += 1
-            plt.show()
-
+            #plt.show()
+            plt.savefig(dP.conv1dActPlotPredict, dpi = 160, format = 'png')  # Save plot
+            
         display_activation(activations, int(dP.CL_filter[0]/dP.sizeColPlot), dP.sizeColPlot, 0)
     #############################################
 
