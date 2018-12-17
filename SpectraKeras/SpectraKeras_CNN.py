@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20181207a
+* 20181217a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -47,6 +47,7 @@ class Conf():
         self.model_le = self.model_directory+"keras_le.pkl"
         self.spectral_range = "keras_spectral_range.pkl"
         self.model_png = self.model_directory+"/keras_CNN_model.png"
+        self.sizeColPlot = 5
             
     def SKDef(self):
         self.conf['Parameters'] = {
@@ -67,6 +68,7 @@ class Conf():
             'batch_size' : 64,
             'numLabels' : 1,
             'plotWeightsFlag' : False,
+            'plotActivations' : True,
             'showValidPred' : False,
             }
 
@@ -98,6 +100,7 @@ class Conf():
             self.batch_size = self.conf.getint('Parameters','batch_size')
             self.numLabels = self.conf.getint('Parameters','numLabels')
             self.plotWeightsFlag = self.conf.getboolean('Parameters','plotWeightsFlag')
+            self.plotActivations = self.conf.getboolean('Parameters','plotActivations')
             self.showValidPred = self.conf.getboolean('Parameters','showValidPred')
             self.useTFKeras = self.conf.getboolean('System','useTFKeras')
         except:
@@ -132,21 +135,21 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            try:
-                if len(sys.argv)<4:
-                    train(sys.argv[2], None)
-                else:
-                    train(sys.argv[2], sys.argv[3])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            if len(sys.argv)<4:
+                train(sys.argv[2], None)
+            else:
+                train(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            try:
-                predict(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            predict(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
                 
         if o in ("-b" , "--batch"):
             try:
@@ -328,6 +331,29 @@ def train(learnFile, testFile):
             verbose=2,
 	        validation_split=dP.cv_split)
 
+
+    #############################################
+    # Plot activations - Experimental
+    #############################################
+    if dP.plotActivations:
+        import matplotlib.pyplot as plt
+        weight_conv2d_1 = model.layers[0].get_weights()[0][:,:,0,:]
+        col_size = 5
+        row_size = 2
+        filter_index = 0
+        fig, ax = plt.subplots(row_size, col_size, figsize=(12,8))
+
+        print(weight_conv2d_1[0,:,1].shape)
+        for row in range(0,row_size):
+            for col in range(0,col_size):
+                #plt.plot(weight_conv2d_1[:,:,filter_index][0])
+                #print("Act #",filter_index,":",weight_conv2d_1[:,:,filter_index][0])
+                #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
+                ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
+                filter_index += 1
+        plt.show()
+    #############################################
+
     model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     model.summary()
@@ -463,6 +489,33 @@ def predict(testFile):
             print("  2:",str(predValue[1]),"%")
             print("  3:",str((predValue[1]/0.5)*(100-99.2-.3)),"%\n")
             print(' ==========================================\n')
+
+    #############################################
+    # Plot activations - Experimental
+    #############################################
+    if dP.plotActivations:
+        import matplotlib.pyplot as plt
+        plt.plot(R[0,0,:,0])
+        #plt.show()
+
+        from keras.models import Model
+        layer_outputs = [layer.output for layer in model.layers]
+        activation_model = Model(inputs=model.input, outputs=layer_outputs)
+        activations = activation_model.predict(R)
+
+        def display_activation(activations, col_size, row_size, act_index):
+            activation = activations[act_index]
+            activation_index=0
+            fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
+            for row in range(0,row_size):
+                for col in range(0,col_size):
+                    #ax[row][col].imshow(activation[0, :, :, activation_index], cmap='gray')
+                    ax[row][col].plot(activation[0, :, :, activation_index][0])
+                    activation_index += 1
+            plt.show()
+
+        display_activation(activations, int(dP.CL_filter[0]/dP.sizeColPlot), dP.sizeColPlot, 0)
+    #############################################
 
 #************************************
 # Batch Prediction
