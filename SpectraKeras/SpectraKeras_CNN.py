@@ -49,7 +49,7 @@ class Conf():
         self.model_png = self.model_directory+"/keras_CNN_model.png"
         self.conv1dActPlotTrain = self.model_directory+"/keras_CNN_conv1d-activations.png"
         self.conv1dActPlotPredict = self.model_directory+"/keras_CNN_activations.png"
-        self.sizeColPlot = 5
+        self.sizeColPlot = 4
             
     def SKDef(self):
         self.conf['Parameters'] = {
@@ -137,21 +137,21 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            #try:
-            if len(sys.argv)<4:
-                train(sys.argv[2], None)
-            else:
-                train(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                if len(sys.argv)<4:
+                    train(sys.argv[2], None)
+                else:
+                    train(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            predict(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                predict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
                 
         if o in ("-b" , "--batch"):
             try:
@@ -333,27 +333,9 @@ def train(learnFile, testFile):
             verbose=2,
 	        validation_split=dP.cv_split)
 
-
-    #############################################
     # Plot activations
-    #############################################
     if dP.plotActivations:
-        import matplotlib.pyplot as plt
-        weight_conv2d_1 = model.layers[0].get_weights()[0][:,:,0,:]
-        col_size = 5
-        row_size = 2
-        filter_index = 0
-        fig, ax = plt.subplots(row_size, col_size, figsize=(12,8))
-
-        print(weight_conv2d_1[0,:,1].shape)
-        for row in range(0,row_size):
-            for col in range(0,col_size):
-                #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
-                ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
-                filter_index += 1
-        #plt.show()
-        plt.savefig(dP.conv1dActPlotTrain, dpi = 160, format = 'png')  # Save plot
-    #############################################
+        plotActivationsTrain(model)
 
     model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
@@ -491,33 +473,8 @@ def predict(testFile):
             print("  3:",str((predValue[1]/0.5)*(100-99.2-.3)),"%\n")
             print(' ==========================================\n')
 
-    #############################################
-    # Plot activations - Experimental
-    #############################################
     if dP.plotActivations:
-        import matplotlib.pyplot as plt
-
-        from keras.models import Model
-        layer_outputs = [layer.output for layer in model.layers]
-        activation_model = Model(inputs=model.input, outputs=layer_outputs)
-        activations = activation_model.predict(R)
-
-        def display_activation(activations, col_size, row_size, act_index):
-            activation = activations[act_index]
-            activation_index=0
-            fig, ax = plt.subplots(row_size+1, col_size, figsize=(row_size*2.5,col_size*1.5))
-            for col in range(0,col_size):
-                ax[0][col].plot(R[0,0,:,0],'r')
-            for row in range(1,row_size+1):
-                for col in range(0,col_size):
-                    #ax[row][col].imshow(activation[0, :, :, activation_index], cmap='gray')
-                    ax[row][col].plot(activation[0, :, :, activation_index][0])
-                    activation_index += 1
-            #plt.show()
-            plt.savefig(dP.conv1dActPlotPredict, dpi = 160, format = 'png')  # Save plot
-            
-        display_activation(activations, int(dP.CL_filter[0]/dP.sizeColPlot), dP.sizeColPlot, 0)
-    #############################################
+        plotActivationsPredictions(R,model)
 
 #************************************
 # Batch Prediction
@@ -615,13 +572,13 @@ def readTestFile(testFile):
     with open(testFile, 'r') as f:
         print('\n  Opening sample data for prediction:\n  ',testFile)
         Rtot = np.loadtxt(f, unpack =True)
-    R = preprocess(Rtot)
+    R = preProcess(Rtot)
     return R
 
 #****************************************************
 # Check Energy Range and convert to fit training set
 #****************************************************
-def preprocess(Rtot):
+def preProcess(Rtot):
     dP = Conf()
     En = pickle.loads(open(dP.spectral_range, "rb").read())
     R = np.array([Rtot[1,:]])
@@ -683,7 +640,7 @@ def printParam():
 
 
 #************************************
-# Open Learning Data
+# Plot Weights
 #************************************
 def plotWeights(En, A, model):
     import matplotlib.pyplot as plt
@@ -707,6 +664,55 @@ def plotWeights(En, A, model):
     plt.xlabel('Raman shift [1/cm]')
     plt.legend(loc='upper right')
     plt.savefig('keras_CNN_weights' + '.png', dpi = 160, format = 'png')  # Save plot
+
+#************************************
+# Plot Activations in Predictions
+#************************************
+def plotActivationsTrain(model):
+    import matplotlib.pyplot as plt
+    dP = Conf()
+    weight_conv2d_1 = model.layers[0].get_weights()[0][:,:,0,:]
+    col_size = dP.sizeColPlot
+    row_size = int(dP.CL_filter[0]/dP.sizeColPlot)
+    filter_index = 0
+    fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
+
+    print(weight_conv2d_1[0,:,1].shape)
+    for row in range(0,row_size):
+        for col in range(0,col_size):
+            #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
+            ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
+            filter_index += 1
+    #plt.show()
+    plt.savefig(dP.conv1dActPlotTrain, dpi = 160, format = 'png')  # Save plot
+
+#************************************
+# Plot Activations in Predictions
+#************************************
+def plotActivationsPredictions(R, model):
+    import matplotlib.pyplot as plt
+    from keras.models import Model
+    dP = Conf()
+    layer_outputs = [layer.output for layer in model.layers]
+    activation_model = Model(inputs=model.input, outputs=layer_outputs)
+    activations = activation_model.predict(R)
+
+    def display_activation(activations, col_size, row_size, act_index):
+        activation = activations[act_index]
+        activation_index=0
+        fig, ax = plt.subplots(row_size+1, col_size, figsize=(row_size*2.5,col_size*1.5))
+        for col in range(0,col_size):
+            ax[0][col].plot(R[0,0,:,0],'r')
+        for row in range(1,row_size+1):
+            for col in range(0,col_size):
+                #ax[row][col].plot(R[0,0,:,0],'r')
+                #ax[row][col].imshow(activation[0, :, :, activation_index], cmap='gray')
+                ax[row][col].plot(activation[0, :, :, activation_index][0])
+                activation_index += 1
+        #plt.show()
+        plt.savefig(dP.conv1dActPlotPredict, dpi = 160, format = 'png')  # Save plot
+        
+    display_activation(activations, dP.sizeColPlot, int(dP.CL_filter[0]/dP.sizeColPlot), 0)
 
 #************************************
 # Lists the program usage
