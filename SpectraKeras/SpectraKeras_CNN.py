@@ -703,6 +703,7 @@ def plotActivationsTrain(model):
 # Plot Activations in Predictions
 #************************************
 def plotActivationsPredictions(R, model):
+    print(" Saving activation plots...\n")
     import matplotlib.pyplot as plt
     from keras.models import Model
     dP = Conf()
