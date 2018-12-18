@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20181217b
+* 20181218a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -48,7 +48,7 @@ class Conf():
         self.spectral_range = "keras_spectral_range.pkl"
         self.model_png = self.model_directory+"/keras_CNN_model.png"
         self.conv1dActPlotTrain = self.model_directory+"/keras_CNN_conv1d-activations.png"
-        self.conv1dActPlotPredict = self.model_directory+"/keras_CNN_activations.png"
+        self.conv1dActPlotPredict = self.model_directory+"/keras_CNN_activations_"
         self.sizeColPlot = 4
             
     def SKDef(self):
@@ -710,9 +710,10 @@ def plotActivationsPredictions(R, model):
     layer_outputs = [layer.output for layer in model.layers]
     activation_model = Model(inputs=model.input, outputs=layer_outputs)
     activations = activation_model.predict(R)
-
+    
     def display_activation(activations, col_size, row_size, act_index):
         activation = activations[act_index]
+        print(activation)
         activation_index=0
         fig, ax = plt.subplots(row_size+1, col_size, figsize=(row_size*2.5,col_size*1.5))
         for col in range(0,col_size):
@@ -724,9 +725,13 @@ def plotActivationsPredictions(R, model):
                 ax[row][col].plot(activation[0, :, :, activation_index][0])
                 activation_index += 1
         #plt.show()
-        plt.savefig(dP.conv1dActPlotPredict, dpi = 160, format = 'png')  # Save plot
-        
-    display_activation(activations, dP.sizeColPlot, int(dP.CL_filter[0]/dP.sizeColPlot), 0)
+        plt.savefig(dP.conv1dActPlotPredict+str(act_index)+'.png', dpi = 160, format = 'png')  # Save plot
+
+    try:
+        for i in range(len(activations)):
+            display_activation(activations, dP.sizeColPlot, int(dP.CL_filter[0]/dP.sizeColPlot), i)
+    except:
+        pass
 
 #************************************
 # Lists the program usage
