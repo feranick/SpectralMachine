@@ -157,11 +157,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            predict(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                predict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
                 
         if o in ("-b" , "--batch"):
             try:
@@ -711,26 +711,35 @@ def plotActivationsPredictions(R, model):
     activation_model = Model(inputs=model.input, outputs=layer_outputs)
     activations = activation_model.predict(R)
     
-    def display_activation(activations, layerName, col_size, row_size, act_index):
+    def display_activation(activations, layerName, col_size, layerShape, act_index):
         activation = activations[act_index]
-        print(activation.shape)
-        activation_index=0
-        fig, ax = plt.subplots(row_size+1, col_size, figsize=(row_size*3,col_size*3))
-        plt.suptitle("Prediction spectra in red, activations in blue\n Layer: "+layerName, fontsize=16)
-        for col in range(0,col_size):
-            ax[0][col].plot(R[0,0,:,0],'r')
-        for row in range(1,row_size+1):
+        if len(activation_model.layers[i+1].output_shape) == 4:
+            activation_index=0
+            row_size = int(layerShape[3]/col_size)
+            fig, ax = plt.subplots(row_size+1, col_size, figsize=(row_size*3,col_size*3))
+            plt.suptitle("Prediction spectra in red, activations in blue\n Layer: "+layerName, fontsize=16)
             for col in range(0,col_size):
-                #ax[row][col].plot(R[0,0,:,0],'r')
-                #ax[row][col].imshow(activation[0, :, :, activation_index], cmap='gray')
-                ax[row][col].plot(activation[0, :, :, activation_index][0])
-                activation_index += 1
-        #plt.show()
-        plt.savefig(dP.actPlotPredict+str(act_index)+'.png', dpi = 160, format = 'png')  # Save plot
+                ax[0][col].plot(R[0,0,:,0],'r')
+            for row in range(1,row_size+1):
+                for col in range(0,col_size):
+                    #ax[row][col].plot(R[0,0,:,0],'r')
+                    #ax[row][col].imshow(activation[0, :, :, activation_index], cmap='gray')
+                    ax[row][col].plot(activation[0, :, :, activation_index][0])
+                    activation_index += 1
+        else:
+            row_size = 2
+            col_size = 1
+            fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*6,col_size*6))
+            plt.suptitle("Prediction spectra in red, dense layers in blue\n Layer: "+layerName, fontsize=16)
+            ax[0].plot(R[0,0,:,0],'r')
+            ax[1].plot(activation[0])
+
+        plt.savefig(dP.actPlotPredict+layerName+'.png', dpi = 160, format = 'png')  # Save plot
+        
 
     try:
         for i in range(len(activations)):
-            display_activation(activations, activation_model.layers[i+1].name, dP.sizeColPlot, int(activation_model.layers[i+1].output_shape[3]/dP.sizeColPlot), i)
+            display_activation(activations, activation_model.layers[i+1].name, dP.sizeColPlot, activation_model.layers[i+1].output_shape, i)
     except:
         pass
 
