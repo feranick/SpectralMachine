@@ -713,6 +713,7 @@ def plotActivationsPredictions(R, model):
     
     def display_activation(activations, layerName, col_size, row_size, act_index):
         activation = activations[act_index]
+        print(activation.shape)
         activation_index=0
         fig, ax = plt.subplots(row_size+1, col_size, figsize=(row_size*3,col_size*3))
         plt.suptitle("Prediction spectra in red, activations in blue\n Layer: "+layerName, fontsize=16)
