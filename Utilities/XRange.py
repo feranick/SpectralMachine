@@ -3,7 +3,7 @@
 '''
 *********************************************
 * Change the Xrange
-* version: 20180619a
+* version: 20181218a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 ''' Main '''
 #************************************
 class defParam:
-    saveAsTxt = False
+    saveAsTxt = True
 
 def main():
     if(len(sys.argv)<2):
@@ -30,7 +30,7 @@ def main():
         min = int(sys.argv[2])
         max = int(sys.argv[3])
         En, M = resize(En, M, min, max)
-        learnFileRoot = learnFileRoot+"_range-"+str(min)+"-"+str(max)+".txt"
+        learnFileRoot = learnFileRoot+"_range-"+str(min)+"-"+str(max)
         saveNewLearnFile(En,Cl,M,learnFileRoot)
         plotTrainData(En, M, learnFileRoot)
     except:
@@ -58,9 +58,9 @@ def readLearnFile(learnFile):
     En = M[0,1:]
     A = M[1:,1:]
     Cl = M[1:,0]
-    print("Classes:", Cl.shape)
-    print("En:",En.shape)
-    print("M:",M.shape)
+    print("  Classes:", Cl.shape)
+    print("  En:",En.shape)
+    print("  M:",M.shape)
     return En, Cl, A, learnFileRoot
 
 #************************************
@@ -71,8 +71,8 @@ def resize(En, M, min, max):
     indMax = np.where(En>max)[0][0]
     En = En[indMin:indMax]
     M = M[:,indMin:indMax]
-    print("New En:", En.shape)
-    print("New M:", M.shape)
+    print("  New En:", En.shape)
+    print("  New M:", M.shape)
     return En, M
 
 #************************************
@@ -105,7 +105,7 @@ def plotTrainData(En, M, learnFileRoot):
     learnFileRootNew = learnFileRoot + '_full-set'
     plt.title(learnFileRoot+'\nRestricted X Range')
 
-    print(' Plotting Training dataset in: ' + learnFileRootNew + '.png\n')
+    print('  Plotting Training dataset in: ' + learnFileRootNew + '.png\n')
     
     for i in range(start,M.shape[0], 1):
         plt.plot(En, M[i,:], label='Training data')
@@ -114,8 +114,8 @@ def plotTrainData(En, M, learnFileRoot):
 
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
-    #plt.savefig(learnFileRootNew + '.png', dpi = 160, format = 'png')  # Save plot
-    plt.show()
+    plt.savefig(learnFileRootNew + '.png', dpi = 160, format = 'png')  # Save plot
+    #plt.show()
     plt.close()
 
 #************************************
