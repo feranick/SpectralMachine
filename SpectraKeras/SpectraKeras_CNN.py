@@ -692,7 +692,6 @@ def plotActivationsTrain(model):
     filter_index = 0
     fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*2.5,col_size*1.5))
 
-    print(weight_conv2d_1[0,:,1].shape)
     for row in range(0,row_size):
         for col in range(0,col_size):
             #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
