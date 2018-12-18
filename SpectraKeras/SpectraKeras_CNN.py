@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20181218a
+* 20181218b
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -47,8 +47,8 @@ class Conf():
         self.model_le = self.model_directory+"keras_le.pkl"
         self.spectral_range = "keras_spectral_range.pkl"
         self.model_png = self.model_directory+"/keras_CNN_model.png"
-        self.conv1dActPlotTrain = self.model_directory+"/keras_CNN_conv1d-activations.png"
-        self.conv1dActPlotPredict = self.model_directory+"/keras_CNN_activations_"
+        self.actPlotTrain = self.model_directory+"/keras_CNN_conv1d-activations.png"
+        self.actPlotPredict = self.model_directory+"/keras_CNN_activations_"
         self.sizeColPlot = 4
             
     def SKDef(self):
@@ -610,7 +610,6 @@ def preProcess(Rtot):
 
     #R = np.array([np.dstack([np.dstack([np.ones(len(En)), En]), R])])
     R = formatForCNN(R,En)
-    print(R.shape)
     return R
 
 #****************************************************
@@ -698,7 +697,7 @@ def plotActivationsTrain(model):
             ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
             filter_index += 1
     #plt.show()
-    plt.savefig(dP.conv1dActPlotTrain, dpi = 160, format = 'png')  # Save plot
+    plt.savefig(dP.actPlotTrain, dpi = 160, format = 'png')  # Save plot
 
 #************************************
 # Plot Activations in Predictions
@@ -713,7 +712,6 @@ def plotActivationsPredictions(R, model):
     
     def display_activation(activations, col_size, row_size, act_index):
         activation = activations[act_index]
-        print(activation)
         activation_index=0
         fig, ax = plt.subplots(row_size+1, col_size, figsize=(row_size*2.5,col_size*1.5))
         for col in range(0,col_size):
@@ -725,7 +723,7 @@ def plotActivationsPredictions(R, model):
                 ax[row][col].plot(activation[0, :, :, activation_index][0])
                 activation_index += 1
         #plt.show()
-        plt.savefig(dP.conv1dActPlotPredict+str(act_index)+'.png', dpi = 160, format = 'png')  # Save plot
+        plt.savefig(dP.actPlotPredict+str(act_index)+'.png', dpi = 160, format = 'png')  # Save plot
 
     try:
         for i in range(len(activations)):
