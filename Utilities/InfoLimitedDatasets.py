@@ -25,26 +25,25 @@ def main():
 
     numClasses = np.unique(M[:,0]).size
     indClass = np.zeros((numClasses))
-    #rosterSpectra = np.zeros((M.shape[0]))
     totNumIncl = 0
 
+    # sort how many spectra per class
     for i in range(M.shape[0]):
         indClass[int(M[i,0])]+=1
 
+    # identify the number of spectra above threshold
     for i in range(M.shape[0]):
         if indClass[int(M[i,0])] >= float(sys.argv[2]):
             totNumIncl += 1
 
+    # find out how many classes are above the threshold
     for i in range(numClasses):
         if indClass[i] >= float(sys.argv[2]):
             print(" Class: ",i, "- spectra per class:", int(indClass[i]))
-            #totClassIncl += 1
         else:
             print(" Class: ",i, "- spectra per class:", int(indClass[i])," - EXCLUDED")
-            #totClassExcl += 1
 
     totClassIncl = indClass[np.where(indClass < float(sys.argv[2]))]
-    #print(s.shape)
 
     print("\n Number of points per spectra:", M[0,1:].size)
     print("\n Original number of unique classes:", numClasses)

@@ -6,7 +6,7 @@
 * RemoveLimitedDatasets
 * Remove data with little representation based on threshold
 *
-* version: 20180803d
+* version: 20181219a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -36,39 +36,46 @@ def main():
     newTrain = np.append([0], En)
     exclTrain = np.append([0], En)
 
-    num = 0
-    ind = 0
-    tempTrain = M[0,:]
-    exclIndex = []
+    numClasses = np.unique(M[:,0]).size
+    indClass = np.zeros((numClasses))
+    rosterSpectra = np.zeros((M.shape[0]))
+    totNumIncl = 0
 
+    # sort how many spectra per class
     for i in range(M.shape[0]):
-        #print("initial: ", M[i,0], num)
-        if M[i,0] != ind or i == M.shape[0]-1:
-            if i == M.shape[0]-1:
-                num += 1
-            if num >= float(sys.argv[2]):
-                print(" Class: ",ind, "\t- number per class:", num)
-                newTrain = np.vstack((newTrain,tempTrain))
-            else:
-                print(" Class: ",ind, "\t- number per class:", num, " EXCLUDED")
-                exclIndex.append(ind)
-                exclTrain = np.vstack((exclTrain,tempTrain))
-            tempTrain = M[i,:]
-            ind = M[i,0]
-            num = 1
+        indClass[int(M[i,0])]+=1
+
+    # create roster for spectra above threshold
+    for i in range(M.shape[0]):
+        if indClass[int(M[i,0])] >= float(sys.argv[2]):
+            rosterSpectra[i] = 1
+            totNumIncl += 1
+
+    # find out how many classes are above the threshold
+    for i in range(numClasses):
+        if indClass[i] >= float(sys.argv[2]):
+            print(" Class: ",i, "- spectra per class:", int(indClass[i]))
         else:
-            tempTrain=np.vstack((tempTrain,M[i,:]))
-            num +=1
+            print(" Class: ",i, "- spectra per class:", int(indClass[i])," - EXCLUDED")
+
+    totClassIncl = indClass[np.where(indClass < float(sys.argv[2]))]
+
+    # create new training set above threshold
+    for i in np.where(rosterSpectra == 1.)[0]:
+        newTrain = np.vstack((newTrain,M[i,:]))
+
+    # create new training set below threshold
+    for i in np.where(rosterSpectra == 0.)[0]:
+        exclTrain = np.vstack((exclTrain,M[i,:]))
 
     print("\n Number of points per spectra:", M[0,1:].size)
-    print("\n Original number of unique classes:", np.unique(M[:,0]).size)
-    print(" Number of included unique classes:",
-        np.unique(M[:,0]).size - np.unique(exclIndex).size)
-    print(" Number of excluded unique classes:",np.unique(exclIndex).size)
+    print("\n Original number of unique classes:", numClasses)
+    print(" Number of included unique classes:",totClassIncl.shape[0])
+    print(" Number of excluded unique classes:",indClass.shape[0] - totClassIncl.shape[0])
 
     print("\n Original number of spectra in training set:", M.shape[0])
-    print(" Number of spectra included in new training set:", newTrain.shape[0]-1)
-    print(" Number of spectra excluded in new training set:", exclTrain.shape[0]-1,"\n")
+    print(" Number of spectra included in new training set:", totNumIncl)
+    print(" Number of spectra excluded in new training set:", M.shape[0] - totNumIncl,"\n")
 
     saveLearnFile(newTrain, newFile)
     saveLearnFile(exclTrain, exclFile)
