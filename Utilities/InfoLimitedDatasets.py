@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
-*
+***********************************************************
 * InfoLimitedDatasets
 * Info data with little representation based on threshold
-*
-* version: 20180803d
-*
+* version: 20181219a
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
-***********************************************
+***********************************************************
 '''
 print(__doc__)
 
@@ -27,38 +23,38 @@ def main():
 
     En, M = readLearnFile(sys.argv[1])
 
-    num = 0
-    ind = 0
-    exclIndex = []
+    numClasses = np.unique(M[:,0]).size
+    indClass = np.zeros((numClasses))
+    rosterSpectra = np.zeros((M.shape[0]))
     totNumIncl = 0
-    totNumExcl = 0
-    
+
     for i in range(M.shape[0]):
-        #print("initial: ", M[i,0], num)
-        if M[i,0] != ind or i == M.shape[0]-1:
-            if i == M.shape[0]-1:
-                num += 1
-            if num >= float(sys.argv[2]):
-                print(" Class: ",ind, "\t- number per class:", num)
-                totNumIncl += num
-            else:
-                print(" Class: ",ind, "\t- number per class:", num, " EXCLUDED")
-                exclIndex.append(ind)
-                totNumExcl += num
-            ind = M[i,0]
-            num = 1
+        indClass[int(M[i,0])]+=1
+
+    for i in range(M.shape[0]):
+        if indClass[int(M[i,0])] >= float(sys.argv[2]):
+            totNumIncl += 1
+
+    for i in range(numClasses):
+        if indClass[i] >= float(sys.argv[2]):
+            print(" Class: ",i, "- spectra per class:", int(indClass[i]))
+            #totClassIncl += 1
         else:
-            num +=1
+            print(" Class: ",i, "- spectra per class:", int(indClass[i])," - EXCLUDED")
+            #totClassExcl += 1
+
+    totClassIncl = indClass[np.where(indClass < float(sys.argv[2]))]
+    #print(s.shape)
 
     print("\n Number of points per spectra:", M[0,1:].size)
-    print("\n Original number of unique classes:", np.unique(M[:,0]).size)
-    print(" Number of included unique classes:",
-        np.unique(M[:,0]).size - np.unique(exclIndex).size)
-    print(" Number of excluded unique classes:",np.unique(exclIndex).size)
+    print("\n Original number of unique classes:", numClasses)
+    print(" Number of included unique classes:",totClassIncl.shape[0])
+    print(" Number of excluded unique classes:",indClass.shape[0] - totClassIncl.shape[0])
 
     print("\n Original number of spectra in training set:", M.shape[0])
     print(" Number of spectra included in new training set:", totNumIncl)
-    print(" Number of spectra excluded in new training set:", totNumExcl,"\n")
+    print(" Number of spectra excluded in new training set:", M.shape[0] - totNumIncl,"\n")
+
 
 #************************************
 ''' Open Learning Data '''

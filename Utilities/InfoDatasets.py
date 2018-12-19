@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
 * InfoDatasets
 * Info data for training databases
-*
-* version: 20181127a
-*
+* version: 20181219a
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)
@@ -27,26 +23,20 @@ def main():
 
     En, M = readLearnFile(sys.argv[1])
 
-    num = 0
-    ind = 0
-    exclIndex = []
-    totNumIncl = 0
-    totNumExcl = 0
+    numClasses = np.unique(M[:,0]).size
+    indClass = np.zeros((numClasses))
+    rosterSpectra = np.zeros((M.shape[0]))
+    
+    print(M.shape)
     
     for i in range(M.shape[0]):
-        #print("initial: ", M[i,0], num)
-        if M[i,0] != ind or i == M.shape[0]-1:
-            if i == M.shape[0]-1:
-                num += 1
-            print(" Class: ",ind, "- number per class:", num)
-            totNumIncl += num
-            ind = M[i,0]
-            num = 1
-        else:
-            num +=1
+        indClass[int(M[i,0])]+=1
+
+    for i in range(numClasses):
+        print(" Class:",i, "- number per class:", int(indClass[i]))
 
     print("\n Number of points per spectra:", M[0,1:].size)
-    print(" Number of unique classes:", np.unique(M[:,0]).size)
+    print(" Number of unique classes:", numClasses)
     print(" Original number of spectra in training set:", M.shape[0],"\n")
 
 #************************************
