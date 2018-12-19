@@ -60,14 +60,6 @@ def main():
 
     totClassIncl = indClass[np.where(indClass < float(sys.argv[2]))]
 
-    # create new training set above threshold
-    for i in np.where(rosterSpectra == 1.)[0]:
-        newTrain = np.vstack((newTrain,M[i,:]))
-
-    # create new training set below threshold
-    for i in np.where(rosterSpectra == 0.)[0]:
-        exclTrain = np.vstack((exclTrain,M[i,:]))
-
     print("\n Number of points per spectra:", M[0,1:].size)
     print("\n Original number of unique classes:", numClasses)
     print(" Number of included unique classes:",totClassIncl.shape[0])
@@ -77,6 +69,16 @@ def main():
     print(" Number of spectra included in new training set:", totNumIncl)
     print(" Number of spectra excluded in new training set:", M.shape[0] - totNumIncl,"\n")
 
+    # create new training set above threshold
+    print(" Creating new training dataset with included spectra...")
+    for i in np.where(rosterSpectra == 1.)[0]:
+        newTrain = np.vstack((newTrain,M[i,:]))
+
+    # create new training set below threshold
+    print(" Creating new training dataset with the excluded spectra... \n")
+    for i in np.where(rosterSpectra == 0.)[0]:
+        exclTrain = np.vstack((exclTrain,M[i,:]))
+
     saveLearnFile(newTrain, newFile)
     saveLearnFile(exclTrain, exclFile)
 
@@ -84,7 +86,7 @@ def main():
 ''' Open Learning Data '''
 #************************************
 def readLearnFile(learnFile):
-    print(" Opening learning file: "+learnFile+"\n")
+    print(" Opening training file: "+learnFile+"\n")
     try:
         if os.path.splitext(learnFile)[1] == ".npy":
             M = np.load(learnFile)
