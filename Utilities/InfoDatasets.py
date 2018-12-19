@@ -25,7 +25,7 @@ def main():
 
     numClasses = np.unique(M[:,0]).size
     indClass = np.zeros((numClasses))
-    rosterSpectra = np.zeros((M.shape[0]))
+    #rosterSpectra = np.zeros((M.shape[0]))
     
     print(M.shape)
     
