@@ -7,7 +7,7 @@
 * Offset is randomly set
 * For augmentation of data
 *
-* version: 20180703b
+* version: 20181220a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
