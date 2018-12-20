@@ -118,10 +118,10 @@ def scrambleNoise(M, offset):
     
     for i in range(1, M.shape[1]-1):
         if defParam.addToFlatland == False:
-            M[:,i] += offset*uniform(-1,1)
+            M[:,i] += 0.01*offset*uniform(-1,1)
         else:
             if M[:,i].any() == 0:
-                M[:,i] += offset*uniform(-1,1)
+                M[:,i] += 0.01*offset*uniform(-1,1)
     return M
 
 #************************************
