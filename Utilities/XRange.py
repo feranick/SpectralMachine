@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 ''' Main '''
 #************************************
 class defParam:
-    saveAsTxt = True
+    saveAsTxt = False
 
 def main():
     if(len(sys.argv)<2):
