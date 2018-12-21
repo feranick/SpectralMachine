@@ -33,7 +33,7 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
 
-    newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2] + '_offs' + sys.argv[3]
+    #newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2] + '_offs' + sys.argv[3]
     newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2] + '_oNpc' + sys.argv[3]
     learnFileExt = os.path.splitext(sys.argv[1])[1]
 
@@ -116,7 +116,7 @@ def saveLearnFile(M, learnFile):
 #************************************
 def scrambleNoise(M, offset):
     M[:,1:] = np.multiply(M[:,1:],
-        np.abs(np.multiply(np.random.uniform(-1,1, size=(1,M.shape[1]-1)),0.01*offset*np.amax(M[:,1:], axis =0))))
+        np.abs(np.multiply(np.random.uniform(-1,1, size=(1,M.shape[1]-1)),0.01*offset*np.amax(M[:,1:], axis = 0))))
     return M
 '''
 def scrambleNoiseOld(M, offset):

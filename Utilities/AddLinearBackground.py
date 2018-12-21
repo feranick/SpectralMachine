@@ -8,7 +8,7 @@
 * slope parameter.
 * For augmentation of data
 *
-* version: 20181005b
+* version: 20181221a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -25,7 +25,7 @@ class defParam:
     saveAsTxt = False
     addToFlatland = False
     randomSlope = True
-    Ynorm = False
+    Ynorm = True
     YnormTo = 1
 
 def main():
@@ -34,7 +34,7 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
-    newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2] + '_sLinBack-' + sys.argv[3]
+    newFile = os.path.splitext(sys.argv[1])[0] + '_n' + sys.argv[2]
     
     if len(sys.argv) == 5:
         defParam.addToFlatland = True
@@ -42,11 +42,16 @@ def main():
     else:
         pass
 
+    if defParam.randomSlope:
+        newFile += '_randLinBack-' + sys.argv[3]
+        print(' Adding', sys.argv[2], 'sets with linear background with random slope around:', sys.argv[3], '\n')
+    else:
+        newFile += '_sLinBack-' + sys.argv[3]
+        print(' Adding', sys.argv[2], 'sets with linear background with slope:', sys.argv[3], '\n')
+
     if defParam.Ynorm ==True:
         print(" Normalizing Learning Spectra to:",defParam.YnormTo)
         newFile += '_norm'+str(defParam.YnormTo)
-
-    print(' Adding', sys.argv[2], 'sets with linear background with slope:', sys.argv[3], '\n')
 
     #newFile += '.txt'
     En, M = readLearnFile(sys.argv[1])
@@ -108,6 +113,14 @@ def saveLearnFile(M, learnFile):
 ''' Introduce Noise in Data '''
 #************************************
 def linBackground(En, M, slope):
+    S = np.zeros(M.shape)
+    if defParam.randomSlope == True:
+        slope = np.multiply(slope,np.random.uniform(0,1, size=(M.shape[0],1)))
+    S[:,1:] = np.add(np.subtract(M[:,1:],np.array([M[:,1]]).T), slope*En)
+    return S
+
+'''
+def linBackground_old(En, M, slope):
     from random import uniform
     for j in range(0, M.shape[0]):
         rSlope = slope
@@ -121,7 +134,7 @@ def linBackground(En, M, slope):
                 if M[j,i+1].any() == 0:
                     S[j,i+1] = M[j,i+1] + rSlope*En[i] - M[j,1]
     return S
-
+'''
 #************************************
 ''' Normalize '''
 #************************************
@@ -129,7 +142,8 @@ def normalizeSpectra(M):
     for i in range(1,M.shape[0]):
         if(np.amin(M[i]) <= 0):
             M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
-        M[i,1:] = np.multiply(M[i,1:], defParam.YnormTo/max(M[i][1:]))
+        #M[i,1:] = np.multiply(M[i,1:], defParam.YnormTo/max(M[i][1:]))
+    M[1:,1:] = np.multiply(M[1:,1:], np.array([float(defParam.YnormTo)/np.amax(M[1:,1:], axis = 1)]).T)
     return M
 
 #************************************
