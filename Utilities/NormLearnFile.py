@@ -6,7 +6,7 @@
 * NormLearnFile
 * Normalize spectral intensity in Learning File
 *
-* version: 20180703b
+* version: 20181221a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -15,7 +15,7 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, h5py
+import sys, os.path, h5py, time
 #************************************
 ''' Main '''
 #************************************
@@ -84,7 +84,8 @@ def normalizeSpectra(M):
     for i in range(1,M.shape[0]):
         if(np.amin(M[i]) <= 0):
             M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
-        M[i,1:] = np.multiply(M[i,1:], float(defParam.YnormTo)/max(M[i][1:]))
+        #M[i,1:] = np.multiply(M[i,1:], float(defParam.YnormTo)/max(M[i,1:]))
+    M[:,1:] = np.multiply(M[:,1:], np.array([float(defParam.YnormTo)/np.amax(M[:,1:], axis = 1)]).T)
     return M
 
 #************************************
