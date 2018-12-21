@@ -85,7 +85,7 @@ def normalizeSpectra(M):
         if(np.amin(M[i]) <= 0):
             M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
         #M[i,1:] = np.multiply(M[i,1:], float(defParam.YnormTo)/max(M[i,1:]))
-    M[:,1:] = np.multiply(M[:,1:], np.array([float(defParam.YnormTo)/np.amax(M[:,1:], axis = 1)]).T)
+    M[1:,1:] = np.multiply(M[1:,1:], np.array([float(defParam.YnormTo)/np.amax(M[1:,1:], axis = 1)]).T)
     return M
 
 #************************************

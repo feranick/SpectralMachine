@@ -7,7 +7,7 @@
 * Offset is randomly set
 * For augmentation of data
 *
-* version: 20181220a
+* version: 20181221b
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -114,8 +114,11 @@ def saveLearnFile(M, learnFile):
 ''' Introduce Noise in Data '''
 #************************************
 def scrambleNoise(M, offset):
+    M[:,1:] = np.add(M[:,1:], 0.01*offset*np.random.uniform(-1,1, size=(1,M.shape[1]-1)))
+    return M
+'''
+def scrambleNoise_old(M, offset):
     from random import uniform
-    
     for i in range(1, M.shape[1]-1):
         if defParam.addToFlatland == False:
             M[:,i] += 0.01*offset*uniform(-1,1)
@@ -123,6 +126,7 @@ def scrambleNoise(M, offset):
             if M[:,i].any() == 0:
                 M[:,i] += 0.01*offset*uniform(-1,1)
     return M
+'''
 
 #************************************
 ''' Normalize '''
@@ -131,7 +135,8 @@ def normalizeSpectra(M):
     for i in range(1,M.shape[0]):
         if(np.amin(M[i]) <= 0):
             M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
-        M[i,1:] = np.multiply(M[i,1:], defParam.YnormTo/max(M[i][1:]))
+        #M[i,1:] = np.multiply(M[i,1:], defParam.YnormTo/max(M[i][1:]))
+    M[1:,1:] = np.multiply(M[1:,1:], np.array([float(defParam.YnormTo)/np.amax(M[1:,1:], axis = 1)]).T)
     return M
 
 #************************************
