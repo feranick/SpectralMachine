@@ -6,7 +6,7 @@
 * Replicate training data with horizontal offset
 * For augmentation of data
 *
-* version: 20180615a
+* version: 20181221a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -22,6 +22,10 @@ import sys, os.path, h5py, csv
 #************************************
 class defParam:
     saveAsTxt = False
+    Ynorm = True
+    YnormTo = 1
+    randOffset = False
+
 def main():
     if(len(sys.argv)<4):
         print(' Usage:\n  python3 AddHorizontalOffset.py <learnData> <#additions> <offset>\n')
@@ -40,7 +44,11 @@ def main():
     print(' Adding', sys.argv[2],'sets with horizontal offset:', sys.argv[3], '\n')
 
     for j in range(int(sys.argv[2])):
-        newTrain = np.vstack((newTrain, horizontalOffset(En, M, float(sys.argv[3]), True)))
+        newTrain = np.vstack((newTrain, horizontalOffset(En, M, float(sys.argv[3]))))
+
+    if defParam.Ynorm ==True:
+        print(" Normalizing Learning + Noisy Spectra to:",defParam.YnormTo,"\n")
+        newTrain = normalizeSpectra(newTrain)
 
     saveLearnFile(newTrain, newFile)
 
@@ -85,21 +93,26 @@ def saveLearnFile(M, learnFile):
 #*******************************************
 ''' Introduce Horizontal Offset in Data '''
 #*******************************************
-def horizontalOffset(En, M, offset, rand):
-
-    newM = np.zeros(M.shape)
-    newM[:,0] = M[:,0]
-    newEn = np.zeros(En.shape)
-    
+def horizontalOffset(En, M, offset):
+    newM = np.copy(M)
     for i in range(0, M.shape[0]):
-        if rand is True:
-            from random import uniform
-            newEn = En + offset*uniform(-1,1)
+        if defParam.randOffset:
+            newEn = np.add(En, offset*np.random.uniform(-1,1))
         else:
-            newEn = En + offset
+            newEn = np.add(En, offset)
         newM[i,1:] = np.interp(En, newEn, M[i,1:], left = 0, right = 0)
-
     return newM
+
+#************************************
+''' Normalize '''
+#************************************
+def normalizeSpectra(M):
+    for i in range(1,M.shape[0]):
+        if(np.amin(M[i]) <= 0):
+            M[i,1:] = M[i,1:] - np.amin(M[i,1:]) + 1e-8
+        #M[i,1:] = np.multiply(M[i,1:], defParam.YnormTo/max(M[i][1:]))
+    M[1:,1:] = np.multiply(M[1:,1:], np.array([float(defParam.YnormTo)/np.amax(M[1:,1:], axis = 1)]).T)
+    return M
 
 #************************************
 ''' Main initialization routine '''
