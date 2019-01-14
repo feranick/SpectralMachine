@@ -7,7 +7,7 @@
 *
 * Adds spectra to Training File
 * Spectra can be ASCII or Rruff
-* version: 20180619d
+* version: 20190114a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -16,7 +16,7 @@
 print(__doc__)
 
 import numpy as np
-import sys, os, h5py
+import sys, os, os.path, h5py
 from datetime import datetime, date
 
 #**********************************************
@@ -24,7 +24,12 @@ from datetime import datetime, date
 #**********************************************
 def main():
     try:
-        makeFile(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        if sys.argv[3] == ".":
+            for ind, f in enumerate(sorted(os.listdir("."))):
+                if f != sys.argv[1] and f != sys.argv[2] and os.path.splitext(f)[-1] == ".txt":
+                    makeFile(sys.argv[1], sys.argv[2], f, sys.argv[4])
+        else:
+            makeFile(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     except:
         usage()
     sys.exit(2)
@@ -123,6 +128,7 @@ def saveLearnFile(M, learnFile):
 def usage():
     print('\n Usage:\n')
     print('  python3 AddSpectraToLearnFile.py <trainingfile> <info_file> <spectrafile> <parameter>\n')
+    print('  python3 AddSpectraToLearnFile.py <trainingfile> <info_file> . <parameter>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
