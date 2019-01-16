@@ -6,7 +6,7 @@
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
 *
-* version: 20180615c
+* version: 20190116a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -94,8 +94,8 @@ def saveLearnFile(learnFile):
 ''' Lists the program usage '''
 #************************************
 def usage():
-    print(' Usage:\n  python3 TxtToHDF5.py <Learning File prepared with RruffDataMaker>\n')
-    print(' With Normalization:\n  python3 TxtToHDF5.py -n <Learning File prepared with RruffDataMaker>\n')
+    print(' Usage:\n  python3 TxtToHDF5.py <Learning File DataMaker>\n')
+    print(' With Normalization:\n  python3 TxtToHDF5.py -n <Learning File prepared with DataMaker>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
