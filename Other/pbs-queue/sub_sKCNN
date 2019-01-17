@@ -28,6 +28,7 @@ print "#!/bin/sh
 #PBS -N SLP
 
 #export LD_LIBRARY_PATH=/usr/local/cuda-9.2/extras/CUPTI/lib64:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=/usr/local/cuda-10.0/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 cat \$PBS_NODEFILE > \$PBS_O_WORKDIR/nodes.out
 
   cd $fullpath
