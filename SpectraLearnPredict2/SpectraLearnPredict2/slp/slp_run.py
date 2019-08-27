@@ -33,6 +33,8 @@ from .slp_io import *
 def run():
 
     start_time = time.clock()
+    print(" TensorFlow v.",parse_version(tf.version.VERSION) )
+
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    "fambkph:", ["file", "accuracy", "map", "batch",
@@ -104,6 +106,7 @@ def run():
                 usage()
                 sys.exit(2)
         total_time = time.clock() - start_time
+        print(" TensorFlow v.",parse_version(tf.version.VERSION) )
         print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
                                                     total_time/60, total_time/3600),"\n")
 

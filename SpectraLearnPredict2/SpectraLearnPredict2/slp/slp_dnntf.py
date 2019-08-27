@@ -131,10 +131,44 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
                         dnntfDef.learning_rate_decay_rate,
                         staircase=True)
 
-    # Use this to restrict GPU memory allocation in TF
-    opts = tf.GPUOptions(per_process_gpu_memory_fraction=sysDef.fractionGPUmemory)
-    conf = tf.ConfigProto(gpu_options=opts)
-    #conf.gpu_options.allow_growth = True
+    if Configuration().useTF2:
+        print(" Using tf.keras API")
+        import tensorflow.keras as keras  #tf.keras
+        opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
+        conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
+        
+        #gpus = tf.config.experimental.list_physical_devices('GPU')
+        #if gpus:
+        #   for gpu in gpus:
+        #       tf.config.experimental.set_memory_growth(gpu, True)
+        #   if dP.setMaxMem:
+        #       tf.config.experimental.set_virtual_device_configuration(
+        #         gpus[0],
+        #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
+        
+        def_val_mae = 'val_mae'
+        def_acc = 'accuracy'
+        def_val_acc = 'val_accuracy'
+    
+    else:
+        #conf.gpu_options.allow_growth = True
+        opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
+        conf = tf.compat.v1.ConfigProto(gpu_options=opts)
+    
+        if dP.useTFKeras:
+            print(" Using tf.keras API")
+            import tensorflow.keras as keras  #tf.keras
+            tf.compat.v1.Session(config=conf)
+        else:
+            print(" Using pure keras API")
+            import keras   # pure keras
+            from keras.backend.tensorflow_backend import set_session
+            set_session(tf.compat.v1.Session(config=conf))
+        
+        def_val_mae = 'val_mean_absolute_error'
+        def_acc = 'acc'
+        def_val_acc = 'val_acc'
+
     
     ###############################
     if dnntfDef.useRegressor == False:

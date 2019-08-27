@@ -23,6 +23,8 @@ import random, time, configparser, os
 from os.path import exists, splitext
 from os import rename
 from datetime import datetime, date
+import tensorflow as tf
+from pkg_resources import parse_version
 
 #***************************************************************
 ''' Parameters and configuration  '''
@@ -36,6 +38,10 @@ class Configuration():
         if os.path.isfile(self.configFile) is False:
             print("Configuration file: \""+confFileName+"\" does not exist: Creating one.")
             self.createConfig()
+        if parse_version(tf.version.VERSION) < parse_version('2.0.0-alpha0'):
+            self.useTF2 = False
+        else:
+            self.useTF2 = True
 
     # Hadrcoded default definitions for the confoguration file
     def preprocDef(self):
