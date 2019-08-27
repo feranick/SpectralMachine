@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20181207a
+* 20190826aa
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -13,6 +13,8 @@ print(__doc__)
 import numpy as np
 import pandas as pd
 import sys, os.path, getopt, time, configparser, pickle, h5py, csv, glob
+import tensorflow as tf
+from pkg_resources import parse_version
 from libSpectraKeras import *
 
 #***************************************************
@@ -47,6 +49,10 @@ class Conf():
         self.model_le = self.model_directory+"keras_le.pkl"
         self.spectral_range = "keras_spectral_range.pkl"
         self.model_png = self.model_directory+"/keras_MLP_model.png"
+        if parse_version(tf.version.VERSION) < parse_version('2.0.0-alpha0'):
+            self.useTF2 = False
+        else:
+            self.useTF2 = True
             
     def SKDef(self):
         self.conf['Parameters'] = {
@@ -111,6 +117,9 @@ class Conf():
 def main():
     start_time = time.clock()
     dP = Conf()
+    
+    print(" TensorFlow v.",parse_version(tf.version.VERSION) )
+    
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    "tpbh:", ["train", "predict", "batch", "help"])
@@ -148,6 +157,7 @@ def main():
                 sys.exit(2)
 
     total_time = time.clock() - start_time
+    print(" TensorFlow v.",parse_version(tf.version.VERSION) )
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
                             total_time/60, total_time/3600),"\n")
 
@@ -155,23 +165,45 @@ def main():
 # Training
 #************************************
 def train(learnFile, testFile):
-    import tensorflow as tf
     dP = Conf()
     
-    # Use this to restrict GPU memory allocation in TF
-    opts = tf.GPUOptions(per_process_gpu_memory_fraction=1)
-    conf = tf.ConfigProto(gpu_options=opts)
-    conf.gpu_options.allow_growth = True
-    
-    if dP.useTFKeras:
-        print("Using tf.keras API")
+    if dP.useTF2:
+        print(" Using tf.keras API")
         import tensorflow.keras as keras  #tf.keras
-        tf.Session(config=conf)
+        opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
+        conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
+        
+        #gpus = tf.config.experimental.list_physical_devices('GPU')
+        #if gpus:
+        #   for gpu in gpus:
+        #       tf.config.experimental.set_memory_growth(gpu, True)
+        #   if dP.setMaxMem:
+        #       tf.config.experimental.set_virtual_device_configuration(
+        #         gpus[0],
+        #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
+        
+        def_val_mae = 'val_mae'
+        def_acc = 'accuracy'
+        def_val_acc = 'val_accuracy'
+    
     else:
-        print("Using pure keras API")
-        import keras   # pure keras
-        from keras.backend.tensorflow_backend import set_session
-        set_session(tf.Session(config=conf))
+        conf.gpu_options.allow_growth = True
+        opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
+        conf = tf.compat.v1.ConfigProto(gpu_options=opts)
+    
+        if dP.useTFKeras:
+            print(" Using tf.keras API")
+            import tensorflow.keras as keras  #tf.keras
+            tf.compat.v1.Session(config=conf)
+        else:
+            print(" Using pure keras API")
+            import keras   # pure keras
+            from keras.backend.tensorflow_backend import set_session
+            set_session(tf.compat.v1.Session(config=conf))
+        
+        def_val_mae = 'val_mean_absolute_error'
+        def_acc = 'acc'
+        def_val_acc = 'val_acc'
 
     learnFileRoot = os.path.splitext(learnFile)[0]
 
@@ -287,7 +319,10 @@ def train(learnFile, testFile):
             verbose=2,
 	        validation_split=dP.cv_split)
 
-    model.save(dP.model_name)
+    if dP.useTF2:
+        model.save(dP.model_name, save_format='h5')
+    else:
+        model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     model.summary()
 
@@ -304,7 +339,7 @@ def train(learnFile, testFile):
     val_loss = np.asarray(log.history['val_loss'])
 
     if dP.regressor:
-        val_mae = np.asarray(log.history['val_mean_absolute_error'])
+        val_mae = np.asarray(log.history[def_val_mae])
         printParam()
         print('\n  ==========================================================')
         print('  \033[1mKeras MLP - Regressor\033[0m - Training Summary')
@@ -326,8 +361,8 @@ def train(learnFile, testFile):
                     predictions[i][0], score[0], score[1]))
             print('\n  ==========================================================\n')
     else:
-        accuracy = np.asarray(log.history['acc'])
-        val_acc = np.asarray(log.history['val_acc'])
+        accuracy = np.asarray(log.history[def_acc])
+        val_acc = np.asarray(log.history[def_val_acc])
         print("  Number unique classes (training): ", np.unique(Cl).size)
         if testFile != None:
             Cl2_test = le.transform(Cl_test)
