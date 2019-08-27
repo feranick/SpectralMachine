@@ -17,9 +17,10 @@ The current version 2 is the stable and recommended for use. Version 1 is no lon
 
 Credits and References
 ==================
-If you use SpectralMachine, we request that you reference the papers/resources on which SpectralMachine is based:
-- N Ferralis, SpectralMachine (2017), https://github.com/feranick/SpectralMachine
-- N. Ferralis, JC Grossman, RE Summons, ["Mineral and Geochemical Classification from Spectroscopy/Diffraction Through Neural Networks"](https://agu.confex.com/agu/fm17/meetingapp.cgi/Paper/285994), AGU Fall Meeting 2017, New Orleans, LA.
+If you use SpectralMachine or SpectraKeras, we request that you reference the papers/resources on which SpectralMachine is based:
+- N Ferralis, SpectralMachine and SpectraKeras (2017), https://github.com/feranick/SpectralMachine
+- N. Ferralis, R.E. Sumons, Automated Mineral and Geochemical Classification from Spectroscopy Data using Machine Learning, AGU Fall Meeting 2018, Washington, DC, December 2018, https://agu.confex.com/agu/fm18/prelim.cgi/Paper/369458 
+- N. Ferralis, Automated Materials Classification from Spectroscopy/Diffraction through Deep Neural Networks, MRS Fall Meeting 2018, Boston, MA, November 2018, https://mrsfall2018.zerista.com/event/member/533306
 
 Installation
 =============
