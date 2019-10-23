@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20190826aa
+* 20191022a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -74,7 +74,7 @@ class Conf():
 
     def sysDef(self):
         self.conf['System'] = {
-            'useTFKeras' : False,
+            'useTFKeras' : True,
             }
 
     def readConfig(self,configFile):

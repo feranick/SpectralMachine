@@ -151,8 +151,9 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
               optimizer=kerasDef.optimizer,
               metrics=['accuracy'])
 
-        tbLog = keras.callbacks.TensorBoard(log_dir=tb_directory, histogram_freq=kerasDef.tbHistogramFreq,
-                batch_size=batch_size, write_graph=True, write_grads=True, write_images=True)
+        tbLog = keras.callbacks.TensorBoard(log_dir=tb_directory,
+                histogram_freq=kerasDef.tbHistogramFreq,
+                write_graph=True, write_images=True)
         #tbLog.set_model(model)
         tbLogs = [tbLog]
         log = model.fit(A, Cl2,

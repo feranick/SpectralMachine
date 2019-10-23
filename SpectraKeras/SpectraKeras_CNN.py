@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20190826a
+* 20191022a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -82,7 +82,7 @@ class Conf():
 
     def sysDef(self):
         self.conf['System'] = {
-            'useTFKeras' : False,
+            'useTFKeras' : True,
             }
 
     def readConfig(self,configFile):
@@ -356,8 +356,7 @@ def train(learnFile, testFile, flag):
             metrics=['accuracy'])
 
     tbLog = keras.callbacks.TensorBoard(log_dir=dP.tb_directory, histogram_freq=120,
-            batch_size=dP.batch_size,
-            write_graph=True, write_grads=True, write_images=True)
+            write_graph=True, write_images=True)
     tbLogs = [tbLog]
     
     model.summary()
