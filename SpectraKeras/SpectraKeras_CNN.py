@@ -50,7 +50,7 @@ class Conf():
         
         self.actPlotTrain = self.model_directory+"/model_CNN_conv1d-activations.png"
         self.actPlotPredict = self.model_directory+"/model_CNN_activations_"
-        self.sizeColPlot = 4
+        self.sizeColPlot = 1
     
         self.edgeTPUSharedLib = "libedgetpu.so.1"
             
@@ -73,7 +73,7 @@ class Conf():
             'batch_size' : 64,
             'numLabels' : 1,
             'plotWeightsFlag' : False,
-            'plotActivations' : True,
+            'plotActivations' : False,
             'showValidPred' : False,
             }
 
@@ -174,11 +174,11 @@ def main():
                 sys.exit(2)
                 
         if o in ("-b" , "--batch"):
-            #try:
-            batchPredict()
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                batchPredict()
+            except:
+                usage()
+                sys.exit(2)
 
     total_time = time.perf_counter() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -806,22 +806,29 @@ def plotWeights(En, A, model):
 # Plot Activations in Predictions
 #************************************
 def plotActivationsTrain(model):
-    import matplotlib.pyplot as plt
     dP = Conf()
-    weight_conv2d_1 = model.layers[0].get_weights()[0][:,:,0,:]
     col_size = dP.sizeColPlot
-    row_size = int(dP.CL_filter[0]/dP.sizeColPlot)
-    filter_index = 0
-    fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*3,col_size*3))
-
-    for row in range(0,row_size):
-        for col in range(0,col_size):
-            #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
-            ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
+    row_size = int(dP.CL_filter[0])
+    if row_size > 1:
+        import matplotlib.pyplot as plt
+        weight_conv2d_1 = model.layers[0].get_weights()[0][:,:,0,:]
+        filter_index = 0
+        fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*3,col_size*3))
+    
+        for row in range(0,row_size):
+            ax[row].plot(weight_conv2d_1[:,:,filter_index][0])
             filter_index += 1
-    #plt.show()
-    plt.savefig(dP.actPlotTrain, dpi = 160, format = 'png')  # Save plot
-
+            plt.savefig(dP.actPlotTrain, dpi = 160, format = 'png')  # Save plot
+        '''
+        for row in range(0,row_size):
+            for col in range(0,col_size):
+                #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
+                ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
+                filter_index += 1
+        '''
+        #plt.show()
+        plt.savefig(dP.actPlotTrain, dpi = 160, format = 'png')  # Save plot
+    
 #************************************
 # Plot Activations in Predictions
 #************************************
@@ -858,7 +865,6 @@ def plotActivationsPredictions(R, model):
             ax[1].plot(activation[0])
 
         plt.savefig(dP.actPlotPredict+layerName+'.png', dpi = 160, format = 'png')  # Save plot
-        
 
     try:
         for i in range(len(activations)):
