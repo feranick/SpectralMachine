@@ -3,18 +3,15 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20191022a
-* Uses: Keras, TensorFlow
+* 20191024a
+* Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
 '''
 print(__doc__)
 
 import numpy as np
-import pandas as pd
 import sys, os.path, getopt, time, configparser, pickle, h5py, csv, glob
-import tensorflow as tf
-from pkg_resources import parse_version
 from libSpectraKeras import *
 
 #***************************************************
@@ -36,26 +33,26 @@ class Conf():
             print(" Configuration file: \""+confFileName+"\" does not exist: Creating one.\n")
             self.createConfig()
         self.readConfig(self.configFile)
-        if self.regressor:
-            self.modelName = "keras_CNN_model_regressor.hd5"
-            self.summaryFileName = "keras_CNN_summary_regressor.csv"
-        else:
-            self.modelName = "keras_CNN_model.hd5"
-            self.summaryFileName = "keras_CNN_summary_classifier.csv"
-        
-        self.tb_directory = "keras_CNN"
         self.model_directory = "./"
-        self.model_name = self.model_directory+self.modelName
-        self.model_le = self.model_directory+"keras_le.pkl"
-        self.spectral_range = "keras_spectral_range.pkl"
-        self.model_png = self.model_directory+"/keras_CNN_model.png"
-        self.actPlotTrain = self.model_directory+"/keras_CNN_conv1d-activations.png"
-        self.actPlotPredict = self.model_directory+"/keras_CNN_activations_"
-        self.sizeColPlot = 4
-        if parse_version(tf.version.VERSION) < parse_version('2.0.0-alpha0'):
-            self.useTF2 = False
+        if self.regressor:
+            self.modelName = "model_regressor_CNN.hd5"
+            self.summaryFileName = "summary_regressor_CNN.csv"
+            self.model_png = self.model_directory+"/model_regressor_CNN.png"
         else:
-            self.useTF2 = True
+            self.modelName = "model_classifier_CNN.hd5"
+            self.summaryFileName = "summary_classifier_CNN.csv"
+            self.model_png = self.model_directory+"/model_classifier_CNN.png"
+    
+        self.tb_directory = "model_CNN"
+        self.model_name = self.model_directory+self.modelName
+        self.model_le = self.model_directory+"model_le.pkl"
+        self.spectral_range = "model_spectral_range.pkl"
+        
+        self.actPlotTrain = self.model_directory+"/model_CNN_conv1d-activations.png"
+        self.actPlotPredict = self.model_directory+"/model_CNN_activations_"
+        self.sizeColPlot = 4
+    
+        self.edgeTPUSharedLib = "libedgetpu.so.1"
             
     def SKDef(self):
         self.conf['Parameters'] = {
@@ -82,7 +79,10 @@ class Conf():
 
     def sysDef(self):
         self.conf['System'] = {
-            'useTFKeras' : True,
+            'makeQuantizedTFlite' : True,
+            'useTFlitePred' : False,
+            'TFliteRuntime' : False,
+            'runCoralEdge' : False,
             }
 
     def readConfig(self,configFile):
@@ -110,7 +110,10 @@ class Conf():
             self.plotWeightsFlag = self.conf.getboolean('Parameters','plotWeightsFlag')
             self.plotActivations = self.conf.getboolean('Parameters','plotActivations')
             self.showValidPred = self.conf.getboolean('Parameters','showValidPred')
-            self.useTFKeras = self.conf.getboolean('System','useTFKeras')
+            self.makeQuantizedTFlite = self.conf.getboolean('System','makeQuantizedTFlite')
+            self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
+            self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
+            self.runCoralEdge = self.conf.getboolean('System','runCoralEdge')
         except:
             print(" Error in reading configuration file. Please check it\n")
 
@@ -128,10 +131,8 @@ class Conf():
 # Main
 #************************************
 def main():
-    start_time = time.clock()
+    start_time = time.perf_counter()
     dP = Conf()
-    
-    print(" TensorFlow v.",parse_version(tf.version.VERSION) )
     
     try:
         opts, args = getopt.getopt(sys.argv[1:],
@@ -146,14 +147,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            try:
-                if len(sys.argv)<4:
-                    train(sys.argv[2], None, False)
-                else:
-                    train(sys.argv[2], sys.argv[3], False)
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            if len(sys.argv)<4:
+                train(sys.argv[2], None, False)
+            else:
+                train(sys.argv[2], sys.argv[3], False)
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-n" , "--net"):
             try:
@@ -173,14 +174,13 @@ def main():
                 sys.exit(2)
                 
         if o in ("-b" , "--batch"):
-            try:
-                batchPredict()
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            batchPredict()
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
-    total_time = time.clock() - start_time
-    print(" TensorFlow v.",parse_version(tf.version.VERSION) )
+    total_time = time.perf_counter() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
                             total_time/60, total_time/3600),"\n")
 
@@ -190,9 +190,19 @@ def main():
 def train(learnFile, testFile, flag):
     dP = Conf()
     
-    if dP.useTF2:
-        print(" Using tf.keras API")
-        import tensorflow.keras as keras  #tf.keras
+    def_mae = 'mae'
+    def_val_mae = 'val_mae'
+    
+    import tensorflow as tf
+    import tensorflow.keras as keras
+    from pkg_resources import parse_version
+
+    if parse_version(tf.version.VERSION) < parse_version('2.0.0'):
+        useTF2 = False
+    else:
+        useTF2 = True
+    
+    if useTF2:
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
         
@@ -205,7 +215,6 @@ def train(learnFile, testFile, flag):
         #         gpus[0],
         #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
         
-        def_val_mae = 'val_mae'
         def_acc = 'accuracy'
         def_val_acc = 'val_accuracy'
     
@@ -214,16 +223,9 @@ def train(learnFile, testFile, flag):
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)
     
-        if dP.useTFKeras:
-            print(" Using tf.keras API")
-            import tensorflow.keras as keras  #tf.keras
-            tf.compat.v1.Session(config=conf)
-        else:
-            print(" Using pure keras API")
-            import keras   # pure keras
-            from keras.backend.tensorflow_backend import set_session
-            set_session(tf.compat.v1.Session(config=conf))
+        tf.compat.v1.Session(config=conf)
         
+        def_mae = 'mean_absolute_error'
         def_val_mae = 'val_mean_absolute_error'
         def_acc = 'acc'
         def_val_acc = 'val_acc'
@@ -383,15 +385,18 @@ def train(learnFile, testFile, flag):
     if dP.plotActivations:
         plotActivationsTrain(model)
 
-    if dP.useTF2:
+    if useTF2:
         model.save(dP.model_name, save_format='h5')
     else:
         model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     model.summary()
+    
+    if dP.makeQuantizedTFlite:
+        makeQuantizedTFmodel(x_train, model)
 
     print('\n  =============================================')
-    print('  \033[1mKeras CNN\033[0m - Model Configuration')
+    print('  \033[1m CNN\033[0m - Model Configuration')
     print('  =============================================')
 
     print("  Training set file:",learnFile)
@@ -406,11 +411,11 @@ def train(learnFile, testFile, flag):
         val_mae = np.asarray(log.history[def_val_mae])
         printParam()
         print('\n  ==========================================================')
-        print('  \033[1mKeras CNN - Regressor\033[0m - Training Summary')
+        print('  \033[1m CNN - Regressor\033[0m - Training Summary')
         print('  ==========================================================')
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(loss), np.amin(loss), loss[-1]))
         print('\n\n  ==========================================================')
-        print('  \033[1mKeras CNN - Regressor \033[0m - Validation Summary')
+        print('  \033[1m CNN - Regressor \033[0m - Validation Summary')
         print('  ========================================================')
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
         print("  \033[1mMean Abs Err\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_mae), np.amin(val_mae), val_mae[-1]))
@@ -435,13 +440,13 @@ def train(learnFile, testFile, flag):
             print("  Number unique classes (total): ", np.unique(totCl).size)
         printParam()
         print('\n  ========================================================')
-        print('  \033[1mKeras CNN - Classifier \033[0m - Training Summary')
+        print('  \033[1m CNN - Classifier \033[0m - Training Summary')
         print('  ========================================================')
         print("\n  \033[1mAccuracy\033[0m - Average: {0:.2f}%; Max: {1:.2f}%; Last: {2:.2f}%".format(100*np.average(accuracy),
             100*np.amax(accuracy), 100*accuracy[-1]))
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(loss), np.amin(loss), loss[-1]))
         print('\n\n  ========================================================')
-        print('  \033[1mKeras CNN - Classifier \033[0m - Validation Summary')
+        print('  \033[1m CNN - Classifier \033[0m - Validation Summary')
         print('  ========================================================')
         print("\n  \033[1mAccuracy\033[0m - Average: {0:.2f}%; Max: {1:.2f}%; Last: {2:.2f}%".format(100*np.average(val_acc),
         100*np.amax(val_acc), 100*val_acc[-1]))
@@ -463,17 +468,14 @@ def train(learnFile, testFile, flag):
     if dP.plotWeightsFlag == True:
         plotWeights(En, A, model)
 
+    getTFVersion()
+
 #************************************
 # Prediction
 #************************************
 def predict(testFile):
     dP = Conf()
-    if dP.useTFKeras:
-        import tensorflow.keras as keras  #tf.keras
-    else:
-        import keras   # pure Keras
-    
-    model = keras.models.load_model(dP.modelName)
+    model = loadModel()
 
     try:
         R = readTestFile(testFile)
@@ -482,9 +484,10 @@ def predict(testFile):
         return
 
     if dP.regressor:
-        predictions = model.predict(R).flatten()[0]
+        #predictions = model.predict(R).flatten()[0]
+        predictions = getPredictions(R, model).flatten()[0]
         print('\n  ========================================================')
-        print('  \033[1mKeras CNN - Regressor\033[0m - Prediction')
+        print('  \033[1m CNN - Regressor\033[0m - Prediction')
         print('  ========================================================')
         predValue = predictions
         print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
@@ -492,12 +495,16 @@ def predict(testFile):
         
     else:
         le = pickle.loads(open(dP.model_le, "rb").read())
-        predictions = model.predict(R, verbose=0)
+        #predictions = model.predict(R, verbose=0)
+        predictions = getPredictions(R, model)
         pred_class = np.argmax(predictions)
-        predProb = round(100*predictions[0][pred_class],2)
+        if dP.useTFlitePred:
+            predProb = round(100*predictions[0][pred_class]/255,2)
+        else:
+            predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
         print('\n  ========================================================')
-        print('  \033[1mKeras CNN - Classifier\033[0m - Prediction')
+        print('  \033[1m CNN - Classifier\033[0m - Prediction')
         print('  ========================================================')
 
         if dP.numLabels == 1:
@@ -509,7 +516,10 @@ def predict(testFile):
             print('  ----------------------------- ')
             for i in range(len(predictions[0])-1):
                 if predictions[0][i]>0.01:
-                    print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]))
+                    if dP.useTFlitePred:
+                        print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]/255))
+                    else:
+                        print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]))
             print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
             print('  ========================================================\n')
 
@@ -530,27 +540,22 @@ def predict(testFile):
 #************************************
 def batchPredict():
     dP = Conf()
-    if dP.useTFKeras:
-        import tensorflow.keras as keras  #tf.keras
-    else:
-        import keras   # pure Keras
-
-    model = keras.models.load_model(dP.modelName)
+    model = loadModel()
 
     predictions = np.zeros((0,0))
     fileName = []
     for file in glob.glob('*.txt'):
         R = readTestFile(file)
         try:
-            predictions = np.vstack((predictions,model.predict(R).flatten()))
+            predictions = np.vstack((predictions,getPredictions(R, model).flatten()))
         except:
-            predictions = np.array([model.predict(R).flatten()])
+            predictions = np.array([getPredictions(R, model).flatten()])
         fileName.append(file)
 
     if dP.regressor:
         summaryFile = np.array([['SpectraKeras_CNN','Regressor','',],['File name','Prediction','']])
         print('\n  ========================================================')
-        print('  \033[1mKeras CNN - Regressor\033[0m - Prediction')
+        print('  \033[1m CNN - Regressor\033[0m - Prediction')
         print('  ========================================================')
         for i in range(predictions.shape[0]):
             predValue = predictions[i][0]
@@ -562,11 +567,14 @@ def batchPredict():
         le = pickle.loads(open(dP.model_le, "rb").read())
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['File name','Predicted Class', 'Probability']])
         print('\n  ========================================================')
-        print('  \033[1mKeras CNN - Classifier\033[0m - Prediction')
+        print('  \033[1m CNN - Classifier\033[0m - Prediction')
         print('  ========================================================')
         for i in range(predictions.shape[0]):
             pred_class = np.argmax(predictions[i])
-            predProb = round(100*predictions[0][pred_class],2)
+            if dP.useTFlitePred:
+                predProb = round(100*predictions[0][pred_class]/255,2)
+            else:
+                predProb = round(100*predictions[0][pred_class],2)
             rosterPred = np.where(predictions[i][0]>0.1)[0]
         
             if pred_class.size >0:
@@ -577,9 +585,62 @@ def batchPredict():
                 print('  {0:s}:\033[1m\n   No predicted value (probability = {1:.2f}%)\033[0m\n'.format(fileName[i],predProb))
             summaryFile = np.vstack((summaryFile,[fileName[i], predValue,predProb]))
         print('  ========================================================\n')
+        
+    import pandas as pd
     df = pd.DataFrame(summaryFile)
     df.to_csv(dP.summaryFileName, index=False, header=False)
     print(" Prediction summary saved in:",dP.summaryFileName,"\n")
+
+#************************************
+# Make prediction based on framework
+#************************************
+def getPredictions(R, model):
+    dP = Conf()
+       
+    if dP.useTFlitePred:
+        interpreter = model  #needed to keep consistency with documentation
+        # Get input and output tensors.
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+
+        # Test model on random input data.
+        input_shape = input_details[0]['shape']
+        input_data = np.array(R, dtype=np.float32)
+        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.invoke()
+
+        # The function `get_tensor()` returns a copy of the tensor data.
+        # Use `tensor()` in order to get a pointer to the tensor.
+        predictions = interpreter.get_tensor(output_details[0]['index'])
+        
+    else:
+        predictions = model.predict(R)
+    return predictions
+    
+#************************************
+# Load saved models
+#************************************
+def loadModel():
+    dP = Conf()
+    if dP.TFliteRuntime:
+        import tflite_runtime.interpreter as tflite
+        # model here is intended as interpreter
+        if dP.runCoralEdge:
+            print(" Running on Coral Edge TPU")
+            model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'_edgetpu.tflite',
+                experimental_delegates=[tflite.load_delegate(dP.edgeTPUSharedLib,{})])
+        else:
+            model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
+        model.allocate_tensors()
+    else:
+        import tensorflow as tf
+        if dP.useTFlitePred:
+            # model here is intended as interpreter
+            model = tf.lite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
+            model.allocate_tensors()
+        else:
+            model = tf.keras.models.load_model(dP.model_name)
+    return model
 
 #************************************
 # Open Learning Data
@@ -624,6 +685,34 @@ def readTestFile(testFile):
     R = preProcess(Rtot)
     return R
 
+#************************************
+### Create Quantized tflite model
+#************************************
+def makeQuantizedTFmodel(A, model):
+    dP = Conf()
+    import tensorflow as tf
+    print("\n  Creating quantized TensorFlowLite Model...\n")
+    def representative_dataset_gen():
+        for i in range(A.shape[0]):
+            yield [A[i:i+1].astype(np.float32)]
+    try:
+        converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TensorFlow 2.x
+    except:
+        converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # TensorFlow 1.x
+
+    #converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
+    #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    #converter.inference_input_type = tf.uint8
+    converter.inference_input_type = tf.float32
+    converter.inference_output_type = tf.uint8
+    converter.representative_dataset = representative_dataset_gen
+    tflite_quant_model = converter.convert()
+
+    with open(os.path.splitext(dP.model_name)[0]+'.tflite', 'wb') as o:
+        o.write(tflite_quant_model)
+
 #****************************************************
 # Check Energy Range and convert to fit training set
 #****************************************************
@@ -666,7 +755,7 @@ def formatForCNN(A,En):
 def printParam():
     dP = Conf()
     print('\n  ================================================')
-    print('  \033[1mKeras CNN\033[0m - Parameters')
+    print('  \033[1m CNN\033[0m - Parameters')
     print('  ================================================')
     print('  Optimizer:','Adam',
                 '\n  Convolutional layers:', dP.CL_filter,
@@ -711,7 +800,7 @@ def plotWeights(En, A, model):
 
     plt.xlabel('Raman shift [1/cm]')
     plt.legend(loc='upper right')
-    plt.savefig('keras_CNN_weights' + '.png', dpi = 160, format = 'png')  # Save plot
+    plt.savefig('model_CNN_weights' + '.png', dpi = 160, format = 'png')  # Save plot
 
 #************************************
 # Plot Activations in Predictions
@@ -776,6 +865,17 @@ def plotActivationsPredictions(R, model):
             display_activation(activations, activation_model.layers[i+1].name, dP.sizeColPlot, activation_model.layers[i+1].output_shape, i)
     except:
         pass
+
+#************************************
+# Get TensorFlow Version
+#************************************
+def getTFVersion():
+    import tensorflow as tf
+    from pkg_resources import parse_version
+    if Conf().useTFlitePred:
+        print(" TensorFlow (Lite) v.",parse_version(tf.version.VERSION) )
+    else:
+        print(" TensorFlow v.",parse_version(tf.version.VERSION) )
 
 #************************************
 # Lists the program usage

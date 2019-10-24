@@ -4,7 +4,7 @@
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
 * 20191022a
-* Uses: Keras, TensorFlow
+* Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
 '''
@@ -35,12 +35,12 @@ class Conf():
         self.readConfig(self.configFile)
         self.model_directory = "./"
         if self.regressor:
-            self.modelName = "model_regressor.hd5"
-            self.summaryFileName = "summary_regressor.csv"
+            self.modelName = "model_regressor_MLP.hd5"
+            self.summaryFileName = "summary_regressor_MLP.csv"
             self.model_png = self.model_directory+"/model_regressor_MLP.png"
         else:
-            self.modelName = "model_classifier.hd5"
-            self.summaryFileName = "summary_classifier.csv"
+            self.modelName = "model_classifier_MLP.hd5"
+            self.summaryFileName = "summary_classifier_MLP.csv"
             self.model_png = self.model_directory+"/model_classifier_MLP.png"
         
         self.tb_directory = "model_MLP"
@@ -70,7 +70,7 @@ class Conf():
 
     def sysDef(self):
         self.conf['System'] = {
-            'makeQuantizedTFlite' : False,
+            'makeQuantizedTFlite' : True,
             'useTFlitePred' : False,
             'TFliteRuntime' : False,
             'runCoralEdge' : False,
@@ -143,11 +143,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            predict(sys.argv[2])
-            #except:
-            #   usage()
-            #    sys.exit(2)
+            try:
+                predict(sys.argv[2])
+            except:
+               usage()
+                sys.exit(2)
                 
         if o in ("-b" , "--batch"):
             try:
@@ -450,8 +450,12 @@ def predict(testFile):
             print('  -----------------------------')
             for i in range(len(predictions[0])-1):
                 if predictions[0][i]>0.01:
-                    print(' ',le.inverse_transform(i)[0],'\t\t',
-                        str('{:.2f}'.format(100*predictions[0][i])))
+                    if dP.useTFlitePred:
+                        print(' ',le.inverse_transform(i)[0],'\t\t',
+                            str('{:.2f}'.format(100*predictions[0][i]/255)))
+                    else:
+                        print(' ',le.inverse_transform(i)[0],'\t\t',
+                            str('{:.2f}'.format(100*predictions[0][i])))
             print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
             print('  ========================================================\n')
 
@@ -500,7 +504,10 @@ def batchPredict():
         print('  ========================================================')
         for i in range(predictions.shape[0]):
             pred_class = np.argmax(predictions[i])
-            predProb = round(100*predictions[0][pred_class],2)
+            if dP.useTFlitePred:
+                predProb = round(100*predictions[0][pred_class]/255,2)
+            else:
+                predProb = round(100*predictions[0][pred_class],2)
             rosterPred = np.where(predictions[i][0]>0.1)[0]
         
             if pred_class.size >0:
@@ -704,7 +711,7 @@ def plotWeights(En, A, model):
 
     plt.xlabel('Raman shift [1/cm]')
     plt.legend(loc='upper right')
-    plt.savefig('keras_MLP_weights' + '.png', dpi = 160, format = 'png')  # Save plot
+    plt.savefig('model_MLP_weights' + '.png', dpi = 160, format = 'png')  # Save plot
 
 #************************************
 # Get TensorFlow Version
