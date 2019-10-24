@@ -147,14 +147,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            #try:
-            if len(sys.argv)<4:
-                train(sys.argv[2], None, False)
-            else:
-                train(sys.argv[2], sys.argv[3], False)
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                if len(sys.argv)<4:
+                    train(sys.argv[2], None, False)
+                else:
+                    train(sys.argv[2], sys.argv[3], False)
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-n" , "--net"):
             try:
@@ -532,7 +532,7 @@ def predict(testFile):
             print("  3:",str((predValue[1]/0.5)*(100-99.2-.3)),"%\n")
             print(' ==========================================\n')
 
-    if dP.plotActivations:
+    if dP.plotActivations and not dP.useTFlitePred:
         plotActivationsPredictions(R,model)
 
 #************************************
@@ -835,7 +835,7 @@ def plotActivationsTrain(model):
 def plotActivationsPredictions(R, model):
     print(" Saving activation plots...\n")
     import matplotlib.pyplot as plt
-    from keras.models import Model
+    from tensorflow.keras.models import Model
     dP = Conf()
     layer_outputs = [layer.output for layer in model.layers]
     activation_model = Model(inputs=model.input, outputs=layer_outputs)
