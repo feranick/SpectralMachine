@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20181207a
+* 20191024a
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -109,6 +109,7 @@ class CustomRound:
     def __call__(self,x):
         data = self.data
         ndata = len(data)
+        from bisect import bisect_left
         idx = bisect_left(data,x)
         if idx <= 0:
             return data[0]
