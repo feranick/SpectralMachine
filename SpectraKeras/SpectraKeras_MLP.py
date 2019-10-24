@@ -147,7 +147,7 @@ def main():
                 predict(sys.argv[2])
             except:
                usage()
-                sys.exit(2)
+               sys.exit(2)
                 
         if o in ("-b" , "--batch"):
             try:
