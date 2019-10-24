@@ -1,16 +1,19 @@
-# SpectralMachine
+# SpectralMachine and SpectraKeras
 Machine learning software for rapid Spectral analysis. While Raman spectra were the initilal focus, SpectralMachine is flexible to be applied for classification using any spectra (from XRD, FTIR and beyond).
 The current version 2 is the stable and recommended for use. Version 1 is no longer supported.
+SpectralMachine is in long-term maintenance mode. No new features will be added and development is now focused on SpectraKeras
 
-**Supported algorithms:**
- 
+**Supported algorithms: (SpectraKeras)**
+- DNNClassifier (TensorFlow 
+- Convolutional Neural Networks (TensorFlow)
+
+**Supported algorithms: (SpectralMachine)**
  - Deep Neural Networks:
    - multi-layer perceptron (MLP) (L-BFGS Optimizer strongly recommended)
    - DNNClassifier (TensorFlow and keras)
    - Convolutional Neural Networks (Under development - via keras)
  - Support Vector Machine - SVM
  - TensorFlow (basic implementation)
-
 **Additional multivariate analysis:**
 - K-Means
 - Principal component analysis
@@ -31,7 +34,6 @@ This software requires Python (3.3 or higher). It has been tested with Python 3.
     scikit-learn (>=0.18)
     matplotlib
     pandas
-    keras
     pydot
     graphviz
     h5py
@@ -45,9 +47,52 @@ These are found in Unix based systems using common repositories (apt-get for Deb
 
 [TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow v.1.14+. Support for TensorFlow 2.x is present and will be the main supported platform going forward after the release of TF 2.0.
 
+Usage (SpectraKeras)
+===================
 
-Usage
-======
+## SpectraKeras_MLP
+
+Train (Random cross validation):
+
+    python3 SpectraKeras_MLP.py -t <learningFile>
+    
+Train (with external validation):
+
+    python3 SpectraKeras_MLP.py -t <learningFile> <validationFile>
+    
+Predict:
+
+    python3 SpectraKeras_MLP.py -p <testFile>
+    
+Batch predict:')
+    
+    python3 SpectraKeras_MLP.py -b
+
+## SpectraKeras_CNN
+
+Train (Random cross validation):
+
+    python3 SpectraKeras_CNN.py -t <learningFile>
+    
+Train (with external validation):
+
+    python3 SpectraKeras_CNN.py -t <learningFile> <validationFile>
+    
+Predict:
+
+    python3 SpectraKeras_CNN.py -p <testFile>
+    
+Batch predict:
+
+    python3 SpectraKeras_CNN.py -b
+
+Display Neural Netwrok Configuration:
+    
+    python3 SpectraKeras_CNN.py -n <learningFile>
+    
+
+Usage (SpectralMachine)
+===================
 
 Single files: 
   
