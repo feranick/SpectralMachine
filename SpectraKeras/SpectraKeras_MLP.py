@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20191022a
+* 20191025a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -151,7 +151,7 @@ def main():
                 
         if o in ("-b" , "--batch"):
             try:
-                batchPredict()
+                batchPredict(folder)
             except:
                 usage()
                 sys.exit(2)
@@ -471,13 +471,13 @@ def predict(testFile):
 #************************************
 # Batch Prediction
 #************************************
-def batchPredict():
+def batchPredict(folder):
     dP = Conf()
     model = loadModel()
 
     predictions = np.zeros((0,0))
     fileName = []
-    for file in glob.glob('*.txt'):
+    for file in glob.glob(folder+'/*.txt'):
         R = readTestFile(file)
         try:
             predictions = np.vstack((predictions,getPredictions(R, model).flatten()))
@@ -736,7 +736,7 @@ def usage():
     print(' Predict:')
     print('  python3 SpectraKeras_MLP.py -p <testFile>\n')
     print(' Batch predict:')
-    print('  python3 SpectraKeras_MLP.py -b\n')
+    print('  python3 SpectraKeras_MLP.py -b <folder>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************

@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20191024a
+* 20191025a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -175,7 +175,7 @@ def main():
                 
         if o in ("-b" , "--batch"):
             try:
-                batchPredict()
+                batchPredict(sys.argv[2])
             except:
                 usage()
                 sys.exit(2)
@@ -538,13 +538,13 @@ def predict(testFile):
 #************************************
 # Batch Prediction
 #************************************
-def batchPredict():
+def batchPredict(folder):
     dP = Conf()
     model = loadModel()
 
     predictions = np.zeros((0,0))
     fileName = []
-    for file in glob.glob('*.txt'):
+    for file in glob.glob(folder+'/*.txt'):
         R = readTestFile(file)
         try:
             predictions = np.vstack((predictions,getPredictions(R, model).flatten()))
@@ -895,8 +895,8 @@ def usage():
     print(' Predict:')
     print('  python3 SpectraKeras_CNN.py -p <testFile>\n')
     print(' Batch predict:')
-    print('  python3 SpectraKeras_CNN.py -b\n')
-    print(' Display Neural Netwrok Configuration:')
+    print('  python3 SpectraKeras_CNN.py -b <folder>\n')
+    print(' Display Neural Network Configuration:')
     print('  python3 SpectraKeras_CNN.py -n <learningFile>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
