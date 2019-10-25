@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20191025a
+* 20191025b
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -411,10 +411,8 @@ def predict(testFile):
     dP = Conf()
     model = loadModel()
 
-    try:
-        R = readTestFile(testFile)
-    except:
-        print('\033[1m' + '\n Sample data file not found \n ' + '\033[0m')
+    R, good = readTestFile(testFile)
+    if not good:
         return
 
     if dP.regressor:
@@ -478,12 +476,13 @@ def batchPredict(folder):
     predictions = np.zeros((0,0))
     fileName = []
     for file in glob.glob(folder+'/*.txt'):
-        R = readTestFile(file)
-        try:
-            predictions = np.vstack((predictions,getPredictions(R, model).flatten()))
-        except:
-            predictions = np.array([getPredictions(R, model).flatten()])
-        fileName.append(file)
+        R, good = readTestFile(file)
+        if good:
+            try:
+                predictions = np.vstack((predictions,getPredictions(R, model).flatten()))
+            except:
+                predictions = np.array([getPredictions(R, model).flatten()])
+            fileName.append(file)
 
     if dP.regressor:
         summaryFile = np.array([['SpectraKeras_MLP','Regressor','',],['File name','Prediction','']])
@@ -611,12 +610,15 @@ def readLearnFile(learnFile):
 # Open Testing Data
 #************************************
 def readTestFile(testFile):
-
-    with open(testFile, 'r') as f:
-        print('\n  Opening sample data for prediction:\n  ',testFile)
-        Rtot = np.loadtxt(f, unpack =True)
-    R = preprocess(Rtot)
-    return R
+    try:
+        with open(testFile, 'r') as f:
+            print('\n  Opening sample data for prediction:\n  ',testFile)
+            Rtot = np.loadtxt(f, unpack =True)
+        R = preProcess(Rtot)
+    except:
+        print("\033[1m\n File not found or corrupt\033[0m\n")
+        return 0, False
+    return R, True
 
 #************************************
 ### Create Quantized tflite model
