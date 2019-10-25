@@ -43,7 +43,6 @@ def main():
 # Save File
 #************************************
 def saveFile(folder, file):
-    print(file)
     try:
         with open(file, 'r') as f:
             M = np.loadtxt(f, skiprows = 10, delimiter = ',', unpack=False)
