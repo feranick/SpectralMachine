@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20191025b
+* 20191025c
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -571,9 +571,9 @@ def batchPredict(folder):
         for i in range(predictions.shape[0]):
             pred_class = np.argmax(predictions[i])
             if dP.useTFlitePred:
-                predProb = round(100*predictions[0][pred_class]/255,2)
+                predProb = round(100*predictions[i][pred_class]/255,2)
             else:
-                predProb = round(100*predictions[0][pred_class],2)
+                predProb = round(100*predictions[i][pred_class],2)
             rosterPred = np.where(predictions[i][0]>0.1)[0]
         
             if pred_class.size >0:

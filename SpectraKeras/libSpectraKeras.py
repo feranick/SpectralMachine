@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20191024a
+* 20191025b
 * Uses: Keras, TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -17,7 +17,7 @@ from bisect import bisect_left
 class Normalizer(object):
     def __init__(self):
         self.YnormTo = 1
-        print("  Normalizing spectra between 0 and 1 \n")
+        print("  Normalizing spectra between 0 and 1")
 
     def transform_matrix(self,y):
         yn = np.copy(y)
