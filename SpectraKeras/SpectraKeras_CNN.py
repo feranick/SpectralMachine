@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20191025c
+* 20191025d
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -231,10 +231,9 @@ def train(learnFile, testFile, flag):
         def_val_acc = 'val_acc'
         
     learnFileRoot = os.path.splitext(learnFile)[0]
-
-    En, A, Cl = readLearnFile(learnFile)
+    En, A, Cl = readLearnFile(learnFile, dP)
     if testFile != None:
-        En_test, A_test, Cl_test = readLearnFile(testFile)
+        En_test, A_test, Cl_test = readLearnFile(testFile, dP)
         totA = np.vstack((A, A_test))
         totCl = np.append(Cl, Cl_test)
     else:
@@ -298,9 +297,9 @@ def train(learnFile, testFile, flag):
     # CNN specific
     # Format spectra as images for loading
     #************************************
-    x_train = formatForCNN(A,En)
+    x_train = formatForCNN(A)
     if testFile != None:
-        x_test = formatForCNN(A_test,En)
+        x_test = formatForCNN(A_test)
 
     #************************************
     ### Define optimizer
@@ -393,7 +392,7 @@ def train(learnFile, testFile, flag):
     model.summary()
     
     if dP.makeQuantizedTFlite:
-        makeQuantizedTFmodel(x_train, model)
+        makeQuantizedTFmodel(x_train, model, dP)
 
     print('\n  =============================================')
     print('  \033[1m CNN\033[0m - Model Configuration')
@@ -466,24 +465,25 @@ def train(learnFile, testFile, flag):
             print('\n  ========================================================\n')
 
     if dP.plotWeightsFlag == True:
-        plotWeights(En, A, model)
+        plotWeights(En, A, model, "CNN")
 
-    getTFVersion()
+    getTFVersion(dP)
 
 #************************************
 # Prediction
 #************************************
 def predict(testFile):
     dP = Conf()
-    model = loadModel()
+    model = loadModel(dP)
 
-    R, good = readTestFile(testFile)
+    R, good = readTestFile(testFile, dP)
     if not good:
         return
+    R = formatForCNN(R)
 
     if dP.regressor:
         #predictions = model.predict(R).flatten()[0]
-        predictions = getPredictions(R, model).flatten()[0]
+        predictions = getPredictions(R, model, dP).flatten()[0]
         print('\n  ========================================================')
         print('  \033[1m CNN - Regressor\033[0m - Prediction')
         print('  ========================================================')
@@ -494,7 +494,7 @@ def predict(testFile):
     else:
         le = pickle.loads(open(dP.model_le, "rb").read())
         #predictions = model.predict(R, verbose=0)
-        predictions = getPredictions(R, model)
+        predictions = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
         if dP.useTFlitePred:
             predProb = round(100*predictions[0][pred_class]/255,2)
@@ -538,17 +538,18 @@ def predict(testFile):
 #************************************
 def batchPredict(folder):
     dP = Conf()
-    model = loadModel()
+    model = loadModel(dP)
 
     predictions = np.zeros((0,0))
     fileName = []
     for file in glob.glob(folder+'/*.txt'):
-        R, good = readTestFile(file)
+        R, good = readTestFile(file, dP)
+        R = formatForCNN(R)
         if good:
             try:
-                predictions = np.vstack((predictions,getPredictions(R, model).flatten()))
+                predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
             except:
-                predictions = np.array([getPredictions(R, model).flatten()])
+                predictions = np.array([getPredictions(R, model,dP).flatten()])
             fileName.append(file)
 
     if dP.regressor:
@@ -590,157 +591,10 @@ def batchPredict(folder):
     df.to_csv(dP.summaryFileName, index=False, header=False)
     print(" Prediction summary saved in:",dP.summaryFileName,"\n")
 
-#************************************
-# Make prediction based on framework
-#************************************
-def getPredictions(R, model):
-    dP = Conf()
-       
-    if dP.useTFlitePred:
-        interpreter = model  #needed to keep consistency with documentation
-        # Get input and output tensors.
-        input_details = interpreter.get_input_details()
-        output_details = interpreter.get_output_details()
-
-        # Test model on random input data.
-        input_shape = input_details[0]['shape']
-        input_data = np.array(R, dtype=np.float32)
-        interpreter.set_tensor(input_details[0]['index'], input_data)
-        interpreter.invoke()
-
-        # The function `get_tensor()` returns a copy of the tensor data.
-        # Use `tensor()` in order to get a pointer to the tensor.
-        predictions = interpreter.get_tensor(output_details[0]['index'])
-        
-    else:
-        predictions = model.predict(R)
-    return predictions
-    
-#************************************
-# Load saved models
-#************************************
-def loadModel():
-    dP = Conf()
-    if dP.TFliteRuntime:
-        import tflite_runtime.interpreter as tflite
-        # model here is intended as interpreter
-        if dP.runCoralEdge:
-            print(" Running on Coral Edge TPU")
-            model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'_edgetpu.tflite',
-                experimental_delegates=[tflite.load_delegate(dP.edgeTPUSharedLib,{})])
-        else:
-            model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
-        model.allocate_tensors()
-    else:
-        import tensorflow as tf
-        if dP.useTFlitePred:
-            # model here is intended as interpreter
-            model = tf.lite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
-            model.allocate_tensors()
-        else:
-            model = tf.keras.models.load_model(dP.model_name)
-    return model
-
-#************************************
-# Open Learning Data
-#************************************
-def readLearnFile(learnFile):
-    print("\n  Opening learning file: ",learnFile)
-    try:
-        if os.path.splitext(learnFile)[1] == ".npy":
-            M = np.load(learnFile)
-        elif os.path.splitext(learnFile)[1] == ".h5":
-            with h5py.File(learnFile, 'r') as hf:
-                M = hf["M"][:]
-        else:
-            with open(learnFile, 'r') as f:
-                M = np.loadtxt(f, unpack =False)
-    except:
-        print("\033[1m Learning file not found\033[0m")
-        return
-
-    dP = Conf()
-    En = M[0,dP.numLabels:]
-    A = M[1:,dP.numLabels:]
-    
-    if dP.normalize:
-        norm = Normalizer()
-        A = norm.transform_matrix(A)
-
-    if dP.numLabels == 1:
-        Cl = M[1:,0]
-    else:
-        Cl = M[1:,[0,dP.numLabels-1]]
-
-    return En, A, Cl
-
-#************************************
-# Open Testing Data
-#************************************
-def readTestFile(testFile):
-    try:
-        with open(testFile, 'r') as f:
-            print('\n  Opening sample data for prediction:\n  ',testFile)
-            Rtot = np.loadtxt(f, unpack =True)
-        R = preProcess(Rtot)
-    except:
-        print("\033[1m\n File not found or corrupt\033[0m\n")
-        return 0, False
-    return R, True
-
-#************************************
-### Create Quantized tflite model
-#************************************
-def makeQuantizedTFmodel(A, model):
-    dP = Conf()
-    import tensorflow as tf
-    print("\n  Creating quantized TensorFlowLite Model...\n")
-    def representative_dataset_gen():
-        for i in range(A.shape[0]):
-            yield [A[i:i+1].astype(np.float32)]
-    try:
-        converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TensorFlow 2.x
-    except:
-        converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # TensorFlow 1.x
-
-    #converter.optimizations = [tf.lite.Optimize.DEFAULT]
-    converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
-    #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
-    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-    #converter.inference_input_type = tf.uint8
-    converter.inference_input_type = tf.float32
-    converter.inference_output_type = tf.uint8
-    converter.representative_dataset = representative_dataset_gen
-    tflite_quant_model = converter.convert()
-
-    with open(os.path.splitext(dP.model_name)[0]+'.tflite', 'wb') as o:
-        o.write(tflite_quant_model)
-
-#****************************************************
-# Check Energy Range and convert to fit training set
-#****************************************************
-def preProcess(Rtot):
-    dP = Conf()
-    En = pickle.loads(open(dP.spectral_range, "rb").read())
-    R = np.array([Rtot[1,:]])
-    Rx = np.array([Rtot[0,:]])
-    
-    if dP.normalize:
-        norm = Normalizer()
-        R = norm.transform_single(R)
-    
-    if(R.shape[1] != len(En)):
-        print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
-        R = np.interp(En, Rx[0], R[0])
-        R = R.reshape(1,-1)
-
-    R = formatForCNN(R,En)
-    return R
-
 #****************************************************
 # Format data for CNN
 #****************************************************
-def formatForCNN(A,En):
+def formatForCNN(A):
     listmatrix = []
     for i in range(A.shape[0]):
         spectra = np.dstack([A[i]])
@@ -774,32 +628,6 @@ def printParam():
     print('  Number of labels:', dP.numLabels)
     #print('  ================================================\n')
 
-
-#************************************
-# Plot Weights
-#************************************
-def plotWeights(En, A, model):
-    import matplotlib.pyplot as plt
-    plt.figure(tight_layout=True)
-    plotInd = 511
-    for layer in model.layers:
-        try:
-            w_layer = layer.get_weights()[0]
-            ax = plt.subplot(plotInd)
-            newX = np.arange(En[0], En[-1], (En[-1]-En[0])/w_layer.shape[0])
-            plt.plot(En, np.interp(En, newX, w_layer[:,0]), label=layer.get_config()['name'])
-            plt.legend(loc='upper right')
-            plt.setp(ax.get_xticklabels(), visible=False)
-            plotInd +=1
-        except:
-            pass
-
-    ax1 = plt.subplot(plotInd)
-    ax1.plot(En, A[0], label='Sample data')
-
-    plt.xlabel('Raman shift [1/cm]')
-    plt.legend(loc='upper right')
-    plt.savefig('model_CNN_weights' + '.png', dpi = 160, format = 'png')  # Save plot
 
 #************************************
 # Plot Activations in Predictions
@@ -870,17 +698,6 @@ def plotActivationsPredictions(R, model):
             display_activation(activations, activation_model.layers[i+1].name, dP.sizeColPlot, activation_model.layers[i+1].output_shape, i)
     except:
         pass
-
-#************************************
-# Get TensorFlow Version
-#************************************
-def getTFVersion():
-    import tensorflow as tf
-    from pkg_resources import parse_version
-    if Conf().useTFlitePred:
-        print(" TensorFlow (Lite) v.",parse_version(tf.version.VERSION) )
-    else:
-        print(" TensorFlow v.",parse_version(tf.version.VERSION) )
 
 #************************************
 # Lists the program usage
