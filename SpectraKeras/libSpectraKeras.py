@@ -113,6 +113,7 @@ def loadModel(dP):
             model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
         model.allocate_tensors()
     else:
+        getTFVersion(dP)
         import tensorflow as tf
         if dP.useTFlitePred:
             # model here is intended as interpreter
@@ -182,9 +183,9 @@ def getTFVersion(dP):
     import tensorflow as tf
     from pkg_resources import parse_version
     if dP.useTFlitePred:
-        print(" TensorFlow (Lite) v.",parse_version(tf.version.VERSION) )
+        print(" TensorFlow (Lite) v.",parse_version(tf.version.VERSION),"\n")
     else:
-        print(" TensorFlow v.",parse_version(tf.version.VERSION) )
+        print(" TensorFlow v.",parse_version(tf.version.VERSION),"\n" )
 
 #************************************
 # Normalizer

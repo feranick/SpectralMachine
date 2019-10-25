@@ -418,7 +418,7 @@ def train(learnFile, testFile, flag):
         print('  ========================================================')
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
         print("  \033[1mMean Abs Err\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_mae), np.amin(val_mae), val_mae[-1]))
-        print('  ========================================================')
+        print('  ========================================================\n')
         if testFile != None and dP.showValidPred:
             predictions = model.predict(A_test)
             print('  ========================================================')
@@ -450,7 +450,7 @@ def train(learnFile, testFile, flag):
         print("\n  \033[1mAccuracy\033[0m - Average: {0:.2f}%; Max: {1:.2f}%; Last: {2:.2f}%".format(100*np.average(val_acc),
         100*np.amax(val_acc), 100*val_acc[-1]))
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
-        print('  ========================================================')
+        print('  ========================================================\n')
         if testFile != None and dP.showValidPred:
             print("  Real class\t| Predicted class\t| Probability")
             print("  ---------------------------------------------------")
