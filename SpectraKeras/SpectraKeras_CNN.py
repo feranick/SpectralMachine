@@ -734,7 +734,6 @@ def preProcess(Rtot):
         R = np.interp(En, Rx[0], R[0])
         R = R.reshape(1,-1)
 
-    #R = np.array([np.dstack([np.dstack([np.ones(len(En)), En]), R])])
     R = formatForCNN(R,En)
     return R
 
@@ -744,9 +743,6 @@ def preProcess(Rtot):
 def formatForCNN(A,En):
     listmatrix = []
     for i in range(A.shape[0]):
-        #spectra = np.dstack([np.ones(En.shape[0]), En])
-        #spectra = np.dstack([spectra, A[i]])
-        #spectra = np.dstack([En, A[i]])
         spectra = np.dstack([A[i]])
         listmatrix.append(spectra)
     x = np.stack(listmatrix, axis=0)

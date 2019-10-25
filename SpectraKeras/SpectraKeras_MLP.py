@@ -651,7 +651,7 @@ def makeQuantizedTFmodel(A, model):
 #****************************************************
 # Check Energy Range and convert to fit training set
 #****************************************************
-def preprocess(Rtot):
+def preProcess(Rtot):
     dP = Conf()
     En = pickle.loads(open(dP.spectral_range, "rb").read())
     R = np.array([Rtot[1,:]])
