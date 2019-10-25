@@ -151,7 +151,7 @@ def main():
                 
         if o in ("-b" , "--batch"):
             try:
-                batchPredict(folder)
+                batchPredict(sys.argv[2])
             except:
                 usage()
                 sys.exit(2)
