@@ -46,14 +46,14 @@ def readLearnFile(learnFile, dP):
 # Open Testing Data
 #************************************
 def readTestFile(testFile, dP):
-    #try:
-    with open(testFile, 'r') as f:
-        print('\n  Opening sample data for prediction:\n  ',testFile)
-        Rtot = np.loadtxt(f, unpack =True)
-    R = preProcess(Rtot, dP)
-    #except:
-    #    print("\033[1m\n File not found or corrupt\033[0m\n")
-    #    return 0, False
+    try:
+        with open(testFile, 'r') as f:
+            print('\n  Opening sample data for prediction:\n  ',testFile)
+            Rtot = np.loadtxt(f, unpack =True)
+        R = preProcess(Rtot, dP)
+    except:
+        print("\033[1m\n File not found or corrupt\033[0m\n")
+        return 0, False
     return R, True
     
 #****************************************************
