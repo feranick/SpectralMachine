@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20191025d
+* 20191025e
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -544,8 +544,8 @@ def batchPredict(folder):
     fileName = []
     for file in glob.glob(folder+'/*.txt'):
         R, good = readTestFile(file, dP)
-        R = formatForCNN(R)
         if good:
+            R = formatForCNN(R)
             try:
                 predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
             except:
