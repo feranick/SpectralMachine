@@ -318,12 +318,12 @@ def train(learnFile, testFile, flag):
         model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
             activation='relu',
             input_shape=x_train[0].shape))
-        model.add(keras.layers.Dropout(dP.dropCNN[i]))
         try:
             model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling[i])))
         except:
             print("  WARNING: Pooling layer is larger than last convolution layer\n  Aborting\n")
             return
+        model.add(keras.layers.Dropout(dP.dropCNN[i]))
     '''
     try:
         model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
