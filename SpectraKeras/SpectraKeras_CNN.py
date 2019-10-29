@@ -73,7 +73,7 @@ class Conf():
             'batch_size' : 64,
             'numLabels' : 1,
             'plotWeightsFlag' : False,
-            'plotActivations' : False,
+            'plotActivations' : True,
             'showValidPred' : False,
             }
 
