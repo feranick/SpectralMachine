@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20191025e
+* 20191029a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -50,7 +50,7 @@ class Conf():
         
         self.actPlotTrain = self.model_directory+"/model_CNN_conv1d-activations.png"
         self.actPlotPredict = self.model_directory+"/model_CNN_activations_"
-        self.sizeColPlot = 1
+        self.sizeColPlot = 4
     
         self.edgeTPUSharedLib = "libedgetpu.so.1"
             
@@ -147,14 +147,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            try:
-                if len(sys.argv)<4:
-                    train(sys.argv[2], None, False)
-                else:
-                    train(sys.argv[2], sys.argv[3], False)
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            if len(sys.argv)<4:
+                train(sys.argv[2], None, False)
+            else:
+                train(sys.argv[2], sys.argv[3], False)
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-n" , "--net"):
             try:
@@ -628,33 +628,25 @@ def printParam():
     print('  Number of labels:', dP.numLabels)
     #print('  ================================================\n')
 
-
 #************************************
 # Plot Activations in Predictions
 #************************************
 def plotActivationsTrain(model):
+    import matplotlib.pyplot as plt
     dP = Conf()
+    weight_conv2d_1 = model.layers[0].get_weights()[0][:,:,0,:]
     col_size = dP.sizeColPlot
-    row_size = int(dP.CL_filter[0])
-    if row_size > 1:
-        import matplotlib.pyplot as plt
-        weight_conv2d_1 = model.layers[0].get_weights()[0][:,:,0,:]
-        filter_index = 0
-        fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*3,col_size*3))
-    
-        for row in range(0,row_size):
-            ax[row].plot(weight_conv2d_1[:,:,filter_index][0])
+    row_size = int(dP.CL_filter[0]/dP.sizeColPlot)
+    filter_index = 0
+    fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*3,col_size*3))
+
+    for row in range(0,row_size):
+        for col in range(0,col_size):
+            #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
+            ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
             filter_index += 1
-            plt.savefig(dP.actPlotTrain, dpi = 160, format = 'png')  # Save plot
-        '''
-        for row in range(0,row_size):
-            for col in range(0,col_size):
-                #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
-                ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
-                filter_index += 1
-        '''
-        #plt.show()
-        plt.savefig(dP.actPlotTrain, dpi = 160, format = 'png')  # Save plot
+    #plt.show()
+    plt.savefig(dP.actPlotTrain, dpi = 160, format = 'png')  # Save plot
     
 #************************************
 # Plot Activations in Predictions
