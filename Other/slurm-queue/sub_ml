@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 #use the script as follows:
 # sbatch sub_ml <trainFile> <testFile>
 
