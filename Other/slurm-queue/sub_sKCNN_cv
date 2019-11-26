@@ -1,0 +1,29 @@
+!/bin/bash
+#use the script as follows:
+# sbatch sub_ml <trainFile> <testFile>
+
+#SBATCH --nodes=1                  # Request 2 nodes
+#SBATCH -t 100:00:00                # Request 12 hours in walltime.
+#SBATCH --job-name=test           # Job name
+#SBATCH -o log_output              # output file
+#SBATCH -e log_error               # error file
+#SBATCH --ntasks=1                # total number of cores required. Nodes*24
+#SBATCH --export=ALL
+
+# Load environment modules
+#. /usr/share/Modules/init/bash
+
+#execdir="/home/nicola/exec/bin/"
+#basepy=$execdir/python3
+
+#base=${PWD}
+
+logname="log_"${PWD##*/}".txt"
+
+# Use argument specific cross validation file:
+#SpectraKeras_CNN -a $base/$1 $base/$2 2>&1 | tee -a $logname
+#SpectraKeras_CNN -a $1 $2 2>&1 | tee -a $logname
+
+# Use randomly created cross validation dataset:
+#SpectraKeras_CNN -a $base/$1 2>&1 | tee -a $logname
+SpectraKeras_CNN -a $1 2>&1 | tee -a $logname
