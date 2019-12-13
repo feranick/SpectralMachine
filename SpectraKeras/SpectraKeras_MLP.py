@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20191029a
+* 20191212a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -195,9 +195,9 @@ def train(learnFile, testFile):
         def_val_acc = 'val_accuracy'
     
     else:
-        #conf.gpu_options.allow_growth = True
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)
+        conf.gpu_options.allow_growth = True
     
         tf.compat.v1.Session(config=conf)
         
