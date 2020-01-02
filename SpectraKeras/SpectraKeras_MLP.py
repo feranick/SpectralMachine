@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20191212a
+* 20200102a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -335,6 +335,8 @@ def train(learnFile, testFile):
     print('  =============================================')
 
     print("  Training set file:",learnFile)
+    if testFile != None:
+        print("  Validation set file:",testFile)
     print("  Data size:", A.shape,"\n")
     print("  Number of learning labels:",dP.numLabels)
     print("  Total number of points per data:",En.size)
