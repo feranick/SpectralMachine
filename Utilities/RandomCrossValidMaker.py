@@ -6,7 +6,7 @@
 * Create Random Cross Validation Datasets
 * Train + Test
 *
-* version: 20180726a
+* version: 20200102a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -83,8 +83,12 @@ def writeFile(File, En, A, Cl):
     print(' Number of datapoints:', str(A.shape[0]))
     
     newMatrix = np.append([0], En).reshape(1,-1)
-    for i in range(len(Cl)):
-        newMatrix = np.vstack((newMatrix, np.append(Cl[i], A[i])))
+    
+    temp = np.hstack((Cl[np.newaxis].T, A))
+    newMatrix = np.vstack((newMatrix, temp))
+
+    #for i in range(len(Cl)):
+    #    newMatrix = np.vstack((newMatrix, np.append(Cl[i], A[i])))
     
     if defParam.saveAsTxt == True:
         with open(File, 'ab') as f:
