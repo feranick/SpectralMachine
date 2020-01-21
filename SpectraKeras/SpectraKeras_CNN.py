@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200113a
+* 20200121a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -189,10 +189,6 @@ def main():
 #************************************
 def train(learnFile, testFile, flag):
     dP = Conf()
-    
-    def_mae = 'mae'
-    def_val_mae = 'val_mae'
-    
     import tensorflow as tf
     import tensorflow.keras as keras
     from pkg_resources import parse_version
@@ -215,20 +211,12 @@ def train(learnFile, testFile, flag):
         #         gpus[0],
         #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
         
-        def_acc = 'accuracy'
-        def_val_acc = 'val_accuracy'
-    
     else:
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)
         conf.gpu_options.allow_growth = True
         
         tf.compat.v1.Session(config=conf)
-        
-        def_mae = 'mean_absolute_error'
-        def_val_mae = 'val_mean_absolute_error'
-        def_acc = 'acc'
-        def_val_acc = 'val_acc'
         
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
@@ -409,6 +397,7 @@ def train(learnFile, testFile, flag):
     val_loss = np.asarray(log.history['val_loss'])
 
     if dP.regressor:
+        def_mae, def_val_mae = [list(log.history)[i] for i in (1,3)]
         val_mae = np.asarray(log.history[def_val_mae])
         printParam()
         print('\n  ==========================================================')
@@ -432,6 +421,7 @@ def train(learnFile, testFile, flag):
                     predictions[i][0], score[0], score[1]))
             print('\n  ==========================================================\n')
     else:
+        def_acc, def_val_acc = [list(log.history)[i] for i in (1,3)]
         accuracy = np.asarray(log.history[def_acc])
         val_acc = np.asarray(log.history[def_val_acc])
         print("  Number unique classes (training): ", np.unique(Cl).size)
