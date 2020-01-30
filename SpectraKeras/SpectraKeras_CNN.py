@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200121a
+* 20200130a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -11,7 +11,8 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, getopt, time, configparser, pickle, h5py, csv, glob
+import sys, os.path, getopt, time, configparser
+import platform, pickle, h5py, csv, glob
 from libSpectraKeras import *
 
 #***************************************************
@@ -52,7 +53,12 @@ class Conf():
         self.actPlotPredict = self.model_directory+"/model_CNN_activations_"
         self.sizeColPlot = 4
     
-        self.edgeTPUSharedLib = "libedgetpu.so.1"
+        if platform.system() == 'Linux':
+            self.edgeTPUSharedLib = "libedgetpu.so.1"
+        if platform.system() == 'Darwin':
+            self.edgeTPUSharedLib = "libedgetpu.1.dylib"
+        if platform.system() == 'Windows':
+            self.edgeTPUSharedLib = "edgetpu.dll"
             
     def SKDef(self):
         self.conf['Parameters'] = {
