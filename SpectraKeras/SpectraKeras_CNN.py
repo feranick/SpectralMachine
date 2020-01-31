@@ -63,7 +63,7 @@ class Conf():
     def SKDef(self):
         self.conf['Parameters'] = {
             'regressor' : False,
-            'normalize' : False,
+            'normalize' : True,
             'l_rate' : 0.001,
             'l_rdecay' : 1e-4,
             'CL_filter' : [1],
@@ -79,7 +79,7 @@ class Conf():
             'batch_size' : 64,
             'numLabels' : 1,
             'plotWeightsFlag' : False,
-            'plotActivations' : True,
+            'plotActivations' : False,
             'showValidPred' : False,
             }
 
