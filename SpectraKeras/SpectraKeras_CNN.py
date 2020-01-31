@@ -142,7 +142,7 @@ def main():
     
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "tnpblh:", ["train", "net", "predict", "batch", "lite","help"])
+                                   "tnpblh:", ["train", "net", "predict", "batch", "lite", "help"])
     except:
         usage()
         sys.exit(2)

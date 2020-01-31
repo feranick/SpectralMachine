@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20200130b
+* 20200131a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -59,7 +59,7 @@ class Conf():
     def SKDef(self):
         self.conf['Parameters'] = {
             'regressor' : False,
-            'normalize' : False,
+            'normalize' : True,
             'l_rate' : 0.001,
             'l_rdecay' : 1e-4,
             'HL' : [20,30,40,50,60,70],
@@ -128,7 +128,7 @@ def main():
     
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "tpbh:", ["train", "predict", "batch", "help"])
+                                   "tpblh:", ["train", "predict", "lite", "batch", "help"])
     except:
         usage()
         sys.exit(2)
@@ -161,6 +161,13 @@ def main():
             except:
                 usage()
                 sys.exit(2)
+        
+        if o in ("-l" , "--lite"):
+            try:
+                convertTflite(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
 
     total_time = time.perf_counter() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -172,6 +179,7 @@ def main():
 def train(learnFile, testFile):
     dP = Conf()
     import tensorflow as tf
+    tf.enable_eager_execution()
     import tensorflow.keras as keras
     from pkg_resources import parse_version
 
@@ -520,6 +528,21 @@ def batchPredict(folder):
     df.to_csv(dP.summaryFileName, index=False, header=False)
     print(" Prediction summary saved in:",dP.summaryFileName,"\n")
 
+#****************************************************
+# Convert model to quantized TFlite
+#****************************************************
+def convertTflite(learnFile):
+    dP = Conf()
+    dP.useTFlitePred = False
+    dP.TFliteRuntime = False
+    dP.runCoralEdge = False
+    import tensorflow as tf
+    tf.enable_eager_execution()
+    learnFileRoot = os.path.splitext(learnFile)[0]
+    En, A, Cl = readLearnFile(learnFile, dP)
+    model = loadModel(dP)
+    makeQuantizedTFmodel(A, model, dP)
+
 #************************************
 # Print NN Info
 #************************************
@@ -555,6 +578,8 @@ def usage():
     print('  python3 SpectraKeras_MLP.py -p <testFile>\n')
     print(' Batch predict:')
     print('  python3 SpectraKeras_MLP.py -b <folder>\n')
+    print(' Convert model to quantized tflite:')
+    print('  python3 SpectraKeras_CNN.py -l <learningFile>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
