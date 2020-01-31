@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200131a
+* 20200131b
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -202,10 +202,9 @@ def main():
 #************************************
 def train(learnFile, testFile, flag):
     dP = Conf()
-    import tensorflow as tf
-    tf.enable_eager_execution()
-    import tensorflow.keras as keras
+    
     from pkg_resources import parse_version
+    import tensorflow as tf
 
     if parse_version(tf.version.VERSION) < parse_version('2.0.0'):
         useTF2 = False
@@ -226,11 +225,14 @@ def train(learnFile, testFile, flag):
         #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
         
     else:
+        tf.compat.v1.enable_eager_execution()
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)
         conf.gpu_options.allow_growth = True
         
         tf.compat.v1.Session(config=conf)
+    
+    import tensorflow.keras as keras
         
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
@@ -605,8 +607,10 @@ def convertTflite(learnFile):
     dP.useTFlitePred = False
     dP.TFliteRuntime = False
     dP.runCoralEdge = False
+    from pkg_resources import parse_version
     import tensorflow as tf
-    tf.enable_eager_execution()
+    if parse_version(tf.version.VERSION) < parse_version('2.0.0'):
+        tf.compat.v1.enable_eager_execution()
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
     model = loadModel(dP)
