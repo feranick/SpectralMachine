@@ -173,18 +173,18 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            try:
-                predict(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            predict(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
                 
         if o in ("-b" , "--batch"):
-            try:
-                batchPredict(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            batchPredict(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-l" , "--lite"):
             #try:
@@ -601,8 +601,10 @@ def batchPredict(folder):
 #****************************************************
 def convertTflite(learnFile):
     dP = Conf()
+    dP.useTFlitePred = False
+    dP.TFliteRuntime = False
+    dP.runCoralEdge = False
     import tensorflow as tf
-    import tensorflow.keras as keras
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
     model = loadModel(dP)

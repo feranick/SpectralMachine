@@ -132,6 +132,7 @@ def makeQuantizedTFmodel(A, model, dP):
     def representative_dataset_gen():
         for i in range(A.shape[0]):
             yield [A[i:i+1].astype(np.float32)]
+            #yield [A[i:i+1].astype(np.uint8)]
     try:
         converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TensorFlow 2.x
     except:
@@ -141,8 +142,8 @@ def makeQuantizedTFmodel(A, model, dP):
     converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
     #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-    converter.inference_input_type = tf.uint8
-    #converter.inference_input_type = tf.float32
+    #converter.inference_input_type = tf.uint8
+    converter.inference_input_type = tf.float32
     converter.inference_output_type = tf.uint8
     converter.representative_dataset = representative_dataset_gen
     tflite_quant_model = converter.convert()
