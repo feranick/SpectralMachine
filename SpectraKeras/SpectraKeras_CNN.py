@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200130b
+* 20200131a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -142,7 +142,7 @@ def main():
     
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "tnpbh:", ["train", "net", "predict", "batch", "help"])
+                                   "tnpblh:", ["train", "net", "predict", "batch", "lite","help"])
     except:
         usage()
         sys.exit(2)
@@ -185,6 +185,13 @@ def main():
             except:
                 usage()
                 sys.exit(2)
+
+        if o in ("-l" , "--lite"):
+            #try:
+            convertTflite(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
     total_time = time.perf_counter() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -590,6 +597,19 @@ def batchPredict(folder):
     print(" Prediction summary saved in:",dP.summaryFileName,"\n")
 
 #****************************************************
+# Convert model to quantized TFlite
+#****************************************************
+def convertTflite(learnFile):
+    dP = Conf()
+    import tensorflow as tf
+    import tensorflow.keras as keras
+    learnFileRoot = os.path.splitext(learnFile)[0]
+    En, A, Cl = readLearnFile(learnFile, dP)
+    model = loadModel(dP)
+    x_train = formatForCNN(A)
+    makeQuantizedTFmodel(x_train, model, dP)
+    
+#****************************************************
 # Format data for CNN
 #****************************************************
 def formatForCNN(A):
@@ -704,6 +724,8 @@ def usage():
     print('  python3 SpectraKeras_CNN.py -b <folder>\n')
     print(' Display Neural Network Configuration:')
     print('  python3 SpectraKeras_CNN.py -n <learningFile>\n')
+    print(' Convert model to quantized tflite:')
+    print('  python3 SpectraKeras_CNN.py -l <learningFile>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
