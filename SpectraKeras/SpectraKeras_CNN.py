@@ -153,14 +153,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            #try:
-            if len(sys.argv)<4:
-                train(sys.argv[2], None, False)
-            else:
-                train(sys.argv[2], sys.argv[3], False)
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                if len(sys.argv)<4:
+                    train(sys.argv[2], None, False)
+                else:
+                    train(sys.argv[2], sys.argv[3], False)
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-n" , "--net"):
             try:
@@ -173,25 +173,25 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            predict(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
-                
+            try:
+                predict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
+            
         if o in ("-b" , "--batch"):
-            #try:
-            batchPredict(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                batchPredict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-l" , "--lite"):
-            #try:
-            convertTflite(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                convertTflite(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
 
     total_time = time.perf_counter() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -203,6 +203,7 @@ def main():
 def train(learnFile, testFile, flag):
     dP = Conf()
     import tensorflow as tf
+    tf.enable_eager_execution()
     import tensorflow.keras as keras
     from pkg_resources import parse_version
 
@@ -605,6 +606,7 @@ def convertTflite(learnFile):
     dP.TFliteRuntime = False
     dP.runCoralEdge = False
     import tensorflow as tf
+    tf.enable_eager_execution()
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
     model = loadModel(dP)

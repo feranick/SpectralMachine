@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20200130b
+* 20200131a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -129,23 +129,35 @@ def loadModel(dP):
 def makeQuantizedTFmodel(A, model, dP):
     import tensorflow as tf
     print("\n  Creating quantized TensorFlowLite Model...\n")
+    
+    A2 = tf.cast(A, tf.float32)
+    A = tf.data.Dataset.from_tensor_slices((A2)).batch(1)
+    
     def representative_dataset_gen():
-        for i in range(A.shape[0]):
-            yield [A[i:i+1].astype(np.float32)]
-            #yield [A[i:i+1].astype(np.uint8)]
+        for input_value in A.take(100):
+            yield[input_value]
+    
+    ''' # Previous version
+    def representative_dataset_gen():
+        #for i in range(A.shape[0]):
+            #yield [A[i:i+1].astype(np.float32)]
+    '''
+
     try:
         converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TensorFlow 2.x
     except:
         converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # TensorFlow 1.x
 
-    #converter.optimizations = [tf.lite.Optimize.DEFAULT]
-    converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
+    print(converter.get_input_arrays())
+
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
     #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+    converter.representative_dataset = representative_dataset_gen
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
     #converter.inference_input_type = tf.uint8
     converter.inference_input_type = tf.float32
     converter.inference_output_type = tf.uint8
-    converter.representative_dataset = representative_dataset_gen
     tflite_quant_model = converter.convert()
 
     with open(os.path.splitext(dP.model_name)[0]+'.tflite', 'wb') as o:
