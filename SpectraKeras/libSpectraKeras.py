@@ -86,7 +86,7 @@ def getPredictions(R, model, dP):
 
         # Test model on random input data.
         input_shape = input_details[0]['shape']
-        input_data = np.array(R, dtype=np.float32)
+        input_data = np.array(R, dtype=np.uint8)
         interpreter.set_tensor(input_details[0]['index'], input_data)
         interpreter.invoke()
 
@@ -155,8 +155,7 @@ def makeQuantizedTFmodel(A, model, dP):
     #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
     converter.representative_dataset = representative_dataset_gen
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-    #converter.inference_input_type = tf.uint8
-    converter.inference_input_type = tf.float32
+    converter.inference_input_type = tf.uint8
     converter.inference_output_type = tf.uint8
     tflite_quant_model = converter.convert()
 
