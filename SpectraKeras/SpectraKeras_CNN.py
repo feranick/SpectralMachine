@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200131b
+* 20200131b-test20200201a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -180,11 +180,11 @@ def main():
                 sys.exit(2)
             
         if o in ("-b" , "--batch"):
-            try:
-                batchPredict(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            batchPredict(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-l" , "--lite"):
             try:
@@ -549,17 +549,21 @@ def batchPredict(folder):
     model = loadModel(dP)
 
     predictions = np.zeros((0,0))
+    T = np.zeros((1090,0))
     fileName = []
     for file in glob.glob(folder+'/*.txt'):
         R, good = readTestFile(file, dP)
         if good:
             R = formatForCNN(R)
-            try:
-                predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
-            except:
-                predictions = np.array([getPredictions(R, model,dP).flatten()])
-            fileName.append(file)
-
+            T = np.hstack((T,R[0][0]))
+    for i in range(T.shape[1]):
+        try:
+            predictions = np.vstack((predictions,getPredictions([[T[:,[i]]]], model, dP).flatten()))
+        except:
+            predictions = np.array([getPredictions([[T[:,[i]]]], model,dP).flatten()])
+        fileName.append(file)
+        
+    
     if dP.regressor:
         summaryFile = np.array([['SpectraKeras_CNN','Regressor','',],['File name','Prediction','']])
         print('\n  ========================================================')
@@ -598,6 +602,7 @@ def batchPredict(folder):
     df = pd.DataFrame(summaryFile)
     df.to_csv(dP.summaryFileName, index=False, header=False)
     print(" Prediction summary saved in:",dP.summaryFileName,"\n")
+    
 
 #****************************************************
 # Convert model to quantized TFlite
