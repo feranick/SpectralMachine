@@ -1,22 +1,27 @@
-# SpectralMachine and SpectraKeras
-Machine learning software for rapid Spectral analysis. While Raman spectra were the initilal focus, SpectralMachine is flexible to be applied for classification using any spectra (from XRD, FTIR and beyond).
-The current version 2 is the stable and recommended for use. Version 1 is no longer supported.
-SpectralMachine is in long-term maintenance mode. No new features will be added and development is now focused on SpectraKeras
+# SpectralMachine
+Machine learning software for rapid spectral analysis. While Raman spectra were the initilal focus, SpectralMachine is flexible to be applied for classification using any spectra (from XRD, FTIR and beyond). The latest and supporrted software within SpectralMachine is SpectraKeras. The previous generation (SpectraLearnPredict) is no longer developed. 
 
-**Supported algorithms: (SpectraKeras)**
-- DNNClassifier (TensorFlow 
-- Convolutional Neural Networks (TensorFlow)
+**SpectraKeras**
+- Currently supported ML architectures:
+   - DNNClassifier (TensorFlow, TensorFlow-Lite)
+   - Convolutional Neural Networks (TensorFlow-Lite)
+- Prediction:
+   - tensorflow
+   - tensorflow-lite
+   - [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
+   - tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
 
-**Supported algorithms: (SpectralMachine)**
+**Previous version: SpectralLearnPredict**
+- This is deprecated and no longer developed.
  - Deep Neural Networks:
    - multi-layer perceptron (MLP) (L-BFGS Optimizer strongly recommended)
    - DNNClassifier (TensorFlow and keras)
    - Convolutional Neural Networks (Under development - via keras)
  - Support Vector Machine - SVM
  - TensorFlow (basic implementation)
-**Additional multivariate analysis:**
-- K-Means
-- Principal component analysis
+ - Additional multivariate analysis
+   - K-Means
+   - Principal component analysis
 
 Credits and References
 ==================
@@ -37,6 +42,8 @@ This software requires Python (3.3 or higher). It has been tested with Python 3.
     pydot
     graphviz
     h5py
+    tensorflow
+    
     
 In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
     
@@ -45,7 +52,9 @@ In addition, these packages may be needed depending on your platform (via ```apt
 
 These are found in Unix based systems using common repositories (apt-get for Debian/Ubuntu Linux, or MacPorts for MacOS). More details in the [scikit-learn installation page](http://scikit-learn.org/stable/install.html).
 
-[TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow v.1.14+. Support for TensorFlow 2.x is present and will be the main supported platform going forward after the release of TF 2.0.
+[TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow v.1.15+. Support for TensorFlow 2.x is present and will be the main supported platform going forward after the release of TF 2.0.
+
+Prediction can be carried out using the regular tensorflow, or using [tensorflow-lite](https://www.tensorflow.org/lite/) for [quantized models](https://www.tensorflow.org/lite/performance/post_training_quantization). Loading times of tflite (direct or via [tflite-runtime](https://www.tensorflow.org/lite/guide/python)) are significantly faster than tensorflow with minimal loss in accuracy. SpectraKeras provides an option to convert tensorflow models to quantized tflite models. TFlite models have been tested in Linux x86-64, arm7 (including Raspberry Pi3) and aarm64, MacOS, Windows. 
 
 Usage (SpectraKeras)
 ===================
@@ -64,9 +73,13 @@ Predict:
 
     python3 SpectraKeras_MLP.py -p <testFile>
     
-Batch predict:')
+Batch predict:
     
-    python3 SpectraKeras_MLP.py -b
+    python3 SpectraKeras_MLP.py -b <folder>
+    
+Convert model to quantized tflite:
+    
+    python3 SpectraKeras_CNN.py -l <learningFile>
 
 ## SpectraKeras_CNN
 
@@ -84,11 +97,15 @@ Predict:
     
 Batch predict:
 
-    python3 SpectraKeras_CNN.py -b
+    python3 SpectraKeras_CNN.py -b <folder>
 
 Display Neural Netwrok Configuration:
     
     python3 SpectraKeras_CNN.py -n <learningFile>
+    
+Convert model to quantized tflite:
+    
+    python3 SpectraKeras_CNN.py -l <learningFile>
     
 
 Usage (SpectralMachine)
