@@ -148,8 +148,6 @@ def makeQuantizedTFmodel(A, model, dP):
     except:
         converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # TensorFlow 1.x
 
-    print(converter.get_input_arrays())
-
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
     #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
