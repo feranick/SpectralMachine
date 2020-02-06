@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20200131b
+* 20200205a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -87,6 +87,7 @@ def getPredictions(R, model, dP):
         # Test model on random input data.
         input_shape = input_details[0]['shape']
         input_data = np.array(R, dtype=np.uint8)
+        #input_data = np.array(R, dtype=np.float32)
         interpreter.set_tensor(input_details[0]['index'], input_data)
         interpreter.invoke()
 
@@ -144,7 +145,8 @@ def makeQuantizedTFmodel(A, model, dP):
     '''
 
     try:
-        converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TensorFlow 2.x
+        converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TensorFlow 2.x
+        #converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TensorFlow 2.x
     except:
         converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # TensorFlow 1.x
 
