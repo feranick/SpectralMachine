@@ -138,12 +138,6 @@ def makeQuantizedTFmodel(A, model, dP):
         for input_value in A.take(100):
             yield[input_value]
     
-    ''' # Previous version
-    def representative_dataset_gen():
-        #for i in range(A.shape[0]):
-            #yield [A[i:i+1].astype(np.float32)]
-    '''
-
     try:
         converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TF2.x
         #converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.x only. Does not support EdgeTPU
