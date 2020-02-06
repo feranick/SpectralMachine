@@ -86,8 +86,8 @@ def getPredictions(R, model, dP):
 
         # Test model on random input data.
         input_shape = input_details[0]['shape']
-        input_data = np.array(R, dtype=np.uint8)
-        #input_data = np.array(R, dtype=np.float32)
+        input_data = np.array(R, dtype=np.uint8)     # Disable this for correct prediction in TF1.x
+        #input_data = np.array(R, dtype=np.float32)  # Enable this for correct prediction in TF2.x (not fully on EdgeTPU)
         interpreter.set_tensor(input_details[0]['index'], input_data)
         interpreter.invoke()
 
@@ -146,13 +146,13 @@ def makeQuantizedTFmodel(A, model, dP):
 
     try:
         converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TensorFlow 2.x
-        #converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TensorFlow 2.x
+        #converter = tf.lite.TFLiteConverter.from_keras_model(model)    # Enable this for correct prediction in TF2.x (not fully on EdgeTPU)
     except:
         converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # TensorFlow 1.x
 
-    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    #converter.optimizations = [tf.lite.Optimize.DEFAULT]
     #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
-    #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+    converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
     converter.representative_dataset = representative_dataset_gen
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
     converter.inference_input_type = tf.uint8
