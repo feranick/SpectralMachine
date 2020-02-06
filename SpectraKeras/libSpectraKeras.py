@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20200205a
+* 20200206a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -73,31 +73,6 @@ def preProcess(Rtot, dP):
         R = np.interp(En, Rx[0], R[0])
         R = R.reshape(1,-1)
     return R
-    
-#************************************
-# Make prediction based on framework
-#************************************
-def getPredictions(R, model, dP):
-    if dP.useTFlitePred:
-        interpreter = model  #needed to keep consistency with documentation
-        # Get input and output tensors.
-        input_details = interpreter.get_input_details()
-        output_details = interpreter.get_output_details()
-
-        # Test model on random input data.
-        input_shape = input_details[0]['shape']
-        input_data = np.array(R, dtype=np.uint8)     # Disable this for correct prediction in TF1.x
-        #input_data = np.array(R, dtype=np.float32)  # Enable this for correct prediction in TF2.x (not fully on EdgeTPU)
-        interpreter.set_tensor(input_details[0]['index'], input_data)
-        interpreter.invoke()
-
-        # The function `get_tensor()` returns a copy of the tensor data.
-        # Use `tensor()` in order to get a pointer to the tensor.
-        predictions = interpreter.get_tensor(output_details[0]['index'])
-        
-    else:
-        predictions = model.predict(R)
-    return predictions
 
 #************************************
 # Load saved models
@@ -125,6 +100,31 @@ def loadModel(dP):
     return model
 
 #************************************
+# Make prediction based on framework
+#************************************
+def getPredictions(R, model, dP):
+    if dP.useTFlitePred:
+        interpreter = model  #needed to keep consistency with documentation
+        # Get input and output tensors.
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+
+        # Test model on random input data.
+        input_shape = input_details[0]['shape']
+        input_data = np.array(R*255, dtype=np.uint8) # Disable this for TF1.x
+        #input_data = np.array(R, dtype=np.float32)  # Enable this for TF2.x (not compatible with on EdgeTPU)
+        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.invoke()
+
+        # The function `get_tensor()` returns a copy of the tensor data.
+        # Use `tensor()` in order to get a pointer to the tensor.
+        predictions = interpreter.get_tensor(output_details[0]['index'])
+        
+    else:
+        predictions = model.predict(R)
+    return predictions
+
+#************************************
 ### Create Quantized tflite model
 #************************************
 def makeQuantizedTFmodel(A, model, dP):
@@ -145,10 +145,10 @@ def makeQuantizedTFmodel(A, model, dP):
     '''
 
     try:
-        converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TensorFlow 2.x
-        #converter = tf.lite.TFLiteConverter.from_keras_model(model)    # Enable this for correct prediction in TF2.x (not fully on EdgeTPU)
+        converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TF2.x
+        #converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.x only. Does not support EdgeTPU
     except:
-        converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # TensorFlow 1.x
+        converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # T1.x
 
     #converter.optimizations = [tf.lite.Optimize.DEFAULT]
     #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
