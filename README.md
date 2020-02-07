@@ -59,28 +59,6 @@ Prediction can be carried out using the regular tensorflow, or using [tensorflow
 Usage (SpectraKeras)
 ===================
 
-## SpectraKeras_MLP
-
-Train (Random cross validation):
-
-    python3 SpectraKeras_MLP.py -t <learningFile>
-    
-Train (with external validation):
-
-    python3 SpectraKeras_MLP.py -t <learningFile> <validationFile>
-    
-Predict:
-
-    python3 SpectraKeras_MLP.py -p <testFile>
-    
-Batch predict:
-    
-    python3 SpectraKeras_MLP.py -b <folder>
-    
-Convert model to quantized tflite:
-    
-    python3 SpectraKeras_CNN.py -l <learningFile>
-
 ## SpectraKeras_CNN
 
 Train (Random cross validation):
@@ -107,8 +85,37 @@ Convert model to quantized tflite:
     
     python3 SpectraKeras_CNN.py -l <learningFile>
     
+Determine accuracy using h5 testing file with spectra:
 
-Usage (SpectralMachine)
+    python3 SpectraKeras_CNN.py -a <testFile>
+    
+## SpectraKeras_MLP
+
+Train (Random cross validation):
+
+    python3 SpectraKeras_MLP.py -t <learningFile>
+        
+Train (with external validation):
+
+    python3 SpectraKeras_MLP.py -t <learningFile> <validationFile>
+        
+Predict:
+
+    python3 SpectraKeras_MLP.py -p <testFile>
+        
+Batch predict:
+        
+    python3 SpectraKeras_MLP.py -b <folder>
+        
+Convert model to quantized tflite:
+        
+    python3 SpectraKeras_MLP.py -l <learningFile>
+        
+Determine accuracy using h5 testing file with spectra:
+
+    python3 SpectraKeras_MLP.py -a <testFile>
+
+Usage (SpectralMachine) - Deprecated
 ===================
 
 Single files: 
@@ -168,43 +175,6 @@ Accuracy is increased to 80.4% with a single training run (100 times 30% of the 
 One can optimize/minimize the number of spectra with added noise. Adding only 2 data-sets with noise offset at 0.02 converges the accuracy to about 94.6%. 
 
 **One final word of caution**: Increasing the number of statistically independent available spectra for training is recommended over adding noisy data. 
-
-Optimizers
-==========
-## [MLPClassifier - sklearn](http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html):
-- lbfgs is an optimizer in the family of [quasi-Newton methods](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm)
-- sgd, refers to stochastic gradient descent.
-- adam refers to a stochastic gradient-based optimizer
-
-## [DNNClassifier - TensorFlow](https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier)[Optimizers](https://www.tensorflow.org/api_guides/python/train)
-- Adagrad (default)
-- Adam
-- Ftrl
-- Momentum
-- RMSProp
-- SGD
-
-Activation functions
-====================
-
-## [MLPClassifier - sklearn](http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html):
-- identity, no-op activation, useful to implement linear bottleneck, returns f(x) = x
-- logistic, the logistic sigmoid function, returns f(x) = 1 / (1 + exp(-x)).
-- tanh, the hyperbolic tan function, returns f(x) = tanh(x).
-- relu, the rectified linear unit function, returns f(x) = max(0, x)
-- leaky_relu: tf.nn.relu(x) - alpha * tf.nn.relu(-x)   -  Alpha = 0.2
-
-## [DNNClassifier - TensorFlow](https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier) [Activation Functions](https://www.tensorflow.org/api_guides/python/nn):
-- relu, rectified linear: max(features, 0)
-- relu6, rectified linear 6: min(max(features, 0), 6)
-- crelu, concatenated ReLU. Concatenates a ReLU which selects only the positive part of the activation with a ReLU which selects only the negative part of the activation. 
-- elu, exponential linear: exp(features) - 1 if < 0, features otherwise.
-- softplus, log(exp(features) + 1)
-- softsign, features / (abs(features) + 1)
-- dropout
-- bias_add, bias to value
-- sigmoid, sigmoid of x element-wise, y = 1 / (1 + exp(-x))
-- tanh, hyperbolic tangent of x element-wise
 
 More on Machine Learning tools used
 ====================================
