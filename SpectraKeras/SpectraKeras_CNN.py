@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200206a
+* 20200207a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -42,6 +42,7 @@ class Conf():
         else:
             self.modelName = "model_classifier_CNN.hd5"
             self.summaryFileName = "summary_classifier_CNN.csv"
+            self.summaryAccFileName = "summary_classifier_CNN_accuracy.csv"
             self.model_png = self.model_directory+"/model_classifier_CNN.png"
     
         self.tb_directory = "model_CNN"
@@ -142,7 +143,7 @@ def main():
     
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "tnpblh:", ["train", "net", "predict", "batch", "lite", "help"])
+                                   "tnpblah:", ["train", "net", "predict", "batch", "lite", "accuracy", "help"])
     except:
         usage()
         sys.exit(2)
@@ -173,11 +174,11 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            predict(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                predict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
             
         if o in ("-b" , "--batch"):
             try:
@@ -192,6 +193,13 @@ def main():
             except:
                 usage()
                 sys.exit(2)
+                
+        if o in ("-a" , "--accuracy"):
+            #try:
+            accDeterm(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
     total_time = time.perf_counter() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -559,7 +567,7 @@ def batchPredict(folder):
             except:
                 predictions = np.array([getPredictions(R, model,dP).flatten()])
             fileName.append(file)
-
+            
     if dP.regressor:
         summaryFile = np.array([['SpectraKeras_CNN','Regressor','',],['File name','Prediction','']])
         print('\n  ========================================================')
@@ -598,6 +606,60 @@ def batchPredict(folder):
     df = pd.DataFrame(summaryFile)
     df.to_csv(dP.summaryFileName, index=False, header=False)
     print(" Prediction summary saved in:",dP.summaryFileName,"\n")
+
+#************************************
+# Accuracy determination
+#************************************
+def accDeterm(testFile):
+    dP = Conf()
+    model = loadModel(dP)
+    En, A, Cl = readLearnFile(testFile, dP)
+    predictions = np.zeros((0,0))
+    fileName = []
+    
+    print("\n  Number of spectra in testing file:",A.shape[0])
+    
+    for i in range(A.shape[0]):
+        R = formatForCNN(np.array([A[i]]))
+        try:
+            predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
+        except:
+            predictions = np.array([getPredictions(R, model,dP).flatten()])
+            
+    if dP.regressor:
+        print("\n  Accuracy determination is not defined in regression. Exiting.\n")
+        return
+    else:
+        le = pickle.loads(open(dP.model_le, "rb").read())
+        summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['Real Class','Predicted Class', 'Probability']])
+        
+        successPred = 0
+        
+        for i in range(predictions.shape[0]):
+            pred_class = np.argmax(predictions[i])
+            if dP.useTFlitePred:
+                predProb = round(100*predictions[i][pred_class]/255,2)
+            else:
+                predProb = round(100*predictions[i][pred_class],2)
+            rosterPred = np.where(predictions[i][0]>0.1)[0]
+        
+            if pred_class.size >0:
+                predValue = le.inverse_transform(pred_class)[0]
+            else:
+                predValue = 0
+            if Cl[i] == predValue:
+                successPred+=1
+                
+            summaryFile = np.vstack((summaryFile,[Cl[i], predValue, predProb]))
+    
+    print("\n\033[1m  Overall average accuracy: {0:.2f}% \033[0m".format(successPred*100/Cl.shape[0]))
+    summaryFile[0,2] = "Av Acc: {0:.2f}%".format(successPred*100/Cl.shape[0])
+    
+    import pandas as pd
+    df = pd.DataFrame(summaryFile)
+    df.to_csv(dP.summaryAccFileName, index=False, header=False)
+    print("\n  Prediction summary saved in:",dP.summaryAccFileName,"\n")
+
 
 #****************************************************
 # Convert model to quantized TFlite
@@ -734,6 +796,8 @@ def usage():
     print('  python3 SpectraKeras_CNN.py -n <learningFile>\n')
     print(' Convert model to quantized tflite:')
     print('  python3 SpectraKeras_CNN.py -l <learningFile>\n')
+    print(' Determine accuracy using h5 testing file with spectra:')
+    print('  python3 SpectraKeras_CNN.py -a <testFile>\n')
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
