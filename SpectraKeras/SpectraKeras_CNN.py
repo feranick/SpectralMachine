@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200207a
+* 20200208a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -195,11 +195,11 @@ def main():
                 sys.exit(2)
                 
         if o in ("-a" , "--accuracy"):
-            #try:
-            accDeterm(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                accDeterm(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
 
     total_time = time.perf_counter() - start_time
     print(" Total time: {0:.1f}s or {1:.1f}m or {2:.1f}h".format(total_time,
@@ -618,9 +618,9 @@ def accDeterm(testFile):
     fileName = []
     
     print("\n  Number of spectra in testing file:",A.shape[0])
-    
-    for i in range(A.shape[0]):
-        R = formatForCNN(np.array([A[i]]))
+
+    for row in A:
+        R = formatForCNN(np.array([row]))
         try:
             predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
         except:

@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20200207a
+* 20200208a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -551,8 +551,8 @@ def accDeterm(testFile):
     
     print("\n  Number of spectra in testing file:",A.shape[0])
         
-    for i in range(A.shape[0]):
-        R = np.array([A[i]])
+    for row in A:
+        R = np.array([row])
         try:
             predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
         except:
