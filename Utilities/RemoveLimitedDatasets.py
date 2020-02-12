@@ -42,11 +42,9 @@ def main():
     le = MultiClassReductor()
     le.fit(np.unique(M[:,0]))
     Cl = le.transform(M[:,0])
-    print(Cl)
 
     # sort how many spectra per class
     for i in range(M.shape[0]):
-        #indClass[int(M[i,0])]+=1
         indClass[int(Cl[i])]+=1
 
     # create roster for spectra above threshold

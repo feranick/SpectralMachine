@@ -4,7 +4,7 @@
 ***********************************************************
 * InfoLimitedDatasets
 * Info data with little representation based on threshold
-* version: 20181219a
+* version: 20200212a
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
 '''
@@ -27,13 +27,17 @@ def main():
     indClass = np.zeros((numClasses))
     totNumIncl = 0
 
+    le = MultiClassReductor()
+    le.fit(np.unique(M[:,0]))
+    Cl = le.transform(M[:,0])
+
     # sort how many spectra per class
     for i in range(M.shape[0]):
-        indClass[int(M[i,0])]+=1
+        indClass[int(Cl[i])]+=1
 
     # identify the number of spectra above threshold
     for i in range(M.shape[0]):
-        if indClass[int(M[i,0])] >= float(sys.argv[2]):
+        if indClass[int(Cl[i])] >= float(sys.argv[2]):
             totNumIncl += 1
 
     # find out how many classes are above the threshold
