@@ -6,7 +6,7 @@
 * RemoveLimitedDatasets
 * Remove data with little representation based on threshold
 *
-* version: 20181219a
+* version: 20200212a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -33,21 +33,25 @@ def main():
     learnFileExt = os.path.splitext(sys.argv[1])[1]
 
     En, M = readLearnFile(sys.argv[1])
-    newTrain = np.append([0], En)
-    exclTrain = np.append([0], En)
 
     numClasses = np.unique(M[:,0]).size
     indClass = np.zeros((numClasses))
     rosterSpectra = np.zeros((M.shape[0]))
     totNumIncl = 0
 
+    le = MultiClassReductor()
+    le.fit(np.unique(M[:,0]))
+    Cl = le.transform(M[:,0])
+    print(Cl)
+
     # sort how many spectra per class
     for i in range(M.shape[0]):
-        indClass[int(M[i,0])]+=1
+        #indClass[int(M[i,0])]+=1
+        indClass[int(Cl[i])]+=1
 
     # create roster for spectra above threshold
     for i in range(M.shape[0]):
-        if indClass[int(M[i,0])] >= float(sys.argv[2]):
+        if indClass[int(Cl[i])] >= float(sys.argv[2]):
             rosterSpectra[i] = 1
             totNumIncl += 1
 
@@ -58,6 +62,7 @@ def main():
         else:
             print(" Class: ",i, "- spectra per class:", int(indClass[i])," - EXCLUDED")
 
+    print(indClass)
     totClassIncl = indClass[np.where(indClass < float(sys.argv[2]))]
 
     print("\n Number of points per spectra:", M[0,1:].size)
@@ -71,14 +76,14 @@ def main():
 
     # create new training set above threshold
     print(" Creating new training dataset with included spectra...")
-    for i in np.where(rosterSpectra == 1.)[0]:
-        newTrain = np.vstack((newTrain,M[i,:]))
+    newTrain = M[np.where(rosterSpectra == 1.)[0],:]
+    newTrain = np.insert(newTrain,0,np.append([0], En),0)
 
     # create new training set below threshold
     print(" Creating new training dataset with the excluded spectra... \n")
-    for i in np.where(rosterSpectra == 0.)[0]:
-        exclTrain = np.vstack((exclTrain,M[i,:]))
-
+    exclTrain = M[np.where(rosterSpectra == 0.)[0],:]
+    exclTrain = np.insert(exclTrain,0,np.append([0], En),0)
+    
     saveLearnFile(newTrain, newFile)
     saveLearnFile(exclTrain, exclFile)
 
@@ -119,6 +124,29 @@ def saveLearnFile(M, learnFile):
         print(" Saving new training file (hdf5) in: "+learnFile+"\n")
         with h5py.File(learnFile, 'w') as hf:
             hf.create_dataset("M",  data=M)
+
+#************************************
+# MultiClassReductor
+#************************************
+class MultiClassReductor():
+    def __self__(self):
+        self.name = name
+    
+    def fit(self,tc):
+        self.totalClass = tc.tolist()
+    
+    def transform(self,y):
+        Cl = np.zeros(y.shape[0])
+        for j in range(len(y)):
+            Cl[j] = self.totalClass.index(np.array(y[j]).tolist())
+        return Cl
+    
+    def inverse_transform(self,a):
+        return [self.totalClass[int(a)]]
+
+    def classes_(self):
+        return self.totalClass
+
 
 #************************************
 ''' Main initialization routine '''
