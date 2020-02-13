@@ -82,20 +82,27 @@ def readLearnFile(learnFile):
     #Cl = M[1:,0]
     return En, A
 
-#***************************************
-''' Save new learning Data '''
-#***************************************
-def saveLearnFile(M, learnFile):
-    if defParam.saveAsTxt == True:
-        learnFile += '.txt'
-        print(" Saving new training file (txt) in:", learnFile+"\n")
-        with open(learnFile, 'ab') as f:
-            np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
-    else:
-        learnFile += '.h5'
-        print(" Saving new training file (hdf5) in: "+learnFile+"\n")
-        with h5py.File(learnFile, 'w') as hf:
-            hf.create_dataset("M",  data=M)
+#************************************
+# MultiClassReductor
+#************************************
+class MultiClassReductor():
+    def __self__(self):
+        self.name = name
+    
+    def fit(self,tc):
+        self.totalClass = tc.tolist()
+    
+    def transform(self,y):
+        Cl = np.zeros(y.shape[0])
+        for j in range(len(y)):
+            Cl[j] = self.totalClass.index(np.array(y[j]).tolist())
+        return Cl
+    
+    def inverse_transform(self,a):
+        return [self.totalClass[int(a)]]
+
+    def classes_(self):
+        return self.totalClass
 
 #************************************
 ''' Main initialization routine '''

@@ -145,7 +145,6 @@ class MultiClassReductor():
     def classes_(self):
         return self.totalClass
 
-
 #************************************
 ''' Main initialization routine '''
 #************************************
