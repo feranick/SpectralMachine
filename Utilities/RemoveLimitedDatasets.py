@@ -60,7 +60,6 @@ def main():
         else:
             print(" Class: ",i, "- spectra per class:", int(indClass[i])," - EXCLUDED")
 
-    print(indClass)
     totClassIncl = indClass[np.where(indClass < float(sys.argv[2]))]
 
     print("\n Number of points per spectra:", M[0,1:].size)
