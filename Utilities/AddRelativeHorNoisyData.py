@@ -8,7 +8,7 @@
 * spectra are also shifted along the x axis
 * For augmentation of data
 *
-* version: 20180615a
+* version: 20200221a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -26,6 +26,9 @@ import sys, os.path, h5py
 class defParam:
     saveAsTxt = False
     addToFlatland = False
+    Ynorm = True
+    YnormTo = 1
+    randOffset = False
 
 def main():
     if len(sys.argv) < 5:
@@ -54,7 +57,7 @@ def main():
 
     for j in range(int(sys.argv[2])):
         newTrain = np.vstack((newTrain,
-                    scrambleNoise(horizontalOffset(En, M, float(sys.argv[3]), True),
+                    scrambleNoise(horizontalOffset(En, M, float(sys.argv[3])),
                     float(sys.argv[3]))))
 
     saveLearnFile(newTrain, newFile)
@@ -101,6 +104,10 @@ def saveLearnFile(M, learnFile):
 ''' Introduce Noise in Data '''
 #************************************
 def scrambleNoise(M, offset):
+    M[:,1:] = np.multiply(M[:,1:],
+        np.abs(np.multiply(np.random.uniform(-1,1, size=(1,M.shape[1]-1)),0.01*offset*np.amax(M[:,1:], axis = 0))))
+    return M
+    '''
     from random import uniform
     for j in range(0, M.shape[0]):
         for i in range(1, M.shape[1]):
@@ -110,12 +117,21 @@ def scrambleNoise(M, offset):
                 if M[j,i].any() == 0:
                     M[j,i] += offset*uniform(-1,1)*np.amax(M[j,:])
     return M
+    '''
 
 #*******************************************
 ''' Introduce Horizontal Offset in Data '''
 #*******************************************
 def horizontalOffset(En, M, offset, rand):
-    
+    newM = np.copy(M)
+    for i in range(0, M.shape[0]):
+        if defParam.randOffset:
+            newEn = np.add(En, offset*np.random.uniform(-1,1))
+        else:
+            newEn = np.add(En, offset)
+        newM[i,1:] = np.interp(En, newEn, M[i,1:], left = 0, right = 0)
+    return newM
+    '''
     newM = np.zeros(M.shape)
     newM[:,0] = M[:,0]
     newEn = np.zeros(En.shape)
@@ -129,7 +145,7 @@ def horizontalOffset(En, M, offset, rand):
         newM[i,1:] = np.interp(En, newEn, M[i,1:], left = 0, right = 0)
     
     return newM
-
+    '''
 #************************************
 ''' Main initialization routine '''
 #************************************
