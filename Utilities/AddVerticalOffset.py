@@ -6,7 +6,7 @@
 * Replicate training data with vertical offset
 * For augmentation of data
 *
-* version: 20180615a
+* version: 20200222a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -21,6 +21,8 @@ import sys, os.path, csv, h5py
 #************************************
 class defParam:
     saveAsTxt = False
+    Ynorm = True
+    YnormTo = 1
 
 def main():
     if(len(sys.argv)<4):
@@ -85,9 +87,8 @@ def saveLearnFile(M, learnFile):
 #************************************
 ''' Introduce Noise in Data '''
 #************************************
-def verticalOffset(M, offset):    
-    for i in range(1, M.shape[1]-1):
-        M[:,i] += offset
+def verticalOffset(M, offset):
+    M[:,1:] += offset
     return M
 
 #************************************
