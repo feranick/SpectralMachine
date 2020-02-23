@@ -6,7 +6,7 @@
 * Check whether a training file has data with
 *  intensity higher than specified value
 *
-* version: 20170621a
+* version: 20200222a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -16,7 +16,7 @@ print(__doc__)
 
 
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path, h5py, csv
 
 def main():
     if(len(sys.argv)<3):
@@ -41,16 +41,23 @@ def main():
 ''' Open Learning Data '''
 #************************************
 def readLearnFile(learnFile):
+    print(" Opening learning file: "+learnFile+"\n")
     try:
-        with open(learnFile, 'r') as f:
-            M = np.loadtxt(f, unpack =False)
+        if os.path.splitext(learnFile)[1] == ".npy":
+            M = np.load(learnFile)
+        elif os.path.splitext(learnFile)[1] == ".h5":
+            with h5py.File(learnFile, 'r') as hf:
+                M = hf["M"][:]
+        else:
+            with open(learnFile, 'r') as f:
+                M = np.loadtxt(f, unpack =False)
     except:
-        print('\033[1m' + ' Learn data file not found \n' + '\033[0m')
+        print("\033[1m" + " Learning file not found \n" + "\033[0m")
         return
 
-    En = np.delete(np.array(M[0,:]),np.s_[0:1],0)
-    M = np.delete(M,np.s_[0:1],0)
-    return En, M
+    En = M[0,1:]
+    A = M[1:,:]
+    return En, A
 
 #************************************
 ''' Main initialization routine '''
