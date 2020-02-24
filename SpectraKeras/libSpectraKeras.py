@@ -177,7 +177,7 @@ def plotWeights(En, A, model, type):
             plt.legend(loc="upper right")
             plt.setp(ax.get_xticklabels(), visible=False)
             plotInd +=1
-            print(" Preparing activations for layer:",layer.name)
+            print(" Preparing weigths for layer:",layer.name)
                 
     ax1 = plt.subplot(plotInd)
     ax1.plot(En, A[0], label='Sample data')
@@ -185,7 +185,7 @@ def plotWeights(En, A, model, type):
     plt.xlabel("Raman shift [1/cm]")
     plt.legend(loc="upper right")
     plt.savefig(plotFileName, dpi = 160, format = 'png')  # Save plot
-    print(" Saving activations plots in:", plotFileName,"\n")
+    print(" Saving weights plots in:", plotFileName,"\n")
 
 #************************************
 # Get TensorFlow Version
