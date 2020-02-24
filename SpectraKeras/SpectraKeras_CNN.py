@@ -50,8 +50,8 @@ class Conf():
         self.model_le = self.model_directory+"model_le.pkl"
         self.spectral_range = "model_spectral_range.pkl"
         
-        self.actPlotTrain = self.model_directory+"model_CNN_activations_conv2D_"
-        self.actPlotPredict = self.model_directory+"model_CNN_activations_"
+        self.actPlotTrain = self.model_directory+"model_CNN_train-activations_conv2D_"
+        self.actPlotPredict = self.model_directory+"model_CNN_pred-activations_"
         self.sizeColPlot = 4
     
         if platform.system() == 'Linux':
@@ -547,6 +547,7 @@ def predict(testFile):
             print("  3:",str((predValue[1]/0.5)*(100-99.2-.3)),"%\n")
             print(' ==========================================\n')
 
+
     if dP.plotActivations and not dP.useTFlitePred:
         plotActivationsPredictions(R,model)
 
@@ -738,6 +739,7 @@ def plotActivationsTrain(model):
                     #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
                     ax[row][col].plot(weight_conv2d[:,:,filter_index][0])
                     filter_index += 1
+            plt.suptitle("Training Conv2D_"+str(i)+" activations", fontsize=16)
             plt.savefig(dP.actPlotTrain+str(i)+".png", dpi = 160, format = 'png')  # Save plot
             print(" Saving conv2D activation plots in:", dP.actPlotTrain+str(i)+".png")
             i+=1
