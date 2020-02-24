@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20200214a
+* 20200224a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -164,26 +164,28 @@ def makeQuantizedTFmodel(A, model, dP):
 #************************************
 def plotWeights(En, A, model, type):
     import matplotlib.pyplot as plt
+    import tensorflow as tf
+    plotFileName = "model_" + type + "_weights" + ".png"
     plt.figure(tight_layout=True)
     plotInd = 511
     for layer in model.layers:
-        try:
+        if isinstance(layer, tf.keras.layers.Dense):
             w_layer = layer.get_weights()[0]
             ax = plt.subplot(plotInd)
             newX = np.arange(En[0], En[-1], (En[-1]-En[0])/w_layer.shape[0])
             plt.plot(En, np.interp(En, newX, w_layer[:,0]), label=layer.get_config()['name'])
-            plt.legend(loc='upper right')
+            plt.legend(loc="upper right")
             plt.setp(ax.get_xticklabels(), visible=False)
             plotInd +=1
-        except:
-            pass
-
+            print(" Preparing activations for layer:",layer.name)
+                
     ax1 = plt.subplot(plotInd)
     ax1.plot(En, A[0], label='Sample data')
 
-    plt.xlabel('Raman shift [1/cm]')
-    plt.legend(loc='upper right')
-    plt.savefig('model_' + type + '_weights' + '.png', dpi = 160, format = 'png')  # Save plot
+    plt.xlabel("Raman shift [1/cm]")
+    plt.legend(loc="upper right")
+    plt.savefig(plotFileName, dpi = 160, format = 'png')  # Save plot
+    print(" Saving activations plots in:", plotFileName,"\n")
 
 #************************************
 # Get TensorFlow Version
