@@ -38,12 +38,12 @@ class Conf():
         if self.regressor:
             self.modelName = "model_regressor_MLP.hd5"
             self.summaryFileName = "summary_regressor_MLP.csv"
-            self.model_png = self.model_directory+"/model_regressor_MLP.png"
+            self.model_png = self.model_directory+"model_regressor_MLP.png"
         else:
             self.modelName = "model_classifier_MLP.hd5"
             self.summaryFileName = "summary_classifier_MLP.csv"
             self.summaryAccFileName = "summary_classifier_MLP_accuracy.csv"
-            self.model_png = self.model_directory+"/model_classifier_MLP.png"
+            self.model_png = self.model_directory+"model_classifier_MLP.png"
         
         self.tb_directory = "model_MLP"
         self.model_name = self.model_directory+self.modelName

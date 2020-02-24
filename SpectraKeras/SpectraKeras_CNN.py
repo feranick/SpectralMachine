@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200224a
+* 20200214a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -38,20 +38,20 @@ class Conf():
         if self.regressor:
             self.modelName = "model_regressor_CNN.hd5"
             self.summaryFileName = "summary_regressor_CNN.csv"
-            self.model_png = self.model_directory+"/model_regressor_CNN.png"
+            self.model_png = self.model_directory+"model_regressor_CNN.png"
         else:
             self.modelName = "model_classifier_CNN.hd5"
             self.summaryFileName = "summary_classifier_CNN.csv"
             self.summaryAccFileName = "summary_classifier_CNN_accuracy.csv"
-            self.model_png = self.model_directory+"/model_classifier_CNN.png"
+            self.model_png = self.model_directory+"model_classifier_CNN.png"
     
         self.tb_directory = "model_CNN"
         self.model_name = self.model_directory+self.modelName
         self.model_le = self.model_directory+"model_le.pkl"
         self.spectral_range = "model_spectral_range.pkl"
         
-        self.actPlotTrain = self.model_directory+"/model_CNN_conv1d-activations.png"
-        self.actPlotPredict = self.model_directory+"/model_CNN_activations_"
+        self.actPlotTrain = self.model_directory+"model_CNN_activations_conv2D_"
+        self.actPlotPredict = self.model_directory+"model_CNN_activations_"
         self.sizeColPlot = 4
     
         if platform.system() == 'Linux':
@@ -392,10 +392,6 @@ def train(learnFile, testFile, flag):
             verbose=2,
 	        validation_split=dP.cv_split)
 
-    # Plot activations
-    if dP.plotActivations:
-        plotActivationsTrain(model)
-
     if useTF2:
         model.save(dP.model_name, save_format='h5')
     else:
@@ -480,7 +476,12 @@ def train(learnFile, testFile, flag):
             #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
             print('\n  ========================================================\n')
 
-    if dP.plotWeightsFlag == True:
+    # Plot Conv2D activations
+    if dP.plotActivations:
+        plotActivationsTrain(model)
+    
+    # Plot Dense weights
+    if dP.plotWeightsFlag:
         plotWeights(En, A, model, "CNN")
 
     getTFVersion(dP)
@@ -721,20 +722,25 @@ def printParam():
 #************************************
 def plotActivationsTrain(model):
     import matplotlib.pyplot as plt
+    import tensorflow as tf
     dP = Conf()
-    weight_conv2d_1 = model.layers[0].get_weights()[0][:,:,0,:]
-    col_size = dP.sizeColPlot
-    row_size = int(dP.CL_filter[0]/dP.sizeColPlot)
-    filter_index = 0
-    fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*3,col_size*3))
-
-    for row in range(0,row_size):
-        for col in range(0,col_size):
-            #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
-            ax[row][col].plot(weight_conv2d_1[:,:,filter_index][0])
-            filter_index += 1
-    #plt.show()
-    plt.savefig(dP.actPlotTrain, dpi = 160, format = 'png')  # Save plot
+    i = 0
+    for layer in model.layers:
+        if isinstance(layer, tf.keras.layers.Conv2D):
+            weight_conv2d = layer.get_weights()[0][:,:,0,:]
+            filter_index = 0
+            col_size = dP.sizeColPlot
+            row_size = int(dP.CL_filter[i]/dP.sizeColPlot)
+            fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*3,col_size*3))
+                        
+            for row in range(0,row_size):
+                for col in range(0,col_size):
+                    #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
+                    ax[row][col].plot(weight_conv2d[:,:,filter_index][0])
+                    filter_index += 1
+            plt.savefig(dP.actPlotTrain+str(i)+".png", dpi = 160, format = 'png')  # Save plot
+            print(" Saving conv2D activation plots in:", dP.actPlotTrain+str(i)+".png")
+            i+=1
     
 #************************************
 # Plot Activations in Predictions
