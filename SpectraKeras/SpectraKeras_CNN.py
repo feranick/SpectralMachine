@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200224a
+* 20200225a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -40,6 +40,7 @@ class Conf():
             self.summaryFileName = "summary_regressor_CNN.csv"
             self.model_png = self.model_directory+"model_regressor_CNN.png"
         else:
+            self.predProbThreshold = 90.00
             self.modelName = "model_classifier_CNN.hd5"
             self.summaryFileName = "summary_classifier_CNN.csv"
             self.summaryAccFileName = "summary_classifier_CNN_accuracy.csv"
@@ -587,6 +588,7 @@ def batchPredict(folder):
         print('\n  ========================================================')
         print('  \033[1m CNN - Classifier\033[0m - Prediction')
         print('  ========================================================')
+        indPredProb = 0
         for i in range(predictions.shape[0]):
             pred_class = np.argmax(predictions[i])
             if dP.useTFlitePred:
@@ -601,8 +603,11 @@ def batchPredict(folder):
             else:
                 predValue = 0
                 print('  {0:s}:\033[1m\n   No predicted value (probability = {1:.2f}%)\033[0m\n'.format(fileName[i],predProb))
+            if predProb > dP.predProbThreshold:
+                indPredProb += 1
             summaryFile = np.vstack((summaryFile,[fileName[i], predValue,predProb]))
         print('  ========================================================\n')
+        print(" Predictions with probability > {0:.2f}:  {1:.2f}%\n".format(dP.predProbThreshold, indPredProb*100/predictions.shape[0]))
         
     import pandas as pd
     df = pd.DataFrame(summaryFile)
