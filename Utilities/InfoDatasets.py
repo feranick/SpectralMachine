@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
+***********************************************************
 * InfoDatasets
-* Info data for training databases
-* version: 20181219a
+* Info data for a given learning dataset
+* version: 20200302a
 * By: Nicola Ferralis <feranick@hotmail.com>
-***********************************************
+***********************************************************
 '''
 print(__doc__)
 
@@ -23,21 +23,10 @@ def main():
 
     En, M = readLearnFile(sys.argv[1])
 
-    numClasses = np.unique(M[:,0]).size
-    indClass = np.zeros((numClasses))
-    #rosterSpectra = np.zeros((M.shape[0]))
-    
-    print(M.shape)
-    
-    for i in range(M.shape[0]):
-        indClass[int(M[i,0])]+=1
-
-    for i in range(numClasses):
-        print(" Class:",i, "- number per class:", int(indClass[i]))
-
-    print("\n Number of points per spectra:", M[0,1:].size)
-    print(" Number of unique classes:", numClasses)
-    print(" Original number of spectra in training set:", M.shape[0],"\n")
+    print(" Initial Energy: {0:.1f}, Final Energy: {1:.1f}, Step: {2:.1f}".format(En[0], En[-1], En[1]-En[0]))
+    print(" Number of points per spectra:", M[0,1:].size)
+    print("\n Number of unique classes:", np.unique(M[:,0]).size)
+    print(" Number of spectra in training set:", M.shape[0],"\n")
 
 #************************************
 ''' Open Learning Data '''
@@ -61,21 +50,6 @@ def readLearnFile(learnFile):
     A = M[1:,:]
     #Cl = M[1:,0]
     return En, A
-
-#***************************************
-''' Save new learning Data '''
-#***************************************
-def saveLearnFile(M, learnFile):
-    if defParam.saveAsTxt == True:
-        learnFile += '.txt'
-        print(" Saving new training file (txt) in:", learnFile+"\n")
-        with open(learnFile, 'ab') as f:
-            np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
-    else:
-        learnFile += '.h5'
-        print(" Saving new training file (hdf5) in: "+learnFile+"\n")
-        with h5py.File(learnFile, 'w') as hf:
-            hf.create_dataset("M",  data=M)
 
 #************************************
 ''' Main initialization routine '''
