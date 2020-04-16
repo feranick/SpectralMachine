@@ -1355,22 +1355,23 @@ def runPCA(En, Cl, A, YnormXind, numPCAcomponents):
         #***************************
         ''' Plotting Scores '''
         #***************************
-        Cl_ind = np.zeros(len(Cl))
-        Cl_labels = np.zeros(0)
-        ind = np.zeros(np.unique(Cl).shape[0])
-
-        for i in range(len(Cl)):
-            if (np.in1d(Cl[i], Cl_labels, invert=True)):
-                Cl_labels = np.append(Cl_labels, Cl[i])
-
-        for i in range(len(Cl)):
-            Cl_ind[i] = np.where(Cl_labels == Cl[i])[0][0]
-
-            colors = [ cm.jet(x) for x in np.linspace(0, 1, ind.shape[0]) ]
-
-        for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
-            plt.scatter(A_r[Cl_ind==i,0], A_r[Cl_ind==i,1], color=color, alpha=.8, lw=2, label=target_name)
-
+        if len(Cl):
+            Cl_ind = np.zeros(len(Cl))
+            Cl_labels = np.zeros(0)
+            ind = np.zeros(np.unique(Cl).shape[0])
+    
+            for i in range(len(Cl)):
+                if (np.in1d(Cl[i], Cl_labels, invert=True)):
+                    Cl_labels = np.append(Cl_labels, Cl[i])
+    
+            for i in range(len(Cl)):
+                Cl_ind[i] = np.where(Cl_labels == Cl[i])[0][0]
+    
+                colors = [ cm.jet(x) for x in np.linspace(0, 1, ind.shape[0]) ]
+    
+            for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
+                plt.scatter(A_r[Cl_ind==i,0], A_r[Cl_ind==i,1], color=color, alpha=.8, lw=2, label=target_name)
+    
         plt.title('Score plot')
         plt.xlabel('PC 0 ({0:.0f}%)'.format(pca.explained_variance_ratio_[0] * 100))
         plt.ylabel('PC 1 ({0:.0f}%)'.format(pca.explained_variance_ratio_[1] * 100))
