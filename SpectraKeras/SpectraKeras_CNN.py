@@ -510,9 +510,9 @@ def predict(testFile):
         print('  ========================================================\n')
         
     else:
-        p_file = open(dP.model_le, "rb")
-        le = pickle.loads(p_file.read())
-        p_file.close()
+        le_file = open(dP.model_le, "rb")
+        le = pickle.loads(le_file.read())
+        le_file.close()
         #predictions = model.predict(R, verbose=0)
         predictions = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
@@ -585,7 +585,9 @@ def batchPredict(folder):
         print('  ========================================================\n')
 
     else:
-        le = pickle.loads(open(dP.model_le, "rb").read())
+        le_file = open(dP.model_le, "rb")
+        le = pickle.loads(le_file.read())
+        le_file.close()
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['File name','Predicted Class', 'Probability']])
         print('\n  ========================================================')
         print('  \033[1m CNN - Classifier\033[0m - Prediction')
@@ -639,7 +641,9 @@ def accDeterm(testFile):
         print("\n  Accuracy determination is not defined in regression. Exiting.\n")
         return
     else:
-        le = pickle.loads(open(dP.model_le, "rb").read())
+        le_file = open(dP.model_le, "rb")
+        le = pickle.loads(le_file.read())
+        le_file.close()
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['Real Class','Predicted Class', 'Probability']])
         
         successPred = 0
