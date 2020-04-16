@@ -443,7 +443,9 @@ def predict(testFile):
         print('  ========================================================\n')
         
     else:
-        le = pickle.loads(open(dP.model_le, "rb").read())
+        p_file = open(dP.model_le, "rb")
+        le = pickle.loads(p_file.read())
+        p_file.close()
         #predictions = model.predict(R, verbose=0)
         predictions = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
