@@ -278,7 +278,7 @@ def train(learnFile, testFile):
     # Training
     #************************************
 
-    if dP.fullSizeBatch == True:
+    if dP.fullSizeBatch:
         dP.batch_size = A.shape[0]
 
     #************************************
@@ -416,7 +416,7 @@ def train(learnFile, testFile):
             #print("\n  Validation - Loss: {0:.2f}; accuracy: {1:.2f}%".format(score[0], 100*score[1]))
             print('\n  ========================================================\n')
 
-    if dP.plotWeightsFlag == True:
+    if dP.plotWeightsFlag:
         plotWeights(En, A, model, MLP)
     
     getTFVersion(dP)
@@ -630,7 +630,7 @@ def printParam():
                 '\n  Dropout:', dP.drop,
                 '\n  Learning rate:', dP.l_rate,
                 '\n  Learning decay rate:', dP.l_rdecay)
-    if dP.fullSizeBatch == True:
+    if dP.fullSizeBatch:
         print('  Batch size: full')
     else:
         print('  Batch size:', dP.batch_size)

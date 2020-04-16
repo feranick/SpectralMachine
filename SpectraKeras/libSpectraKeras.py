@@ -68,7 +68,7 @@ def preProcess(Rtot, dP):
         norm = Normalizer()
         R = norm.transform_single(R)
     
-    if(R.shape[1] != len(En)):
+    if(R.shape[1] is not len(En)):
         print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
         R = np.interp(En, Rx[0], R[0])
         R = R.reshape(1,-1)

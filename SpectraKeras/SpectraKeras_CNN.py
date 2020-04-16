@@ -303,7 +303,7 @@ def train(learnFile, testFile, flag):
     # Training
     #************************************
 
-    if dP.fullSizeBatch == True:
+    if dP.fullSizeBatch:
         dP.batch_size = A.shape[0]
 
     #************************************
@@ -718,7 +718,7 @@ def printParam():
                 '\n  Dropout HL:', dP.dropFCL,
                 '\n  Learning rate:', dP.l_rate,
                 '\n  Learning decay rate:', dP.l_rdecay)
-    if dP.fullSizeBatch == True:
+    if dP.fullSizeBatch:
         print('  Batch size: full')
     else:
         print('  Batch size:', dP.batch_size)
