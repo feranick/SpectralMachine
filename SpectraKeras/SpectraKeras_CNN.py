@@ -245,7 +245,7 @@ def train(learnFile, testFile, flag):
         
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
-    if testFile != None:
+    if testFile is not None:
         En_test, A_test, Cl_test = readLearnFile(testFile, dP)
         totA = np.vstack((A, A_test))
         totCl = np.append(Cl, Cl_test)
@@ -262,7 +262,7 @@ def train(learnFile, testFile, flag):
     
     if dP.regressor:
         Cl2 = np.copy(Cl)
-        if testFile != None:
+        if testFile is not None:
             Cl2_test = np.copy(Cl_test)
     else:
     
@@ -275,7 +275,7 @@ def train(learnFile, testFile, flag):
         le = preprocessing.LabelEncoder()
         totCl2 = le.fit_transform(totCl)
         Cl2 = le.transform(Cl)
-        if testFile != None:
+        if testFile is not None:
             Cl2_test = le.transform(Cl_test)
         '''
         le = MultiClassReductor()
@@ -284,7 +284,7 @@ def train(learnFile, testFile, flag):
     
         print("  Number unique classes (training): ", np.unique(Cl).size)
     
-        if testFile != None:
+        if testFile is not None:
             Cl2_test = le.transform(Cl_test)
             print("  Number unique classes (validation):", np.unique(Cl_test).size)
             print("  Number unique classes (total): ", np.unique(totCl).size)
@@ -296,7 +296,7 @@ def train(learnFile, testFile, flag):
 
         #totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
         Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(totCl).size+1)
-        if testFile != None:
+        if testFile is not None:
             Cl2_test = keras.utils.to_categorical(Cl2_test, num_classes=np.unique(totCl).size+1)
 
     #************************************
@@ -311,7 +311,7 @@ def train(learnFile, testFile, flag):
     # Format spectra as images for loading
     #************************************
     x_train = formatForCNN(A)
-    if testFile != None:
+    if testFile is not None:
         x_test = formatForCNN(A_test)
 
     #************************************
@@ -378,7 +378,7 @@ def train(learnFile, testFile, flag):
     if flag:
         return
     
-    if testFile != None:
+    if testFile is not None:
         log = model.fit(x_train, Cl2,
             epochs=dP.epochs,
             batch_size=dP.batch_size,
@@ -431,7 +431,7 @@ def train(learnFile, testFile, flag):
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
         print("  \033[1mMean Abs Err\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_mae), np.amin(val_mae), val_mae[-1]))
         print('  ========================================================\n')
-        if testFile != None and dP.showValidPred:
+        if testFile is not None and dP.showValidPred:
             predictions = model.predict(A_test)
             print('  ========================================================')
             print("  Real value | Predicted value | val_loss | val_mean_abs_err")
@@ -446,7 +446,7 @@ def train(learnFile, testFile, flag):
         accuracy = np.asarray(log.history[def_acc])
         val_acc = np.asarray(log.history[def_val_acc])
         print("  Number unique classes (training): ", np.unique(Cl).size)
-        if testFile != None:
+        if testFile is not None:
             Cl2_test = le.transform(Cl_test)
             print("  Number unique classes (validation):", np.unique(Cl_test).size)
             print("  Number unique classes (total): ", np.unique(totCl).size)
@@ -464,7 +464,7 @@ def train(learnFile, testFile, flag):
         100*np.amax(val_acc), 100*val_acc[-1]))
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}\n".format(np.average(val_loss), np.amin(val_loss), val_loss[-1]))
         print('  ========================================================\n')
-        if testFile != None and dP.showValidPred:
+        if testFile is not None and dP.showValidPred:
             print("  Real class\t| Predicted class\t| Probability")
             print("  ---------------------------------------------------")
             predictions = model.predict(x_test)
@@ -510,7 +510,9 @@ def predict(testFile):
         print('  ========================================================\n')
         
     else:
-        le = pickle.loads(open(dP.model_le, "rb").read())
+        p_file = open(dP.model_le, "rb")
+        le = pickle.loads(p_file.read())
+        p_file.close()
         #predictions = model.predict(R, verbose=0)
         predictions = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
