@@ -45,7 +45,7 @@ class preprocDef:
     scrambleNoiseFlag = False # Adds random noise to spectra (False: recommended)
     scrambleNoiseOffset = 0.1
 
-    if StandardScalerFlag == True:
+    if StandardScalerFlag:
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
 
