@@ -420,7 +420,6 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     with open(summary_filename, "a") as sum_file:
         csv_out=csv.writer(sum_file)
         csv_out.writerow(summaryFile)
-        sum_file.close()
 
 #**********************************************
 ''' Learn and Predict - Maps'''
@@ -1172,7 +1171,6 @@ def saveMap(file, type, extension, s, x1, y1, comma):
             coord_file.write('{:}\t'.format(x1))
             coord_file.write('{:}\t'.format(y1))
         coord_file.write('{:}\n'.format(s))
-        coord_file.close()
 
 def saveMapName(file, type, extension, comma):
     if comma==True:
@@ -1264,7 +1262,6 @@ def makeHeaderSummary(file, learnFile):
             csv_out=csv.writer(sum_file)
             csv_out.writerow(summaryHeader1)
             csv_out.writerow(summaryHeader2)
-            sum_file.close()
 
 #************************************
 ''' Lists the program usage '''
