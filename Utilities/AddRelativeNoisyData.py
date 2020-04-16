@@ -7,7 +7,7 @@
 * Noise is a percentage of max in a spectra.
 * For augmentation of data
 *
-* version: 20181221a
+* version: 20200416a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *

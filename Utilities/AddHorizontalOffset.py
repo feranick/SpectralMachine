@@ -46,7 +46,7 @@ def main():
     for j in range(int(sys.argv[2])):
         newTrain = np.vstack((newTrain, horizontalOffset(En, M, float(sys.argv[3]))))
 
-    if defParam.Ynorm ==True:
+    if defParam.Ynorm:
         print(" Normalizing Learning + Noisy Spectra to:",defParam.YnormTo,"\n")
         newTrain = normalizeSpectra(newTrain)
 

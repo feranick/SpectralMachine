@@ -6,7 +6,7 @@
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
 *
-* version: 20190116a
+* version: 20200416a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -61,7 +61,7 @@ def saveLearnFile(learnFile):
     #A = M[1:,1:]
     #Cl = M[1:,0]
 
-    if defParam.Ynorm ==True:
+    if defParam.Ynorm:
         print(" Normalizing spectra to:",defParam.YnormTo)
         A = M[1:,1:]
         for i in range(0,A.shape[0]):

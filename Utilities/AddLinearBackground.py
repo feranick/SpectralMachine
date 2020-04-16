@@ -8,7 +8,7 @@
 * slope parameter.
 * For augmentation of data
 *
-* version: 20181221a
+* version: 20200416a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -49,7 +49,7 @@ def main():
         newFile += '_sLinBack-' + sys.argv[3]
         print(' Adding', sys.argv[2], 'sets with linear background with slope:', sys.argv[3], '\n')
 
-    if defParam.Ynorm ==True:
+    if defParam.Ynorm:
         print(" Normalizing Learning Spectra to:",defParam.YnormTo)
         newFile += '_norm'+str(defParam.YnormTo)
 
@@ -65,7 +65,7 @@ def main():
     for j in range(int(sys.argv[2])):
         newTrain = np.vstack((newTrain, linBackground(En, M, float(sys.argv[3]))))
 
-    if defParam.Ynorm ==True:
+    if defParam.Ynorm:
         print(" Normalizing Learning + Noisy Spectra to:",defParam.YnormTo,"\n")
         newTrain = normalizeSpectra(newTrain)
 
