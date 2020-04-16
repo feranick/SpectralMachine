@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20200225a
+* 20200416a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -60,7 +60,10 @@ def readTestFile(testFile, dP):
 # Check Energy Range and convert to fit training set
 #****************************************************
 def preProcess(Rtot, dP):
-    En = pickle.loads(open(dP.spectral_range, "rb").read())
+    En_file = open(dP.spectral_range, "rb")
+    En = pickle.loads(En_file.read())
+    En_file.close()
+    
     R = np.array([Rtot[1,:]])
     Rx = np.array([Rtot[0,:]])
     

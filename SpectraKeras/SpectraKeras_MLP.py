@@ -571,7 +571,9 @@ def accDeterm(testFile):
         print("\n  Accuracy determination is not defined in regression. Exiting.\n")
         return
     else:
-        le = pickle.loads(open(dP.model_le, "rb").read())
+        le_file = open(dP.model_le, "rb")
+        le = pickle.loads(le_file.read())
+        le_file.close()
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['Real Class','Predicted Class', 'Probability']])
             
         successPred = 0
