@@ -162,13 +162,13 @@ def LearnPredictBatch(learnFile):
         import multiprocessing as mp
         p = mp.Pool(sysDef.numCores)
         for f in glob.glob('*.txt'):
-            if (f != learnFile):
+            if (f is not learnFile):
                 p.apply_async(processSingleBatch, args=(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFile))
         p.close()
         p.join()
     else:
         for f in glob.glob('*.txt'):
-            if (f != learnFile):
+            if (f is not learnFile):
                 processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFile)
 
 def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFile):
