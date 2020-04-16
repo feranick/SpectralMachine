@@ -103,7 +103,7 @@ def formatSubset(A, Cl, percent):
     return A_train, Cl_train, A_cv, Cl_cv
 
 def formatSubset2(A, Cl, percent):
-    list = np.random.choice(range(len(Cl)), round(percent*len(Cl)), replace=False)
+    list = np.random.choice(range(len(Cl)), int(np.rint(percent*len(Cl))), replace=False)
     A_train = np.delete(A,list,0)
     Cl_train = np.delete(Cl,list)
     A_cv = A[list]
