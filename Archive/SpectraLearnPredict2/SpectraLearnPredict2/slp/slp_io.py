@@ -227,7 +227,6 @@ def processSingleBatch(f, En, Cl, A, Aorig, YnormXind, summary_filename, learnFi
     with open(summary_filename, "a") as sum_file:
         csv_out=csv.writer(sum_file)
         csv_out.writerow(summaryFile)
-        sum_file.close()
 
 #**********************************************
 ''' Learn and Predict - Maps'''
