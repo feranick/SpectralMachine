@@ -124,7 +124,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
         with open(model_le, 'ab') as f:
             f.write(pickle.dumps(le))
     
-    if kerasDef.fullBatch == True:
+    if kerasDef.fullBatch:
         batch_size = A.shape[0]
     else:
         batch_size = kerasDef.batchSize
@@ -178,7 +178,7 @@ def trainKeras(En, A, Cl, A_test, Cl_test, Root):
         else:
             model.save(dP.model_name)
 
-        if kerasDef.plotModel == True:
+        if kerasDef.plotModel:
             from keras.utils import plot_model
             keras.utils.plot_model(model, to_file=model_directory+'/keras_MLP_model.png', show_shapes=True)
             
@@ -281,7 +281,7 @@ def printParamKeras(A):
                 '\n  Dropout:', kerasDef.dropout_perc,
                 '\n  Learning rate:', kerasDef.learning_rate,
                 '\n  Learning decay rate:', kerasDef.learning_decay_rate)
-    if kerasDef.fullBatch == True:
+    if kerasDef.fullBatch:
         print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)))
     else:
         print('  Batch size:', kerasDef.batchSize)

@@ -59,7 +59,7 @@ def runPCA(En, Cl, A, YnormXind, numPCAcomponents):
         print(' Score PC ' + str(i) + ': ' + '{0:.0f}%'.format(pca.explained_variance_ratio_[i] * 100))
     print('')
 
-    if plotDef.showPCAPlots == True:
+    if plotDef.showPCAPlots:
         print(' Plotting Loadings and score plots... \n')
 
         #***************************

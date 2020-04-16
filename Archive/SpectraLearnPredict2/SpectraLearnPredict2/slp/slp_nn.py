@@ -129,14 +129,14 @@ def predNN(clf, A, Cl, R, le):
     #**************************************
     ''' Neural Networks Classification Report '''
     #**************************************
-    if nnDef.nnClassReport == True:
+    if nnDef.nnClassReport:
         print(' Neural Networks Classification Report\n')
         runClassReport(clf, A, Cl)
 
     #*************************
     ''' Plot probabilities '''
     #*************************
-    if plotDef.showProbPlot == True:
+    if plotDef.showProbPlot:
         if nnDef.MLPRegressor is False:
             plotProb(clf, R)
 

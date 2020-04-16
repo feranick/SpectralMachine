@@ -41,7 +41,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
     
-    if tfDef.logCheckpoint == True:
+    if tfDef.logCheckpoint:
         tf.logging.set_verbosity(tf.logging.INFO)
     
     tfTrainedData = Root + '.tfmodel'
@@ -73,7 +73,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y))
     
-    if tfDef.decayLearnRate == True:
+    if tfDef.decayLearnRate:
         print(' Using decaying learning rate, start at:',tfDef.learnRate, '\n')
         global_step = tf.Variable(0, trainable=False)
         starter_learning_rate = tfDef.learnRate
@@ -86,7 +86,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
     
-    if tfDef.enableTensorboard == True:
+    if tfDef.enableTensorboard:
         writer = tf.summary.FileWriter(".", sess.graph)
         print('\n Saving graph. Accessible via tensorboard.  \n')
 
@@ -106,7 +106,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
     except:
         init = tf.global_variables_initializer()
         sess.run(init)
-        if os.path.isfile(tfTrainedData + '.meta') & tfDef.alwaysImprove == True:
+        if os.path.isfile(tfTrainedData + '.meta') & tfDef.alwaysImprove:
             print('\n Improving TF model...')
             saver.restore(sess, './' + tfTrainedData)
         else:
@@ -122,7 +122,7 @@ def trainTF(A, Cl, A_test, Cl_test, Root):
         save_path = saver.save(sess, "./"+tfTrainedData)
         print(' Model saved in file: %s\n' % save_path)
         
-    if tfDef.enableTensorboard == True:
+    if tfDef.enableTensorboard:
         writer.close()
     
     sess.close()
@@ -146,7 +146,7 @@ def predTF(A, Cl, R, Root):
     import tensorflow.contrib.learn as skflow
     from sklearn import preprocessing
     
-    if tfDef.logCheckpoint == True:
+    if tfDef.logCheckpoint:
         tf.logging.set_verbosity(tf.logging.INFO)
     
     tfTrainedData = Root + '.tfmodel'

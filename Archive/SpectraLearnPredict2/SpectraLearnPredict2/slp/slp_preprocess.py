@@ -74,7 +74,7 @@ def readLearnFile(learnFile):
             print( ' Cheery picking points in the spectra\n')
 
     # Find index corresponding to energy value to be used for Y normalization
-    if preprocDef.fullYnorm == True:
+    if preprocDef.fullYnorm:
         YnormXind = np.where(En>0)[0].tolist()
     else:
         YnormXind_temp = np.where((En<float(preprocDef.YnormX+preprocDef.YnormXdelta)) & (En>float(preprocDef.YnormX-preprocDef.YnormXdelta)))[0].tolist()
@@ -126,7 +126,7 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
     #**********************************************************************************
     ''' Reformat x-axis in case it does not match that of the training data '''
     #**********************************************************************************
-    if preprocDef.scrambleNoiseFlag == True:
+    if preprocDef.scrambleNoiseFlag:
         print(' Adding random noise to training set \n')
         scrambleNoise(A, preprocDef.scrambleNoiseOffset)
     Aorig = np.copy(A)
@@ -134,7 +134,7 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
     #**********************************************
-    if preprocDef.Ynorm == True:
+    if preprocDef.Ynorm:
         if type == 0:
             if preprocDef.fullYnorm == False:
                 print('  Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; En = [' + str(preprocDef.YnormX-preprocDef.YnormXdelta) + ', ' + str(preprocDef.YnormX+preprocDef.YnormXdelta) + ']')
@@ -145,14 +145,14 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
                 A[i,:] = A[i,:] - np.amin(A[i,:]) + 1e-8
             A[i,:] = np.multiply(A[i,:], preprocDef.YnormTo/A[i,A[i][YnormXind].tolist().index(max(A[i][YnormXind].tolist()))+YnormXind[0]])
 
-    if preprocDef.StandardScalerFlag == True:
+    if preprocDef.StandardScalerFlag:
         print('  Using StandardScaler from sklearn ')
         A = preprocDef.scaler.fit_transform(A)
 
     #**********************************************
     ''' Energy normalization range '''
     #**********************************************
-    if preprocDef.enRestrictRegion == True:
+    if preprocDef.enRestrictRegion:
         A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         En = En[range(preprocDef.enLim1, preprocDef.enLim2)]
         Aorig = Aorig[:,range(preprocDef.enLim1, preprocDef.enLim2)]
@@ -161,7 +161,7 @@ def preProcessNormLearningData(A, En, Cl, YnormXind, type):
             print( '  Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
         if type == 0:
-            if(preprocDef.cherryPickEnPoint == True):
+            if preprocDef.cherryPickEnPoint:
                 print( '  Using selected spectral points:')
                 print(En)
             else:
@@ -187,7 +187,7 @@ def preProcessNormPredData(R, Rx, En, YnormXind, type):
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
     #**********************************************
-    if preprocDef.Ynorm == True:
+    if preprocDef.Ynorm:
         if type == 0:
             if preprocDef.fullYnorm == False:
                 print('  Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; En = [' + str(preprocDef.YnormX-preprocDef.YnormXdelta) + ', ' + str(preprocDef.YnormX+preprocDef.YnormXdelta) + ']')
@@ -199,14 +199,14 @@ def preProcessNormPredData(R, Rx, En, YnormXind, type):
             R[0,:] = R[0,:] - np.amin(R[0,:]) + 1e-8
         R[0,:] = np.multiply(R[0,:], preprocDef.YnormTo/R[0,R[0][YnormXind].tolist().index(max(R[0][YnormXind].tolist()))+YnormXind[0]])
 
-    if preprocDef.StandardScalerFlag == True:
+    if preprocDef.StandardScalerFlag:
         print('  Using StandardScaler from sklearn ')
         R = preprocDef.scaler.transform(R)
     
     #**********************************************
     ''' Energy normalization range '''
     #**********************************************
-    if preprocDef.enRestrictRegion == True:
+    if preprocDef.enRestrictRegion:
         #A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         En = En[range(preprocDef.enLim1, preprocDef.enLim2)]
         R = R[:,range(preprocDef.enLim1, preprocDef.enLim2)]
@@ -215,7 +215,7 @@ def preProcessNormPredData(R, Rx, En, YnormXind, type):
             print( '  Restricting energy range between: [' + str(En[0]) + ', ' + str(En[En.shape[0]-1]) + ']\n')
     else:
         if type == 0:
-            if(preprocDef.cherryPickEnPoint == True):
+            ifpreprocDef.cherryPickEnPoint:
                 print( '  Using selected spectral points:')
                 print(En)
             else:
@@ -240,21 +240,21 @@ def preProcessNormMap(A, En, type):
     #**********************************************
     ''' Normalize/preprocess if flags are set '''
     #**********************************************
-    if preprocDef.Ynorm == True:
+    if preprocDef.Ynorm:
         if type == 0:
             print(' Normalizing spectral intensity to: ' + str(preprocDef.YnormTo) + '; En = [' + str(preprocDef.YnormX-preprocDef.YnormXdelta) + ', ' + str(preprocDef.YnormX+preprocDef.YnormXdelta) + ']')
         for i in range(0,A.shape[0]):
             A[i,:] = np.multiply(A[i,:], preprocDef.YnormTo/np.amax(A[i]))
 
 
-    if preprocDef.StandardScalerFlag == True:
+    if preprocDef.StandardScalerFlag:
         print('  Using StandardScaler from sklearn ')
         A = preprocDef.scaler.fit_transform(A)
 
     #**********************************************
     ''' Energy normalization range '''
     #**********************************************
-    if preprocDef.enRestrictRegion == True:
+    if preprocDef.enRestrictRegion:
         A = A[:,range(preprocDef.enLim1, preprocDef.enLim2)]
         En = En[range(preprocDef.enLim1, preprocDef.enLim2)]
         Aorig = Aorig[:,range(preprocDef.enLim1, preprocDef.enLim2)]
@@ -340,7 +340,7 @@ def plotProb(clf, R):
 #************************************
 def plotTrainData(A, En, R, plotAllSpectra, learnFileRoot):
     import matplotlib.pyplot as plt
-    if plotDef.plotAllSpectra == True:
+    if plotDef.plotAllSpectra:
         step = 1
         learnFileRoot = learnFileRoot + '_full-set'
     else:
@@ -360,7 +360,7 @@ def plotTrainData(A, En, R, plotAllSpectra, learnFileRoot):
 
     plt.savefig(learnFileRoot + '.png', dpi = 160, format = 'png')  # Save plot
 
-    if plotDef.showTrainingDataPlot == True:
+    if plotDef.showTrainingDataPlot:
         plt.show()
 
     plt.close()

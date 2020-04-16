@@ -50,7 +50,7 @@ def runKMmain(A, Cl, En, R, Aorig, Rorig):
             print("  {0:d}\t| {1:.2f}".format(prediction,Cl[j]))
     print('  ==============================\n')
 
-    if kmDef.plotKM == True:
+    if kmDef.plotKM:
         import matplotlib.pyplot as plt
         for j in range(0,kmeans.labels_.shape[0]):
             if kmeans.labels_[j] == kmeans.predict(R)[0]:
@@ -87,6 +87,6 @@ def KmMap(mapFile, numKMcomp):
                 saveMap(mapFile, 'KM', 'Class_'+ str(int(kmPred[i])) + '-'+str(np.unique(kmeans.labels_).shape[0]) , '\t'.join(map(str, Rx)), ' ', ' ', False)
             saveMap(mapFile, 'KM', 'Class_'+ str(int(kmPred[i])) + '-'+str(np.unique(kmeans.labels_).shape[0]) , '\t'.join(map(str, R[1,:])), X[i], Y[i], False)
 
-    if kmDef.plotKM == True:
+    if kmDef.plotKM:
         plotMaps(X, Y, kmPred, 'K-Means')
 

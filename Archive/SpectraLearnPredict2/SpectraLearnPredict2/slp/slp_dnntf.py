@@ -48,7 +48,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
     #import tensorflow.contrib.learn as skflow
     #from tensorflow.contrib.learn.python.learn import monitors as monitor_lib
     
-    if dnntfDef.logCheckpoint == True:
+    if dnntfDef.logCheckpoint:
         tf.logging.set_verbosity(tf.logging.INFO)
     
     if dnntfDef.alwaysRetrain == False:
@@ -88,7 +88,7 @@ def trainDNNTF(A, Cl, A_test, Cl_test, Root):
         Cl2_test = Cl_test
     #############################
     
-    if dnntfDef.fullBatch == True:
+    if dnntfDef.fullBatch:
         batch_size_train = A.shape[0]
         batch_size_test = A_test.shape[0]
     else:
@@ -273,7 +273,7 @@ def printInfo(A):
         print('  Exponential decay - initial learning rate:',dnntfDef.learning_rate,
                 '\n  Exponential decay rate:', dnntfDef.learning_rate_decay_rate,
                 '\n  Exponential decay steps:', dnntfDef.learning_rate_decay_steps,)
-    if dnntfDef.fullBatch == True:
+    if dnntfDef.fullBatch:
         print('  Full batch size: {0:d} spectra, {1:.3f} Mb'.format(A.shape[0],(1e-6*A.size*A.itemsize)))
     else:
         print('  Batch size:', dnntfDef.batchSize)

@@ -364,7 +364,7 @@ class preprocDef:
     scrambleNoiseFlag = config.scrambleNoiseFlag # Adds random noise to spectra (False: recommended)
     scrambleNoiseOffset = config.scrambleNoiseOffset
 
-    if StandardScalerFlag == True:
+    if StandardScalerFlag:
         from sklearn.preprocessing import StandardScaler
         scaler = StandardScaler()
 
@@ -379,7 +379,7 @@ class preprocDef:
     #enSel = [1220, 1270, 1590]
     #enSelDelta = [2, 2, 30]
 
-    if(cherryPickEnPoint == True):
+    if cherryPickEnPoint:
         enRestrictRegion = False
         print(' Calculation by limited number of points: ENABLED ')
         print(' THIS IS AN EXPERIMENTAL FEATURE \n')
@@ -411,7 +411,7 @@ class dnntfDef:
     
     learning_rate = config.learning_rateDNNTF
     learning_rate_decay = config.learning_rate_decayDNNTF
-    if learning_rate_decay == True:
+    if learning_rate_decay:
         learning_rate_decay_rate = config.learning_rate_decay_rateDNNTF
         learning_rate_decay_steps = config.learning_rate_decay_stepsDNNTF
 
@@ -449,7 +449,7 @@ class dnntfDef:
     #*************************************************
     # Setup variables and definitions- do not change.
     #*************************************************
-    if runDNNTF == True:
+    if runDNNTF:
         import tensorflow as tf
         if activation_function == "sigmoid" or activation_function == "tanh":
             actFn = "tf."+activation_function
@@ -548,7 +548,7 @@ class kerasDef:
     #*************************************************
     # Setup variables and definitions- do not change.
     #*************************************************
-    if runKeras == True:
+    if runKeras:
         import tensorflow as tf
         if useTFKeras:
             print("Using tf.keras API")
@@ -733,7 +733,7 @@ class sysDef:
     multiProc = config.multiProc
     config.useAllCores
     import multiprocessing as mp
-    if config.useAllCores == True:
+    if config.useAllCores:
         numCores = mp.cpu_count()
         print("\n Multiprocessing batch using max number of cores/processors: ", numCores)
     else:

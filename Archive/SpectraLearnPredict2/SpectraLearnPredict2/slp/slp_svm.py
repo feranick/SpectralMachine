@@ -73,7 +73,7 @@ def trainSVM(A, Cl, A_test, Cl_test, Root):
         print('\n  Number of classes = ' + str(Z.shape[1]))
         joblib.dump(clf, svmTrainedData)
         joblib.dump(le, model_le)
-        if svmDef.showClasses == True:
+        if svmDef.showClasses:
             print('  List of classes: ' + str(clf.classes_))
 
     print('==========================================================================\n')
@@ -106,14 +106,14 @@ def predSVM(clf, A, Cl, R, le):
     #**************************************
     ''' SVM Classification Report '''
     #**************************************
-    if svmDef.svmClassReport == True:
+    if svmDef.svmClassReport:
         print(' SVM Classification Report \n')
         runClassReport(clf, A, Cl)
 
     #*************************
     ''' Plot probabilities '''
     #*************************
-    if plotDef.showProbPlot == True:
+    if plotDef.showProbPlot:
         plotProb(clf, R)
 
     return R_pred[0], round(100*max(prob),1)
@@ -151,7 +151,7 @@ def runPCA(learnFile, numPCAcomponents):
         print(' Score PC ' + str(i) + ': ' + '{0:.0f}%'.format(pca.explained_variance_ratio_[i] * 100))
     print('')
 
-    if plotDef.showPCAPlots == True:
+    if plotDef.showPCAPlots:
         print(' Plotting Loadings and score plots... \n')
 
         #***************************
