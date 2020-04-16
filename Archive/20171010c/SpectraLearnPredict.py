@@ -1372,19 +1372,19 @@ def runPCA(En, Cl, A, YnormXind, numPCAcomponents):
             for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
                 plt.scatter(A_r[Cl_ind==i,0], A_r[Cl_ind==i,1], color=color, alpha=.8, lw=2, label=target_name)
     
-        plt.title('Score plot')
-        plt.xlabel('PC 0 ({0:.0f}%)'.format(pca.explained_variance_ratio_[0] * 100))
-        plt.ylabel('PC 1 ({0:.0f}%)'.format(pca.explained_variance_ratio_[1] * 100))
-        plt.figure()
+            plt.title('Score plot')
+            plt.xlabel('PC 0 ({0:.0f}%)'.format(pca.explained_variance_ratio_[0] * 100))
+            plt.ylabel('PC 1 ({0:.0f}%)'.format(pca.explained_variance_ratio_[1] * 100))
+            plt.figure()
 
-        plt.title('Score box plot')
-        plt.xlabel('Principal Component')
-        plt.ylabel('Score')
-        for j in range(pca.components_.shape[0]):
-            for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
-                plt.scatter([j+1]*len(A_r[Cl_ind==i,j]), A_r[Cl_ind==i,j], color=color, alpha=.8, lw=2, label=target_name)
-        plt.boxplot(A_r)
-        plt.figure()
+            plt.title('Score box plot')
+            plt.xlabel('Principal Component')
+            plt.ylabel('Score')
+            for j in range(pca.components_.shape[0]):
+                for color, i, target_name in zip(colors, range(ind.shape[0]), Cl_labels):
+                    plt.scatter([j+1]*len(A_r[Cl_ind==i,j]), A_r[Cl_ind==i,j], color=color, alpha=.8, lw=2, label=target_name)
+            plt.boxplot(A_r)
+            plt.figure()
 
         #******************************
         ''' Plotting Scores vs H:C '''
