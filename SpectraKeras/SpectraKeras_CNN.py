@@ -408,7 +408,7 @@ def train(learnFile, testFile, flag):
     print('  =============================================')
 
     print("  Training set file:",learnFile)
-    if testFile != None:
+    if testFile is not None:
         print("  Validation set file:",testFile)
     print("  Data size:", A.shape,"\n")
     print("  Number of learning labels:",dP.numLabels)
