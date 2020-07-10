@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20200416a
+* 20200710a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -45,23 +45,23 @@ class Conf():
             self.summaryFileName = "summary_classifier_CNN.csv"
             self.summaryAccFileName = "summary_classifier_CNN_accuracy.csv"
             self.model_png = self.model_directory+"model_classifier_CNN.png"
-    
+
         self.tb_directory = "model_CNN"
         self.model_name = self.model_directory+self.modelName
         self.model_le = self.model_directory+"model_le.pkl"
         self.spectral_range = "model_spectral_range.pkl"
-        
+
         self.actPlotTrain = self.model_directory+"model_CNN_train-activations_conv2D_"
         self.actPlotPredict = self.model_directory+"model_CNN_pred-activations_"
         self.sizeColPlot = 4
-    
+
         if platform.system() == 'Linux':
             self.edgeTPUSharedLib = "libedgetpu.so.1"
         if platform.system() == 'Darwin':
             self.edgeTPUSharedLib = "libedgetpu.1.dylib"
         if platform.system() == 'Windows':
             self.edgeTPUSharedLib = "edgetpu.dll"
-            
+
     def SKDef(self):
         self.conf['Parameters'] = {
             'regressor' : False,
@@ -98,7 +98,7 @@ class Conf():
             self.conf.read(configFile)
             self.SKDef = self.conf['Parameters']
             self.sysDef = self.conf['System']
-        
+
             self.regressor = self.conf.getboolean('Parameters','regressor')
             self.normalize = self.conf.getboolean('Parameters','normalize')
             self.l_rate = self.conf.getfloat('Parameters','l_rate')
@@ -141,7 +141,7 @@ class Conf():
 def main():
     start_time = time.perf_counter()
     dP = Conf()
-    
+
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    "tnpblah:", ["train", "net", "predict", "batch", "lite", "accuracy", "help"])
@@ -180,7 +180,7 @@ def main():
             except:
                 usage()
                 sys.exit(2)
-            
+
         if o in ("-b" , "--batch"):
             try:
                 batchPredict(sys.argv[2])
@@ -194,7 +194,7 @@ def main():
             except:
                 usage()
                 sys.exit(2)
-                
+
         if o in ("-a" , "--accuracy"):
             try:
                 accDeterm(sys.argv[2])
@@ -211,7 +211,7 @@ def main():
 #************************************
 def train(learnFile, testFile, flag):
     dP = Conf()
-    
+
     from pkg_resources import parse_version
     import tensorflow as tf
 
@@ -219,11 +219,11 @@ def train(learnFile, testFile, flag):
         useTF2 = False
     else:
         useTF2 = True
-    
+
     if useTF2:
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
-        
+
         gpus = tf.config.experimental.list_physical_devices('GPU')
         if gpus:
            for gpu in gpus:
@@ -232,17 +232,17 @@ def train(learnFile, testFile, flag):
         #       tf.config.experimental.set_virtual_device_configuration(
         #         gpus[0],
         #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
-        
+
     else:
         tf.compat.v1.enable_eager_execution()
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)
         conf.gpu_options.allow_growth = True
-        
+
         tf.compat.v1.Session(config=conf)
-    
+
     import tensorflow.keras as keras
-        
+
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
     if testFile is not None:
@@ -259,13 +259,13 @@ def train(learnFile, testFile, flag):
 
     print("  Total number of points per data:",En.size)
     print("  Number of learning labels: {0:d}\n".format(int(dP.numLabels)))
-    
+
     if dP.regressor:
         Cl2 = np.copy(Cl)
         if testFile is not None:
             Cl2_test = np.copy(Cl_test)
     else:
-    
+
         #************************************
         # Label Encoding
         #************************************
@@ -281,14 +281,14 @@ def train(learnFile, testFile, flag):
         le = MultiClassReductor()
         le.fit(np.unique(totCl, axis=0))
         Cl2 = le.transform(Cl)
-    
+
         print("  Number unique classes (training): ", np.unique(Cl).size)
-    
+
         if testFile is not None:
             Cl2_test = le.transform(Cl_test)
             print("  Number unique classes (validation):", np.unique(Cl_test).size)
             print("  Number unique classes (total): ", np.unique(totCl).size)
-            
+
         if flag == False:
             print("\n  Label Encoder saved in:", dP.model_le,"\n")
             with open(dP.model_le, 'ab') as f:
@@ -372,12 +372,12 @@ def train(learnFile, testFile, flag):
     tbLog = keras.callbacks.TensorBoard(log_dir=dP.tb_directory, histogram_freq=120,
             write_graph=True, write_images=True)
     tbLogs = [tbLog]
-    
+
     model.summary()
-    
+
     if flag:
         return
-    
+
     if testFile is not None:
         log = model.fit(x_train, Cl2,
             epochs=dP.epochs,
@@ -399,7 +399,7 @@ def train(learnFile, testFile, flag):
         model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     model.summary()
-    
+
     if dP.makeQuantizedTFlite:
         makeQuantizedTFmodel(x_train, model, dP)
 
@@ -480,7 +480,7 @@ def train(learnFile, testFile, flag):
     # Plot Conv2D activations
     if dP.plotActivations:
         plotActivationsTrain(model)
-    
+
     # Plot Dense weights
     if dP.plotWeightsFlag:
         plotWeights(En, A, model, "CNN")
@@ -508,7 +508,7 @@ def predict(testFile):
         predValue = predictions
         print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
         print('  ========================================================\n')
-        
+
     else:
         le_file = open(dP.model_le, "rb")
         le = pickle.loads(le_file.read())
@@ -550,7 +550,6 @@ def predict(testFile):
             print("  3:",str((predValue[1]/0.5)*(100-99.2-.3)),"%\n")
             print(' ==========================================\n')
 
-
     if dP.plotActivations and not dP.useTFlitePred:
         plotActivationsPredictions(R,model)
 
@@ -572,7 +571,7 @@ def batchPredict(folder):
             except:
                 predictions = np.array([getPredictions(R, model,dP).flatten()])
             fileName.append(file)
-            
+
     if dP.regressor:
         summaryFile = np.array([['SpectraKeras_CNN','Regressor','',],['File name','Prediction','']])
         print('\n  ========================================================')
@@ -600,7 +599,7 @@ def batchPredict(folder):
             else:
                 predProb = round(100*predictions[i][pred_class],2)
             rosterPred = np.where(predictions[i][0]>0.1)[0]
-        
+
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
                 print('  {0:s}:\033[1m\n   Predicted value = {1:.2f} (probability = {2:.2f}%)\033[0m\n'.format(fileName[i],predValue, predProb))
@@ -612,7 +611,7 @@ def batchPredict(folder):
             summaryFile = np.vstack((summaryFile,[fileName[i], predValue,predProb]))
         print('  ========================================================\n')
         print(" Predictions with probability > {0:.2f}:  {1:.2f}%\n".format(dP.predProbThreshold, indPredProb*100/predictions.shape[0]))
-        
+
     import pandas as pd
     df = pd.DataFrame(summaryFile)
     df.to_csv(dP.summaryFileName, index=False, header=False)
@@ -627,7 +626,7 @@ def accDeterm(testFile):
     En, A, Cl = readLearnFile(testFile, dP)
     predictions = np.zeros((0,0))
     fileName = []
-    
+
     print("\n  Number of spectra in testing file:",A.shape[0])
 
     for row in A:
@@ -636,7 +635,7 @@ def accDeterm(testFile):
             predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
         except:
             predictions = np.array([getPredictions(R, model,dP).flatten()])
-            
+
     if dP.regressor:
         print("\n  Accuracy determination is not defined in regression. Exiting.\n")
         return
@@ -645,9 +644,9 @@ def accDeterm(testFile):
         le = pickle.loads(le_file.read())
         le_file.close()
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['Real Class','Predicted Class', 'Probability']])
-        
+
         successPred = 0
-        
+
         for i in range(predictions.shape[0]):
             pred_class = np.argmax(predictions[i])
             if dP.useTFlitePred:
@@ -655,24 +654,23 @@ def accDeterm(testFile):
             else:
                 predProb = round(100*predictions[i][pred_class],2)
             rosterPred = np.where(predictions[i][0]>0.1)[0]
-        
+
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
             else:
                 predValue = 0
             if Cl[i] == predValue:
                 successPred+=1
-                
+
             summaryFile = np.vstack((summaryFile,[Cl[i], predValue, predProb]))
-    
+
     print("\n\033[1m  Overall average accuracy: {0:.2f}% \033[0m".format(successPred*100/Cl.shape[0]))
     summaryFile[0,2] = "Av Acc: {0:.2f}%".format(successPred*100/Cl.shape[0])
-    
+
     import pandas as pd
     df = pd.DataFrame(summaryFile)
     df.to_csv(dP.summaryAccFileName, index=False, header=False)
     print("\n  Prediction summary saved in:",dP.summaryAccFileName,"\n")
-
 
 #****************************************************
 # Convert model to quantized TFlite
@@ -744,7 +742,7 @@ def plotActivationsTrain(model):
             col_size = dP.sizeColPlot
             row_size = int(dP.CL_filter[i]/dP.sizeColPlot)
             fig, ax = plt.subplots(row_size, col_size, figsize=(row_size*3,col_size*3))
-                        
+
             for row in range(0,row_size):
                 for col in range(0,col_size):
                     #ax[row][col].imshow(weight_conv2d_1[:,:,filter_index],cmap="gray")
@@ -754,7 +752,7 @@ def plotActivationsTrain(model):
             plt.savefig(dP.actPlotTrain+str(i)+".png", dpi = 160, format = 'png')  # Save plot
             print(" Saving conv2D activation plots in:", dP.actPlotTrain+str(i)+".png")
             i+=1
-    
+
 #************************************
 # Plot Activations in Predictions
 #************************************
@@ -766,7 +764,7 @@ def plotActivationsPredictions(R, model):
     layer_outputs = [layer.output for layer in model.layers]
     activation_model = Model(inputs=model.input, outputs=layer_outputs)
     activations = activation_model.predict(R)
-    
+
     def display_activation(activations, layerName, col_size, layerShape, act_index):
         activation = activations[act_index]
         if len(activation_model.layers[i+1].output_shape) == 4:
