@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20200416a
+* 20200709a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -45,19 +45,19 @@ class Conf():
             self.summaryFileName = "summary_classifier_MLP.csv"
             self.summaryAccFileName = "summary_classifier_MLP_accuracy.csv"
             self.model_png = self.model_directory+"model_classifier_MLP.png"
-        
+
         self.tb_directory = "model_MLP"
         self.model_name = self.model_directory+self.modelName
         self.model_le = self.model_directory+"model_le.pkl"
         self.spectral_range = "model_spectral_range.pkl"
-        
+
         if platform.system() == 'Linux':
             self.edgeTPUSharedLib = "libedgetpu.so.1"
         if platform.system() == 'Darwin':
             self.edgeTPUSharedLib = "libedgetpu.1.dylib"
         if platform.system() == 'Windows':
             self.edgeTPUSharedLib = "edgetpu.dll"
-            
+
     def SKDef(self):
         self.conf['Parameters'] = {
             'regressor' : False,
@@ -89,7 +89,7 @@ class Conf():
             self.conf.read(configFile)
             self.SKDef = self.conf['Parameters']
             self.sysDef = self.conf['System']
-        
+
             self.regressor = self.conf.getboolean('Parameters','regressor')
             self.normalize = self.conf.getboolean('Parameters','normalize')
             self.l_rate = self.conf.getfloat('Parameters','l_rate')
@@ -127,7 +127,7 @@ class Conf():
 def main():
     start_time = time.perf_counter()
     dP = Conf()
-    
+
     try:
         opts, args = getopt.getopt(sys.argv[1:],
                                    "tpblah:", ["train", "predict", "lite", "batch", "accuracy", "help"])
@@ -156,21 +156,21 @@ def main():
             except:
                usage()
                sys.exit(2)
-                
+
         if o in ("-b" , "--batch"):
             try:
                 batchPredict(sys.argv[2])
             except:
                 usage()
                 sys.exit(2)
-        
+
         if o in ("-l" , "--lite"):
             try:
                 convertTflite(sys.argv[2])
             except:
                 usage()
                 sys.exit(2)
-        
+
         if o in ("-a" , "--accuracy"):
             try:
                 accDeterm(sys.argv[2])
@@ -195,11 +195,11 @@ def train(learnFile, testFile):
         useTF2 = False
     else:
         useTF2 = True
-    
+
     if useTF2:
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
-        
+
         gpus = tf.config.experimental.list_physical_devices('GPU')
         if gpus:
            for gpu in gpus:
@@ -208,13 +208,13 @@ def train(learnFile, testFile):
         #       tf.config.experimental.set_virtual_device_configuration(
         #         gpus[0],
         #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
-        
+
     else:
         tf.compat.v1.enable_eager_execution()
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)
         conf.gpu_options.allow_growth = True
-    
+
         tf.compat.v1.Session(config=conf)
 
     import tensorflow.keras as keras
@@ -235,13 +235,13 @@ def train(learnFile, testFile):
 
     print("  Total number of points per data:",En.size)
     print("  Number of learning labels: {0:d}\n".format(int(dP.numLabels)))
-    
+
     if dP.regressor:
         Cl2 = np.copy(Cl)
         if testFile is not None:
             Cl2_test = np.copy(Cl_test)
     else:
-    
+
         #************************************
         # Label Encoding
         #************************************
@@ -257,14 +257,14 @@ def train(learnFile, testFile):
         le = MultiClassReductor()
         le.fit(np.unique(totCl, axis=0))
         Cl2 = le.transform(Cl)
-    
+
         print("  Number unique classes (training): ", np.unique(Cl).size)
-    
+
         if testFile is not None:
             Cl2_test = le.transform(Cl_test)
             print("  Number unique classes (validation):", np.unique(Cl_test).size)
             print("  Number unique classes (total): ", np.unique(totCl).size)
-            
+
         print("\n  Label Encoder saved in:", dP.model_le,"\n")
         with open(dP.model_le, 'ab') as f:
             f.write(pickle.dumps(le))
@@ -315,9 +315,9 @@ def train(learnFile, testFile):
             batch_size=dP.batch_size,
             write_graph=True, write_grads=True, write_images=True)
     tbLogs = [tbLog]
-    
+
     model.summary()
-    
+
     if testFile is not None:
         log = model.fit(A, Cl2,
             epochs=dP.epochs,
@@ -339,7 +339,7 @@ def train(learnFile, testFile):
         model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     model.summary()
-    
+
     if dP.makeQuantizedTFlite:
         makeQuantizedTFmodel(A, model, dP)
 
@@ -418,7 +418,7 @@ def train(learnFile, testFile):
 
     if dP.plotWeightsFlag:
         plotWeights(En, A, model, MLP)
-    
+
     getTFVersion(dP)
 
 #************************************
@@ -441,7 +441,7 @@ def predict(testFile):
         predValue = predictions
         print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
         print('  ========================================================\n')
-        
+
     else:
         le_file = open(dP.model_le, "rb")
         le = pickle.loads(le_file.read())
@@ -530,7 +530,7 @@ def batchPredict(folder):
             else:
                 predProb = round(100*predictions[i][pred_class],2)
             rosterPred = np.where(predictions[i][0]>0.1)[0]
-        
+
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
                 print('  {0:s}:\033[1m\n   Predicted value = {1:.2f} (probability = {2:.2f}%)\033[0m\n'.format(fileName[i],predValue, predProb))
@@ -546,7 +546,6 @@ def batchPredict(folder):
     df = pd.DataFrame(summaryFile)
     df.to_csv(dP.summaryFileName, index=False, header=False)
     print(" Prediction summary saved in:",dP.summaryFileName,"\n")
-    
 
 #************************************
 # Accuracy determination
@@ -557,16 +556,15 @@ def accDeterm(testFile):
     En, A, Cl = readLearnFile(testFile, dP)
     predictions = np.zeros((0,0))
     fileName = []
-    
     print("\n  Number of spectra in testing file:",A.shape[0])
-        
+
     for row in A:
         R = np.array([row])
         try:
             predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
         except:
             predictions = np.array([getPredictions(R, model,dP).flatten()])
-                
+
     if dP.regressor:
         print("\n  Accuracy determination is not defined in regression. Exiting.\n")
         return
@@ -575,9 +573,9 @@ def accDeterm(testFile):
         le = pickle.loads(le_file.read())
         le_file.close()
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['Real Class','Predicted Class', 'Probability']])
-            
+
         successPred = 0
-            
+
         for i in range(predictions.shape[0]):
             pred_class = np.argmax(predictions[i])
             if dP.useTFlitePred:
@@ -585,24 +583,23 @@ def accDeterm(testFile):
             else:
                 predProb = round(100*predictions[i][pred_class],2)
             rosterPred = np.where(predictions[i][0]>0.1)[0]
-            
+
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
             else:
                 predValue = 0
             if Cl[i] == predValue:
                 successPred+=1
-                    
+
             summaryFile = np.vstack((summaryFile,[Cl[i], predValue, predProb]))
-        
+
     print("\n\033[1m  Overall average accuracy: {0:.2f}% \033[0m".format(successPred*100/Cl.shape[0]))
     summaryFile[0,2] = "Av Acc: {0:.2f}%".format(successPred*100/Cl.shape[0])
-        
+
     import pandas as pd
     df = pd.DataFrame(summaryFile)
     df.to_csv(dP.summaryAccFileName, index=False, header=False)
     print("\n  Prediction summary saved in:",dP.summaryAccFileName,"\n")
-
 
 #****************************************************
 # Convert model to quantized TFlite
@@ -642,7 +639,7 @@ def printParam():
         print('  Batch size:', dP.batch_size)
     print('  Number of labels:', dP.numLabels)
     #print('  ================================================\n')
-        
+
 #************************************
 # Lists the program usage
 #************************************

@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20200416a
+* 20200709a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -30,7 +30,7 @@ def readLearnFile(learnFile, dP):
 
     En = M[0,dP.numLabels:]
     A = M[1:,dP.numLabels:]
-    
+
     if dP.normalize:
         norm = Normalizer()
         A = norm.transform_matrix(A)
@@ -39,7 +39,7 @@ def readLearnFile(learnFile, dP):
         Cl = M[1:,0]
     else:
         Cl = M[1:,[0,dP.numLabels-1]]
-        
+
     return En, A, Cl
 
 #************************************
@@ -55,7 +55,7 @@ def readTestFile(testFile, dP):
         print("\033[1m\n File not found or corrupt\033[0m\n")
         return 0, False
     return R, True
-    
+
 #****************************************************
 # Check Energy Range and convert to fit training set
 #****************************************************
@@ -63,14 +63,14 @@ def preProcess(Rtot, dP):
     En_file = open(dP.spectral_range, "rb")
     En = pickle.loads(En_file.read())
     En_file.close()
-    
+
     R = np.array([Rtot[1,:]])
     Rx = np.array([Rtot[0,:]])
-    
+
     if dP.normalize:
         norm = Normalizer()
         R = norm.transform_single(R)
-    
+
     if(R.shape[1] is not len(En)):
         print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
         R = np.interp(En, Rx[0], R[0])
@@ -125,7 +125,7 @@ def getPredictions(R, model, dP):
         # The function `get_tensor()` returns a copy of the tensor data.
         # Use `tensor()` in order to get a pointer to the tensor.
         predictions = interpreter.get_tensor(output_details[0]['index'])
-        
+
     else:
         predictions = model.predict(R)
     return predictions
@@ -136,14 +136,14 @@ def getPredictions(R, model, dP):
 def makeQuantizedTFmodel(A, model, dP):
     import tensorflow as tf
     print("\n  Creating quantized TensorFlowLite Model...\n")
-    
+
     A2 = tf.cast(A, tf.float32)
     A = tf.data.Dataset.from_tensor_slices((A2)).batch(1)
-    
+
     def representative_dataset_gen():
         for input_value in A.take(100):
             yield[input_value]
-    
+
     try:
         converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TF2.x
         #converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.x only. Does not support EdgeTPU
@@ -181,7 +181,7 @@ def plotWeights(En, A, model, type):
             plt.setp(ax.get_xticklabels(), visible=False)
             plotInd +=1
             print(" Preparing weigths for layer:",layer.name)
-                
+
     ax1 = plt.subplot(plotInd)
     ax1.plot(En, A[0], label='Sample data')
 
@@ -218,7 +218,7 @@ class Normalizer(object):
                 yn[i,:] = np.multiply(y[i,:] - np.amin(y[i,:]),
                     self.YnormTo/(np.amax(y[i,:]) - np.amin(y[i,:])))
         return yn
-    
+
     def transform_single(self,y):
         yn = np.copy(y)
         yn = np.multiply(y - np.amin(y),
@@ -242,11 +242,11 @@ class NormalizeLabel(object):
         self.maxGeneralLabel = dP.maxGeneralLabel
         self.YnormTo = dP.YnormTo
         self.stepNormLabel = dP.stepNormLabel
-        
+
         self.data = np.arange(0,1,self.stepNormLabel)
         self.min = np.zeros([self.M.shape[1]])
         self.max = np.zeros([self.M.shape[1]])
-    
+
         if self.normalizeLabel:
             if self.useGeneralNormLabel:
                 self.min[0] = dP.minGeneralLabel
@@ -254,11 +254,11 @@ class NormalizeLabel(object):
             else:
                 self.min[0] = np.amin(self.M[1:,0])
                 self.max[0] = np.amax(self.M[1:,0])
-        
+
         for i in range(1,M.shape[1]):
             self.min[i] = np.amin(self.M[1:,i])
             self.max[i] = np.amax(self.M[1:,i])
-    
+
     def transform_matrix(self,y):
         Mn = np.copy(y)
         if self.normalizeLabel:
@@ -273,14 +273,14 @@ class NormalizeLabel(object):
             Mn[1:,i] = np.multiply(y[1:,i] - self.min[i],
                 self.YnormTo/(self.max[i] - self.min[i]))
         return Mn
-    
+
     def transform_valid(self,V):
         Vn = np.copy(V)
         for i in range(0,V.shape[0]):
             Vn[i,1] = np.multiply(V[i,1] - self.min[i+1],
                 self.YnormTo/(self.max[i+1] - self.min[i+1]))
         return Vn
-    
+
     def transform_inverse_single(self,v):
         vn = self.min[0] + v*(self.max[0] - self.min[0])/self.YnormTo
         return vn
@@ -317,16 +317,16 @@ class CustomRound:
 class MultiClassReductor():
     def __self__(self):
         self.name = name
-    
+
     def fit(self,tc):
         self.totalClass = tc.tolist()
-    
+
     def transform(self,y):
         Cl = np.zeros(y.shape[0])
         for j in range(len(y)):
             Cl[j] = self.totalClass.index(np.array(y[j]).tolist())
         return Cl
-    
+
     def inverse_transform(self,a):
         return [self.totalClass[int(a)]]
 
