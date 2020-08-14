@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20200716a
+* 20200814a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -200,14 +200,14 @@ def train(learnFile, testFile):
         opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
         conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
 
-        gpus = tf.config.experimental.list_physical_devices('GPU')
+        gpus = tf.config.list_physical_devices('GPU')
         if gpus:
            for gpu in gpus:
                tf.config.experimental.set_memory_growth(gpu, True)
         #   if dP.setMaxMem:
-        #       tf.config.experimental.set_virtual_device_configuration(
+        #       tf.config.set_virtual_device_configuration(
         #         gpus[0],
-        #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
+        #         [tf.config.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
 
     else:
         tf.compat.v1.enable_eager_execution()
