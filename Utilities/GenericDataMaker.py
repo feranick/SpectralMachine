@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
 * GenericDataMaker
 * Adds spectra to single file for classification
 * File must be in TXT format
-* version: 20210324a
 *
+* version: 20210427a
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)
@@ -52,6 +50,7 @@ def main():
         enInit = 100
         enFin = 1500
         enStep = 0.5
+        threshold = 0
     else:
         enInit = sys.argv[2]
         enFin =  sys.argv[3]
