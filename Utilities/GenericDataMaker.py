@@ -17,7 +17,7 @@ import sys, os.path, h5py
 from datetime import datetime, date
 
 #**********************************************
-''' main '''
+# User customizable Parameters
 #**********************************************
 class defParam:
     saveAsTxt = False
@@ -45,6 +45,9 @@ class defParam:
     # fill in in absence of data
     useMinForBoundary = False
 
+#**********************************************
+# Main
+#**********************************************
 def main():
     if len(sys.argv) < 5:
         enInit = 100
@@ -63,14 +66,14 @@ def main():
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
     
-    #try:
-    processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
-    #except:
-        #usage()
-    #sys.exit(2)
+    try:
+        processMultiFile(sys.argv[1], enInit, enFin, enStep, threshold)
+    except:
+        usage()
+        sys.exit(2)
 
 #**********************************************
-''' Open and process inividual files '''
+# Open and process inividual files
 #**********************************************
 def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     index = 0
@@ -137,7 +140,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
             np.savetxt(f, Cl2, delimiter='\t', fmt='%10.6f')
 
 #**********************************************
-''' Add data to Training file '''
+# Add data to Training file
 #**********************************************
 def makeFile(sampleFile, EnT, M, param, threshold):
     print('\n Process file in class #: ' + str(param))
@@ -175,7 +178,7 @@ def makeFile(sampleFile, EnT, M, param, threshold):
     return True, M
 
 #***************************************
-''' Save learning file '''
+# Save learning file
 #***************************************
 def saveLearningFile(M, learnFileRoot):
     if defParam.saveAsTxt == True:
@@ -190,7 +193,7 @@ def saveLearningFile(M, learnFileRoot):
         print(" Saving new training file (hdf5) in: "+learnFile+"\n")
 
 #************************************
-''' Open Learning Data '''
+# Open Learning Data
 #************************************
 def readLearnFile(learnFile):
     print(" Opening learning file: "+learnFile+"\n")
@@ -214,7 +217,7 @@ def readLearnFile(learnFile):
     return En, M
 
 #************************************
-''' Lists the program usage '''
+# Lists the program usage
 #************************************
 def usage():
     print('\n Usage:\n')
@@ -222,7 +225,7 @@ def usage():
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
-''' Main initialization routine '''
+# Main initialization routine
 #************************************
 if __name__ == "__main__":
     sys.exit(main())
