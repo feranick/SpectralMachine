@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20201210a
+* 20210510a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -191,33 +191,17 @@ def train(learnFile, testFile):
     import tensorflow as tf
     import tensorflow.keras as keras
 
-    if parse_version(tf.version.VERSION) < parse_version('2.0.0'):
-        useTF2 = False
-    else:
-        useTF2 = True
+    opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
+    conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
 
-    if useTF2:
-        opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
-        conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
-
-        gpus = tf.config.list_physical_devices('GPU')
-        if gpus:
-           for gpu in gpus:
-               tf.config.experimental.set_memory_growth(gpu, True)
-        #   if dP.setMaxMem:
-        #       tf.config.set_virtual_device_configuration(
-        #         gpus[0],
-        #         [tf.config.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
-
-    else:
-        tf.compat.v1.enable_eager_execution()
-        opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)
-        conf = tf.compat.v1.ConfigProto(gpu_options=opts)
-        conf.gpu_options.allow_growth = True
-
-        tf.compat.v1.Session(config=conf)
-
-    import tensorflow.keras as keras
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    #   if dP.setMaxMem:
+    #       tf.config.set_virtual_device_configuration(
+    #         gpus[0],
+    #         [tf.config.VirtualDeviceConfiguration(memory_limit=dP.maxMem)])
 
     learnFileRoot = os.path.splitext(learnFile)[0]
 
@@ -332,11 +316,9 @@ def train(learnFile, testFile):
             callbacks = tbLogs,
             verbose=2,
 	        validation_split=dP.cv_split)
-
-    if useTF2:
-        model.save(dP.model_name, save_format='h5')
-    else:
-        model.save(dP.model_name)
+         
+    model.save(dP.model_name, save_format='h5')
+    
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     model.summary()
 

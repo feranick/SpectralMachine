@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20201210a
+* 20210510a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -144,11 +144,8 @@ def makeQuantizedTFmodel(A, model, dP):
         for input_value in A.take(100):
             yield[input_value]
 
-    try:
-        #converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TF2.0-2.2 (will be deprecated)
-        converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only. 
-    except:
-        converter = tf.lite.TFLiteConverter.from_keras_model_file(dP.model_name)  # T1.x
+    #converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TF2.0-2.2 (will be deprecated)
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only.
 
     #converter.optimizations = [tf.lite.Optimize.DEFAULT]
     #converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
