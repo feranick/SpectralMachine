@@ -74,6 +74,7 @@ class Conf():
             'numLabels' : 1,
             'plotWeightsFlag' : False,
             'showValidPred' : False,
+            'stopAtBest' : False,
             }
 
     def sysDef(self):
@@ -104,6 +105,7 @@ class Conf():
             self.numLabels = self.conf.getint('Parameters','numLabels')
             self.plotWeightsFlag = self.conf.getboolean('Parameters','plotWeightsFlag')
             self.showValidPred = self.conf.getboolean('Parameters','showValidPred')
+            self.stopAtBest = self.conf.getboolean('Parameters','stopAtBest')
             self.makeQuantizedTFlite = self.conf.getboolean('System','makeQuantizedTFlite')
             self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
             self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
@@ -298,7 +300,13 @@ def train(learnFile, testFile):
     tbLog = keras.callbacks.TensorBoard(log_dir=dP.tb_directory, histogram_freq=120,
             batch_size=dP.batch_size,
             write_graph=True, write_grads=True, write_images=True)
-    tbLogs = [tbLog]
+    
+    if dP.stopAtBest == True:
+        es = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=200)
+        mc = keras.callbacks.ModelCheckpoint(dP.model_name, monitor='val_accuracy', mode='max', verbose=1, save_best_only=True)
+        tbLogs = [tbLog, es, mc]
+    else:
+        tbLogs = [tbLog]
 
     model.summary()
 
