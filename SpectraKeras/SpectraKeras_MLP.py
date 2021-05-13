@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20210510a
+* 20210513a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -36,12 +36,12 @@ class Conf():
         self.readConfig(self.configFile)
         self.model_directory = "./"
         if self.regressor:
-            self.modelName = "model_regressor_MLP.hd5"
+            self.modelName = "model_regressor_MLP.h5"
             self.summaryFileName = "summary_regressor_MLP.csv"
             self.model_png = self.model_directory+"model_regressor_MLP.png"
         else:
             self.predProbThreshold = 90.00
-            self.modelName = "model_classifier_MLP.hd5"
+            self.modelName = "model_classifier_MLP.h5"
             self.summaryFileName = "summary_classifier_MLP.csv"
             self.summaryAccFileName = "summary_classifier_MLP_accuracy.csv"
             self.model_png = self.model_directory+"model_classifier_MLP.png"

@@ -6,8 +6,8 @@ Machine learning software for rapid spectral analysis. While Raman spectra were 
    - DNNClassifier (TensorFlow, TensorFlow-Lite)
    - Convolutional Neural Networks (TensorFlow-Lite)
 - Prediction:
-   - tensorflow
-   - tensorflow-lite
+   - tensorflow (v.2.0 and higher)
+   - tensorflow-lite (v.2.3 and higher)
    - [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
    - tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
 
@@ -186,3 +186,6 @@ More on Machine Learning tools used
 - [K-Means](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
 - [Principal Component Analysis](http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
 
+Known Issues
+==================
+Starting from version 20210513a, models are saved with the `.h5` extension, and are expected to have that extension. Previously, models were saved with the non-standard `.hd5` extension. If you have previously trained models saved in `.hd5`, just rename the extension as `.h5`. No change in functionality besides the change in extension.
