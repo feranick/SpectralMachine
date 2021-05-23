@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20210513a
+* 20210523a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -302,8 +302,11 @@ def train(learnFile, testFile):
             write_graph=True, write_grads=True, write_images=True)
     
     if dP.stopAtBest == True:
-        es = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=200)
-        mc = keras.callbacks.ModelCheckpoint(dP.model_name, monitor='val_accuracy', mode='max', verbose=1, save_best_only=True)
+        es = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=1000)
+        if dP.regressor:
+            mc = keras.callbacks.ModelCheckpoint(dP.model_name, monitor='val_mae', mode='min', verbose=1, save_best_only=True)
+        else:
+            mc = keras.callbacks.ModelCheckpoint(dP.model_name, monitor='val_accuracy', mode='max', verbose=1, save_best_only=True)
         tbLogs = [tbLog, es, mc]
     else:
         tbLogs = [tbLog]
