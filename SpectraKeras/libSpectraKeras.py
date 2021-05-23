@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20210523a
+* 20210523b
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
