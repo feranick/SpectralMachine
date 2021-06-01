@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20210523b
+* 20210531a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -273,7 +273,7 @@ def train(learnFile, testFile):
     ### Define optimizer
     #************************************
     #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
-    optim = keras.optimizers.Adam(lr=dP.l_rate, beta_1=0.9,
+    optim = keras.optimizers.Adam(learning_rate=dP.l_rate, beta_1=0.9,
                     beta_2=0.999, epsilon=1e-08,
                     decay=dP.l_rdecay,
                     amsgrad=False)
@@ -316,6 +316,7 @@ def train(learnFile, testFile):
         
     #tbLogs = [tbLog, es, mc]
 
+    print("\n")
     model.summary()
 
     if testFile is not None:
