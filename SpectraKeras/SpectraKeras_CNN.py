@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20210531a
+* 20210601a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -304,59 +304,66 @@ def train(learnFile, testFile, flag):
         x_test = formatForCNN(A_test)
 
     #************************************
-    ### Define optimizer
+    ### Build model
     #************************************
-    #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
-    optim = keras.optimizers.Adam(learning_rate=dP.l_rate, beta_1=0.9,
+    def get_model():
+    
+        #************************************
+        ### Define optimizer
+        #************************************
+        #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
+        optim = keras.optimizers.Adam(learning_rate=dP.l_rate, beta_1=0.9,
                     beta_2=0.999, epsilon=1e-08,
                     decay=dP.l_rdecay,
                     amsgrad=False)
-    #************************************
-    ### Build model
-    #************************************
-    model = keras.models.Sequential()
+        
+        model = keras.models.Sequential()
 
-    for i in range(len(dP.CL_filter)):
-        model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
-            activation='relu',
-            input_shape=x_train[0].shape))
+        for i in range(len(dP.CL_filter)):
+            model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
+                activation='relu',
+                input_shape=x_train[0].shape))
+            try:
+                model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling[i])))
+            except:
+                print("  WARNING: Pooling layer is larger than last convolution layer\n  Aborting\n")
+                return
+            model.add(keras.layers.Dropout(dP.dropCNN[i]))
+        '''
         try:
-            model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling[i])))
-        except:
-            print("  WARNING: Pooling layer is larger than last convolution layer\n  Aborting\n")
-            return
-        model.add(keras.layers.Dropout(dP.dropCNN[i]))
-    '''
-    try:
-        model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
-    except:
-        if dP.max_pooling > dP.CL_size[-1]:
-            dP.max_pooling -= dP.CL_size[-1] - 1
-            print(" Rescaled pool size: ", dP.max_pooling, "\n")
             model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
-        else:
-            print(" Final conv-layer needs to be smaller than pooling layer")
-            return
-    '''
-    model.add(keras.layers.Flatten())
+        except:
+            if dP.max_pooling > dP.CL_size[-1]:
+                dP.max_pooling -= dP.CL_size[-1] - 1
+                print(" Rescaled pool size: ", dP.max_pooling, "\n")
+                model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling)))
+            else:
+                print(" Final conv-layer needs to be smaller than pooling layer")
+                return
+        '''
+        model.add(keras.layers.Flatten())
 
-    for i in range(len(dP.HL)):
-        model.add(keras.layers.Dense(dP.HL[i],
-            activation = 'relu',
-            input_dim=A.shape[1],
-            kernel_regularizer=keras.regularizers.l2(dP.l2)))
-        model.add(keras.layers.Dropout(dP.dropFCL))
+        for i in range(len(dP.HL)):
+            model.add(keras.layers.Dense(dP.HL[i],
+                activation = 'relu',
+                input_dim=A.shape[1],
+                kernel_regularizer=keras.regularizers.l2(dP.l2)))
+            model.add(keras.layers.Dropout(dP.dropFCL))
 
-    if dP.regressor:
-        model.add(keras.layers.Dense(1))
-        model.compile(loss='mse',
-        optimizer=optim,
-        metrics=['mae'])
-    else:
-        model.add(keras.layers.Dense(np.unique(totCl).size+1, activation = 'softmax'))
-        model.compile(loss='categorical_crossentropy',
+        if dP.regressor:
+            model.add(keras.layers.Dense(1))
+            model.compile(loss='mse',
             optimizer=optim,
-            metrics=['accuracy'])
+            metrics=['mae'])
+        else:
+            model.add(keras.layers.Dense(np.unique(totCl).size+1, activation = 'softmax'))
+            model.compile(loss='categorical_crossentropy',
+                optimizer=optim,
+                metrics=['accuracy'])
+                
+        return model
+        
+    model = get_model()
 
     tbLog = keras.callbacks.TensorBoard(log_dir=dP.tb_directory, histogram_freq=120,
             write_graph=True, write_images=True)

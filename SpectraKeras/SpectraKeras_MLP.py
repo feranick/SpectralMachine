@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20210531a
+* 20210601a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -280,24 +280,38 @@ def train(learnFile, testFile):
     #************************************
     ### Build model
     #************************************
-    model = keras.models.Sequential()
-    for i in range(len(dP.HL)):
-        model.add(keras.layers.Dense(dP.HL[i],
-            activation = 'relu',
-            input_dim=A.shape[1],
-            kernel_regularizer=keras.regularizers.l2(dP.l2)))
-        model.add(keras.layers.Dropout(dP.drop))
+    def get_model():
+        
+        #************************************
+        ### Define optimizer
+        #************************************
+        #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
+        optim = keras.optimizers.Adam(learning_rate=dP.l_rate, beta_1=0.9,
+                    beta_2=0.999, epsilon=1e-08,
+                    decay=dP.l_rdecay,
+                    amsgrad=False)
+                    
+        model = keras.models.Sequential()
+        for i in range(len(dP.HL)):
+            model.add(keras.layers.Dense(dP.HL[i],
+                activation = 'relu',
+                input_dim=A.shape[1],
+                kernel_regularizer=keras.regularizers.l2(dP.l2)))
+            model.add(keras.layers.Dropout(dP.drop))
 
-    if dP.regressor:
-        model.add(keras.layers.Dense(1))
-        model.compile(loss='mse',
-        optimizer=optim,
-        metrics=['mae'])
-    else:
-        model.add(keras.layers.Dense(np.unique(totCl).size+1, activation = 'softmax'))
-        model.compile(loss='categorical_crossentropy',
-            optimizer=optim,
-            metrics=['accuracy'])
+        if dP.regressor:
+            model.add(keras.layers.Dense(1))
+            model.compile(loss='mse',
+                optimizer=optim,
+                metrics=['mae'])
+        else:
+            model.add(keras.layers.Dense(np.unique(totCl).size+1, activation = 'softmax'))
+            model.compile(loss='categorical_crossentropy',
+                optimizer=optim,
+                metrics=['accuracy'])
+        return model
+        
+    model = get_model()
 
     tbLog = keras.callbacks.TensorBoard(log_dir=dP.tb_directory, histogram_freq=120,
             batch_size=dP.batch_size,
