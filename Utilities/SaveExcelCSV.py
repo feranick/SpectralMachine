@@ -16,7 +16,7 @@ import sys, os.path, h5py
 #************************************
 class dP:
     saveAsCsv = True
-    saveAsHDF = True
+    saveAsHDF = False
 
 #************************************
 # Main
@@ -27,7 +27,9 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
-    root = os.path.splitext(sys.argv[1])[0]
+    rootFile = os.path.splitext(sys.argv[1])[0]
+    os.mkdir(rootFile)
+    root = "./"+rootFile+"/"+rootFile
     print(" Opening Excel File:",sys.argv[1],"...\n")
     ws = pd.read_excel(sys.argv[1], sheet_name=None)
 
