@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20210616a
+* 20210617a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -443,9 +443,10 @@ def train(learnFile, testFile, flag):
         print("  \033[1mMean Abs Err\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(val_mae), np.amin(val_mae), val_mae[-1]))
         if dP.saveBestModel:
             if dP.metricBestModelR == 'mae':
-                score = model.evaluate(A_test, Cl_test, batch_size=dP.batch_size, verbose = 0)
-                print("  \033[1mSaved model with min training MAE:\033[0m: {0:.4f}".format(np.amin(mae)))
-                print("  \033[1mSaved model with validation MAE:\033[0m: {0:.4f}\n".format(score[1]))
+                if testFile:
+                    score = model.evaluate(A_test, Cl_test, batch_size=dP.batch_size, verbose = 0)
+                    print("  \033[1mSaved model with validation MAE:\033[0m: {0:.4f}".format(score[1]))
+                print("  \033[1mSaved model with min training MAE:\033[0m: {0:.4f}\n".format(np.amin(mae)))
             if dP.metricBestModelR == 'val_mae':
                 print("  \033[1mSaved model with validation MAE:\033[0m: {0:.4f}\n".format(np.amin(val_mae)))
             else:
