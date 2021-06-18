@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20210617a
+* 20210618a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -673,6 +673,7 @@ def printParam():
     else:
         print('  Batch size:', dP.batch_size)
     print('  Number of labels:', dP.numLabels)
+    print('  Epochs:',dP.epochs)
     print('  Stop at Best Model based on validation:', dP.stopAtBest)
     print('  Save Best Model based on validation:', dP.saveBestModel)
     if dP.regressor:

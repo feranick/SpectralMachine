@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20210617a
+* 20210618a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -752,6 +752,7 @@ def printParam():
         print('  Batch size: full')
     else:
         print('  Batch size:', dP.batch_size)
+    print('  Epochs:',dP.epochs)
     print('  Number of labels:', dP.numLabels)
     print('  Stop at Best Model based on validation:', dP.stopAtBest)
     print('  Save Best Model based on validation:', dP.saveBestModel)
