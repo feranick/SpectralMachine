@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20210618a
+* 20210713a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -162,12 +162,13 @@ def makeQuantizedTFmodel(A, model, dP):
 #************************************
 # Plot Weights
 #************************************
-def plotWeights(En, A, model, type):
+def plotWeights(dP, En, A, model, type):
     import matplotlib.pyplot as plt
     import tensorflow as tf
     plotFileName = "model_" + type + "_weights" + ".png"
     plt.figure(tight_layout=True)
-    plotInd = 511
+    #plotInd = 511
+    plotInd = (len(dP.HL)+2)*100+11
     for layer in model.layers:
         if isinstance(layer, tf.keras.layers.Dense):
             w_layer = layer.get_weights()[0]

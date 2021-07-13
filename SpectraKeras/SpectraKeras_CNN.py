@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20210618a
+* 20210713a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -511,7 +511,7 @@ def train(learnFile, testFile, flag):
 
     # Plot Dense weights
     if dP.plotWeightsFlag:
-        plotWeights(En, A, model, "CNN")
+        plotWeights(dP, En, A, model, "CNN")
 
     getTFVersion(dP)
 

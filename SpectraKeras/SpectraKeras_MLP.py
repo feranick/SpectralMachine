@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20210618a
+* 20210713a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -452,7 +452,7 @@ def train(learnFile, testFile):
             print('\n  ========================================================\n')
 
     if dP.plotWeightsFlag:
-        plotWeights(En, A, model, MLP)
+        plotWeights(dP, En, A, model, "MLP")
 
     getTFVersion(dP)
 
