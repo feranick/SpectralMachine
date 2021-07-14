@@ -177,9 +177,9 @@ More on Machine Learning tools used
 - [Deep Neural Networks - Multilayer Perceptron](http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html)
 - [Deep Neural Networks - TensorFlow](https://www.tensorflow.org/api_docs/python/tf/contrib/learn/DNNClassifier)
 - [TensorFlow](https://www.tensorflow.org)
-- [Support Vector Classification](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html)
-- [K-Means](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
-- [Principal Component Analysis](http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
+- [Support Vector Classification - deprecated](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html)
+- [K-Means - deprecated](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
+- [Principal Component Analysis - deprecated](http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
 
 Known Issues
 ==================
