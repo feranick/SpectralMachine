@@ -118,23 +118,25 @@ Formatting input file for training
 ========================
 The main idea behind the software is to train classification or regression models from plain spectra (which can be Raman, but they can be any spectra or diffraction profiles, as long as the model is consistent), rather than from manually selected features (such as bands, peaks, widths, etc). So, suppose one has training files similar to this, where the first column is the Raman shiift, the second is intensity:
 
+`
 1000  123
 1001  140
 1002  180
 1003  150
 ...
-
+`
 Let's say this file correspond to label 1, and now one has a collection of files that will be used for training each with its own label, the input file will look like this:
 
+`
 0  1000  1001  1002  1003 ...
 lab1  123 140  180  150  ...
 lab2 ... ... ... ... ...
-
+`
 Essentially each line in the input file corresponds to a training file with its label. during training the model will learn (either through a simple deep MLP network using SpectraKeras_MLP, or through a Convolutional Network using SpectraKeras_CNN, which is recommended) to extract features needed for prediction. Note that all spectra needs to have the same Raman shifts max min and step.
 
 Of course it is not expected that the user manually compiles the training file from a possibly large collection of spectra. For that, GenericDataMaker.py is available in the "Utilities" folder, that can be used to automatically create such files. Basically you can run from the folder where you have your spectra:
 
-python3 GenericDataMaker.py <learnfile> <enInitial> <enFinal> <enStep>
+`python3 GenericDataMaker.py <learnfile> <enInitial> <enFinal> <enStep>`
 
 The script will interpolate each spectra within the Raman shifts parameters you set above. Note that there are some basic configuration that you may need to change in the GenericDataMakerp.py for your case (such as delimiter between data, extension of the files, etc).
 
