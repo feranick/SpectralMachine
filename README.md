@@ -5,11 +5,11 @@ Machine learning software for rapid spectral analysis. While Raman spectra were 
 - Currently supported ML architectures:
    - DNNClassifier (TensorFlow, TensorFlow-Lite)
    - Convolutional Neural Networks (TensorFlow-Lite)
-- Prediction:
-   - tensorflow (v.2.0 and higher)
-   - tensorflow-lite (v.2.3 and higher)
-   - [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
-   - tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
+- Required libraries for prediction:
+   - tensorflow (v.2.3 and higher)
+   - Optional: tensorflow-lite (v.2.3 and higher)
+   - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
+   - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
 
 **Previous version: SpectralLearnPredict**
 - This is deprecated and no longer developed.
@@ -114,41 +114,33 @@ Determine accuracy using h5 testing file with spectra:
 
     python3 SpectraKeras_MLP.py -a <testFile>
 
-Usage (SpectralMachine) - Deprecated
-===================
+Formatting input file for training
+========================
+The main idea behind the software is to train classification or regression models from plain spectra (which can be Raman, but they can be any spectra or diffraction profiles, as long as the model is consistent), rather than from manually selected features (such as bands, peaks, widths, etc). So, suppose one has training files similar to this, where the first column is the Raman shiift, the second is intensity:
 
-Single files: 
-  
-    python3 SpectraLearnPredict.py -f learningfile spectrafile
+1000  123
+1001  140
+1002  180
+1003  150
+...
 
-Cross-validation for accuracy determination:
+Let's say this file correspond to label 1, and now one has a collection of files that will be used for training each with its own label, the input file will look like this:
 
-    python3 SpectraLearnPredict.py -a learningfile testdataset
+0  1000  1001  1002  1003 ...
+lab1  123 140  180  150  ...
+lab2 ... ... ... ... ...
 
-Cross-validation for accuracy determination (automatic splitting):
+Essentially each line in the input file corresponds to a training file with its label. during training the model will learn (either through a simple deep MLP network using SpectraKeras_MLP, or through a Convolutional Network using SpectraKeras_CNN, which is recommended) to extract features needed for prediction. Note that all spectra needs to have the same Raman shifts max min and step.
 
-    python3 SpectraLearnPredict.py -a <learningfile>
+Of course it is not expected that the user manually compiles the training file from a possibly large collection of spectra. For that, GenericDataMaker.py is available in the "Utilities" folder, that can be used to automatically create such files. Basically you can run from the folder where you have your spectra:
 
-Maps (formatted for Horiba LabSpec): 
-  
-    python3 SpectraLearnPredict.py -m learningfile spectramap 
+python3 GenericDataMaker.py <learnfile> <enInitial> <enFinal> <enStep>
 
-Batch txt files:
+The script will interpolate each spectra within the Raman shifts parameters you set above. Note that there are some basic configuration that you may need to change in the GenericDataMakerp.py for your case (such as delimiter between data, extension of the files, etc).
 
-    python3 SpectraLearnPredict.py -b learningfile 
+One can use the same to create a validation file, or you can use other scripts also provided to split the training set into training+validation. That can be done randomly within SpectraKeras, but the split will be different every time you run it.
 
-K-means on Raman maps:
-    
-    python3 SpectraLearnPredict.py -k spectramap number_of_classes
-
-Principal component analysis on spectral collection files:
-    
-    python3 SpectraLearnPredict.py -p spectrafile #comp
-
-Run in background for accuracy determination during training:
-
-    python3 SpectraLearnPredict.py -a learningfile testdataset 2>&1 | tee -a logfile &
-
+Once models are trained trained, prediction on individual files can be made using simply formatted ASCII files (like in the example above).
 
 Training data
 =============
