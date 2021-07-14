@@ -118,27 +118,30 @@ Formatting input file for training
 ========================
 The main idea behind the software is to train classification or regression models from plain spectra (which can be Raman, but they can be any spectra or diffraction profiles, as long as the model is consistent), rather than from manually selected features (such as bands, peaks, widths, etc). So, suppose one has training files similar to this, where the first column is the Raman shiift, the second is intensity:
 
-`1000  123`
-`1001  140`
-`1002  180`
-`1003  150`
-`...`
+```
+1000  123
+1001  140
+1002  180
+1003  150
+...
+```
 
 Let's say this file correspond to label 1, and now one has a collection of files that will be used for training each with its own label, the input file will look like this:
 
-`0  1000  1001  1002  1003 ...`
-`lab1  123 140  180  150  ...`
-`lab2 ... ... ... ... ...`
+```
+0  1000  1001  1002  1003 ...
+lab1  123 140  180  150  ...
+lab2 ... ... ... ... ...
+```
+Essentially each line in the input file corresponds to a training file with its label. during training the model will learn (either through a simple deep MLP network using `SpectraKeras_MLP.py`, or through a Convolutional Network using `SpectraKeras_CNN.py`, which is recommended) to extract features needed for prediction. Note that all spectra needs to have the same Raman shifts max min and step.
 
-Essentially each line in the input file corresponds to a training file with its label. during training the model will learn (either through a simple deep MLP network using SpectraKeras_MLP, or through a Convolutional Network using SpectraKeras_CNN, which is recommended) to extract features needed for prediction. Note that all spectra needs to have the same Raman shifts max min and step.
-
-Of course it is not expected that the user manually compiles the training file from a possibly large collection of spectra. For that, GenericDataMaker.py is available in the "Utilities" folder, that can be used to automatically create such files. Basically you can run from the folder where you have your spectra:
+Of course it is not expected that the user manually compiles the training file from a possibly large collection of spectra. For that, [`GenericDataMaker.py`](https://github.com/feranick/SpectralMachine/blob/master/Utilities/GenericDataMaker.py) is available in the [`Utilities`](https://github.com/feranick/SpectralMachine/tree/master/Utilities) folder, that can be used to automatically create such files. Basically you can run from the folder where you have your spectra:
 
 `python3 GenericDataMaker.py <learnfile> <enInitial> <enFinal> <enStep>`
 
-The script will interpolate each spectra within the Raman shifts parameters you set above. Note that there are some basic configuration that you may need to change in the GenericDataMakerp.py for your case (such as delimiter between data, extension of the files, etc).
+The script will interpolate each spectra within the Raman shifts parameters you set above. Note that there are some basic configuration that you may need to change in the `GenericDataMakerp.py` for your case (such as delimiter between data, extension of the files, etc).
 
-One can use the same to create a validation file, or you can use other scripts also provided to split the training set into training+validation. That can be done randomly within SpectraKeras, but the split will be different every time you run it.
+One can use the same to create a validation file, or you can use [other scripts](https://github.com/feranick/SpectralMachine/tree/master/Utilities) also provided to split the training set into training+validation. That can be done randomly within SpectraKeras, but the split will be different every time you run it.
 
 Once models are trained trained, prediction on individual files can be made using simply formatted ASCII files (like in the example above).
 
@@ -151,15 +154,15 @@ Data augmentation
 ==================
 Using the provided training data set as is, accuracy is low. For a single training run using a random 30% of the training set for 100 times, the accuracy is about 32%:
 
-./SpectraLearnPredict.py -t Training/20170227a/Training_kerogen_633nm_HC_20170227a.txt 1
+`./SpectraLearnPredict.py -t Training/20170227a/Training_kerogen_633nm_HC_20170227a.txt 1`
 
 Repeating the training few more times (5, for example) marginally increases the accuracy to 35.7% and it is fully converged. This is expected given the small dataset.
 
-Increasing the number of spectra in the actual dataset can be done by accounting for noise. Using the AddNoisyData.py utility, the esisting training set is taken, and random variations in intensity at each energy point are added within a given offset. This virtually changes the overall spectra, without changing its overall trend in relation to the classifier (H:C). This allows for the preservation of the classifier for a given spectra, but it also increases the number of available spectra. This method is obviously a workaround, but it allows accuracy to be substantially increased. Furthermore, it lends a model better suited at dealing with noisy data. 
+Increasing the number of spectra in the actual dataset can be done by accounting for noise. Using the `AddNoisyData.py` utility, the esisting training set is taken, and random variations in intensity at each energy point are added within a given offset. This virtually changes the overall spectra, without changing its overall trend in relation to the classifier. This allows for the preservation of the classifier for a given spectra, but it also increases the number of available spectra. This method is obviously a workaround, but it allows accuracy to be substantially increased. Furthermore, it lends a model better suited at dealing with noisy data. 
 
-To recreate, let's start with adding noisy spectra to the training set. For example, let's add 5 replicated spectra with random noise added with an offset of 0.02 (intensity is normalized to the range [0,1])
+To recreate, let's start with adding noisy spectra to the training set. For example, let's add 5 replicated spectra with random noise added with an offset of 0.02 (intensity is normalized to the `range [0,1]`)
 
-AddNoisyData.py Training/20170227a/Training_kerogen_633nm_HC_20170227a.txt 5 0.02
+`AddNoisyData.py Training/20170227a/Training_kerogen_633nm_HC_20170227a.txt 5 0.02`
 
 Accuracy is increased to 80.4% with a single training run (100 times 30% of the dataset). 2 iterations increase accuracy to 95.8% and a third increased to 100%. (The same can be achieved by running 30% of the dataset 300 times).
 
@@ -180,4 +183,4 @@ More on Machine Learning tools used
 
 Known Issues
 ==================
-Starting from version 20210513a, models are saved with the `.h5` extension, and are expected to have that extension. Previously, models were saved with the non-standard `.hd5` extension. If you have previously trained models saved in `.hd5`, just rename the extension as `.h5`. No change in functionality besides the change in extension.
+Starting from version `20210513a`, models are saved with the `.h5` extension, and are expected to have that extension. Previously, models were saved with the non-standard `.hd5` extension. If you have previously trained models saved in `.hd5`, just rename the extension as `.h5`. No change in functionality besides the change in extension.
