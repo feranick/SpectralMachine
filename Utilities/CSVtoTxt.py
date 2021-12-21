@@ -21,9 +21,16 @@ class dP:
 
 def main():
     try:
-        File =  sys.argv[1]
-        print(" Opening CSV File:"+File+"\n")
-        saveFile(File)
+        if len(sys.argv)<2:
+            for ind, f in enumerate(sorted(os.listdir("."))):
+                if os.path.splitext(f)[1] == ".csv" or os.path.splitext(f)[1] == ".CSV":
+                    print(" Opening CSV File:"+f)
+                    saveFile(f)
+        else:
+            File =  sys.argv[1]
+            if os.path.splitext(File)[1] == ".csv" or os.path.splitext(File)[1] == ".CSV":
+                print(" Opening CSV File:"+File)
+                saveFile(File)
     except:
         usage()
         sys.exit(2)
@@ -32,6 +39,7 @@ def main():
 ''' Convert Learning file to HDF5 '''
 #************************************
 def saveFile(File):
+
     fileRoot = os.path.splitext(File)[0]
     try:
         M = np.loadtxt(open(File, "rb"), delimiter=",", skiprows=dP.skipRows)
@@ -51,7 +59,7 @@ def saveFile(File):
 #************************************
 def usage():
     print(' Usage:\n  python3 CSVToTxt.py <CSV File>.csv\n')
-    p
+    print(' Run an all csv in a folder:\n  python3 CSVToTxt.py\n')    
     print(' Requires python 3.x. Not compatible with python 2.x\n')
 
 #************************************
