@@ -6,7 +6,7 @@
 * XmuDataMaker
 * Adds spectra to single file for classification
 * File must be in Xmu
-* version: 20180619a
+* version: 20220528a
 *
 * By: Nicola Ferralis <feranick@hotmail.com>
 *
@@ -86,7 +86,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
         EnT, M = readLearnFile(learnFile)
     else:
         print('\n\033[1m' + ' Train data file not found. Creating...' + '\033[0m')
-        EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
+        EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=float)
         M = np.append([0], EnT)
 
     for ind, f in enumerate(sorted(os.listdir("."))):
