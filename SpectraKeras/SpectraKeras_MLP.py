@@ -469,11 +469,11 @@ def predict(testFile):
 
     if dP.regressor:
         #predictions = model.predict(R).flatten()[0]
-        predictions, _ = getPredictions(R, model, dP).flatten()[0]
+        predictions, _ = getPredictions(R, model, dP)
         print('\n  ========================================================')
         print('  \033[1m MLP - Regressor\033[0m - Prediction')
         print('  ========================================================')
-        predValue = predictions
+        predValue = predictions.flatten()[0]
         print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
         print('  ========================================================\n')
 
