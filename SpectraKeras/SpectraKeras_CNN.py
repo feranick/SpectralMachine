@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20210713a
+* 20221021a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -529,7 +529,7 @@ def predict(testFile):
 
     if dP.regressor:
         #predictions = model.predict(R).flatten()[0]
-        predictions = getPredictions(R, model, dP).flatten()[0]
+        predictions, _ = getPredictions(R, model, dP).flatten()[0]
         print('\n  ========================================================')
         print('  \033[1m CNN - Regressor\033[0m - Prediction')
         print('  ========================================================')
@@ -542,7 +542,7 @@ def predict(testFile):
         le = pickle.loads(le_file.read())
         le_file.close()
         #predictions = model.predict(R, verbose=0)
-        predictions = getPredictions(R, model,dP)
+        predictions, _ = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
         if dP.useTFlitePred:
             predProb = round(100*predictions[0][pred_class]/255,2)
@@ -595,9 +595,9 @@ def batchPredict(folder):
         if good:
             R = formatForCNN(R)
             try:
-                predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
+                predictions = np.vstack((predictions,getPredictions(R, model, dP)[0].flatten()))
             except:
-                predictions = np.array([getPredictions(R, model,dP).flatten()])
+                predictions = np.array([getPredictions(R, model,dP)[0].flatten()])
             fileName.append(file)
 
     if dP.regressor:
@@ -660,9 +660,9 @@ def accDeterm(testFile):
     for row in A:
         R = formatForCNN(np.array([row]))
         try:
-            predictions = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
+            predictions, _ = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
         except:
-            predictions = np.array([getPredictions(R, model,dP).flatten()])
+            predictions, _ = np.array([getPredictions(R, model,dP).flatten()])
 
     if dP.regressor:
         print("\n  Accuracy determination is not defined in regression. Exiting.\n")

@@ -3,11 +3,11 @@ from setuptools import setup, find_packages
 setup(
     name='SpectraKeras',
     packages=find_packages(),
-    install_requires=['numpy', 'h5py', 'tensorflow', 'pydot'],
+    install_requires=['numpy', 'h5py', 'tensorflow', 'pydot', 'scipy'],
     entry_points={'console_scripts' : ['SpectraKeras_MLP=SpectraKeras_MLP:SpectraKeras_MLP',
         'SpectraKeras_CNN=SpectraKeras_CNN:SpectraKeras_CNN']},
     py_modules=['SpectraKeras_MLP','SpectraKeras_CNN','libSpectraKeras'],
-    version='20210713a',
+    version='20221021a',
     description='Machine learning for spectral data',
     long_description= """ Machine learning for spectral data """,
     author='Nicola Ferralis',
