@@ -6,7 +6,7 @@ Machine learning software for rapid spectral analysis. While Raman spectra were 
    - DNNClassifier (TensorFlow, TensorFlow-Lite)
    - Convolutional Neural Networks (TensorFlow-Lite)
 - Required libraries for prediction:
-   - tensorflow (v.2.3 and higher)
+   - tensorflow (v.2.11 and higher)
    - Optional: tensorflow-lite (v.2.3 and higher)
    - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
    - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
@@ -37,12 +37,13 @@ This software requires Python (3.6 or higher). It has been tested with Python 3.
 
     numpy
     scikit-learn (>=0.18)
+    scipy
     matplotlib
     pandas
     pydot
     graphviz
     h5py
-    tensorflow (2.3 < TF < 2.10, not compatible with TF 1.x)
+    tensorflow (>=2.11)
     
 In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
     
@@ -185,4 +186,4 @@ Known Issues
 ==================
 - Starting from version `20210513a`, models are saved with the `.h5` extension, and are expected to have that extension. Previously, models were saved with the non-standard `.hd5` extension. If you have previously trained models saved in `.hd5`, just rename the extension as `.h5`. No change in functionality besides the change in extension.
 
-- Version `20221026a` will be the last with support for Tensorflow `<= 2.10.x`. Future versions will require Tensorflow `>=2.11` 
+- Version `20221026b` will be the last with support for Tensorflow `<= 2.10.x`. Future versions will require Tensorflow `>=2.11` 
