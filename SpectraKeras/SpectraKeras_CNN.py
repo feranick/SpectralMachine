@@ -67,7 +67,7 @@ class Conf():
             'regressor' : False,
             'normalize' : True,
             'l_rate' : 0.001,
-            'l_rdecay' : 1e-4,
+            'l_rdecay' : 0.96,
             'CL_filter' : [1],
             'CL_size' : [10],
             'max_pooling' : [20],
@@ -317,9 +317,21 @@ def train(learnFile, testFile, flag):
         ### Define optimizer
         #************************************
         #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
+        
+        # Legacy optimizer
+        '''
         optim = keras.optimizers.legacy.Adam(learning_rate=dP.l_rate, beta_1=0.9,
                     beta_2=0.999, epsilon=1e-08,
                     decay=dP.l_rdecay,
+                    amsgrad=False)
+        '''
+        # New version
+        lr_schedule = keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=dP.l_rate,
+            decay_steps=dP.epochs,
+            decay_rate=dP.l_rdecay)
+        optim = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.9,
+                    beta_2=0.999, epsilon=1e-08,
                     amsgrad=False)
         
         model = keras.models.Sequential()
