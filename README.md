@@ -42,7 +42,7 @@ This software requires Python (3.6 or higher). It has been tested with Python 3.
     pydot
     graphviz
     h5py
-    tensorflow (>=2.3, not compatible with TF 1.x)
+    tensorflow (2.3 < TF < 2.10, not compatible with TF 1.x)
     
 In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
     
@@ -183,4 +183,6 @@ More on Machine Learning tools used
 
 Known Issues
 ==================
-Starting from version `20210513a`, models are saved with the `.h5` extension, and are expected to have that extension. Previously, models were saved with the non-standard `.hd5` extension. If you have previously trained models saved in `.hd5`, just rename the extension as `.h5`. No change in functionality besides the change in extension.
+- Starting from version `20210513a`, models are saved with the `.h5` extension, and are expected to have that extension. Previously, models were saved with the non-standard `.hd5` extension. If you have previously trained models saved in `.hd5`, just rename the extension as `.h5`. No change in functionality besides the change in extension.
+
+- Version `20221026a` will be the last with support for Tensorflow `<= 2.10.x`. Future versions will require Tensorflow `>=2.11` 
