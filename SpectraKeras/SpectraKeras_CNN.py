@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20221021a
+* 20221026b
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
