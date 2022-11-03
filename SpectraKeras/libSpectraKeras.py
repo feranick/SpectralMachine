@@ -207,7 +207,7 @@ def getTFVersion(dP):
 def checkTFVersion():
     import tensorflow as tf
     from pkg_resources import parse_version
-    if  parse_version(tf.version.VERSION) <  parse_version("2.11.0"):
+    if  parse_version(tf.version.VERSION) <  parse_version("2.11.0rc0"):
         return False
     else:
         return True
