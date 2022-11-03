@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20221026d
+* 20221103a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -196,10 +196,21 @@ def plotWeights(dP, En, A, model, type):
 def getTFVersion(dP):
     import tensorflow as tf
     from pkg_resources import parse_version
+    
+    version = parse_version(tf.version.VERSION)
     if dP.useTFlitePred:
-        print(" TensorFlow (Lite) v.",parse_version(tf.version.VERSION),"\n")
+        print(" TensorFlow (Lite) v.",version,"\n")
     else:
-        print(" TensorFlow v.",parse_version(tf.version.VERSION),"\n" )
+        print(" TensorFlow v.",version,"\n" )
+
+# This will be deprecated with support for TF >= 2.11 is stable across platforms
+def checkTFVersion():
+    import tensorflow as tf
+    from pkg_resources import parse_version
+    if  parse_version(tf.version.VERSION) <  parse_version("2.11.0"):
+        return False
+    else:
+        return True
 
 #************************************
 # Normalizer
