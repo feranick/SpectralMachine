@@ -4,7 +4,7 @@
 ***************************************************
 * Convert from multiline string into single line
 * By: Nicola Ferralis <feranick@hotmail.com>
-* version 20221107a
+* version 20221221a
 ***************************************************
 '''
 print(__doc__)
@@ -12,6 +12,9 @@ print(__doc__)
 import sys, os.path
 
 def main():
+
+    saveInText = True
+    
     if(len(sys.argv)<2):
         print(' Usage:\n  python3 Multi2SingleLine.py <file>\n')
         return
@@ -24,11 +27,12 @@ def main():
         print(" Opening text file with multiple lines:",file,"\n")
         data = f.read().replace('\n', '')
         print(" Single line string: \n")
-        print(data)
-    
-    with open(outfile, "w") as of:
-        of.write(data)
-        print("\n Single line text file saved in:",outfile,"\n")
+        print(data,"\n")
+           
+    if saveInText:
+        with open(outfile, "w") as of:
+            of.write(data)
+            print(" Single line text file saved in:",outfile,"\n")
 
 #************************************
 ''' Main initialization routine '''
