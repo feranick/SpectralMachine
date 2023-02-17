@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20221103a
+* 20230217a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -202,15 +202,6 @@ def getTFVersion(dP):
         print(" TensorFlow (Lite) v.",version,"\n")
     else:
         print(" TensorFlow v.",version,"\n" )
-
-# This will be deprecated with support for TF >= 2.11 is stable across platforms
-def checkTFVersion():
-    import tensorflow as tf
-    from pkg_resources import parse_version
-    if  parse_version(tf.version.VERSION) <  parse_version("2.11.0rc0"):
-        return False
-    else:
-        return True
 
 #************************************
 # Normalizer

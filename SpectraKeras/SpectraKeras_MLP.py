@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20221103a
+* 20230217a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -292,23 +292,13 @@ def train(learnFile, testFile):
         #************************************
         #optim = opt.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
         
-        if checkTFVersion():
-            # New version
-            print("  Using new optimizer for TF > = 2.11\n")
-            lr_schedule = keras.optimizers.schedules.ExponentialDecay(
-                initial_learning_rate=dP.l_rate,
-                decay_steps=dP.epochs,
-                decay_rate=dP.l_rdecay)
-            optim = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.9,
-                    beta_2=0.999, epsilon=1e-08,
-                    amsgrad=False)
-        else:
-        # Legacy optimizer
-            print("  Using legacy optimizer for TF < 2.11\n")
-            optim = keras.optimizers.legacy.Adam(learning_rate=dP.l_rate, beta_1=0.9,
-                    beta_2=0.999, epsilon=1e-08,
-                    decay=dP.l_rdecay,
-                    amsgrad=False)
+        lr_schedule = keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=dP.l_rate,
+            decay_steps=dP.epochs,
+            decay_rate=dP.l_rdecay)
+        optim = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.9,
+                beta_2=0.999, epsilon=1e-08,
+                amsgrad=False)
                     
         model = keras.models.Sequential()
         for i in range(len(dP.HL)):
