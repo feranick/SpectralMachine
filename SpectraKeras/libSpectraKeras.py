@@ -103,7 +103,8 @@ def loadModel(dP):
             model = tf.lite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
             model.allocate_tensors()
         else:
-            model = tf.keras.models.load_model(dP.model_name)
+            #model = tf.keras.models.load_model(dP.model_name)
+            model = tf.keras.saving.load_model(dP.model_name)
     return model
 
 #************************************
