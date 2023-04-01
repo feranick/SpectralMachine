@@ -6,7 +6,7 @@ Machine learning software for rapid spectral analysis. While Raman spectra were 
    - DNNClassifier (TensorFlow, TensorFlow-Lite)
    - Convolutional Neural Networks (TensorFlow-Lite)
 - Required libraries for prediction:
-   - tensorflow (v.2.12 or higher)
+   - tensorflow (v.2.12 or higher - won't work with previous releases)
    - Optional: tensorflow-lite (v.2.3 and higher)
    - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
    - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
@@ -43,7 +43,7 @@ This software requires Python (3.6 or higher). It has been tested with Python 3.
     pydot
     graphviz
     h5py
-    tensorflow (>=2.11)
+    tensorflow (>=2.12)
     
 In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
     
