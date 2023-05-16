@@ -52,7 +52,7 @@ def saveFile(folder, file, type):
         if type == 1:
             newFile = folder + '_ASCII/' + os.path.splitext(file)[0] + '_ASCII.txt'
         else:
-            newFile = folder + os.path.splitext(file)[0] + '_ASCII.txt'
+            newFile = folder + '/' + os.path.splitext(file)[0] + '_ASCII.txt'
         with open(newFile, 'ab') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
     except:
