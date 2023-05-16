@@ -23,7 +23,7 @@ def main():
         print(' Usage:\n')
         print(' (Single File): python3 ReadRruff.py <folder> <RRuFF filename>\n')
         print(' (Batch conversion): python3 ReadRruff.py <folder>\n')
-        print(' <folder> Directory where ASCII files are to be saved\n')
+        print(' <folder> Directory where original files are located\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
@@ -45,7 +45,7 @@ def main():
 # Save File
 #************************************
 def saveFile(folder, file, type):
-    #try:
+    try:
         with open(folder+'/'+file, 'r') as f:
             M = np.loadtxt(f, skiprows = 10, delimiter = ',', unpack=False)
         print(str(' ' + file) + '\n File OK, converting to ASCII... \n')
@@ -55,9 +55,9 @@ def saveFile(folder, file, type):
             newFile = folder + os.path.splitext(file)[0] + '_ASCII.txt'
         with open(newFile, 'ab') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
-    #except:
-    #    print('\033[1m ' + str(sys.argv[1]) + ' file not found \n' + '\033[0m')
-    #    return
+    except:
+        print('\033[1m ' + str(sys.argv[1]) + ' file not found \n' + '\033[0m')
+        return
 
 #************************************
 # Main initialization routine
