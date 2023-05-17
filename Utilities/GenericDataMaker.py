@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
+*************************************************
 * GenericDataMaker
 * Adds spectra to single file for classification
 * File must be in TXT format
 *
-* version: 20220528a
+* version: 20230517a
 * By: Nicola Ferralis <feranick@hotmail.com>
-***********************************************
+**************************************************
 '''
 print(__doc__)
 
@@ -24,9 +24,12 @@ class defParam:
     saveFormatClass = False
     
     # Delimiter for input files
-    delimiter = ','  # For comma separated data
-    #delimiter = '\t  '  # For tab separated data
+    #delimiter = ','  # For comma separated data
+    delimiter = '\t'  # For tab separated data
     #delimiter = ' '  # For space separated data
+    
+    #filePartition = '_'  # For Rruff
+    filePartition = ' ' # Else
     
     # Skip number of rows at the beginning of each files
     #skipRows = 10   # This is for Rruff
@@ -108,9 +111,9 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     for ind, f in enumerate(sorted(os.listdir("."))):
         if (f != learnFile and os.path.splitext(f)[-1] == defParam.extSampleFiles):
             try:
-                index = compound.index(f.partition("_")[0])
+                index = compound.index(f.partition(defParam.filePartition)[0])
             except:
-                compound.append(f.partition("_")[0])
+                compound.append(f.partition(defParam.filePartition)[0])
                 index = len(compound)-1
             
             success, M = makeFile(f, EnT, M, index, threshold)
