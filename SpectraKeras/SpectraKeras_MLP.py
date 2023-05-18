@@ -316,7 +316,7 @@ def train(learnFile, testFile):
 
     tbLog = keras.callbacks.TensorBoard(log_dir=dP.tb_directory, histogram_freq=120,
             batch_size=dP.batch_size,
-            write_graph=True, write_grads=True, write_images=True)
+            write_graph=True, write_grads=True, write_images=False)
     
     tbLogs = [tbLog]
     if dP.stopAtBest == True:
