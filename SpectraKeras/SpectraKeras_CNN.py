@@ -414,7 +414,7 @@ def train(learnFile, testFile, flag):
     
     #model.save(dP.model_name, save_format='h5')
     model.save(dP.model_name)
-    #keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
+    keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     model.summary()
 
     if dP.makeQuantizedTFlite:
