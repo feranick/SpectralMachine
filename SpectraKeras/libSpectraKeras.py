@@ -108,8 +108,8 @@ def loadModel(dP):
             else:
                 model_name = dP.model_name
             print("  Model name:",model_name)
-            #model = tf.keras.models.load_model(model_name)
-            model = tf.keras.saving.load_model(model_name)
+            model = tf.keras.models.load_model(model_name)
+            #model = tf.keras.saving.load_model(model_name)
     return model
 
 #************************************
