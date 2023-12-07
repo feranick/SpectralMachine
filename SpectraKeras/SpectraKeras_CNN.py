@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20230710a
+* 20231207a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -36,12 +36,12 @@ class Conf():
         self.readConfig(self.configFile)
         self.model_directory = "./"
         if self.regressor:
-            self.modelName = "model_regressor_CNN.h5"
+            self.modelName = "model_regressor_CNN.keras"
             self.summaryFileName = "summary_regressor_CNN.csv"
             self.model_png = self.model_directory+"model_regressor_CNN.png"
         else:
             self.predProbThreshold = 90.00
-            self.modelName = "model_classifier_CNN.h5"
+            self.modelName = "model_classifier_CNN.keras"
             self.summaryFileName = "summary_classifier_CNN.csv"
             self.summaryAccFileName = "summary_classifier_CNN_accuracy.csv"
             self.model_png = self.model_directory+"model_classifier_CNN.png"
@@ -412,8 +412,9 @@ def train(learnFile, testFile, flag):
             verbose=2,
 	        validation_split=dP.cv_split)
     
-    model.save(dP.model_name, save_format='h5')
-    keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
+    #model.save(dP.model_name, save_format='h5')
+    model.save(dP.model_name)
+    #keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     model.summary()
 
     if dP.makeQuantizedTFlite:
