@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='SpectraKeras',
     packages=find_packages(),
-    install_requires=['numpy', 'h5py', 'tflite-runtime', 'pydot', 'graphviz'],
+    install_requires=['numpy', 'h5py', 'tflite-runtime', 'pydot', 'graphviz','scipy'],
     entry_points={'console_scripts' : ['SpectraKeras_MLP=SpectraKeras_MLP:SpectraKeras_MLP',
         'SpectraKeras_CNN=SpectraKeras_CNN:SpectraKeras_CNN']},
     py_modules=['SpectraKeras_MLP','SpectraKeras_CNN','libSpectraKeras'],
