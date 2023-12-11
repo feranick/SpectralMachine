@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
 * Create Random Cross Validation Datasets
 * Train + Test
-*
-* version: 20200102a
-*
+* version: 20231211a
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)
@@ -28,8 +24,11 @@ def main():
 
     En, A, Cl = readLearnFile(sys.argv[1])
 
-    percTrain = str('{:.0f}'.format(100-float(sys.argv[2])))
-    percTest = str('{:.0f}'.format(float(sys.argv[2])))
+    #percTrain = str('{:.0f}'.format(100-float(sys.argv[2])))
+    #percTest = str('{:.0f}'.format(float(sys.argv[2])))
+
+    percTrain = str('{:1d}-{:1d}'.format(int(float(sys.argv[2])),int((float(sys.argv[2])-int(float(sys.argv[2])))*10)))
+    percTest = str('{:1d}-{:1d}'.format(int(100-float(sys.argv[2])),int((100-float(sys.argv[2])-int(100-float(sys.argv[2])))*10)))
 
     if defParam.saveAsTxt == True:
         newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv' + percTrain + 'pc.txt'
