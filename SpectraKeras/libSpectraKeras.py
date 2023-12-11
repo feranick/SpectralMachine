@@ -91,7 +91,7 @@ def loadModel(dP):
                 model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'_edgetpu.tflite',
                     experimental_delegates=[tflite.load_delegate(dP.edgeTPUSharedLib,{})])
             except:
-                print(" Coral Edge TPU not found. Please make sure it's connected. ")
+                print(" Coral Edge TPU not found. Please make sure it's connected and Tflite-runtime is v2.11.1 or lower.")
         else:
             model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
         model.allocate_tensors()
