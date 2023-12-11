@@ -418,13 +418,13 @@ def train(learnFile, testFile, flag):
     model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     
+    if dP.makeQuantizedTFlite:
+        makeQuantizedTFmodel(x_train, model, dP)
+    
     print('\n  =============================================')
     print('  \033[1m CNN\033[0m - Model Architecture')
     print('  =============================================\n')
     model.summary()
-
-    if dP.makeQuantizedTFlite:
-        makeQuantizedTFmodel(x_train, model, dP)
 
     print('\n  ========================================================')
     print('  \033[1m CNN\033[0m - Training/Validation set Configuration')
