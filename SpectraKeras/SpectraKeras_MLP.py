@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_MLP Classifier and Regressor
-* 20231207a
+* 20231211a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -331,7 +331,9 @@ def train(learnFile, testFile):
         
     #tbLogs = [tbLog, es, mc]
 
-    print("\n")
+    print('  =============================================')
+    print('  \033[1m MLP\033[0m - Model Architecture')
+    print('  =============================================\n')
     model.summary()
 
     if testFile is not None:
@@ -353,14 +355,18 @@ def train(learnFile, testFile):
     model.save(dP.model_name)
     
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
+    
+    print('\n  =============================================')
+    print('  \033[1m MLP\033[0m - Model Architecture')
+    print('  =============================================\n')
     model.summary()
 
     if dP.makeQuantizedTFlite:
         makeQuantizedTFmodel(A, model, dP)
 
-    print('\n  =============================================')
-    print('  \033[1m MLP\033[0m - Model Configuration')
-    print('  =============================================')
+    print('\n  ========================================================')
+    print('  \033[1m MLP\033[0m - Training/Validation set Configuration')
+    print('  ========================================================')
 
     print("  Training set file:",learnFile)
     if testFile is not None:

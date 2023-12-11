@@ -3,7 +3,7 @@
 '''
 **********************************************************
 * SpectraKeras_CNN Classifier and Regressor
-* 20231207a
+* 20231211a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -391,7 +391,9 @@ def train(learnFile, testFile, flag):
         
     #tbLogs = [tbLog, es, mc]
 
-    print("\n")
+    print('  =============================================')
+    print('  \033[1m CNN\033[0m - Model Architecture')
+    print('  =============================================\n')
     model.summary()
 
     if flag:
@@ -415,14 +417,18 @@ def train(learnFile, testFile, flag):
     #model.save(dP.model_name, save_format='h5')
     model.save(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
+    
+    print('\n  =============================================')
+    print('  \033[1m CNN\033[0m - Model Architecture')
+    print('  =============================================\n')
     model.summary()
 
     if dP.makeQuantizedTFlite:
         makeQuantizedTFmodel(x_train, model, dP)
 
-    print('\n  =============================================')
-    print('  \033[1m CNN\033[0m - Model Configuration')
-    print('  =============================================')
+    print('\n  ========================================================')
+    print('  \033[1m CNN\033[0m - Training/Validation set Configuration')
+    print('  ========================================================')
 
     print("  Training set file:",learnFile)
     if testFile is not None:

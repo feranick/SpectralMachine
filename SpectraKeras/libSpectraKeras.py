@@ -2,7 +2,7 @@
 '''
 **********************************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20231207a
+* 20231211a
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -143,7 +143,10 @@ def getPredictions(R, model, dP):
 #************************************
 def makeQuantizedTFmodel(A, model, dP):
     import tensorflow as tf
-    print("\n  Creating quantized TensorFlowLite Model...\n")
+    
+    print("\n  =========================================================")
+    print("   Creating\033[1m quantized TensorFlowLite Model \033[0m")
+    print("  =========================================================\n")
 
     A2 = tf.cast(A, tf.float32)
     A = tf.data.Dataset.from_tensor_slices((A2)).batch(1)
