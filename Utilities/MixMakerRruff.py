@@ -2,14 +2,11 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
 * MixMakerRruff
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: 20180619b
-*
+* version: 20231212a
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)
@@ -25,6 +22,7 @@ import matplotlib.pyplot as plt
 class defParam:
     saveAsTxt = True
     saveAsASCII = False
+    plotData = False
 
 def main():
     if len(sys.argv) < 4:
@@ -66,7 +64,7 @@ def main():
                 R[R<float(threshold)*np.amax(R)/100] = 0
                 print('\n' + file + '\n File OK, converting to ASCII...')
 
-                EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
+                EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=float)
             
                 if EnT.shape[0] == En.shape[0]:
                     print(' Number of points in the learning dataset: ' + str(EnT.shape[0]))
@@ -96,7 +94,8 @@ def main():
                 with open(summaryMixFile, "a") as sum_file:
                     sum_file.write(str(index) + ',,,' + label + ','+file+'\n')
     
-                plt.plot(EnT,R,label=label)
+                if defParam.plotData == True:
+                    plt.plot(EnT,R,label=label)
         except:
             print("\n Skipping: ",file)
 
@@ -108,13 +107,14 @@ def main():
 
     saveMixFile(newR, mixFile)
 
-    plt.plot(EnT, mixR, linewidth=3, label=r'Mixture')
-    plt.xlabel('Raman shift [1/cm]')
-    plt.ylabel('Raman Intensity [arb. units]')
-    plt.legend(loc='upper right')
-    plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
-    plt.show()
-    plt.close()
+    if defParam.plotData == True:
+        plt.plot(EnT, mixR, linewidth=3, label=r'Mixture')
+        plt.xlabel('Raman shift [1/cm]')
+        plt.ylabel('Raman Intensity [arb. units]')
+        plt.legend(loc='upper right')
+        plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
+        plt.show()
+        plt.close()
 
 #***************************************
 ''' Save new learning Data '''
