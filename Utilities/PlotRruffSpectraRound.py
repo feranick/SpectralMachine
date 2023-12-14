@@ -2,14 +2,11 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
 * PlotRruffSpectraRound
-* Plot Rruff spectra
+* Plot Rruff spectra with rounding decimals
 * Files must be in RRuFF
-* version: 20171208c
-*
+* version: 20231214a
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)
@@ -20,7 +17,7 @@ from datetime import datetime, date
 import matplotlib.pyplot as plt
 
 def main():
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 5:
         print(' Usage:\n  python3 PlotRruffSpectraRound.py <EnIn> <EnFin> <EnStep> <decimals>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
@@ -50,7 +47,7 @@ def main():
 
             print(file + '\n File OK, converting to ASCII...')
 
-            EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
+            EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=float)
             
             if EnT.shape[0] == En.shape[0]:
                 print(' Number of points in the learning dataset: ' + str(EnT.shape[0]))
