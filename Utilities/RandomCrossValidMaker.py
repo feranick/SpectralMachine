@@ -28,8 +28,8 @@ def main():
     percTrain1 = str('{:.1f}'.format(100-float(sys.argv[2])))
     percTest1 = str('{:.1f}'.format(float(sys.argv[2])))
 
-    percTrain = str('{:1d}-{:1d}'.format(int(float(sys.argv[2])),int((float(sys.argv[2])-int(float(sys.argv[2])))*10)))
-    percTest = str('{:1d}-{:1d}'.format(int(100-float(sys.argv[2])),int((100-float(sys.argv[2])-int(100-float(sys.argv[2])))*10)))
+    percTrain = str('{:1d}-{:1d}'.format(int(100-float(sys.argv[2])),int((100-float(sys.argv[2])-int(100-float(sys.argv[2])))*10)))
+    percTest = str('{:1d}-{:1d}'.format(int(float(sys.argv[2])),int((float(sys.argv[2])-int(float(sys.argv[2])))*10)))
 
     if defParam.saveAsTxt == True:
         newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv' + percTrain + 'pc.txt'
