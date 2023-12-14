@@ -15,6 +15,7 @@ import sys, os, csv, h5py
 
 class defParam:
     saveAsTxt = False
+    randomSel = None #None or any seed, like 42.
 
 def main():
     if(len(sys.argv)<3):
@@ -24,8 +25,8 @@ def main():
 
     En, A, Cl = readLearnFile(sys.argv[1])
 
-    #percTrain = str('{:.0f}'.format(100-float(sys.argv[2])))
-    #percTest = str('{:.0f}'.format(float(sys.argv[2])))
+    percTrain1 = str('{:.0f}'.format(100-float(sys.argv[2])))
+    percTest1 = str('{:.0f}'.format(float(sys.argv[2])))
 
     percTrain = str('{:1d}-{:1d}'.format(int(float(sys.argv[2])),int((float(sys.argv[2])-int(float(sys.argv[2])))*10)))
     percTest = str('{:1d}-{:1d}'.format(int(100-float(sys.argv[2])),int((100-float(sys.argv[2])-int(100-float(sys.argv[2])))*10)))
@@ -41,7 +42,7 @@ def main():
         print(" Training or cross validation test files exist. Exiting.\n")
         return
 
-    print(' Splitting', sys.argv[1], ' (Train:', percTrain,'%; Test:',percTest,'%)\n')
+    print(' Splitting', sys.argv[1], ' (Train:', percTrain1,'%; Test:',percTest1,'%)\n')
     A_train, Cl_train, A_test, Cl_test = formatSubset(A, Cl, float(sys.argv[2])/100)
 
     print(' Writing new training file: ', newTrainFile)
@@ -102,7 +103,7 @@ def writeFile(File, En, A, Cl):
 def formatSubset(A, Cl, percent):
     from sklearn.model_selection import train_test_split
     A_train, A_cv, Cl_train, Cl_cv = \
-    train_test_split(A, Cl, test_size=percent, random_state=42)
+    train_test_split(A, Cl, test_size=percent, random_state=defParam.randomSel)
     print(" Unique classes for validation set:\n")
     print(np.unique(Cl_cv),"\n")
     return A_train, Cl_train, A_cv, Cl_cv
