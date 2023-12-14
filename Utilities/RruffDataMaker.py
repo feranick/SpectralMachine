@@ -2,14 +2,11 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: 20220528a
-*
+* version: 20231214a
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)
@@ -33,7 +30,7 @@ class defParam:
     # set to True to set boundaries as the min
     # values for intensities when to
     # fill in in absence of data
-    useMinForBoundary = False
+    useMinForBoundary = True
 
 def main():
     if len(sys.argv) < 5:

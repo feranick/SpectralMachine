@@ -5,8 +5,7 @@
 * GenericDataMaker
 * Adds spectra to single file for classification
 * File must be in TXT format
-*
-* version: 20230517a
+* version: 20231214a
 * By: Nicola Ferralis <feranick@hotmail.com>
 **************************************************
 '''
@@ -46,7 +45,7 @@ class defParam:
     # set to True to set boundaries as the min
     # values for intensities when to
     # fill in in absence of data
-    useMinForBoundary = False
+    useMinForBoundary = True
 
 #**********************************************
 # Main
