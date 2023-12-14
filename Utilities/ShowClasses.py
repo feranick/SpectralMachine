@@ -20,13 +20,26 @@ def main():
 
     En, M, Cl, learnFileRoot = readLearnFile(sys.argv[1])
     
+    uniCl = np.unique(Cl).astype(int)
+    
     print(" Number of spectra in dataset:",Cl.shape[0])
-    print(" Number of unique classes in dataset:",np.unique(Cl).shape[0])
-    if Cl.shape[0] - np.unique(Cl).shape[0] > 0:
+    print(" Number of unique classes in dataset:",uniCl.shape[0])
+    if Cl.shape[0] - uniCl.shape[0] > 0:
         print(" Classes with multiple data present.")
-    print("\n Unique classes in learning/validation set:\n")
-    with np.printoptions(threshold=np.inf):
-        print(np.unique(Cl).astype(int),"\n")
+        print("\n Unique classes in learning/validation set and corresponting number of members:\n")
+    
+        uni = np.ones(np.unique(Cl).shape)
+        with np.nditer(uniCl) as it:
+            for x in it:
+                uni[x] = np.count_nonzero(Cl==x)
+                if uni[x] == 1:
+                    print(" {0:.0f}: {1:.0f} ".format(x,uni[x]))
+                else:
+                    print(" \033[1m {0:.0f}: {1:.0f} \033[0m".format(x,uni[x]))
+    else:
+        print("\n Unique classes in learning/validation set:\n")
+        with np.printoptions(threshold=np.inf):
+            print(np.unique(Cl).astype(int),"\n")
         
 #************************************
 ''' Open Learning Data '''

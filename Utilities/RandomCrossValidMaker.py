@@ -45,7 +45,7 @@ def main():
     print(' Splitting', sys.argv[1], ' (Train:', percTrain1,'%; Test:',percTest1,'%)\n')
     A_train, Cl_train, A_test, Cl_test = formatSubset(A, Cl, float(sys.argv[2])/100)
 
-    print(' Writing new training file: ', newTrainFile)
+    print('\n Writing new training file: ', newTrainFile)
     writeFile(newTrainFile, En, A_train, Cl_train)
     print('\n Writing new cross-validation file: ', newTestFile)
     writeFile(newTestFile, En, A_test, Cl_test)
@@ -104,8 +104,25 @@ def formatSubset(A, Cl, percent):
     from sklearn.model_selection import train_test_split
     A_train, A_cv, Cl_train, Cl_cv = \
     train_test_split(A, Cl, test_size=percent, random_state=defParam.randomSel)
-    print(" Unique classes for validation set:\n")
-    print(np.unique(Cl_cv),"\n")
+    
+    uniCl = np.unique(Cl_cv).astype(int)
+    if Cl_cv.shape[0] - uniCl.shape[0] > 0:
+        print(" Classes with multiple data present.")
+        print("\n Unique classes in learning/validation set and corresponting number of members:\n")
+    
+        uni = np.ones(np.unique(Cl_cv).shape)
+        #with np.nditer(uniCl) as it:
+        for x in enumerate(uniCl):
+            uni[x[0]] = np.count_nonzero(Cl_cv==uniCl[x[0]])
+            if uni[x[0]] == 1:
+                print(" {0:.0f}: {1:.0f} ".format(x[0],uni[x[0]]))
+            else:
+                print(" \033[1m {0:.0f}: {1:.0f} \033[0m".format(x[0],uni[x[0]]))
+                
+    else:
+        print("\n Unique classes in learning/validation set:\n")
+        with np.printoptions(threshold=np.inf):
+            print(np.unique(Cl_cv).astype(int))
     return A_train, Cl_train, A_cv, Cl_cv
 
 def formatSubset2(A, Cl, percent):
