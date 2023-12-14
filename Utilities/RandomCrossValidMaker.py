@@ -4,7 +4,7 @@
 *********************************************
 * Create Random Cross Validation Datasets
 * Train + Test
-* version: 20231211a
+* version: 20231214a
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
@@ -103,6 +103,8 @@ def formatSubset(A, Cl, percent):
     from sklearn.model_selection import train_test_split
     A_train, A_cv, Cl_train, Cl_cv = \
     train_test_split(A, Cl, test_size=percent, random_state=42)
+    print(" Unique classes for validation set:\n")
+    print(np.unique(Cl_cv),"\n")
     return A_train, Cl_train, A_cv, Cl_cv
 
 def formatSubset2(A, Cl, percent):
