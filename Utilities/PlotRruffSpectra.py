@@ -2,14 +2,11 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
 * PlotRruffSpectra
 * Plot Rruff spectra
 * Files must be in RRuFF
-* version: 20171208c
-*
+* version: 20231214a
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)
@@ -49,7 +46,7 @@ def main():
 
                 print(file + '\n File OK, converting to ASCII...')
 
-                EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=np.float)
+                EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=float)
             
                 if EnT.shape[0] == En.shape[0]:
                     print(' Number of points in the learning dataset: ' + str(EnT.shape[0]))
@@ -82,7 +79,7 @@ def main():
 
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
-    plt.legend(loc='upper left')
+    plt.legend(loc='upper right')
     plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
     plt.show()
     plt.close()

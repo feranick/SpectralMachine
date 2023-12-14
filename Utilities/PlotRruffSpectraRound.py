@@ -82,7 +82,7 @@ def main():
 
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
-    plt.legend(loc='upper left')
+    plt.legend(loc='upper right')
     plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
     plt.show()
     plt.close()
