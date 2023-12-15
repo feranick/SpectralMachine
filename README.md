@@ -1,10 +1,10 @@
-# SpectralMachine
-Machine learning software for rapid spectral analysis. While Raman spectra were the initilal focus, SpectralMachine is flexible to be applied for classification using any spectra (from XRD, FTIR and beyond). The latest and supporrted software within SpectralMachine is SpectraKeras. The previous generation (SpectraLearnPredict) is no longer developed. 
+# SpectralMachine: SpectraKeras
+Machine learning software for rapid spectral analysis. While Raman spectra were the initilal focus, `SpectraKeras` is flexible to be applied for classification using any spectra (from XRD, FTIR and beyond). The previous generation software (`SpectraLearnPredict`) is no longer developed. 
 
 **SpectraKeras**
 - Currently supported ML architectures:
    - DNNClassifier (TensorFlow, TensorFlow-Lite)
-   - Convolutional Neural Networks (TensorFlow-Lite)
+   - Convolutional Neural Networks (TensorFlow, TensorFlow-Lite)
 - Required libraries for prediction:
    - tensorflow (v.2.12 or higher - won't work with previous releases)
    - Optional: tensorflow-lite (v.2.5 and higher)
