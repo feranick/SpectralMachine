@@ -5,7 +5,7 @@
 * XmuDataMaker
 * Adds spectra to single file for classification
 * File must be in Xmu
-* version: 20231214a
+* version: 20231215a
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
@@ -145,8 +145,10 @@ def makeFile(sampleFile, EnT, M, param, threshold):
         print('\033[1m' + ' Mismatch in datapoints: ' + str(EnT.shape[0]) + '; sample = ' +  str(En.shape[0]) + '\033[0m')
         if defParam.useMinForBoundary == True:
             print(" Boundaries: Filling in with min values")
-            defParam.leftBoundary = R[0]
-            defParam.rightBoundary = R[R.shape[0]-1]
+            #defParam.leftBoundary = R[0]
+            #defParam.rightBoundary = R[R.shape[0]-1]
+            defParam.leftBoundary = np.amin(R)
+            defParam.rightBoundary = np.amin(R)
         else:
             print(" Boundaries: Filling in preset values")
         print("  Left:",defParam.leftBoundary,"; Right:",defParam.leftBoundary)
