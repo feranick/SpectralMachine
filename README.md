@@ -20,8 +20,7 @@ If you use SpectralMachine or SpectraKeras, we request that you reference the pa
 
 Installation
 =============
-
-** Installation from available wheel package **
+## Installation from available wheel package
 If available from the main site, you can install SpectraKeras by running:
 
     python3 -m pip install --upgrade spectrakeras-20231215a0-py3-none-any.whl
@@ -29,7 +28,7 @@ If available from the main site, you can install SpectraKeras by running:
 SpectraKeras_CNN and Spectrakeras_MLP are available directly from the command line.
 NOTE: The Utilities in the `Utilities` folder are not included in the package, and can be run locally as needed.
 
-** Make your own wheel package **
+## Make your own wheel package
 Make sure you have the PyPA build package installed:
 
     python3 -m pip install --upgrade build
@@ -40,7 +39,7 @@ To build the wheel package rom the `SpectraKeras` folder run:
     
 A wheel package is available in the subfolder `dir`. You can install it following the instructions shown above.
 
-** Compatibility and dependences ** 
+## Compatibility and dependences
 This software requires Python (3.8 or higher). It has been tested with Python 3.9 or higher which is the recommended platform. It is not compatible with python 2.x. Additional required packages:
 
     numpy
@@ -151,7 +150,7 @@ Essentially each line in the input file corresponds to a training file with its 
 
 Of course it is not expected that the user manually compiles the training file from a possibly large collection of spectra. For that, [`GenericDataMaker.py`](https://github.com/feranick/SpectralMachine/blob/master/Utilities/GenericDataMaker.py) is available in the [`Utilities`](https://github.com/feranick/SpectralMachine/tree/master/Utilities) folder, that can be used to automatically create such files. Basically you can run from the folder where you have your spectra:
 
-`python3 GenericDataMaker.py <learnfile> <enInitial> <enFinal> <enStep>`
+    python3 GenericDataMaker.py <learnfile> <enInitial> <enFinal> <enStep>
 
 The script will interpolate each spectra within the Raman shifts parameters you set above. Note that there are some basic configuration that you may need to change in the `GenericDataMakerp.py` for your case (such as delimiter between data, extension of the files, etc).
 
@@ -162,27 +161,6 @@ Once models are trained trained, prediction on individual files can be made usin
 Training data
 =============
 We do not provide advanced training sets, some of which can be found online. We only provide a simple Raman dataset mainly for testing purposes: it is loosely based on 633nm data from Ferralis et al. [Carbon 108 (2016) 440](http://dx.doi.org/10.1016/j.carbon.2016.07.039).
-
-
-Data augmentation
-==================
-Using the provided training data set as is, accuracy is low. For a single training run using a random 30% of the training set for 100 times, the accuracy is about 32%:
-
-`./SpectraLearnPredict.py -t Training/20170227a/Training_kerogen_633nm_HC_20170227a.txt 1`
-
-Repeating the training few more times (5, for example) marginally increases the accuracy to 35.7% and it is fully converged. This is expected given the small dataset.
-
-Increasing the number of spectra in the actual dataset can be done by accounting for noise. Using the `AddNoisyData.py` utility, the esisting training set is taken, and random variations in intensity at each energy point are added within a given offset. This virtually changes the overall spectra, without changing its overall trend in relation to the classifier. This allows for the preservation of the classifier for a given spectra, but it also increases the number of available spectra. This method is obviously a workaround, but it allows accuracy to be substantially increased. Furthermore, it lends a model better suited at dealing with noisy data. 
-
-To recreate, let's start with adding noisy spectra to the training set. For example, let's add 5 replicated spectra with random noise added with an offset of 0.02 (intensity is normalized to the `range [0,1]`)
-
-`AddNoisyData.py Training/20170227a/Training_kerogen_633nm_HC_20170227a.txt 5 0.02`
-
-Accuracy is increased to 80.4% with a single training run (100 times 30% of the dataset). 2 iterations increase accuracy to 95.8% and a third increased to 100%. (The same can be achieved by running 30% of the dataset 300 times).
-
-One can optimize/minimize the number of spectra with added noise. Adding only 2 data-sets with noise offset at 0.02 converges the accuracy to about 94.6%. 
-
-**One final word of caution**: Increasing the number of statistically independent available spectra for training is recommended over adding noisy data. 
 
 More on Machine Learning tools used
 ====================================
