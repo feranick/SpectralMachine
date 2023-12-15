@@ -7,7 +7,7 @@ Machine learning software for rapid spectral analysis. While Raman spectra were 
    - Convolutional Neural Networks (TensorFlow-Lite)
 - Required libraries for prediction:
    - tensorflow (v.2.12 or higher - won't work with previous releases)
-   - Optional: tensorflow-lite (v.2.3 and higher)
+   - Optional: tensorflow-lite (v.2.5 and higher)
    - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
    - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
 
@@ -21,7 +21,27 @@ If you use SpectralMachine or SpectraKeras, we request that you reference the pa
 Installation
 =============
 
-This software requires Python (3.9 or higher). It has been tested with Python 3.9 or higher which is the recommended platform. It is not compatible with python 2.x. Additional required packages:
+** Installation from available wheel package **
+If available from the main site, you can install SpectraKeras by running:
+
+    python3 -m pip install --upgrade spectrakeras-20231215a0-py3-none-any.whl
+    
+SpectraKeras_CNN and Spectrakeras_MLP are available directly from the command line.
+NOTE: The Utilities in the `Utilities` folder are not included in the package, and can be run locally as needed.
+
+** Make your own wheel package **
+Make sure you have the PyPA build package installed:
+
+    python3 -m pip install --upgrade build
+    
+To build the wheel package rom the `SpectraKeras` folder run:
+
+    python3 -m build
+    
+A wheel package is available in the subfolder `dir`. You can install it following the instructions shown above.
+
+** Compatibility and dependences ** 
+This software requires Python (3.8 or higher). It has been tested with Python 3.9 or higher which is the recommended platform. It is not compatible with python 2.x. Additional required packages:
 
     numpy
     scikit-learn (>=0.18)
@@ -46,6 +66,8 @@ Inference can be carried out using the regular tensorflow, or using [tensorflow-
     To use quantized models, TF 2.3 or higher is recommended. 
 
 Inference using the [Coral EdgeTPU](https://coral.ai/) [tensorflow-lite](https://www.tensorflow.org/lite/) version 2.11.1 or less. `tflite-runtime` (version 2.11.1 or less) and `edgetpu` libraries required. More information on installation of such libraries at [Coral EdgeTPU](https://coral.ai/). 
+
+Creating wheel pakages for easy installation
 
 Usage (SpectraKeras)
 ===================
