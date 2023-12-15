@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
+***********************************************
 * CleanSplineData
 * Remove repeated data, spline
 * File must be in ASCII
-* version: 20230516a
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
+***********************************************
 * ReadRruFF
 * Convert RRuFFspectra to ASCII
 * File must be in RRuFF
-* version: 20230516a
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

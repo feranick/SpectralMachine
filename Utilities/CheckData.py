@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
-*
+***********************************************
 * Check whether a training file has data with
 *  intensity higher than specified value
-*
-* version: 20200222a
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)

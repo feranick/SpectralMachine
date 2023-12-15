@@ -4,7 +4,7 @@
 ***********************************************************
 * InfoLimitedDatasets
 * Info data with little representation based on threshold
-* version: 20200212a
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
 '''

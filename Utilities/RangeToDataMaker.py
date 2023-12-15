@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-**********************************************************
-*
+***********************************************************
 * RangeToDataMaker
-* version: 20180802a
-*
+* version: v2023.12.15-1
 * run: python3 FoosballML-train.py <csv file from Google doc>
-*
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************************
 '''
 #print(__doc__)

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
+*************************************************
 * XmuDataMaker
 * Adds spectra to single file for classification
 * File must be in Xmu
-* version: 20231215a
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-***********************************************
+*************************************************
 '''
 print(__doc__)
 

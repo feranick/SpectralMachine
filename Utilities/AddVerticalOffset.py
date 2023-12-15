@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
-*
+***********************************************
 * Replicate training data with vertical offset
 * For augmentation of data
-*
-* version: 20200222a
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)

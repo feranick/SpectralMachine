@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
-*
+***********************************************
 * AddSpectraToLearnFile
-*
 * Adds spectra to Training File
 * Spectra can be ASCII or Rruff
-* version: 20190114a
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)

@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 '''
 *********************************************
-*
 * PCADataMaker
 * Adds spectra to single file for PCA
-* version: 20170320d
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)

@@ -5,7 +5,7 @@
 * PlotASCIIData
 * Plot single ASCII Data
 * File must be in ASCII
-* version: 20230516a
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

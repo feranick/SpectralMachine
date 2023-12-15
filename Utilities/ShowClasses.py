@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
+***********************************************
 * Show classes in Learning dataset.
-* version: 20231214a
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

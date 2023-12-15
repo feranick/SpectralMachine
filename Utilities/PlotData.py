@@ -3,8 +3,7 @@
 '''
 *********************************************
 * Plot train data skipping with steps
-* version: 20180615a
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

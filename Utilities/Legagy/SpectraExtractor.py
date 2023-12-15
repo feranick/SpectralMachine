@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 '''
 **********************************************
-*
 * SpectraExtractorSVM.py
 * Extract spectra of specific phases
-* version: 20160320d
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 **********************************************
 
 '''

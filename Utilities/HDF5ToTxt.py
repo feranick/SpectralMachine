@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-**********************************************************
-*
+*********************************************
 * HDF5ToTxt
 * Convert HDF5 learning data to Txt
-*
-* version: 20180614a
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
-***********************************************************
+*********************************************
 '''
 print(__doc__)
 import numpy as np

@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-*********************************************
-*
+***********************************************
 * Replicate training data with added noise
 * Noise is a percentage of max in a spectra.
 * spectra are also shifted along the x axis
 * For augmentation of data
-*
 * version: 20200221a
-*
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 ***********************************************
 '''
 print(__doc__)

@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 '''
 *************************************************
-*
 * Replicate training data with horizontal offset
 * For augmentation of data
-*
-* version: 20181221a
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 *************************************************
 '''
 print(__doc__)

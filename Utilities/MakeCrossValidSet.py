@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 '''
 *************************************************
-*
 * Make Cross Validation Dataset from Learing Set
 * Uses CSV with selected spectra from log file.
-*
-* version: 20180614e
-*
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-*
 *************************************************
 '''
 print(__doc__)

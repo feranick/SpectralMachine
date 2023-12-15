@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-**********************************************************
+*******************************************************
 * CSVToTxt
 * Convert CSV-formatted learning data into ASCII Txt
-* version: 20211220a
+* version: v2023.12.15-1
 * By: Nicola Ferralis <feranick@hotmail.com>
-***********************************************************
+*******************************************************
 '''
 print(__doc__)
 

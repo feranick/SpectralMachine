@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 '''
-**********************************************************
+**********************************************
 * libSpectraKeas - Library for SpectraKeras
-* 20231211a
+* v2023.12.15-1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
-***********************************************************
+**********************************************
 '''
 import numpy as np
 import scipy
