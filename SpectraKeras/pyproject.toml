@@ -32,7 +32,6 @@ classifiers = [
 ]
 
 [project.scripts]
-tomatoes = "spam:main_tomatoes"
 SpectraKeras_CNN = "SpectraKeras_CNN:SpectraKeras_CNN"
 SpectraKeras_MLP = "SpectraKeras_MLP:SpectraKeras_MLP"
         
