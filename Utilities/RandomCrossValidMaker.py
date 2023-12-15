@@ -4,7 +4,7 @@
 *********************************************
 * Create Random Cross Validation Datasets
 * Train + Test
-* version: 20231214a
+* version: 20231215a
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
@@ -43,13 +43,19 @@ def main():
         return
 
     print(' Splitting', sys.argv[1], ' (Train:', percTrain1,'%; Test:',percTest1,'%)\n')
-    A_train, Cl_train, A_test, Cl_test = formatSubset(A, Cl, float(sys.argv[2])/100)
+    A_train, Cl_train, A_test, Cl_test, flag = formatSubset(A, Cl, float(sys.argv[2])/100)
 
+    if flag:
+        print("\n Would you like to save dataset with multipe data per class (0: Yes, 1: No)")
+        us = input()
+        if us == "1":
+            return
+    
     print('\n Writing new training file: ', newTrainFile)
     writeFile(newTrainFile, En, A_train, Cl_train)
     print('\n Writing new cross-validation file: ', newTestFile)
     writeFile(newTestFile, En, A_test, Cl_test)
-
+    
     print('\n Done!\n')
 
 #************************************
@@ -118,12 +124,14 @@ def formatSubset(A, Cl, percent):
                 print(" {0:.0f}: {1:.0f} ".format(x[0],uni[x[0]]))
             else:
                 print(" \033[1m {0:.0f}: {1:.0f} \033[0m".format(x[0],uni[x[0]]))
+        flag = True
                 
     else:
         print("\n Unique classes in learning/validation set:\n")
         with np.printoptions(threshold=np.inf):
             print(np.unique(Cl_cv).astype(int))
-    return A_train, Cl_train, A_cv, Cl_cv
+        flag = False
+    return A_train, Cl_train, A_cv, Cl_cv, flag
 
 def formatSubset2(A, Cl, percent):
     list = np.random.choice(range(len(Cl)), int(np.rint(percent*len(Cl))), replace=False)
