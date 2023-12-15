@@ -5,7 +5,7 @@
 * PlotSingleRruffSpectra
 * Plot Single Rruff spectra
 * Files must be in RRuFF
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

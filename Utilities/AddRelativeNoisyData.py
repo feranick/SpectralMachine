@@ -5,7 +5,7 @@
 * Replicate training data with added noise
 * Noise is a percentage of max in a spectra.
 * For augmentation of data
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

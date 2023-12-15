@@ -4,7 +4,7 @@
 ***********************************************
 * Check whether a training file has data with
 *  intensity higher than specified value
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

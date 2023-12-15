@@ -4,7 +4,7 @@
 ***********************************************************
 * TxtToHDF5
 * Convert txt-formatted learning data into HDF5
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
 '''

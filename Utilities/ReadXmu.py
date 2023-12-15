@@ -5,7 +5,7 @@
 * ReadXmu
 * Convert Xanes Xmu to ASCII
 * File must be in xmu format
-* version: 20180206b
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

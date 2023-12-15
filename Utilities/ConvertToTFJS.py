@@ -3,7 +3,7 @@
 '''
 **********************************************
 * Convert TF models (TF, Keras) into TF.js
-* v2023.12.15-1
+* v2023.12.15.1
 * Uses: TensorFlow, Keras
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************

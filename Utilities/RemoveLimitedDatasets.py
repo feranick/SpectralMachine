@@ -4,7 +4,7 @@
 **********************************************
 * RemoveLimitedDatasets
 * Remove data with little representation based on threshold
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

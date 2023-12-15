@@ -6,7 +6,7 @@
 * Noise is a percentage of max in a spectra.
 * spectra are also shifted along the x axis
 * For augmentation of data
-* version: 20200221a
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

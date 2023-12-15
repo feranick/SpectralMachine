@@ -5,7 +5,7 @@
 * PlotRruffSpectraRound
 * Plot Rruff spectra with rounding decimals
 * Files must be in RRuFF
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''

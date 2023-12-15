@@ -4,7 +4,7 @@
 *******************************************************
 * TxtHDF5NpyConverter
 * Convert training files to/from text, hdf5, bin-npy
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 *******************************************************
 '''

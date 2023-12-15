@@ -4,7 +4,7 @@
 *************************************************
 * Make Cross Validation Dataset from Learing Set
 * Uses CSV with selected spectra from log file.
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 *************************************************
 '''

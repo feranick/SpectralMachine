@@ -4,7 +4,7 @@
 ***********************************************************
 * ReadHDF5
 * Read HDF5 learning data
-* version: v2023.12.15-1
+* version: v2023.12.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
 '''
