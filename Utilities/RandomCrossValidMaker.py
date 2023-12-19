@@ -4,7 +4,7 @@
 ***********************************************
 * Create Random Cross Validation Datasets
 * Train + Test
-* version: v2023.12.15.1
+* version: v2023.12.19.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
@@ -30,13 +30,16 @@ def main():
 
     percTrain = str('{:1d}-{:1d}'.format(int(100-float(sys.argv[2])),int((100-float(sys.argv[2])-int(100-float(sys.argv[2])))*10)))
     percTest = str('{:1d}-{:1d}'.format(int(float(sys.argv[2])),int((float(sys.argv[2])-int(float(sys.argv[2])))*10)))
+    
+    newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv' + percTrain + 'pc'
+    newTestFile = os.path.splitext(sys.argv[1])[0] + '_test-cv' + percTest + 'pc'
 
     if defParam.saveAsTxt == True:
-        newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv' + percTrain + 'pc.txt'
-        newTestFile = os.path.splitext(sys.argv[1])[0] + '_test-cv' + percTest + 'pc.txt'
+        newTrainFile = newTrainFile + '.txt'
+        newTestFile = newTestFile + '.txt'
     else:
-        newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv' + percTrain + 'pc.h5'
-        newTestFile = os.path.splitext(sys.argv[1])[0] + '_test-cv' + percTest + 'pc.h5'
+        newTrainFile = newTrainFile + '.h5'
+        newTestFile = newTestFile + '.h5'
 
     if os.path.exists(newTrainFile) or os.path.exists(newTestFile) == True:
         print(" Training or cross validation test files exist. Exiting.\n")
@@ -55,8 +58,41 @@ def main():
     writeFile(newTrainFile, En, A_train, Cl_train)
     print('\n Writing new cross-validation file: ', newTestFile)
     writeFile(newTestFile, En, A_test, Cl_test)
-    
     print('\n Done!\n')
+    
+#************************************
+''' Format subset '''
+#************************************
+def formatSubset(A, Cl, percent):
+    from sklearn.model_selection import train_test_split
+    A_train, A_cv, Cl_train, Cl_cv = \
+    train_test_split(A, Cl, test_size=percent, random_state=defParam.randomSel)
+    uniCl = np.unique(Cl_cv).astype(int)
+    if Cl_cv.shape[0] - uniCl.shape[0] > 0:
+        print(" Classes with multiple data present.")
+        print("\n Unique classes in learning/validation set and corresponding number of members:\n")
+        uni = np.ones(np.unique(Cl_cv).shape)
+        for x in enumerate(uniCl):
+            uni[x[0]] = np.count_nonzero(Cl_cv==uniCl[x[0]])
+            if uni[x[0]] == 1:
+                print(" {0:.0f}: {1:.0f} ".format(x[0],uni[x[0]]))
+            else:
+                print(" \033[1m {0:.0f}: {1:.0f} \033[0m".format(x[0],uni[x[0]]))
+        flag = True
+    else:
+        print("\n Unique classes in learning/validation set:\n")
+        with np.printoptions(threshold=np.inf):
+            print(np.unique(Cl_cv).astype(int))
+        flag = False
+    return A_train, Cl_train, A_cv, Cl_cv, flag
+
+def formatSubset2(A, Cl, percent):
+    list = np.random.choice(range(len(Cl)), int(np.rint(percent*len(Cl))), replace=False)
+    A_train = np.delete(A,list,0)
+    Cl_train = np.delete(Cl,list)
+    A_cv = A[list]
+    Cl_cv = Cl[list]
+    return A_train, Cl_train, A_cv, Cl_cv
 
 #************************************
 ''' Read Learning file '''
@@ -75,11 +111,9 @@ def readLearnFile(learnFile):
     except:
         print("\033[1m" + " Learning file not found \n" + "\033[0m")
         return
-
     En = M[0,1:]
     A = M[1:,1:]
     Cl = M[1:,0]
-
     return En, A, Cl
 
 #*****************************************
@@ -87,59 +121,15 @@ def readLearnFile(learnFile):
 #*****************************************
 def writeFile(File, En, A, Cl):
     print(' Number of datapoints:', str(A.shape[0]))
-    
     newMatrix = np.append([0], En).reshape(1,-1)
-    
     temp = np.hstack((Cl[np.newaxis].T, A))
     newMatrix = np.vstack((newMatrix, temp))
-
-    #for i in range(len(Cl)):
-    #    newMatrix = np.vstack((newMatrix, np.append(Cl[i], A[i])))
-    
     if defParam.saveAsTxt == True:
         with open(File, 'ab') as f:
             np.savetxt(f, newMatrix, delimiter='\t', fmt='%10.6f')
     else:
         with h5py.File(File, 'w') as hf:
             hf.create_dataset("M",  data=newMatrix)
-
-#************************************
-''' Format subset '''
-#************************************
-def formatSubset(A, Cl, percent):
-    from sklearn.model_selection import train_test_split
-    A_train, A_cv, Cl_train, Cl_cv = \
-    train_test_split(A, Cl, test_size=percent, random_state=defParam.randomSel)
-    
-    uniCl = np.unique(Cl_cv).astype(int)
-    if Cl_cv.shape[0] - uniCl.shape[0] > 0:
-        print(" Classes with multiple data present.")
-        print("\n Unique classes in learning/validation set and corresponding number of members:\n")
-    
-        uni = np.ones(np.unique(Cl_cv).shape)
-        #with np.nditer(uniCl) as it:
-        for x in enumerate(uniCl):
-            uni[x[0]] = np.count_nonzero(Cl_cv==uniCl[x[0]])
-            if uni[x[0]] == 1:
-                print(" {0:.0f}: {1:.0f} ".format(x[0],uni[x[0]]))
-            else:
-                print(" \033[1m {0:.0f}: {1:.0f} \033[0m".format(x[0],uni[x[0]]))
-        flag = True
-                
-    else:
-        print("\n Unique classes in learning/validation set:\n")
-        with np.printoptions(threshold=np.inf):
-            print(np.unique(Cl_cv).astype(int))
-        flag = False
-    return A_train, Cl_train, A_cv, Cl_cv, flag
-
-def formatSubset2(A, Cl, percent):
-    list = np.random.choice(range(len(Cl)), int(np.rint(percent*len(Cl))), replace=False)
-    A_train = np.delete(A,list,0)
-    Cl_train = np.delete(Cl,list)
-    A_cv = A[list]
-    Cl_cv = Cl[list]
-    return A_train, Cl_train, A_cv, Cl_cv
 
 #************************************
 ''' Main initialization routine '''
