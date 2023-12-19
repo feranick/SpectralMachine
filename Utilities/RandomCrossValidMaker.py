@@ -114,7 +114,7 @@ def formatSubset(A, Cl, percent):
     uniCl = np.unique(Cl_cv).astype(int)
     if Cl_cv.shape[0] - uniCl.shape[0] > 0:
         print(" Classes with multiple data present.")
-        print("\n Unique classes in learning/validation set and corresponting number of members:\n")
+        print("\n Unique classes in learning/validation set and corresponding number of members:\n")
     
         uni = np.ones(np.unique(Cl_cv).shape)
         #with np.nditer(uniCl) as it:
