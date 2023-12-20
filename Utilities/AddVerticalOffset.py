@@ -38,7 +38,7 @@ def main():
     print(' Adding', sys.argv[2],'sets with vertical offset:', sys.argv[3], '\n')
 
     for j in range(int(sys.argv[2])):
-        newTrain = np.((newTrain, verticalOffset(M, float(sys.argv[3]))))
+        newTrain = np.vstack((newTrain, verticalOffset(M, float(sys.argv[3]))))
 
     saveLearnFile(newTrain, newFile)
 
