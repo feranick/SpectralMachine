@@ -4,7 +4,7 @@
 *********************************************************
 * Create Random Cross Validation Datasets from threshold
 * Based on high frequency datapoints
-* version: v2023.12.19.1
+* version: v2023.12.22.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 *********************************************************
 '''
@@ -25,8 +25,10 @@ def main():
 
     En, A, Cl = readLearnFile(sys.argv[1])
 
-    newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv_hfsel' + sys.argv[2] + '_val' + sys.argv[3]
-    newTestFile = os.path.splitext(sys.argv[1])[0] + '_test-cv_hfsel' + sys.argv[2] + '_val' + sys.argv[3]
+    A_train, Cl_train, A_test, Cl_test, totNumPoints = selectHFdata(A, Cl, int(sys.argv[2]), int(sys.argv[3]))
+    
+    newTrainFile = os.path.splitext(sys.argv[1])[0] + '_train-cv_hfsel' + sys.argv[2] + '_val' + str(totNumPoints)
+    newTestFile = os.path.splitext(sys.argv[1])[0] + '_test-cv_hfsel' + sys.argv[2] + '_val' + str(totNumPoints)
 
     if defParam.saveAsTxt == True:
         newTrainFile = newTrainFile + '.txt'
@@ -34,19 +36,16 @@ def main():
     else:
         newTrainFile = newTrainFile + '.h5'
         newTestFile = newTestFile + '.h5'
-
+        
     if os.path.exists(newTrainFile) or os.path.exists(newTestFile) == True:
         print(" Training or cross validation test files exist. Exiting.\n")
         return
-
-    A_train, Cl_train, A_test, Cl_test = selectHFdata(A, Cl, int(sys.argv[2]), int(sys.argv[3]))
+    
     print(' Splitting', sys.argv[1], 'into training/validation datasets\n')
-    
-    print('\n Writing new training file: ', newTrainFile)
+    print(' Writing new training file:', newTrainFile)
     writeFile(newTrainFile, En, A_train, Cl_train)
-    print('\n Writing new cross-validation file: ', newTestFile)
+    print('\n Writing new cross-validation file:', newTestFile)
     writeFile(newTestFile, En, A_test, Cl_test)
-    
     print('\n Done!\n')
     
 #************************************
@@ -62,6 +61,11 @@ def selectHFdata(A, Cl, HFthreshold, totNumPoints):
             uHFCl = np.append(uHFCl, uniCl[x[0]])
     print(" Classes with members with more than {0:.0f} elements: {1:.0f}".format(HFthreshold,uHFCl.shape[0]))
     print(" Number of classes to be selected for validation: ", totNumPoints)
+    
+    if uHFCl.shape[0] < totNumPoints:
+        print("\n \033[1mNot enough classes to select {0:.0f} classes for validation\033[0m.\n  Setting max number of classes to {0:.0f}.".format(uHFCl.shape[0]))
+        totNumPoints = uHFCl.shape[0]
+        
     list = np.array([]).astype(int)
     listSelHF = np.random.choice(uHFCl, int(totNumPoints), replace=False)
     for i in listSelHF:
@@ -74,7 +78,7 @@ def selectHFdata(A, Cl, HFthreshold, totNumPoints):
     
     print("\n Generated validation set with {0:.0f} members, each from a class with at least {1:.0f} elements.".format(listSelHF.shape[0],uHFCl.shape[0]))
 
-    return A_train, Cl_train, A_cv, Cl_cv
+    return A_train, Cl_train, A_cv, Cl_cv, totNumPoints
 
 #************************************
 ''' Read Learning file '''
