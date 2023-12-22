@@ -3,7 +3,7 @@
 '''
 ***********************************************
 * Show classes in Learning dataset.
-* version: v2023.12.15.1
+* version: v2023.12.22.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
@@ -19,23 +19,19 @@ def main():
         return
 
     En, M, Cl, learnFileRoot = readLearnFile(sys.argv[1])
-    
     uniCl = np.unique(Cl).astype(int)
     
     print(" Number of spectra in dataset:",Cl.shape[0])
     print(" Number of unique classes in dataset:",uniCl.shape[0])
-    if Cl.shape[0] - uniCl.shape[0] > 0:
-        print(" Classes with multiple data present.")
-        print("\n Unique classes in learning/validation set and corresponting number of members:\n")
-    
-        uni = np.ones(np.unique(Cl).shape)
-        with np.nditer(uniCl) as it:
-            for x in it:
-                uni[x] = np.count_nonzero(Cl==x)
-                if uni[x] == 1:
-                    print(" {0:.0f}: {1:.0f} ".format(x,uni[x]))
-                else:
-                    print(" \033[1m {0:.0f}: {1:.0f} \033[0m".format(x,uni[x]))
+    if Cl.shape[0] > uniCl.shape[0]:
+        print("\n Classes with multiple data present. Would you like a list of them? (1: No, 0: Yes)")
+        _ = input()
+        if int(_) == 0:
+            for x in np.nditer(uniCl):
+                _ = np.count_nonzero(Cl==x)
+                if _ > 1:
+                    print(" \033[1m {0:.0f}: {1:.0f} \033[0m".format(x,_))
+        print("")
     else:
         print("\n Unique classes in learning/validation set:\n")
         with np.printoptions(threshold=np.inf):
