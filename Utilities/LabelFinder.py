@@ -4,14 +4,12 @@
 *****************************************************
 * LabelFinder
 * Find label corresponding to class in training data
-* version: v2023.12.15.1
+* version: v2023.12.27.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 *****************************************************
 '''
 print(__doc__)
 
-import pandas as pd
-import numpy as np
 import sys
 #************************************
 ''' Main '''
@@ -21,9 +19,9 @@ def main():
         print(' Usage:\n  python3 LabelFinder <training_data_info_file.csv> <label1, label2, label3...>')
         print('  Requires python 3.x. Not compatible with python 2.x\n')
         return
-
-    learnFile = sys.argv[1]
     
+    import numpy as np
+    learnFile = sys.argv[1]
     R = np.array([np.fromstring(sys.argv[2], dtype='uint64', sep=',')])
     
     print(" Opening learning info file:",learnFile,"\n")
