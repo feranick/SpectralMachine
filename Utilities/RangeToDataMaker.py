@@ -3,8 +3,8 @@
 '''
 ***********************************************************
 * RangeToDataMaker
-* version: v2023.12.15.1
-* run: python3 FoosballML-train.py <csv file from Google doc>
+* version: v2023.12.27.1
+* run: python3 RangeTiDataMaer <csv file from Google doc>
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
 '''
