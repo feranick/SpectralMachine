@@ -1,0 +1,102 @@
+<?php
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_FILES['files'])) {
+        $errors = [];
+        $path = 'uploads/';
+        $extensions = ['txt'];
+        
+        //print($_FILES['files']['name'][0]);
+        //$output =  $path . $file_name;
+
+        $all_files = count($_FILES['files']['tmp_name']);
+        
+        for ($i = 0; $i < $all_files; $i++) {
+            $file_name = $_FILES['files']['name'][$i];
+            $file_tmp = $_FILES['files']['tmp_name'][$i];
+            $file_type = $_FILES['files']['type'][$i];
+            $file_size = $_FILES['files']['size'][$i];
+            $file_ext = strtolower(end(explode('.', $_FILES['files']['name'][$i])));
+
+            $file = $path . $file_name;
+
+            if (!in_array($file_ext, $extensions)) {
+                $errors[] = 'Extension not allowed: ' . $file_name . ' ' . $file_type;
+            }
+
+            if ($file_size > 2097152) {
+                $errors[] = 'File size exceeds limit: ' . $file_name . ' ' . $file_type;
+            }
+
+            if (empty($errors)) {
+                move_uploaded_file($file_tmp, $file);
+            }
+        }
+        $tmpfile = $_FILES['files']['tmp_name'][0];
+        //$output =  $tmpfile;
+        //$fp = fopen($tmpfile, "r");//open file in read mode
+        //$output = fread($fp, filesize($tmpfile));//read file
+	$command = "cd ml; SpectraKeras_CNN -p $tmpfile 2>&1";
+        $output = shell_exec($command);
+
+        if ($errors) print_r($errors);
+    }
+}
+
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <title>SpectraKeras</title>
+
+  </head>
+
+  <body>
+    <script>
+    const url = 'index.php'
+    const form = document.querySelector('form')
+
+    form.addEventListener('submit', (e) => {
+    e.preventDefault()
+
+    const files = document.querySelector('[type=file]').files
+    const formData = new FormData()
+
+    for (let i = 0; i < files.length; i++) {
+        let file = files[i]
+
+        formData.append('files[]', file)
+    }
+
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        return response.text();
+    }).then(data => {
+        console.log(data);
+    });
+    });
+    </script>
+    
+
+    <h2>SpectraKeras: Identify  mineral from Raman Spectra</h2>
+    
+    Upload a ASCII file with the Raman spectra of an uknown mineral. A Convolutional neural netowrk machine learning algorithm trained on the <a href="https://rruff.info" target="_blank" rel="noopener noreferrer">Rruff library</a> will predict the type of mineral.
+    <br>Files are discarded after prediction. <a href="https://github.com/feranick/SpectralMachine" target="_blank" rel="noopener noreferrer">SpectraKeras is open-source and code and python scripts are available on Github</a>
+    <br><small>Current ML model: AAA-20231207_norm1_train-cv_hfsel20_val37  CNN_1_tflite_2-15_k4_99_1</small>
+    
+    <form method="post" enctype="multipart/form-data">
+      <br><br><input type="file" name="files[]" multiple />
+      <input type="submit" value="Identify Mineral via ML" name="submit" />
+    </form>
+    <text_area><pre><?php echo $output; ?></pre></text_area>
+    
+  </body>
+</html>
