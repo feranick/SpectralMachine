@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <script>
+  function readFile() {
+    const [file] = document.querySelector("input[type=file]").files;
+    const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+        process(reader.result);
+        },false,);
+
+        if (file) {
+            reader.readAsText(file);
+            }
+        }
+        
+  function process(file) {
+    console.log(file);
+    document.querySelector(".content").innerText = file;
+  }
+
+  </script>
+  </head>
+  <body>
+    <input type="file" onchange="readFile()" /><br />
+    <p class="content"></p>
+    
+  </body>
+</html>
