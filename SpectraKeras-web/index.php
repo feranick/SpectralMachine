@@ -36,7 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         //$output =  $tmpfile;
         //$fp = fopen($tmpfile, "r");//open file in read mode
         //$output = fread($fp, filesize($tmpfile));//read file
-	$command = "cd ml; SpectraKeras_CNN -p $tmpfile 2>&1";
+        if ($_POST['mode'] == "Raman Spectroscopy") {
+            $command = "cd ml-raman; SpectraKeras_CNN -p $tmpfile 2>&1";
+            }
+        if ($_POST['mode'] == "Powder X-ray Diffraction (XRD)") {
+            $command = "cd ml-xrd; SpectraKeras_CNN -p $tmpfile 2>&1";
+            }
         $output = shell_exec($command);
 
         if ($errors) print_r($errors);
@@ -83,18 +88,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         console.log(data);
     });
     });
-    </script>
     
 
-    <h2>SpectraKeras: Identify  mineral from Raman Spectra</h2>
+    </script>
+
+    <h2>SpectraKeras: Identify  minerals from spectra</h2>
     
-    Upload a ASCII file with the Raman spectra of an uknown mineral. A Convolutional neural netowrk machine learning algorithm trained on the <a href="https://rruff.info" target="_blank" rel="noopener noreferrer">Rruff library</a> will predict the type of mineral.
+    Upload a ASCII file with the Raman spectra or an XRD scan of an uknown mineral. A Convolutional neural netowrk machine learning algorithm trained on the <a href="https://rruff.info" target="_blank" rel="noopener noreferrer">Rruff library</a> will predict the type of mineral.
     <br>Files are discarded after prediction. <a href="https://github.com/feranick/SpectralMachine" target="_blank" rel="noopener noreferrer">SpectraKeras is open-source and code and python scripts are available on Github</a>
     <br><small>Current ML model: AAA-20231207_norm1_train-cv_hfsel20_val37  CNN_1_tflite_2-15_k4_99_1</small>
+    <br><small>Current XRD ML model: AAA-Powder_20231210s2_norm1_train-cv_hfsel10_val22  CNN_powder_2-15_b4</small>
     
-    <form method="post" enctype="multipart/form-data">
+    <form name="SpectraKeras" method="post" enctype="multipart/form-data">
       <br><br><input type="file" name="files[]" multiple />
       <input type="submit" value="Identify Mineral via ML" name="submit" />
+      <br><br><select name="mode" id="mode">
+            <option>Raman Spectroscopy</option>
+            <option>Powder X-ray Diffraction (XRD)</option>
+            </select>
     </form>
     <text_area><pre><?php echo $output; ?></pre></text_area>
     
