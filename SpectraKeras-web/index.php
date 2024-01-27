@@ -34,15 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $tmpfile = $_FILES['files']['tmp_name'][0];
         //$output =  $tmpfile;
-        //$fp = fopen($tmpfile, "r");//open file in read mode
-        //$output = fread($fp, filesize($tmpfile));//read file
         if ($_POST['mode'] == "Raman Spectroscopy") {
-            $command = "cd ml-raman; SpectraKeras_CNN -p $tmpfile 2>&1";
+            $folder = "ml-raman";
             }
         if ($_POST['mode'] == "Powder X-ray Diffraction (XRD)") {
-            $command = "cd ml-xrd; SpectraKeras_CNN -p $tmpfile 2>&1";
+            $folder = "ml-xrd";
             }
-        $output = shell_exec($command);
+
+	//$command = "cd " . $folder . "; SpectraKeras_CNN -p $tmpfile 2>&1";
+	$command = "cd " . $folder . "; python3 SpectraKeras_CNN.py -p $tmpfile 2>&1";
+	$output = shell_exec($command);
 
         if ($errors) print_r($errors);
     }
