@@ -202,11 +202,17 @@ def plotWeights(dP, En, A, model, type):
 #************************************
 def getTFVersion(dP):
     import tensorflow as tf
-    
+    from packaging import version    
     if dP.useTFlitePred:
         print(" TensorFlow (Lite) v.",tf.version.VERSION,"\n")
     else:
         print(" TensorFlow v.",tf.version.VERSION,"\n" )
+        
+def checkTFVersion(vers):
+    import tensorflow as tf
+    from packaging import version
+    v = version.parse(tf.version.VERSION)
+    return v < version.parse(vers)
 
 #************************************
 # Normalizer
