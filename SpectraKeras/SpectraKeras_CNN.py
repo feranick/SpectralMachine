@@ -814,7 +814,6 @@ def plotActivationsPredictions(R, model):
         import tensorflow.keras as keras
     else:
         import keras
-        
     from keras.models import Model
     
     dP = Conf()
