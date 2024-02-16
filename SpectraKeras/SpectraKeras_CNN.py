@@ -222,7 +222,7 @@ def train(learnFile, testFile, flag):
     dP = Conf()
     import tensorflow as tf
     if checkTFVersion("2.16.0"):
-        import tf.keras as keras
+        import tensorflow.keras as keras
     else:
         import keras
         
@@ -780,7 +780,7 @@ def plotActivationsTrain(model):
     import matplotlib.pyplot as plt
     import tensorflow as tf
     if checkTFVersion("2.16.0"):
-        import tf.keras as keras
+        import tensorflow.keras as keras
     else:
         import keras
     dP = Conf()
@@ -811,7 +811,7 @@ def plotActivationsPredictions(R, model):
     import matplotlib.pyplot as plt
     if checkTFVersion("2.16.0"):
         import tensorflow as tf
-        import tf.keras as keras
+        import tensorflow.keras as keras
     else:
         import keras
         

@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2023.12.22.3
+* v2024.02.15.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -198,7 +198,7 @@ def train(learnFile, testFile):
     dP = Conf()
     import tensorflow as tf
     if checkTFVersion("2.16.0"):
-        import tf.keras as keras
+        import tensorflow.keras as keras
     else:
         import keras
 

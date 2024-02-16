@@ -99,7 +99,7 @@ def loadModel(dP):
         getTFVersion(dP)
         import tensorflow as tf
         if checkTFVersion("2.16.0"):
-            import tf.keras as keras
+            import tensorflow.keras as keras
         else:
             import keras
         if dP.useTFlitePred:
@@ -179,7 +179,7 @@ def plotWeights(dP, En, A, model, type):
     import matplotlib.pyplot as plt
     if checkTFVersion("2.16.0"):
         import tensorflow as tf
-        import tf.keras as keras
+        import tensorflow.keras as keras
     else:
         import keras
     plotFileName = "model_" + type + "_weights" + ".png"
