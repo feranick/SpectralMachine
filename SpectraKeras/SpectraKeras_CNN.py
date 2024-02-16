@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2023.12.22.3
+* v2024.02.15.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -220,10 +220,11 @@ def main():
 #************************************
 def train(learnFile, testFile, flag):
     dP = Conf()
-
-    from pkg_resources import parse_version
     import tensorflow as tf
-    import tensorflow.keras as keras
+    if checkTFVersion("2.16.0"):
+        import tf.keras as keras
+    else:
+        import keras
         
     opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
     conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
@@ -780,10 +781,14 @@ def printParam():
 def plotActivationsTrain(model):
     import matplotlib.pyplot as plt
     import tensorflow as tf
+    if checkTFVersion("2.16.0"):
+        import tf.keras as keras
+    else:
+        import keras
     dP = Conf()
     i = 0
     for layer in model.layers:
-        if isinstance(layer, tf.keras.layers.Conv2D):
+        if isinstance(layer, keras.layers.Conv2D):
             weight_conv2d = layer.get_weights()[0][:,:,0,:]
             filter_index = 0
             col_size = dP.sizeColPlot
@@ -806,7 +811,14 @@ def plotActivationsTrain(model):
 def plotActivationsPredictions(R, model):
     print(" Saving activation plots...\n")
     import matplotlib.pyplot as plt
-    from tensorflow.keras.models import Model
+    if checkTFVersion("2.16.0"):
+        import tensorflow as tf
+        import tf.keras as keras
+    else:
+        import keras
+        
+    from keras.models import Model
+    
     dP = Conf()
     layer_outputs = [layer.output for layer in model.layers]
     activation_model = Model(inputs=model.input, outputs=layer_outputs)

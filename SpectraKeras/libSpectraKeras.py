@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2023.12.22.3
+* v2024.02.15.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -98,6 +98,10 @@ def loadModel(dP):
     else:
         getTFVersion(dP)
         import tensorflow as tf
+        if checkTFVersion("2.16.0"):
+            import tf.keras as keras
+        else:
+            import keras
         if dP.useTFlitePred:
             # model here is intended as interpreter
             model = tf.lite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
@@ -108,8 +112,8 @@ def loadModel(dP):
             else:
                 model_name = dP.model_name
             print("  Model name:",model_name)
-            model = tf.keras.models.load_model(model_name)
-            #model = tf.keras.saving.load_model(model_name)
+            model = keras.models.load_model(model_name)
+            #model = keras.saving.load_model(model_name)
     return model
 
 #************************************
@@ -173,13 +177,17 @@ def makeQuantizedTFmodel(A, model, dP):
 #************************************
 def plotWeights(dP, En, A, model, type):
     import matplotlib.pyplot as plt
-    import tensorflow as tf
+    if checkTFVersion("2.16.0"):
+        import tensorflow as tf
+        import tf.keras as keras
+    else:
+        import keras
     plotFileName = "model_" + type + "_weights" + ".png"
     plt.figure(tight_layout=True)
     #plotInd = 511
     plotInd = (len(dP.HL)+2)*100+11
     for layer in model.layers:
-        if isinstance(layer, tf.keras.layers.Dense):
+        if isinstance(layer, keras.layers.Dense):
             w_layer = layer.get_weights()[0]
             ax = plt.subplot(plotInd)
             newX = np.arange(En[0], En[-1], (En[-1]-En[0])/w_layer.shape[0])

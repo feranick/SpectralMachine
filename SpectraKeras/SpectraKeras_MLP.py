@@ -196,9 +196,11 @@ def main():
 #************************************
 def train(learnFile, testFile):
     dP = Conf()
-    from pkg_resources import parse_version
     import tensorflow as tf
-    import tensorflow.keras as keras
+    if checkTFVersion("2.16.0"):
+        import tf.keras as keras
+    else:
+        import keras
 
     opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
     conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
