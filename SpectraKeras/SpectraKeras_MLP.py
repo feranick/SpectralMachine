@@ -649,9 +649,7 @@ def convertTflite(learnFile):
     dP.useTFlitePred = False
     dP.TFliteRuntime = False
     dP.runCoralEdge = False
-    from pkg_resources import parse_version
-    import tensorflow as tf
-    if parse_version(tf.version.VERSION) < parse_version('2.0.0'):
+    if checkTFVersion('2.0.0'):
         tf.compat.v1.enable_eager_execution()
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
