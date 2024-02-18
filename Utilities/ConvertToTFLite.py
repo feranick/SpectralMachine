@@ -3,7 +3,7 @@
 '''
 ***********************************************************
 * Convert TF models (TF, Keras) into TF.Lite
-* v2024.02.16.1
+* v2024.02.18.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
@@ -43,6 +43,15 @@ def convertModelToTFLite(model_file):
     tflite_model = converter.convert()
     open(convFile, "wb").write(tflite_model)
     print(' Converted model saved to:',convFile,'\n')
+
+#************************************
+# Get TensorFlow Version
+#************************************
+def checkTFVersion(vers):
+    import tensorflow as tf
+    from packaging import version
+    v = version.parse(tf.version.VERSION)
+    return v < version.parse(vers)
 
 #************************************
 # Main initialization routine
