@@ -98,10 +98,10 @@ def loadModel(dP):
     else:
         getTFVersion(dP)
         import tensorflow as tf
-        if checkTFVersion("2.16.0"):
+        if checkTFVersion("2.15.99"):
             import tensorflow.keras as keras
         else:
-            import keras
+            import tf_keras as keras
         if dP.useTFlitePred:
             # model here is intended as interpreter
             model = tf.lite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
@@ -177,11 +177,11 @@ def makeQuantizedTFmodel(A, model, dP):
 #************************************
 def plotWeights(dP, En, A, model, type):
     import matplotlib.pyplot as plt
-    if checkTFVersion("2.16.0"):
+    if checkTFVersion("2.15.99"):
         import tensorflow as tf
         import tensorflow.keras as keras
     else:
-        import keras
+        import tf_keras as keras
     plotFileName = "model_" + type + "_weights" + ".png"
     plt.figure(tight_layout=True)
     #plotInd = 511

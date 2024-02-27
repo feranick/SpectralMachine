@@ -9,8 +9,8 @@ include = [
 
 [project]
 name = "SpectraKeras"
-version = "v2024.02.16.1"
-dependencies = ["numpy", "h5py", "tensorflow", "pydot", "graphviz","scipy"]
+version = "v2024.02.27.1"
+dependencies = ["numpy", "h5py", "tensorflow", "pydot", "graphviz","scipy","tf-keras"]
 authors = [{ name="Nicola Ferralis", email="ferralis@mit.edu" },]
 description = "Machine learning for scientific spectra"
 readme = "../README.md"
@@ -26,7 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12,
+    "Programming Language :: Python :: 3.12",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Chemistry",
     "Topic :: Scientific/Engineering :: Physics",

@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2024.02.15.1
+* v2024.02.27.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -197,10 +197,10 @@ def main():
 def train(learnFile, testFile):
     dP = Conf()
     import tensorflow as tf
-    if checkTFVersion("2.16.0"):
+    if checkTFVersion("2.15.99"):
         import tensorflow.keras as keras
     else:
-        import keras
+        import tf_keras as keras
 
     opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
     conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
