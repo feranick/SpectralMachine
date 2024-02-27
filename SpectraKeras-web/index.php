@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
 	//$command = "cd " . $folder . "; SpectraKeras_CNN -p $tmpfile 2>&1";
-	$command = "cd " . $folder . "; python3 SpectraKeras_CNN.py -p $tmpfile 2>&1";
+	$command = "cd " . $folder . "; python3 ../SpectraKeras_CNN.py -p $tmpfile 2>&1";
 	$output = shell_exec($command);
 
         if ($errors) print_r($errors);
