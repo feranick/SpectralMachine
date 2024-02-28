@@ -119,7 +119,8 @@ def loadModel(dP):
                 #model = keras.saving.load_model(model_name)
             else:
                 model_name = dP.model_name
-                model = keras.layers.TFSMLayer(model_name, call_endpoint='serve')
+                model = keras.models.Sequential()
+                model.add(keras.layers.TFSMLayer(model_name, call_endpoint='serve'))
             print("  Model name:",model_name)
     return model
 
