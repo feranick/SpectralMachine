@@ -7,7 +7,7 @@ Machine learning software for rapid spectral analysis. While Raman spectra were 
    - Convolutional Neural Networks (TensorFlow, TensorFlow-Lite)
 - Required libraries for prediction:
    - tensorflow (v.2.12 or higher - won't work with previous releases)
-   - Optional: tensorflow-lite (v.2.5 and higher)
+   - Optional: tensorflow-lite (v.2.11 and higher)
    - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
    - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
 
@@ -23,7 +23,7 @@ Installation
 ## Installation from available wheel package
 If available from the main site, you can install SpectraKeras by running:
 
-    python3 -m pip install --upgrade spectrakeras-20231215a0-py3-none-any.whl
+    python3 -m pip install --upgrade spectrakeras-2023.12.22.3-py3-none-any.whl
     
 SpectraKeras_CNN and Spectrakeras_MLP are available directly from the command line.
 NOTE: The Utilities in the `Utilities` folder are not included in the package, and can be run locally as needed.
@@ -40,7 +40,7 @@ To build the wheel package rom the `SpectraKeras` folder run:
 A wheel package is available in the subfolder `dir`. You can install it following the instructions shown above.
 
 ## Compatibility and dependences
-This software requires Python (3.8 or higher). It has been tested with Python 3.9 or higher which is the recommended platform. It is not compatible with python 2.x. Additional required packages:
+This software requires Python (3.9 or higher). It has been tested with Python 3.9 or higher which is the recommended platform. It is not compatible with python 2.x. Additional required packages:
 
     numpy
     scikit-learn (>=0.18)
@@ -59,7 +59,7 @@ In addition, these packages may be needed depending on your platform (via ```apt
 
 These are found in Unix based systems using common repositories (apt-get for Debian/Ubuntu Linux, or MacPorts for MacOS). More details in the [scikit-learn installation page](http://scikit-learn.org/stable/install.html).
 
-[TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow 2.x (2.14 or higher preferred). TF 2.14 is the currently supported release. 
+[TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow 2.x (2.15 or higher preferred). TF 2.15 is the currently supported release. 
 
 Inference can be carried out using the regular tensorflow, or using [tensorflow-lite](https://www.tensorflow.org/lite/) for [quantized models](https://www.tensorflow.org/lite/performance/post_training_quantization). Loading times of tflite (direct or via [tflite-runtime](https://www.tensorflow.org/lite/guide/python)) are significantly faster than tensorflow with minimal loss in accuracy. SpectraKeras provides an option to convert tensorflow models to quantized tflite models. TFlite models have been tested in Linux x86-64, arm7 (including Raspberry Pi3) and aarm64, MacOS, Windows. 
     To use quantized models, TF 2.3 or higher is recommended. 
