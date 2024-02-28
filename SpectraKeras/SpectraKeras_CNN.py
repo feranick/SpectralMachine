@@ -587,7 +587,7 @@ def predict(testFile):
                         print("  {0:d}\t\t| {1:.2f}".format(int(le.inverse_transform(i)[0]),100*predictions[0][i]/255))
                     else:
                         print("  {0:d}\t\t| {1:.2f}".format(int(le.inverse_transform(i)[0]),100*predictions[0][i]))
-            print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
+            print('\033[1m\n  Predicted value = {0:.d} (probability = {1:.2f}%)\033[0m\n'.format(int(predValue), predProb))
             print('  ========================================================\n')
 
         else:
