@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2024.02.27.1
+* v2024.02.28.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -91,6 +91,7 @@ class Conf():
 
     def sysDef(self):
         self.conf['System'] = {
+            'kerasVersion' : 2,
             'makeQuantizedTFlite' : True,
             'useTFlitePred' : False,
             'TFliteRuntime' : False,
@@ -127,6 +128,7 @@ class Conf():
             self.metricBestModelR = self.conf.get('Parameters','metricBestModelR')
             self.metricBestModelC = self.conf.get('Parameters','metricBestModelC')
             
+            self.kerasVersion = self.conf.getint('System','kerasVersion')
             self.makeQuantizedTFlite = self.conf.getboolean('System','makeQuantizedTFlite')
             self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
             self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
@@ -224,7 +226,10 @@ def train(learnFile, testFile, flag):
     if checkTFVersion("2.15.99"):
         import tensorflow.keras as keras
     else:
-        import tf_keras as keras
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
+        else:
+            import keras
         
     opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
     conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
@@ -416,11 +421,14 @@ def train(learnFile, testFile, flag):
 	        validation_split=dP.cv_split)
     
     #model.save(dP.model_name, save_format='h5')
-    model.save(dP.model_name)
+    if dP.kerasVersion == 2:
+        model.save(dP.model_name)
+    else:
+        model.export(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     
     if dP.makeQuantizedTFlite:
-        makeQuantizedTFmodel(x_train, model, dP)
+        makeQuantizedTFmodel(x_train, dP)
     
     print('\n  =============================================')
     print('  \033[1m CNN\033[0m - Model Architecture')
@@ -544,10 +552,10 @@ def predict(testFile):
         #predictions = model.predict(R).flatten()[0]
         predictions, _ = getPredictions(R, model, dP)
         print('\n  ========================================================')
-        print('  \033[1m CNN - Regressor\033[0m - Prediction')
+        print('  CNN - Regressor - Prediction')
         print('  ========================================================')
         predValue = predictions.flatten()[0]
-        print('\033[1m\n  Predicted value (normalized) = {0:.2f}\033[0m\n'.format(predValue))
+        print('\n  Predicted value (normalized) = {0:.2f}'.format(predValue))
         print('  ========================================================\n')
 
     else:
@@ -563,7 +571,7 @@ def predict(testFile):
             predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
         print('\n  ========================================================')
-        print('   CNN - Classifier - Prediction')
+        print('  CNN - Classifier - Prediction')
         print('  ========================================================')
 
         if dP.numLabels == 1:
@@ -579,12 +587,12 @@ def predict(testFile):
                         print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]/255))
                     else:
                         print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]))
-            print('\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\n'.format(predValue, predProb))
+            print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
             print('  ========================================================\n')
 
         else:
             print('\n ==========================================')
-            print('\033[1m' + ' Predicted value \033[0m(probability = ' + str(predProb) + '%)')
+            print('\n Predicted value (probability = ' + str(predProb) + '%)')
             print(' ==========================================\n')
             print("  1:", str(predValue[0]),"%")
             print("  2:",str(predValue[1]),"%")
@@ -727,7 +735,7 @@ def convertTflite(learnFile):
     En, A, Cl = readLearnFile(learnFile, dP)
     model = loadModel(dP)
     x_train = formatForCNN(A)
-    makeQuantizedTFmodel(x_train, model, dP)
+    makeQuantizedTFmodel(x_train, dP)
     
 #****************************************************
 # Format data for CNN
@@ -782,7 +790,10 @@ def plotActivationsTrain(model):
     if checkTFVersion("2.15.99"):
         import tensorflow.keras as keras
     else:
-        import tf_keras as keras
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
+        else:
+            import keras
     dP = Conf()
     i = 0
     for layer in model.layers:
@@ -813,7 +824,10 @@ def plotActivationsPredictions(R, model):
         import tensorflow as tf
         import tensorflow.keras as keras
     else:
-        import tf_keras as keras
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
+        else:
+            import keras
     from keras.models import Model
     
     dP = Conf()

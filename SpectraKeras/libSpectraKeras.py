@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2024.02.15.1
+* v2024.02.28.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -101,7 +101,10 @@ def loadModel(dP):
         if checkTFVersion("2.15.99"):
             import tensorflow.keras as keras
         else:
-            import tf_keras as keras
+            if dP.kerasVersion == 2:
+                import tf_keras as keras
+            else:
+                import keras
         if dP.useTFlitePred:
             # model here is intended as interpreter
             model = tf.lite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
@@ -112,8 +115,11 @@ def loadModel(dP):
             else:
                 model_name = dP.model_name
             print("  Model name:",model_name)
-            model = keras.models.load_model(model_name)
-            #model = keras.saving.load_model(model_name)
+            if dP.kerasVersion == 2:
+                model = keras.models.load_model(model_name)
+                #model = keras.saving.load_model(model_name)
+            else:
+                model = keras.layers.TFSMLayer(model_file, call_endpoint='serve')
     return model
 
 #************************************
@@ -145,9 +151,9 @@ def getPredictions(R, model, dP):
 #************************************
 ### Create Quantized tflite model
 #************************************
-def makeQuantizedTFmodel(A, model, dP):
+def makeQuantizedTFmodel(A, dP):
     import tensorflow as tf
-    
+ 
     print("\n  =========================================================")
     print("   Creating\033[1m quantized TensorFlowLite Model \033[0m")
     print("  =========================================================\n")
@@ -159,7 +165,13 @@ def makeQuantizedTFmodel(A, model, dP):
         for input_value in A.take(100):
             yield[input_value]
 
-    #converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(dP.model_name)    # TF2.0-2.2 (will be deprecated)
+    if dP.kerasVersion == 2:
+        import tf_keras as keras
+        model = keras.models.load_model(dP.model_name)
+    else:
+        import keras
+        model = keras.layers.TFSMLayer(dP.model_name, call_endpoint='serve')
+    
     converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only.
 
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
@@ -181,7 +193,8 @@ def plotWeights(dP, En, A, model, type):
         import tensorflow as tf
         import tensorflow.keras as keras
     else:
-        import tf_keras as keras
+        #import tf_keras as keras
+        import keras
     plotFileName = "model_" + type + "_weights" + ".png"
     plt.figure(tight_layout=True)
     #plotInd = 511

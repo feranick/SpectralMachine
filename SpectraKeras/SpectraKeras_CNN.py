@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2024.02.27.1
+* v2024.02.28.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -91,6 +91,7 @@ class Conf():
 
     def sysDef(self):
         self.conf['System'] = {
+            'kerasVersion' : 2,
             'makeQuantizedTFlite' : True,
             'useTFlitePred' : False,
             'TFliteRuntime' : False,
@@ -127,6 +128,7 @@ class Conf():
             self.metricBestModelR = self.conf.get('Parameters','metricBestModelR')
             self.metricBestModelC = self.conf.get('Parameters','metricBestModelC')
             
+            self.kerasVersion = self.conf.getint('System','kerasVersion')
             self.makeQuantizedTFlite = self.conf.getboolean('System','makeQuantizedTFlite')
             self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
             self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
@@ -224,7 +226,10 @@ def train(learnFile, testFile, flag):
     if checkTFVersion("2.15.99"):
         import tensorflow.keras as keras
     else:
-        import tf_keras as keras
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
+        else:
+            import keras
         
     opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
     conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
@@ -416,11 +421,14 @@ def train(learnFile, testFile, flag):
 	        validation_split=dP.cv_split)
     
     #model.save(dP.model_name, save_format='h5')
-    model.save(dP.model_name)
+    if dP.kerasVersion == 2:
+        model.save(dP.model_name)
+    else:
+        model.export(dP.model_name)
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     
     if dP.makeQuantizedTFlite:
-        makeQuantizedTFmodel(x_train, model, dP)
+        makeQuantizedTFmodel(x_train, dP)
     
     print('\n  =============================================')
     print('  \033[1m CNN\033[0m - Model Architecture')
@@ -727,7 +735,7 @@ def convertTflite(learnFile):
     En, A, Cl = readLearnFile(learnFile, dP)
     model = loadModel(dP)
     x_train = formatForCNN(A)
-    makeQuantizedTFmodel(x_train, model, dP)
+    makeQuantizedTFmodel(x_train, dP)
     
 #****************************************************
 # Format data for CNN
@@ -782,7 +790,10 @@ def plotActivationsTrain(model):
     if checkTFVersion("2.15.99"):
         import tensorflow.keras as keras
     else:
-        import tf_keras as keras
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
+        else:
+            import keras
     dP = Conf()
     i = 0
     for layer in model.layers:
@@ -813,7 +824,10 @@ def plotActivationsPredictions(R, model):
         import tensorflow as tf
         import tensorflow.keras as keras
     else:
-        import tf_keras as keras
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
+        else:
+            import keras
     from keras.models import Model
     
     dP = Conf()
