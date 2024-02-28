@@ -166,14 +166,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            #try:
-            if len(sys.argv)<4:
-                train(sys.argv[2], None, False)
-            else:
-                train(sys.argv[2], sys.argv[3], False)
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                if len(sys.argv)<4:
+                    train(sys.argv[2], None, False)
+                else:
+                    train(sys.argv[2], sys.argv[3], False)
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-n" , "--net"):
             try:
@@ -587,7 +587,7 @@ def predict(testFile):
                         print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]/255))
                     else:
                         print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]))
-            print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
+            print('\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\n'.format(predValue, predProb))
             print('  ========================================================\n')
 
         else:
