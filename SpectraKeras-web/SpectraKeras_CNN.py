@@ -584,9 +584,9 @@ def predict(testFile):
             for i in range(len(predictions[0])-1):
                 if predictions[0][i]>0.01:
                     if dP.useTFlitePred:
-                        print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]/255))
+                        print("  {0:d}\t\t| {1:.2f}".format(int(le.inverse_transform(i)[0]),100*predictions[0][i]/255))
                     else:
-                        print("  {0:.2f}\t\t| {1:.2f}".format(le.inverse_transform(i)[0],100*predictions[0][i]))
+                        print("  {0:d}\t\t| {1:.2f}".format(int(le.inverse_transform(i)[0]),100*predictions[0][i]))
             print('\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\n'.format(predValue, predProb))
             print('  ========================================================\n')
 
@@ -651,7 +651,7 @@ def batchPredict(folder):
 
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
-                print('  {0:s}:\033[1m\n   Predicted value = {1:.2f} (probability = {2:.2f}%)\033[0m\n'.format(fileName[i],predValue, predProb))
+                print('  {0:s}:\033[1m\n   Predicted value = {1:d} (probability = {2:.2f}%)\033[0m\n'.format(fileName[i],int(predValue), predProb))
             else:
                 predValue = 0
                 print('  {0:s}:\033[1m\n   No predicted value (probability = {1:.2f}%)\033[0m\n'.format(fileName[i],predProb))
