@@ -110,16 +110,17 @@ def loadModel(dP):
             model = tf.lite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
             model.allocate_tensors()
         else:
-            if os.path.isfile(dP.model_name) is False:
-                model_name = os.path.splitext(dP.model_name)[0]+".h5"
-            else:
-                model_name = dP.model_name
-            print("  Model name:",model_name)
             if dP.kerasVersion == 2:
+                if os.path.isfile(dP.model_name) is False:
+                    model_name = os.path.splitext(dP.model_name)[0]+".h5"
+                else:
+                    model_name = dP.model_name
                 model = keras.models.load_model(model_name)
                 #model = keras.saving.load_model(model_name)
             else:
-                model = keras.layers.TFSMLayer(model_file, call_endpoint='serve')
+                model_name = dP.model_name
+                model = keras.layers.TFSMLayer(model_name, call_endpoint='serve')
+            print("  Model name:",model_name)
     return model
 
 #************************************
