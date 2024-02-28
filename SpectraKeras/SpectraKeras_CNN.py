@@ -166,14 +166,14 @@ def main():
 
     for o, a in opts:
         if o in ("-t" , "--train"):
-            try:
-                if len(sys.argv)<4:
-                    train(sys.argv[2], None, False)
-                else:
-                    train(sys.argv[2], sys.argv[3], False)
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            if len(sys.argv)<4:
+                train(sys.argv[2], None, False)
+            else:
+                train(sys.argv[2], sys.argv[3], False)
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-n" , "--net"):
             try:
