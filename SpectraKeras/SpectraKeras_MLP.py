@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2024.02.28.1
+* v2024.02.29.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -521,7 +521,7 @@ def predict(testFile):
                     else:
                         print(' ',le.inverse_transform(i)[0],'\t\t',
                             str('{:.2f}'.format(100*predictions[0][i])))
-            print('\033[1m\n  Predicted value = {0:.2f} (probability = {1:.2f}%)\033[0m\n'.format(predValue, predProb))
+            print('\033[1m\n  Predicted value = {0:d} (probability = {1:.2f}%)\033[0m\n'.format(int(predValue), predProb))
             print('  ========================================================\n')
 
         else:
