@@ -173,6 +173,4 @@ More on Machine Learning tools used
 
 Known Issues
 ==================
-- Starting from version `20210513a`, models are saved with the `.h5` extension, and are expected to have that extension. Previously, models were saved with the non-standard `.hd5` extension. If you have previously trained models saved in `.hd5`, just rename the extension as `.h5`. No change in functionality besides the change in extension.
-
-- Version `20221026b` will be the last with support for Tensorflow `<= 2.10.x`. Future versions will require Tensorflow `>=2.11` 
+None
