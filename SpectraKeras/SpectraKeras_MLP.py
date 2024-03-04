@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2024.02.29.1
+* v2024.03.03.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -476,7 +476,10 @@ def predict(testFile):
     dP = Conf()
     model = loadModel(dP)
 
-    R, good = readTestFile(testFile, dP)
+    with open(dP.spectral_range, "rb") as En_file:
+        EnN = pickle.load(En_file)
+
+    R, good = readTestFile(testFile, EnN, dP)
     if not good:
         return
 
@@ -539,11 +542,13 @@ def predict(testFile):
 def batchPredict(folder):
     dP = Conf()
     model = loadModel(dP)
+    with open(dP.spectral_range, "rb") as En_file:
+        EnN = pickle.load(En_file)
 
     predictions = np.zeros((0,0))
     fileName = []
     for file in glob.glob(folder+'/*.txt'):
-        R, good = readTestFile(file, dP)
+        R, good = readTestFile(file, EnN, dP)
         if good:
             try:
                 predictions = np.vstack((predictions,getPredictions(R, model, dP)[0].flatten()))

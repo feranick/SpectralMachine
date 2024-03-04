@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2024.02.29.1
+* v2024.03.03.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -46,12 +46,12 @@ def readLearnFile(learnFile, dP):
 #************************************
 # Open Testing Data
 #************************************
-def readTestFile(testFile, dP):
+def readTestFile(testFile, En, dP):
     try:
         with open(testFile, 'r') as f:
             #print('\n  Opening sample data for prediction:\n  ',testFile)
             Rtot = np.loadtxt(f, unpack =True)
-        R = preProcess(Rtot, dP)
+        R = preProcess(Rtot, En, dP)
     except:
         print("\033[1m\n File not found or corrupt\033[0m\n")
         return 0, False
@@ -60,11 +60,7 @@ def readTestFile(testFile, dP):
 #****************************************************
 # Check Energy Range and convert to fit training set
 #****************************************************
-def preProcess(Rtot, dP):
-    En_file = open(dP.spectral_range, "rb")
-    En = pickle.loads(En_file.read())
-    En_file.close()
-
+def preProcess(Rtot, En, dP):
     R = np.array([Rtot[1,:]])
     Rx = np.array([Rtot[0,:]])
 

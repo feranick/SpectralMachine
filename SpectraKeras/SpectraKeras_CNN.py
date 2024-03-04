@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2024.02.29.1
+* v2024.03.03.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -542,8 +542,10 @@ def train(learnFile, testFile, flag):
 def predict(testFile):
     dP = Conf()
     model = loadModel(dP)
+    with open(dP.spectral_range, "rb") as En_file:
+        EnN = pickle.load(En_file)
 
-    R, good = readTestFile(testFile, dP)
+    R, good = readTestFile(testFile, EnN, dP)
     if not good:
         return
     R = formatForCNN(R)
@@ -559,9 +561,9 @@ def predict(testFile):
         print('  ========================================================\n')
 
     else:
-        le_file = open(dP.model_le, "rb")
-        le = pickle.loads(le_file.read())
-        le_file.close()
+        with open(dP.model_le, "rb") as le_file:
+            le = pickle.loads(le_file.read())
+    
         #predictions = model.predict(R, verbose=0)
         predictions, _ = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
@@ -608,11 +610,13 @@ def predict(testFile):
 def batchPredict(folder):
     dP = Conf()
     model = loadModel(dP)
+    with open(dP.spectral_range, "rb") as En_file:
+        EnN = pickle.load(En_file)
 
     predictions = np.zeros((0,0))
     fileName = []
     for file in glob.glob(folder+'/*.txt'):
-        R, good = readTestFile(file, dP)
+        R, good = readTestFile(file, EnN, dP)
         if good:
             R = formatForCNN(R)
             try:
@@ -633,9 +637,9 @@ def batchPredict(folder):
         print('  ========================================================\n')
 
     else:
-        le_file = open(dP.model_le, "rb")
-        le = pickle.loads(le_file.read())
-        le_file.close()
+        with open(dP.model_le, "rb") as le_file:
+            le = pickle.loads(le_file.read())
+        
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['File name','Predicted Class', 'Probability']])
         print('\n  ========================================================')
         print('  \033[1m CNN - Classifier\033[0m - Prediction')
