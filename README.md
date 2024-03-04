@@ -64,9 +64,7 @@ These are found in Unix based systems using common repositories (apt-get for Deb
 Inference can be carried out using the regular tensorflow, or using [tensorflow-lite](https://www.tensorflow.org/lite/) for [quantized models](https://www.tensorflow.org/lite/performance/post_training_quantization). Loading times of tflite (direct or via [tflite-runtime](https://www.tensorflow.org/lite/guide/python)) are significantly faster than tensorflow with minimal loss in accuracy. SpectraKeras provides an option to convert tensorflow models to quantized tflite models. TFlite models have been tested in Linux x86-64, arm7 (including Raspberry Pi3) and aarm64, MacOS, Windows. 
     To use quantized models, TF 2.3 or higher is recommended. 
 
-Inference using the [Coral EdgeTPU](https://coral.ai/) [tensorflow-lite](https://www.tensorflow.org/lite/) requires the [libedgetpu](https://github.com/feranick/libedgetpu) provided in this repo (note: the official [libedgetpu](https://github.com/google-coral/libedgetpu) is outdated and does not support modern versions of TF). `tflite-runtime` (version 2.15.0 or less) is also required (Instructions and binaries can be found [here](https://github.com/feranick/TFlite-builds). More information on installation of such libraries at [Coral EdgeTPU](https://coral.ai/). 
-
-Creating wheel pakages for easy installation
+Inference using the [Coral EdgeTPU](https://coral.ai/) [tensorflow-lite](https://www.tensorflow.org/lite/) requires the [libedgetpu](https://github.com/google-coral/libedgetpu) libraries compatible with the supported and current version of `tflite-runtime` (version 2.15.0 or less), which is also required (Instructions and binaries can be found [here](https://github.com/feranick/TFlite-builds). More information on installation of such libraries at [Coral EdgeTPU](https://coral.ai/). 
 
 Usage (SpectraKeras)
 ===================
