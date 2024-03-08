@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2024.03.03.1
+* v2024.03.08.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -223,7 +223,7 @@ def main():
 def train(learnFile, testFile, flag):
     dP = Conf()
     import tensorflow as tf
-    if checkTFVersion("2.15.99"):
+    if checkTFVersion("2.16.0"):
         import tensorflow.keras as keras
     else:
         if dP.kerasVersion == 2:
@@ -791,7 +791,7 @@ def printParam():
 def plotActivationsTrain(model):
     import matplotlib.pyplot as plt
     import tensorflow as tf
-    if checkTFVersion("2.15.99"):
+    if checkTFVersion("2.16.0"):
         import tensorflow.keras as keras
     else:
         if dP.kerasVersion == 2:
@@ -824,7 +824,7 @@ def plotActivationsTrain(model):
 def plotActivationsPredictions(R, model):
     print(" Saving activation plots...\n")
     import matplotlib.pyplot as plt
-    if checkTFVersion("2.15.99"):
+    if checkTFVersion("2.16.0"):
         import tensorflow as tf
         import tensorflow.keras as keras
     else:

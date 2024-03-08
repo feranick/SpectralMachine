@@ -6,8 +6,8 @@ Machine learning software for rapid spectral analysis. While Raman spectra were 
    - DNNClassifier (TensorFlow, TensorFlow-Lite)
    - Convolutional Neural Networks (TensorFlow, TensorFlow-Lite)
 - Required libraries for prediction:
-   - tensorflow (v.2.12 or higher - won't work with previous releases)
-   - Optional: tensorflow-lite (v.2.11 and higher)
+   - tensorflow (v2.13 or higher, v2.16.1 recommended)
+   - Optional: tensorflow-lite (v2.13 and higher, v2.16.1 recommended)
    - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
    - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
 
@@ -23,7 +23,7 @@ Installation
 ## Installation from available wheel package
 If available from the main site, you can install SpectraKeras by running:
 
-    python3 -m pip install --upgrade spectrakeras-2023.12.22.3-py3-none-any.whl
+    python3 -m pip install --upgrade spectrakeras-2024.03.08.1-py3-none-any.whl
     
 SpectraKeras_CNN and Spectrakeras_MLP are available directly from the command line.
 NOTE: The Utilities in the `Utilities` folder are not included in the package, and can be run locally as needed.
@@ -50,7 +50,7 @@ This software requires Python (3.9 or higher). It has been tested with Python 3.
     pydot
     graphviz
     h5py
-    tensorflow (>=2.12)
+    tensorflow (>=2.13)
     
 In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
     
@@ -62,9 +62,9 @@ These are found in Unix based systems using common repositories (apt-get for Deb
 [TensorFlow](https://www.tensorflow.org) is needed only if flag is activated. Instructions for Linux and MacOS can be found in [TensorFlow installation page](https://www.tensorflow.org/install/). Pip installation is the easiest way to get going. Tested with TensorFlow 2.x (2.15 or higher preferred). TF 2.15 is the currently supported release. 
 
 Inference can be carried out using the regular tensorflow, or using [tensorflow-lite](https://www.tensorflow.org/lite/) for [quantized models](https://www.tensorflow.org/lite/performance/post_training_quantization). Loading times of tflite (direct or via [tflite-runtime](https://www.tensorflow.org/lite/guide/python)) are significantly faster than tensorflow with minimal loss in accuracy. SpectraKeras provides an option to convert tensorflow models to quantized tflite models. TFlite models have been tested in Linux x86-64, arm7 (including Raspberry Pi3) and aarm64, MacOS, Windows. 
-    To use quantized models, TF 2.3 or higher is recommended. 
+    To use quantized models, TF 2.13 or higher is recommended. 
 
-Inference using the [Coral EdgeTPU](https://coral.ai/) [tensorflow-lite](https://www.tensorflow.org/lite/) requires the [libedgetpu](https://github.com/google-coral/libedgetpu) libraries compatible with the supported and current version of `tflite-runtime` (version 2.15.0 or less), which is also required (Instructions and binaries can be found [here](https://github.com/feranick/TFlite-builds). More information on installation of such libraries at [Coral EdgeTPU](https://coral.ai/). 
+Inference using the [Coral EdgeTPU](https://coral.ai/) [tensorflow-lite](https://www.tensorflow.org/lite/) requires the [libedgetpu](https://github.com/google-coral/libedgetpu) libraries compatible with the supported and current version of `tflite-runtime` (version v2.13.0 or hiigher, v2.16.1 recommended), which is also required (Instructions and binaries can be found [here](https://github.com/feranick/TFlite-builds). More information on installation of such libraries at [Coral EdgeTPU](https://coral.ai/). 
 
 Usage (SpectraKeras)
 ===================
