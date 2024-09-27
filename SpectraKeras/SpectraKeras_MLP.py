@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2024.03.08.1
+* v2024.09.27.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -362,7 +362,7 @@ def train(learnFile, testFile):
     if dP.kerasVersion == 2:
         model.save(dP.model_name)
     else:
-        model.export(dP.model_name)
+        model.export(os.path.splitext(dP.model_name)[0])
     
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
 
@@ -389,13 +389,14 @@ def train(learnFile, testFile):
     val_loss = np.asarray(log.history['val_loss'])
 
     if dP.regressor:
-        def_mae, def_val_mae = [list(log.history)[i] for i in (1,3)]
-        val_mae = np.asarray(log.history[def_val_mae])
+        mae = np.asarray(log.history['mae'])
+        val_mae = np.asarray(log.history['val_mae'])
         printParam()
         print('\n  ==========================================================')
         print('  \033[1m MLP - Regressor\033[0m - Training Summary')
         print('  ==========================================================')
         print("  \033[1mLoss\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(loss), np.amin(loss), loss[-1]))
+        print("  \033[1mMean Abs Err\033[0m - Average: {0:.4f}; Min: {1:.4f}; Last: {2:.4f}".format(np.average(mae), np.amin(mae), mae[-1]))
         print('\n\n  ==========================================================')
         print('  \033[1m MLP - Regressor \033[0m - Validation Summary')
         print('  ========================================================')
@@ -422,9 +423,8 @@ def train(learnFile, testFile):
                     predictions[i][0], score[0], score[1]))
             print('\n  ==========================================================\n')
     else:
-        def_acc, def_val_acc = [list(log.history)[i] for i in (1,3)]
-        accuracy = np.asarray(log.history[def_acc])
-        val_acc = np.asarray(log.history[def_val_acc])
+        accuracy = np.asarray(log.history['accuracy'])
+        val_acc = np.asarray(log.history['val_accuracy'])
         print("  Number unique classes (training): ", np.unique(Cl).size)
         if testFile is not None:
             Cl2_test = le.transform(Cl_test)

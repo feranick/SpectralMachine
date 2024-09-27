@@ -9,12 +9,12 @@ include = [
 
 [project]
 name = "SpectraKeras"
-version = "v2024.03.08.1"
+version = "v2024.09.27.1"
 dependencies = ["numpy", "h5py", "tensorflow", "pydot", "graphviz","scipy","tf-keras"]
 authors = [{ name="Nicola Ferralis", email="ferralis@mit.edu" },]
 description = "Machine learning for scientific spectra"
 readme = "../README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
@@ -22,7 +22,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2024.03.08.1
+* v2024.09.27.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -163,12 +163,16 @@ def makeQuantizedTFmodel(A, dP):
         for input_value in A.take(100):
             yield[input_value]
 
-    if dP.kerasVersion == 2:
-        import tf_keras as keras
+    if checkTFVersion("2.16.0"):
+        import tensorflow.keras as keras
         model = keras.models.load_model(dP.model_name)
     else:
-        import keras
-        model = keras.layers.TFSMLayer(dP.model_name, call_endpoint='serve')
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
+            model = keras.models.load_model(dP.model_name)
+        else:
+            import keras
+            model = keras.layers.TFSMLayer(os.path.splitext(dP.model_name)[0], call_endpoint='serve')
     
     converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only.
 
@@ -221,16 +225,26 @@ def plotWeights(dP, En, A, model, type):
 #************************************
 def getTFVersion(dP):
     import tensorflow as tf
-    from packaging import version    
-    if dP.useTFlitePred:
-        print(" TensorFlow (Lite) v.",tf.version.VERSION,"\n")
+    if checkTFVersion("2.16.0"):
+        import tensorflow.keras as keras
+        kv = "- Keras v. " + keras.__version__
     else:
-        print(" TensorFlow v.",tf.version.VERSION,"\n" )
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
+            kv = "- tf_keras v. " + keras.__version__
+        else:
+            import keras
+            kv = "- Keras v. " + keras.__version__
+    from packaging import version
+    if dP.useTFlitePred:
+        print("\n TensorFlow (Lite) v.",tf.version.VERSION,kv, "\n")
+    else:
+        print("\n TensorFlow v.",tf.version.VERSION,kv, "\n" )
         
 def checkTFVersion(vers):
     import tensorflow as tf
     from packaging import version
-    v = version.parse(tf.version.VERSION)
+    v = version.parse(tf.__version__)
     return v < version.parse(vers)
 
 #************************************
