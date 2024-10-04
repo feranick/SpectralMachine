@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2024.09.27.1
+* v2024.10.04.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -163,16 +163,22 @@ def makeQuantizedTFmodel(A, dP):
         for input_value in A.take(100):
             yield[input_value]
 
-    if checkTFVersion("2.16.0"):
-        import tensorflow.keras as keras
-        model = keras.models.load_model(dP.model_name)
-    else:
-        if dP.kerasVersion == 2:
-            import tf_keras as keras
-            model = keras.models.load_model(dP.model_name)
+    if dP.kerasVersion == 2:
+        if checkTFVersion("2.16.0"):
+            import tensorflow.keras as keras
         else:
-            import keras
-            model = keras.layers.TFSMLayer(os.path.splitext(dP.model_name)[0], call_endpoint='serve')
+            import tf_keras as keras
+        model = keras.models.load_model(dP.model_name)
+        converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only for full EdgeTPU support.
+    else:
+        # Previous method, TF <= 2.16.2
+        #import keras
+        #model = keras.layers.TFSMLayer(os.path.splitext(dP.model_name)[0], call_endpoint='serve')
+        #converter = tf.lite.TFLiteConverter.from_keras_model(model)
+        # New method
+        model = tf.saved_model.load(os.path.splitext(dP.model_name)[0])
+        concrete_func = model.signatures['serving_default']
+        converter = tf.lite.TFLiteConverter.from_concrete_functions([concrete_func])
     
     converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only.
 
