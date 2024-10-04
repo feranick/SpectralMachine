@@ -4,7 +4,7 @@
 ***************************************************
 * Convert from multiline string into single line
 * By: Nicola Ferralis <feranick@hotmail.com>
-* version v2024.09.16.1
+* version v2024.10.04.1
 ***************************************************
 '''
 print(__doc__)
@@ -15,7 +15,7 @@ def main():
 
     saveInText = True
     
-    if(len(sys.argv)<2):
+    if(len(sys.argv)<3):
         print(' Usage:\n  python3 Multi2SingleLine.py -t \"<multi-line text>\"')
         print('  python3 Multi2SingleLine.py -f <file>\n')
         return
