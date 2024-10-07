@@ -110,7 +110,7 @@ def loadModel(dP):
                 model = keras.models.load_model(dP.model_name)
             else:
                 model = keras.saving.load_model(dP.model_name)
-        print("  Model name:", dP.model_name)
+    print("  Model name:", dP.model_name)
     return model
 
 #************************************
