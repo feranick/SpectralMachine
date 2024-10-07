@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2024.10.07.2
+* v2024.10.07.3
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -362,8 +362,10 @@ def train(learnFile, testFile):
             verbose=2,
 	        validation_split=dP.cv_split)
          
-    #model.save(dP.model_name, save_format='h5')
-    model.save(dP.model_name)
+    if dP.saveBestModel == False:
+        model.save(dP.model_name)
+    else:
+        model = loadModel(dP)
     
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
 

@@ -424,8 +424,7 @@ def train(learnFile, testFile, flag):
             verbose=2,
 	        validation_split=dP.cv_split)
     
-    #model.save(dP.model_name, save_format='h5')
-    if dP.kerasVersion == 2:
+    if dP.saveBestModel == False:
         model.save(dP.model_name)
     else:
         model = loadModel(dP)
