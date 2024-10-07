@@ -5,7 +5,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: v2023.12.15.1
+* version: v2024.10.07.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 *************************************************
 '''
@@ -174,7 +174,7 @@ def saveLearningFile(M, learnFileRoot):
     else:
         learnFile = learnFileRoot+'.h5'
         with h5py.File(learnFile, 'w') as hf:
-            hf.create_dataset("M",  data=M)
+            hf.create_dataset("M",  data=M.astype(np.float64))
         print(" Saving new training file (hdf5) in: "+learnFile+"\n")
 
 #************************************

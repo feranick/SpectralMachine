@@ -4,7 +4,7 @@
 ***********************************************
 * Create Random Cross Validation Datasets
 * Train + Test
-* version: v2023.12.19.1
+* version: v2024.10.07.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
@@ -129,7 +129,7 @@ def writeFile(File, En, A, Cl):
             np.savetxt(f, newMatrix, delimiter='\t', fmt='%10.6f')
     else:
         with h5py.File(File, 'w') as hf:
-            hf.create_dataset("M",  data=newMatrix)
+            hf.create_dataset("M",  data=newMatrix.astype(np.float64))
 
 #************************************
 ''' Main initialization routine '''
