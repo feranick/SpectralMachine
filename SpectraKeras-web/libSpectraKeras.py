@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2024.10.04.1
+* v2024.10.07.2
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -107,16 +107,9 @@ def loadModel(dP):
             model.allocate_tensors()
         else:
             if dP.kerasVersion == 2:
-                if os.path.isfile(dP.model_name) is False:
-                    model_name = os.path.splitext(dP.model_name)[0]+".h5"
-                else:
-                    model_name = dP.model_name
-                model = keras.models.load_model(model_name)
-                #model = keras.saving.load_model(model_name)
+                model = keras.models.load_model(dP.model_name)
             else:
-                model_name = dP.model_name
-                model = keras.models.Sequential()
-                model.add(keras.layers.TFSMLayer(model_name, call_endpoint='serve'))
+                model = keras.saving.load_model(dP.model_name)
             print("  Model name:",model_name)
     return model
 
@@ -169,19 +162,20 @@ def makeQuantizedTFmodel(A, dP):
         else:
             import tf_keras as keras
         model = keras.models.load_model(dP.model_name)
-        converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only for full EdgeTPU support.
     else:
         # Previous method, TF <= 2.16.2
         #import keras
-        #model = keras.layers.TFSMLayer(os.path.splitext(dP.model_name)[0], call_endpoint='serve')
+        #model = keras.layers.TFSMLayer(dP.model_name, call_endpoint='serve')
         #converter = tf.lite.TFLiteConverter.from_keras_model(model)
         # New method
-        model = tf.saved_model.load(os.path.splitext(dP.model_name)[0])
-        concrete_func = model.signatures['serving_default']
-        converter = tf.lite.TFLiteConverter.from_concrete_functions([concrete_func])
-    
-    converter = tf.lite.TFLiteConverter.from_keras_model(model)    # TF2.3 and higher only.
-
+        #model = tf.saved_model.load(dP.model_name)
+        #concrete_func = model.signatures['serving_default']
+        #converter = tf.lite.TFLiteConverter.from_concrete_functions([concrete_func])
+        # New method 2:
+        import keras
+        model = keras.saving.load_model(dP.model_name)
+        
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.representative_dataset = representative_dataset_gen
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]

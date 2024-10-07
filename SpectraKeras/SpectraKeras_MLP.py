@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2024.10.04.1
+* v2024.10.07.2
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -36,18 +36,22 @@ class Conf():
         self.readConfig(self.configFile)
         self.model_directory = "./"
         if self.regressor:
-            self.modelName = "model_regressor_MLP.keras"
+            self.modelName = "model_regressor_MLP.h5"
             self.summaryFileName = "summary_regressor_MLP.csv"
             self.model_png = self.model_directory+"model_regressor_MLP.png"
         else:
             self.predProbThreshold = 90.00
-            self.modelName = "model_classifier_MLP.keras"
+            self.modelName = "model_classifier_MLP.h5"
             self.summaryFileName = "summary_classifier_MLP.csv"
             self.summaryAccFileName = "summary_classifier_MLP_accuracy.csv"
             self.model_png = self.model_directory+"model_classifier_MLP.png"
 
         self.tb_directory = "model_MLP"
         self.model_name = self.model_directory+self.modelName
+        
+        if self.kerasVersion == 3:
+            self.model_name = os.path.splitext(self.model_name)[0]+".keras"
+        
         self.model_le = self.model_directory+"model_le.pkl"
         self.spectral_range = "model_spectral_range.pkl"
 
@@ -359,10 +363,7 @@ def train(learnFile, testFile):
 	        validation_split=dP.cv_split)
          
     #model.save(dP.model_name, save_format='h5')
-    if dP.kerasVersion == 2:
-        model.save(dP.model_name)
-    else:
-        model.export(os.path.splitext(dP.model_name)[0])
+    model.save(dP.model_name)
     
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
 
