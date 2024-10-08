@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2024.10.07.3
+* v2024.10.08.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -338,11 +338,13 @@ def train(learnFile, testFile, flag):
                 amsgrad=False)
         
         model = keras.models.Sequential()
+        model.add(keras.Input(shape=x_train[0].shape))
 
         for i in range(len(dP.CL_filter)):
             model.add(keras.layers.Conv2D(dP.CL_filter[i], (1, dP.CL_size[i]),
                 activation='relu',
-                input_shape=x_train[0].shape))
+                #input_shape=x_train[0].shape
+                ))
             try:
                 model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling[i])))
             except:
@@ -366,7 +368,7 @@ def train(learnFile, testFile, flag):
         for i in range(len(dP.HL)):
             model.add(keras.layers.Dense(dP.HL[i],
                 activation = 'relu',
-                input_dim=A.shape[1],
+                #input_dim=A.shape[1],
                 kernel_regularizer=keras.regularizers.l2(dP.l2)))
             model.add(keras.layers.Dropout(dP.dropFCL))
 
