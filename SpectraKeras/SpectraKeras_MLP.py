@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2024.10.07.3
+* v2024.10.08.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -304,10 +304,11 @@ def train(learnFile, testFile):
                 amsgrad=False)
                     
         model = keras.models.Sequential()
+        model.add(keras.Input(shape=(A.shape[1],)))
         for i in range(len(dP.HL)):
             model.add(keras.layers.Dense(dP.HL[i],
                 activation = 'relu',
-                input_dim=A.shape[1],
+                #input_dim=A.shape[1],
                 kernel_regularizer=keras.regularizers.l2(dP.l2)))
             model.add(keras.layers.Dropout(dP.drop))
 
