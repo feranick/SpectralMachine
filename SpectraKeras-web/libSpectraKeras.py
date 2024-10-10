@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2024.10.08.1
+* v2024.10.10.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -273,7 +273,7 @@ class Normalizer(object):
 
     def save(self, name):
         with open(name, 'ab') as f:
-            f.write(pickle.dumps(self))
+            pickle.dump(self, f)
 
 #************************************
 # Normalize Label
@@ -333,7 +333,7 @@ class NormalizeLabel(object):
 
     def save(self, name):
         with open(name, 'ab') as f:
-            f.write(pickle.dumps(self))
+            pickle.dump(self, f)
 
 #************************************
 # CustomRound

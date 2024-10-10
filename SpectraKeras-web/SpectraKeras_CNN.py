@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2024.10.08.1
+* v2024.10.10.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -259,7 +259,7 @@ def train(learnFile, testFile, flag):
 
     if flag == False:
         with open(dP.spectral_range, 'ab') as f:
-            f.write(pickle.dumps(En))
+            pickle.dump(En, f)
 
     print("  Total number of points per data:",En.size)
     print("  Number of learning labels: {0:d}\n".format(int(dP.numLabels)))
@@ -296,7 +296,7 @@ def train(learnFile, testFile, flag):
         if flag == False:
             print("\n  Label Encoder saved in:", dP.model_le,"\n")
             with open(dP.model_le, 'ab') as f:
-                f.write(pickle.dumps(le))
+                pickle.dump(le, f)
 
         #totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
         Cl2 = keras.utils.to_categorical(Cl2, num_classes=np.unique(totCl).size+1)
@@ -547,8 +547,8 @@ def train(learnFile, testFile, flag):
 def predict(testFile):
     dP = Conf()
     model = loadModel(dP)
-    with open(dP.spectral_range, "rb") as En_file:
-        EnN = pickle.load(En_file)
+    with open(dP.spectral_range, "rb") as f:
+        EnN = pickle.load(f)
 
     R, good = readTestFile(testFile, EnN, dP)
     if not good:
@@ -566,9 +566,8 @@ def predict(testFile):
         print('  ========================================================\n')
 
     else:
-        le_file = open(dP.model_le, "rb")
-        le = pickle.loads(le_file.read())
-        le_file.close()
+        with open(dP.model_le, "rb") as f:
+            le = pickle.load(f)
         #predictions = model.predict(R, verbose=0)
         predictions, _ = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
@@ -615,8 +614,8 @@ def predict(testFile):
 def batchPredict(folder):
     dP = Conf()
     model = loadModel(dP)
-    with open(dP.spectral_range, "rb") as En_file:
-        EnN = pickle.load(En_file)
+    with open(dP.spectral_range, "rb") as f:
+        EnN = pickle.load(f)
 
     predictions = np.zeros((0,0))
     fileName = []
@@ -642,9 +641,8 @@ def batchPredict(folder):
         print('  ========================================================\n')
 
     else:
-        le_file = open(dP.model_le, "rb")
-        le = pickle.loads(le_file.read())
-        le_file.close()
+        with open(dP.model_le, "rb") as f:
+            le = pickle.load(f)
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['File name','Predicted Class', 'Probability']])
         print('\n  ========================================================')
         print('  \033[1m CNN - Classifier\033[0m - Prediction')
@@ -698,9 +696,8 @@ def accDeterm(testFile):
         print("\n  Accuracy determination is not defined in regression. Exiting.\n")
         return
     else:
-        le_file = open(dP.model_le, "rb")
-        le = pickle.loads(le_file.read())
-        le_file.close()
+        with open(dP.model_le, "rb") as f:
+            le = pickle.load(f)
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['Real Class','Predicted Class', 'Probability']])
 
         successPred = 0
