@@ -191,7 +191,7 @@ def main():
 
         if o in ("-p" , "--predict"):
             try:
-                predict(sys.argv[2])
+            predict(sys.argv[2])
             except:
                 usage()
                 sys.exit(2)

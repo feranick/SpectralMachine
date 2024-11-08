@@ -68,7 +68,7 @@ def preProcess(Rtot, En, dP):
         norm = Normalizer()
         R = norm.transform_single(R)
 
-    if(R.shape[1] != len(En)):
+    if(R.shape[1] is not len(En)):
         print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
         R = np.interp(En, Rx[0], R[0])
         R = R.reshape(1,-1)
@@ -84,12 +84,14 @@ def loadModel(dP):
         if dP.runCoralEdge:
             print(" Running on Coral Edge TPU")
             try:
-                model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'_edgetpu.tflite',
+                model_name = os.path.splitext(dP.model_name)[0]+'_edgetpu.tflite'
+                model = tflite.Interpreter(model_path=model_name,
                     experimental_delegates=[tflite.load_delegate(dP.edgeTPUSharedLib,{})])
             except:
-                print(" Coral Edge TPU not found. \n Please make sure it's connected and Tflite-runtime matches the TF version that is installled.")
+                print(" Coral Edge TPU not found. Please make sure it's connected and Tflite-runtime matches the TF version that is installled.")
         else:
-            model = tflite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
+            model_name = os.path.splitext(dP.model_name)[0]+'.tflite'
+            model = tflite.Interpreter(model_path=model_name)
         model.allocate_tensors()
     else:
         getTFVersion(dP)
@@ -103,14 +105,16 @@ def loadModel(dP):
                 import keras
         if dP.useTFlitePred:
             # model here is intended as interpreter
-            model = tf.lite.Interpreter(model_path=os.path.splitext(dP.model_name)[0]+'.tflite')
+            model_name=os.path.splitext(dP.model_name)[0]+'.tflite'
+            model = tf.lite.Interpreter(model_path=model_name)
             model.allocate_tensors()
         else:
+            model_name = dP.model_name
             if dP.kerasVersion == 2:
-                model = keras.models.load_model(dP.model_name)
+                model = keras.models.load_model(model_name)
             else:
-                model = keras.saving.load_model(dP.model_name)
-    print("  Model name:", dP.model_name)
+                model = keras.saving.load_model(model_name)
+    print("  Model name:", model_name)
     return model
 
 #************************************
@@ -174,7 +178,7 @@ def makeQuantizedTFmodel(A, dP):
         # New method 2:
         import keras
         model = keras.saving.load_model(dP.model_name)
-
+        
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.representative_dataset = representative_dataset_gen
