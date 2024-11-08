@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2024.10.10.1
+* v2024.11.08.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -699,7 +699,7 @@ def accDeterm(testFile):
         print("\n  Accuracy determination is not defined in regression. Exiting.\n")
         return
     else:
-        with open(dP.model_le, "rb") as f
+        with open(dP.model_le, "rb") as f:
             le = pickle.load(f)
         summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['Real Class','Predicted Class', 'Probability']])
 
