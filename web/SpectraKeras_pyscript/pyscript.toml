@@ -1,0 +1,6 @@
+name = "SpectraKeras"
+description = "SpectraKeras"
+packages = ["numpy", "scipy"]
+[[fetch]]
+files = ['libSpectraKeras.py']
+
