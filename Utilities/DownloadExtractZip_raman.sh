@@ -1,18 +1,18 @@
 #!/bin/bash
 #
-# DownloadExtractZip - a script to extract Zips into folder
+# DownloadExtractZip_raman - a script to extract Zips into folder
 #
 # By Nicola Ferralis <feranick@hotmail.com>
 #
 # This is script is licensed throughthe GNU Public license v.2.0
 #
 
-version="20180113a"
+version="20241113a"
 if [ "$1" = "" -o "$1" = "-h" ]; then
     echo
     echo " ExtractZip v."$version
     echo " Usage:"
-    echo "  extractzip.sh <destination folder>"
+    echo "  DownloadExtractZip_raman <destination folder>"
     echo
 else
     folder="rruff-raman_"$1
