@@ -5,7 +5,7 @@
 * SpectraKeras_CNN Classifier and Regressor
 * Pyscript version
 * Only for prediction with tflite_runtime
-* v2024.11.08.1
+* v2024.11.13.1
 * Uses: TFlite_runtime
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
