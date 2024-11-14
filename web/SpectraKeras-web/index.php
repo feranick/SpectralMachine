@@ -98,8 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Upload a ASCII file with the Raman spectra or an XRD scan of an uknown mineral. A Convolutional neural netowrk machine learning algorithm trained on the <a href="https://rruff.info" target="_blank" rel="noopener noreferrer">Rruff library</a> will predict the type of mineral.
     <br>Files are discarded after prediction. <a href="https://github.com/feranick/SpectralMachine" target="_blank" rel="noopener noreferrer">SpectraKeras is open-source and code and python scripts are available on Github</a>
     To get names of the minerals corresponding to the prediction values, use the link to the ML models below.
-    <br><small>Current Raman ML model: <a href="ml-raman/AAA-20231207_2023-12-07_16-03-08.csv">AAA-20231207_norm1_train-cv_hfsel20_val37 CNN_1_tflite_2-15_k4_99_1 </a></small>
-    <br><small>Current XRD ML model: <a href="ml-xrd/AAA-Powder_20231210s2_2023-12-15_17-47-26.csv">AAA-Powder_20231210s2_norm1_train-cv_hfsel10_val22 CNN_powder_2-15_b4</a></small>
+    <br><small>Current Raman ML model: <a href="ml-raman/AAA-20241110_2024-11-13_17-33-04.csv">AAA-20241110_norm1_train-cv_hfsel20_val37 CNN_2-15_b4_keras3 </a></small>
+    <br><small>Current XRD ML model: <a href="ml-xrd/AAA-powder-20241110s2_2024-11-13_18-24-29.csv">AAA-Powder_20241110s2_norm1_train-cv_hfsel10_val22 CNN_powder_2-15_b4</a></small>
     
     <form name="SpectraKeras" method="post" enctype="multipart/form-data">
       <br><br><input type="file" name="files[]" multiple />
