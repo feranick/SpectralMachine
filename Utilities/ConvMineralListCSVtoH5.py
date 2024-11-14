@@ -17,7 +17,7 @@ import sys, os.path
 # Main
 #************************************
 class dP:
-    standardName = False
+    standardName = True
 
 def main():
     try:
@@ -43,7 +43,8 @@ def saveToHDF5(File):
         newFile = fileRoot+'.h5'
     
     df.to_hdf(newFile, key='df', mode='w')
-    print(" Original file "+newFile+" converted into h5\n")
+    print("\n Original file: "+File)
+    print(" New file: "+newFile+"\n")
 
 #************************************
 # Lists the program usage
