@@ -50,6 +50,7 @@ This software requires Python (3.9 or higher). It has been tested with Python 3.
     pydot
     graphviz
     h5py
+    tables
     tensorflow (>=2.16.2)
     
 In addition, these packages may be needed depending on your platform (via ```apt-get``` in debian/ubuntu or ```port``` in OSX):
