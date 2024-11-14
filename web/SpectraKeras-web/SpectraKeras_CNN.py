@@ -579,7 +579,7 @@ def predict(testFile):
             predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
         print('\n  ========================================================')
-        print('  \033[1m CNN - Classifier\033[0m - Prediction')
+        print('  CNN - Classifier\033[0m - Prediction')
         print('  ========================================================')
 
         if dP.numLabels == 1:
@@ -598,7 +598,7 @@ def predict(testFile):
                         print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(predValue)),
                             int(le.inverse_transform(i)[0]), 100*predictions[0][i]))
                     
-            print('\033[1m\n  {0:s} \033[0m(Class: {1:d}, probability = {2:.2f}%)\033[0m\n'.format(getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
+            print('\n  {0:s} (Class: {1:d}, probability = {2:.2f}%)\n'.format(getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
             print('  ========================================================\n')
 
         else:
@@ -637,11 +637,11 @@ def batchPredict(folder):
     if dP.regressor:
         summaryFile = np.array([['SpectraKeras_CNN','Regressor','',],['File name','Prediction','']])
         print('\n  ========================================================')
-        print('  \033[1m CNN - Regressor\033[0m - Prediction')
+        print('  CNN - Regressor - Prediction')
         print('  ========================================================')
         for i in range(predictions.shape[0]):
             predValue = predictions[i][0]
-            print('  {0:s}:\033[1m\n   Predicted value = {1:.2f}\033[0m\n'.format(fileName[i],predValue))
+            print('  {0:s}:\n   Predicted value = {1:.2f}\n'.format(fileName[i],predValue))
             summaryFile = np.vstack((summaryFile,[fileName[i],predValue,'']))
         print('  ========================================================\n')
 
@@ -651,7 +651,7 @@ def batchPredict(folder):
         
         summaryFile = np.array([['SpectraKeras_CNN','Classifier','',''],['File name','Name','Predicted Class','Probability']])
         print('\n  ========================================================')
-        print('  \033[1m CNN - Classifier\033[0m - Prediction')
+        print('  CNN - Classifier - Prediction')
         print('  ========================================================')
         indPredProb = 0
         for i in range(predictions.shape[0]):
@@ -664,10 +664,10 @@ def batchPredict(folder):
 
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
-                print('  {0:s}:\033[1m\n   {1:s} \033[0m(Class: {2:d}, probability = {3:.2f}%)\n'.format(fileName[i],getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
+                print('  {0:s}:\n   {1:s} (Class: {2:d}, probability = {3:.2f}%)\n'.format(fileName[i],getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
             else:
                 predValue = 0
-                print('  {0:s}:\033[1m\n   No predicted value (probability = {1:.2f}%)\033[0m\n'.format(fileName[i],predProb))
+                print('  {0:s}:\n   No predicted value (probability = {1:.2f}%)\n'.format(fileName[i],predProb))
             if predProb > dP.predProbThreshold:
                 indPredProb += 1
             summaryFile = np.vstack((summaryFile,[fileName[i], getMineral(dP.table_names, int(predValue)), predValue,predProb]))

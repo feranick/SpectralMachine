@@ -599,7 +599,7 @@ def predict(testFile):
                         print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(predValue)),
                             int(le.inverse_transform(i)[0]), 100*predictions[0][i]))
                     
-            print('\033[1m\n  {0:s} \033[0m(Class: {1:d}, probability = {2:.2f}%)\033[0m\n'.format(getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
+            print('\033[1m\n  {0:s} \033[0m(Class: {1:d}, probability = {2:.2f}%)\n'.format(getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
             print('  ========================================================\n')
 
         else:
