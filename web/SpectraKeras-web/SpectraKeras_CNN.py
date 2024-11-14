@@ -192,18 +192,18 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            #try:
-            predict(sys.argv[2])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                predict(sys.argv[2])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-b" , "--batch"):
-            #try:
-            batchPredict(sys.argv[2], sys.argv[3])
-            #except:
-            #    usage()
-            #    sys.exit(2)
+            try:
+                batchPredict(sys.argv[2], sys.argv[3])
+            except:
+                usage()
+                sys.exit(2)
 
         if o in ("-l" , "--lite"):
             try:
@@ -346,7 +346,7 @@ def batchPredict(array, names):
                 predProb = round(100*predictions[i][pred_class]/255,2)
             else:
                 predProb = round(100*predictions[i][pred_class],2)
-            rosterPred = np.where(predictions[i][0]>0.1)[0]
+            rosterPred = np.atleast_1d(predictions[i][0]).nonzero()[0]
 
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]

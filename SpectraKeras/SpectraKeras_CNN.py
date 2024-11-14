@@ -661,7 +661,7 @@ def batchPredict(folder):
                 predProb = round(100*predictions[i][pred_class]/255,2)
             else:
                 predProb = round(100*predictions[i][pred_class],2)
-            rosterPred = np.where(predictions[i][0]>0.1)[0]
+            rosterPred = np.atleast_1d(predictions[i][0]).nonzero()[0]
 
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
