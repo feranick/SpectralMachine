@@ -6,14 +6,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $path = 'uploads/';
         $extensions = ['txt'];
         
-        //print($_FILES['files']['name'][0]);
-        //$output =  $path . $file_name;
-
-        $all_files = count($_FILES['files']['tmp_name']);
+        $files = $_FILES['files']['tmp_name'];
+        $files_names = $_FILES['files']['name'];
+        $num_files = count($_FILES['files']['tmp_name']);
         
-        for ($i = 0; $i < $all_files; $i++) {
+        for ($i = 0; $i < $num_files; $i++) {
             $file_name = $_FILES['files']['name'][$i];
-            $file_tmp = $_FILES['files']['tmp_name'][$i];
+            $file_tmp = $files[$i];
             $file_type = $_FILES['files']['type'][$i];
             $file_size = $_FILES['files']['size'][$i];
             $file_ext = strtolower(end(explode('.', $_FILES['files']['name'][$i])));
@@ -32,18 +31,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 move_uploaded_file($file_tmp, $file);
             }
         }
-        $tmpfile = $_FILES['files']['tmp_name'][0];
-        //$output =  $tmpfile;
+        
+        $tmpfile = $files[0];
         if ($_POST['mode'] == "Raman Spectroscopy") {
             $folder = "ml-raman";
             }
         if ($_POST['mode'] == "Powder X-ray Diffraction (XRD)") {
             $folder = "ml-xrd";
             }
-
-	//$command = "cd " . $folder . "; SpectraKeras_CNN -p $tmpfile 2>&1";
-	$command = "cd " . $folder . "; python3 ../SpectraKeras_CNN.py -p $tmpfile 2>&1";
-	$output = shell_exec($command);
+                        
+        if ($num_files == 1) {
+            //$command = "cd " . $folder . "; SpectraKeras_CNN -p $tmpfile 2>&1";
+            $command = "cd " . $folder . "; python3 ../SpectraKeras_CNN.py -p $tmpfile 2>&1";
+            $output = shell_exec($command);
+        }
+        else {
+            $f = json_encode($files);
+            $fn = json_encode($files_names);
+            $command = "cd " . $folder . "; python3 ../SpectraKeras_CNN.py -b $f $fn 2>&1";
+            $output = shell_exec($command);
+        }
 
         if ($errors) print_r($errors);
     }
@@ -110,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </select>
     </form>
     <text_area><pre><?php echo $output; ?></pre></text_area>
+    <text_area><pre><?php echo $output2; ?></pre></text_area>
     
   </body>
 </html>

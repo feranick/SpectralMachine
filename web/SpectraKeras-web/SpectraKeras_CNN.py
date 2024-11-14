@@ -192,18 +192,18 @@ def main():
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
-            try:
-                predict(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            predict(sys.argv[2])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-b" , "--batch"):
-            try:
-                batchPredict(sys.argv[2])
-            except:
-                usage()
-                sys.exit(2)
+            #try:
+            batchPredict(sys.argv[2], sys.argv[3])
+            #except:
+            #    usage()
+            #    sys.exit(2)
 
         if o in ("-l" , "--lite"):
             try:
@@ -303,15 +303,18 @@ def predict(testFile):
 #************************************
 # Batch Prediction
 #************************************
-def batchPredict(folder):
+def batchPredict(array, names):
+    import json
     dP = Conf()
     model = loadModel(dP)
     with open(dP.spectral_range, "rb") as f:
         EnN = pickle.load(f)
 
+    files = array.replace('\\','').replace('[','').replace(']','').split(',')
+    fileName = names.replace('[','').replace(']','').split(',')
+
     predictions = np.zeros((0,0))
-    fileName = []
-    for file in glob.glob(folder+'/*.txt'):
+    for file in files:
         R, good = readTestFile(file, EnN, dP)
         if good:
             R = formatForCNN(R)
@@ -319,24 +322,20 @@ def batchPredict(folder):
                 predictions = np.vstack((predictions,getPredictions(R, model, dP)[0].flatten()))
             except:
                 predictions = np.array([getPredictions(R, model,dP)[0].flatten()])
-            fileName.append(file)
 
     if dP.regressor:
-        summaryFile = np.array([['SpectraKeras_CNN','Regressor','',],['File name','Prediction','']])
         print('\n  ========================================================')
         print('  CNN - Regressor - Prediction')
         print('  ========================================================')
         for i in range(predictions.shape[0]):
             predValue = predictions[i][0]
             print('  {0:s}:\n   Predicted value = {1:.2f}\n'.format(fileName[i],predValue))
-            summaryFile = np.vstack((summaryFile,[fileName[i],predValue,'']))
         print('  ========================================================\n')
 
     else:
         with open(dP.model_le, "rb") as f:
             le = pickle.load(f)
         
-        summaryFile = np.array([['SpectraKeras_CNN','Classifier','',''],['File name','Name','Predicted Class','Probability']])
         print('\n  ========================================================')
         print('  CNN - Classifier - Prediction')
         print('  ========================================================')
@@ -357,14 +356,8 @@ def batchPredict(folder):
                 print('  {0:s}:\n   No predicted value (probability = {1:.2f}%)\n'.format(fileName[i],predProb))
             if predProb > dP.predProbThreshold:
                 indPredProb += 1
-            summaryFile = np.vstack((summaryFile,[fileName[i], getMineral(dP.table_names, int(predValue)), predValue,predProb]))
         print('  ========================================================\n')
         print(" Predictions with probability > {0:.2f}:  {1:.2f}%\n".format(dP.predProbThreshold, indPredProb*100/predictions.shape[0]))
-
-    import pandas as pd
-    df = pd.DataFrame(summaryFile)
-    df.to_csv(dP.summaryFileName, index=False, header=False)
-    print(" Prediction summary saved in:",dP.summaryFileName,"\n")
 
 #************************************
 # Accuracy determination
@@ -438,22 +431,7 @@ def plotActivationsPredictions(R, model):
 # Lists the program usage
 #************************************
 def usage():
-    print('\n Usage:\n')
-    print(' Train (Random cross validation):')
-    print('  python3 SpectraKeras_CNN.py -t <learningFile>\n')
-    print(' Train (with external validation):')
-    print('  python3 SpectraKeras_CNN.py -t <learningFile> <validationFile>\n')
-    print(' Predict:')
-    print('  python3 SpectraKeras_CNN.py -p <testFile>\n')
-    print(' Batch predict:')
-    print('  python3 SpectraKeras_CNN.py -b <folder>\n')
-    print(' Display Neural Network Configuration:')
-    print('  python3 SpectraKeras_CNN.py -n <learningFile>\n')
-    print(' Convert model to quantized tflite:')
-    print('  python3 SpectraKeras_CNN.py -l <learningFile>\n')
-    print(' Determine accuracy using h5 testing file with spectra:')
-    print('  python3 SpectraKeras_CNN.py -a <testFile>\n')
-    print(' Requires python 3.x. Not compatible with python 2.x\n')
+    print('\n Error. Please try again later.\n')
 
 #************************************
 # Main initialization routine

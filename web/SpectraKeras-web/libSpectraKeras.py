@@ -69,7 +69,7 @@ def preProcess(Rtot, En, dP):
         R = norm.transform_single(R)
 
     if(R.shape[1] is not len(En)):
-        print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
+        #print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
         R = np.interp(En, Rx[0], R[0])
         R = R.reshape(1,-1)
     return R
@@ -257,7 +257,7 @@ def checkTFVersion(vers):
 class Normalizer(object):
     def __init__(self):
         self.YnormTo = 1
-        print("  Normalizing spectra between 0 and 1")
+        #print("  Normalizing spectra between 0 and 1")
 
     def transform_matrix(self,y):
         yn = np.copy(y)
