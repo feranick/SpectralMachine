@@ -16,12 +16,15 @@ import sys, os.path
 #************************************
 # Main
 #************************************
+class dP:
+    standardName = False
+
 def main():
     try:
         File =  sys.argv[1]
         if os.path.splitext(File)[1] == ".csv" or os.path.splitext(File)[1] == ".CSV":
             print(" Opening CSV File:"+File)
-            getMineral(File)
+            saveToHDF5(File)
     except:
         usage()
         sys.exit(2)
@@ -29,11 +32,16 @@ def main():
 #************************************
 # Convert CSV to HDF5
 #************************************
-def getMineral(File):
-    fileRoot = os.path.splitext(File)[0]
-    newFile = fileRoot+'.h5'
+def saveToHDF5(File):
     df = pd.read_csv(File, header=None).iloc[1:].drop([1,2,4], axis=1)
     print(df)
+    
+    if dP.standardName:
+        newFile = "AAA_table_names.h5"
+    else:
+        fileRoot = os.path.splitext(File)[0]
+        newFile = fileRoot+'.h5'
+    
     df.to_hdf(newFile, key='df', mode='w')
     print(" Original file "+newFile+" converted into h5\n")
 
