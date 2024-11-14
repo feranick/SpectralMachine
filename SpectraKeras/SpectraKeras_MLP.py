@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2024.11.13.1
+* v2024.11.14.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -54,6 +54,7 @@ class Conf():
         
         self.model_le = self.model_directory+"model_le.pkl"
         self.spectral_range = "model_spectral_range.pkl"
+        self.table_names = self.model_directory+"AAA_table_names.h5"
 
         if platform.system() == 'Linux':
             self.edgeTPUSharedLib = "libedgetpu.so.1"
@@ -517,17 +518,18 @@ def predict(testFile):
                 predValue = le.inverse_transform(pred_class)[0]
             else:
                 predValue = 0
-            print('  Prediction\tProbability [%]')
-            print('  -----------------------------')
+            print('  Prediction\t| Class \t| Probability [%]')
+            print('  -------------------------------------------------------- ')
             for i in range(len(predictions[0])-1):
                 if predictions[0][i]>0.01:
                     if dP.useTFlitePred:
-                        print(' ',le.inverse_transform(i)[0],'\t\t',
-                            str('{:.2f}'.format(100*predictions[0][i]/255)))
+                        print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(predValue)),
+                            int(le.inverse_transform(i)[0]), 100*predictions[0][i]/255))
                     else:
-                        print(' ',le.inverse_transform(i)[0],'\t\t',
-                            str('{:.2f}'.format(100*predictions[0][i])))
-            print('\033[1m\n  Predicted value = {0:d} (probability = {1:.2f}%)\033[0m\n'.format(int(predValue), predProb))
+                        print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(predValue)),
+                            int(le.inverse_transform(i)[0]), 100*predictions[0][i]))
+                    
+            print('\033[1m\n  {0:s} \033[0m(Class: {1:d}, probability = {2:.2f}%)\033[0m\n'.format(getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
             print('  ========================================================\n')
 
         else:
@@ -573,9 +575,10 @@ def batchPredict(folder):
     else:
         with open(dP.model_le, "rb") as f:
             le = pickle.load(f)
-        summaryFile = np.array([['SpectraKeras_MLP','Classifier',''],['File name','Predicted Class', 'Probability']])
+        
+        summaryFile = np.array([['SpectraKeras_CNN','Classifier','',''],['File name','Name','Predicted Class','Probability']])
         print('\n  ========================================================')
-        print('  \033[1mKeras MLP - Classifier\033[0m - Prediction')
+        print('  \033[1m CNN - Classifier\033[0m - Prediction')
         print('  ========================================================')
         indPredProb = 0
         for i in range(predictions.shape[0]):
@@ -588,15 +591,16 @@ def batchPredict(folder):
 
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
-                print('  {0:s}:\033[1m\n   Predicted value = {1:.2f} (probability = {2:.2f}%)\033[0m\n'.format(fileName[i],predValue, predProb))
+                print('  {0:s}:\033[1m\n   {1:s} \033[0m(Class: {2:d}, probability = {3:.2f}%)\n'.format(fileName[i],getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
             else:
                 predValue = 0
                 print('  {0:s}:\033[1m\n   No predicted value (probability = {1:.2f}%)\033[0m\n'.format(fileName[i],predProb))
             if predProb > dP.predProbThreshold:
                 indPredProb += 1
-            summaryFile = np.vstack((summaryFile,[fileName[i], predValue,predProb]))
+            summaryFile = np.vstack((summaryFile,[fileName[i], getMineral(dP.table_names, int(predValue)), predValue,predProb]))
         print('  ========================================================\n')
         print(" Predictions with probability > {0:.2f}:  {1:.2f}%\n".format(dP.predProbThreshold, indPredProb*100/predictions.shape[0]))
+        
     import pandas as pd
     df = pd.DataFrame(summaryFile)
     df.to_csv(dP.summaryFileName, index=False, header=False)
