@@ -365,9 +365,6 @@ class CustomRound:
 # MultiClassReductor
 #************************************
 class MultiClassReductor():
-    def __self__(self):
-        self.name = name
-
     def fit(self,tc):
         self.totalClass = tc.tolist()
 

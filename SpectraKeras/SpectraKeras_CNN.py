@@ -603,6 +603,8 @@ def predict(testFile):
             print('  ========================================================\n')
 
         else:
+            pass
+            '''
             print('\n ==========================================')
             print('\033[1m' + ' Predicted value \033[0m(probability = ' + str(predProb) + '%)')
             print(' ==========================================\n')
@@ -610,7 +612,8 @@ def predict(testFile):
             print("  2:",str(predValue[1]),"%")
             print("  3:",str((predValue[1]/0.5)*(100-99.2-.3)),"%\n")
             print(' ==========================================\n')
-
+            '''
+            
     if dP.plotActivations and not dP.useTFlitePred:
         plotActivationsPredictions(R,model)
 
@@ -800,6 +803,7 @@ def printParam():
 def plotActivationsTrain(model):
     import matplotlib.pyplot as plt
     import tensorflow as tf
+    dP = Conf()
     if checkTFVersion("2.16.0"):
         import tensorflow.keras as keras
     else:
@@ -807,7 +811,6 @@ def plotActivationsTrain(model):
             import tf_keras as keras
         else:
             import keras
-    dP = Conf()
     i = 0
     for layer in model.layers:
         if isinstance(layer, keras.layers.Conv2D):

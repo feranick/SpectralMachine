@@ -289,6 +289,8 @@ def predict(testFile):
             print('  ========================================================\n')
 
         else:
+            pass
+            '''
             print('\n ==========================================')
             print('\n Predicted value (probability = ' + str(predProb) + '%)')
             print(' ==========================================\n')
@@ -296,6 +298,7 @@ def predict(testFile):
             print("  2:",str(predValue[1]),"%")
             print("  3:",str((predValue[1]/0.5)*(100-99.2-.3)),"%\n")
             print(' ==========================================\n')
+            '''
 
     if dP.plotActivations and not dP.useTFlitePred:
         plotActivationsPredictions(R,model)
