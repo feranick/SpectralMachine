@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2024.11.14.2
+* v2025.02.25.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -49,7 +49,7 @@ def readLearnFile(learnFile, dP):
 def readTestFile(testFile, En, dP):
     try:
         with open(testFile, 'r') as f:
-            #print('\n  Opening sample data for prediction:\n  ',testFile)
+            print('\n  Opening sample data for prediction:\n  ',testFile)
             Rtot = np.loadtxt(f, unpack =True)
         R = preProcess(Rtot, En, dP)
     except:
@@ -69,7 +69,7 @@ def preProcess(Rtot, En, dP):
         R = norm.transform_single(R)
 
     if(R.shape[1] is not len(En)):
-        #print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
+        print('  Rescaling x-axis from',str(R.shape[1]),'to',str(len(En)))
         R = np.interp(En, Rx[0], R[0])
         R = R.reshape(1,-1)
     return R
@@ -78,23 +78,24 @@ def preProcess(Rtot, En, dP):
 # Load saved models
 #************************************
 def loadModel(dP):
+    getTFVersion(dP)
     if dP.TFliteRuntime:
-        import tflite_runtime.interpreter as tflite
+        #import tflite_runtime.interpreter as litert
+        import ai_edge_litert.interpreter as litert
         # model here is intended as interpreter
         if dP.runCoralEdge:
-            #print(" Running on Coral Edge TPU")
+            print(" Running on Coral Edge TPU")
             try:
                 model_name = os.path.splitext(dP.model_name)[0]+'_edgetpu.tflite'
-                model = tflite.Interpreter(model_path=model_name,
-                    experimental_delegates=[tflite.load_delegate(dP.edgeTPUSharedLib,{})])
+                model = litert.Interpreter(model_path=model_name,
+                    experimental_delegates=[litert.load_delegate(dP.edgeTPUSharedLib,{})])
             except:
                 print(" Coral Edge TPU not found. Please make sure it's connected and Tflite-runtime matches the TF version that is installled.")
         else:
             model_name = os.path.splitext(dP.model_name)[0]+'.tflite'
-            model = tflite.Interpreter(model_path=model_name)
+            model = litert.Interpreter(model_path=model_name)
         model.allocate_tensors()
     else:
-        getTFVersion(dP)
         import tensorflow as tf
         if checkTFVersion("2.16.0"):
             import tensorflow.keras as keras
@@ -106,7 +107,17 @@ def loadModel(dP):
         if dP.useTFlitePred:
             # model here is intended as interpreter
             model_name=os.path.splitext(dP.model_name)[0]+'.tflite'
-            model = tf.lite.Interpreter(model_path=model_name)
+            
+            try:
+                # Using tf.lite (to be deprecated)
+                model = tf.lite.Interpreter(model_path=model_name)
+                print("  Running on tf.lite\n")
+            except:
+                # Using ai_edge_litert
+                import ai_edge_litert.interpreter as litert
+                model = litert.Interpreter(model_path=model_name)
+                print("  Running on ai_edge_litert\n")
+                
             model.allocate_tensors()
         else:
             model_name = dP.model_name
@@ -241,9 +252,17 @@ def getTFVersion(dP):
             kv = "- Keras v. " + keras.__version__
     from packaging import version
     if dP.useTFlitePred:
-        print("\n TensorFlow (Lite) v.",tf.version.VERSION,kv, "\n")
+        if dP.TFliteRuntime:
+            try:
+                import tflite_runtime as litert
+                print("\n  TFlite-runtime v.",litert.__version__,kv, "\n")
+            except:
+                import ai_edge_litert as litert
+                print("\n  LiteRT v.",litert.__version__,kv, "\n")
+        else:
+            print("\n  TensorFlow (Lite) v.",tf.version.VERSION,kv, "\n")
     else:
-        print("\n TensorFlow v.",tf.version.VERSION,kv, "\n" )
+        print("\n  TensorFlow v.",tf.version.VERSION,kv, "\n" )
         
 def checkTFVersion(vers):
     import tensorflow as tf
@@ -257,7 +276,7 @@ def checkTFVersion(vers):
 class Normalizer(object):
     def __init__(self):
         self.YnormTo = 1
-        #print("  Normalizing spectra between 0 and 1")
+        print("  Normalizing spectra between 0 and 1")
 
     def transform_matrix(self,y):
         yn = np.copy(y)
@@ -365,9 +384,6 @@ class CustomRound:
 # MultiClassReductor
 #************************************
 class MultiClassReductor():
-    def __self__(self):
-        self.name = name
-
     def fit(self,tc):
         self.totalClass = tc.tolist()
 
