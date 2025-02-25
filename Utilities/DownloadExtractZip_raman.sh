@@ -7,7 +7,7 @@
 # This is script is licensed throughthe GNU Public license v.2.0
 #
 
-version="20241113a"
+version="20250223a"
 if [ "$1" = "" -o "$1" = "-h" ]; then
     echo
     echo " ExtractZip v."$version
@@ -18,16 +18,16 @@ else
     folder="rruff-raman_"$1
     mkdir $folder
     cd $folder
-    wget http://rruff.info/zipped_data_files/raman/LR-Raman.zip
-    wget http://rruff.info/zipped_data_files/raman/excellent_oriented.zip
-    wget http://rruff.info/zipped_data_files/raman/excellent_unoriented.zip
-    wget http://rruff.info/zipped_data_files/raman/fair_oriented.zip
-    wget http://rruff.info/zipped_data_files/raman/fair_unoriented.zip
-    wget http://rruff.info/zipped_data_files/raman/ignore_unoriented.zip
-    wget http://rruff.info/zipped_data_files/raman/poor_oriented.zip
-    wget http://rruff.info/zipped_data_files/raman/poor_unoriented.zip
-    wget http://rruff.info/zipped_data_files/raman/unrated_oriented.zip
-    wget http://rruff.info/zipped_data_files/raman/unrated_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/LR-Raman.zip
+    wget https://rruff.info/zipped_data_files/raman/excellent_oriented.zip
+    wget https://rruff.info/zipped_data_files/raman/excellent_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/fair_oriented.zip
+    wget https://rruff.info/zipped_data_files/raman/fair_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/ignore_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/poor_oriented.zip
+    wget https://rruff.info/zipped_data_files/raman/poor_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/unrated_oriented.zip
+    wget https://rruff.info/zipped_data_files/raman/unrated_unoriented.zip
     echo " Create folder: "$1
     mkdir $1
     pathfiles=./

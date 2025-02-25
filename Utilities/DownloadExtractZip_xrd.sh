@@ -7,7 +7,7 @@
 # This is script is licensed throughthe GNU Public license v.2.0
 #
 
-version="20241113a"
+version="20250223a"
 if [ "$1" = "" -o "$1" = "-h" ]; then
     echo
     echo " ExtractZip v."$version
@@ -18,9 +18,9 @@ else
     folder="rruff-powder_"$1
     mkdir $folder
     cd $folder
-    wget http://rruff.info/zipped_data_files/powder/XY_Processed.zip
-    wget http://rruff.info/zipped_data_files/powder/XY_RAW.zip
-    wget http://rruff.info/zipped_data_files/powder/DIF.zip
+    wget https://rruff.info/zipped_data_files/powder/XY_Processed.zip
+    wget https://rruff.info/zipped_data_files/powder/XY_RAW.zip
+    wget https://rruff.info/zipped_data_files/powder/DIF.zip
     echo " Create folder: "$1
     mkdir $1
     pathfiles=./
