@@ -78,7 +78,7 @@ def preProcess(Rtot, En, dP):
 # Load saved models
 #************************************
 def loadModel(dP):
-    getTFVersion(dP)
+    #getTFVersion(dP)
     if dP.TFliteRuntime:
         #import tflite_runtime.interpreter as litert
         import ai_edge_litert.interpreter as litert
