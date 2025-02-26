@@ -266,7 +266,7 @@ def predict(testFile):
             predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
         print('\n  ========================================================')
-        print('  CNN - Classifier\033[0m - Prediction')
+        print('  CNN - Classifier - Prediction')
         print('  ========================================================')
 
         if dP.numLabels == 1:
