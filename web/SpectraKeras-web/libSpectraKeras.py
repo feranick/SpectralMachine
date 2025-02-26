@@ -49,7 +49,7 @@ def readLearnFile(learnFile, dP):
 def readTestFile(testFile, En, dP):
     try:
         with open(testFile, 'r') as f:
-            print('\n  Opening sample data for prediction:\n  ',testFile)
+            #print('\n  Opening sample data for prediction:\n  ',testFile)
             Rtot = np.loadtxt(f, unpack =True)
         R = preProcess(Rtot, En, dP)
     except:
@@ -125,7 +125,7 @@ def loadModel(dP):
                 model = keras.models.load_model(model_name)
             else:
                 model = keras.saving.load_model(model_name)
-    print("  Model name:", model_name)
+    #print("  Model name:", model_name)
     return model
 
 #************************************
