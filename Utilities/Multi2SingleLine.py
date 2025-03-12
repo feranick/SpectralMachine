@@ -4,10 +4,10 @@
 ***************************************************
 * Convert from multiline string into single line
 * By: Nicola Ferralis <feranick@hotmail.com>
-* version v2024.10.04.1
+* version v2025.03.12.1
 ***************************************************
 '''
-print(__doc__)
+#print(__doc__)
 
 import sys, os.path, getopt
 
@@ -16,8 +16,7 @@ def main():
     saveInText = True
     
     if(len(sys.argv)<3):
-        print(' Usage:\n  python3 Multi2SingleLine.py -t \"<multi-line text>\"')
-        print('  python3 Multi2SingleLine.py -f <file>\n')
+        usage()
         return
     
     opts, args = getopt.getopt(sys.argv[1:],
@@ -26,7 +25,7 @@ def main():
     for o, a in opts:
         if o in ("-t" , "--text"):
             string = sys.argv[2]
-            print(string.replace('\n', ''),"\n")
+            print(string.replace('\n', ''))
     
         if o in ("-f" , "--file"):
             file = sys.argv[2]
@@ -45,8 +44,14 @@ def main():
                     print(" Single line text file saved in:",outfile,"\n")
                     
         if o in ("-h" , "--help"):
-            print(' Usage:\n  python3 Multi2SingleLine.py <file>\n')
+            usage()
             return
+            
+def usage():
+    print(__doc__)
+    print(' Usage:\n  python3 Multi2SingleLine.py -t \"<multi-line text>\"')
+    print('  python3 Multi2SingleLine.py -f <file>')
+    print('  python3 Multi2SingleLine.py -h\n')
             
 #************************************
 ''' Main initialization routine '''
