@@ -5,7 +5,7 @@
 * SpectraKeras_CNN Classifier and Regressor
 * Pyscript version
 * Only for prediction with tflite_runtime
-* v2025.02.25.1
+* v2025.03.21.1
 * Uses: TFlite_runtime
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -20,20 +20,18 @@ import _pickle as pickle
 
 from libSpectraKeras import *
 
-baseUrl = "https://gridedgedm.mit.edu/SpectraKeras_pyscript/"
-
 #************************************
 # Parameters
 #************************************
 class Conf():
-    def __init__(self, folder, ini):
-    
+    def __init__(self, configIni):
+
         self.conf = configparser.ConfigParser()
         self.conf.optionxform = str
-        
-        self.readConfig(ini)
-        self.model_directory = folder+"/"
-        
+
+        self.readConfig(configIni)
+        self.model_directory = "/"
+
         if self.regressor:
             self.modelName = "model_regressor_CNN.tflite"
         else:
@@ -42,10 +40,10 @@ class Conf():
 
         self.tb_directory = "model_CNN"
         self.model_name = self.model_directory+self.modelName
-        
+
         self.model_le = self.model_directory+"model_le.pkl"
         self.spectral_range = "model_spectral_range.pkl"
-        
+
     def SKDef(self):
         self.conf['Parameters'] = {
             'regressor' : False,
@@ -85,7 +83,7 @@ class Conf():
     def readConfig(self,configFile):
         try:
             self.conf.read_string(configFile)
-        
+
             self.SKDef = self.conf['Parameters']
             self.sysDef = self.conf['System']
 
@@ -112,7 +110,7 @@ class Conf():
             self.saveBestModel = self.conf.getboolean('Parameters','saveBestModel')
             self.metricBestModelR = self.conf.get('Parameters','metricBestModelR')
             self.metricBestModelC = self.conf.get('Parameters','metricBestModelC')
-            
+
             self.kerasVersion = self.conf.getint('System','kerasVersion')
             self.makeQuantizedTFlite = self.conf.getboolean('System','makeQuantizedTFlite')
             self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
@@ -121,25 +119,26 @@ class Conf():
         except:
             print(" Error in reading configuration file. Please check it\n")
 
-async def getFile(folder, file, bin):
-    url = baseUrl+folder+"/"+file
+async def getFile(file, bin):
+    if document.querySelector("#model").selectedIndex == 0:
+        folder = "model-raman"
+    else:
+        folder = "model-raman"
+    url = "./"+folder+"/"+file
     if bin:
         data = await fetch(url).bytearray()
     else:
         data = await fetch(url).text()
     return data
-    
+
 async def getModel(event):
-    global df, folder
+    global df
     document.querySelector("#button").disabled = True
     document.querySelector("#model").disabled = True
-    
-    if document.querySelector("#model").selectedIndex == 0:
-        folder = "model-raman"
-    else:
-        folder = "model-raman"
-    ini = await getFile(folder, "SpectraKeras_CNN.ini", False)
-    dP = Conf(folder, ini)
+
+    ini = await getFile("SpectraKeras_CNN.ini", False)
+    dP = Conf(ini)
+
     #modelPkl = await getFile(folder, dP.modelName, True)
     #df = pickle.loads(modelPkl)
     #output_div.innerHTML = ""
@@ -153,21 +152,24 @@ async def main(event):
     output_div = document.querySelector("#output")
     output_div.innerHTML = "Please wait..."
 
-    ini = await getFile(folder, "SpectraKeras_CNN.ini", False)
-    dP = Conf(folder, ini)
+    ini = await getFile("SpectraKeras_CNN.ini", False)
+    dP = Conf(ini)
     Rtot = np.asarray(js.spectra.to_py())
+    if len(Rtot) == 0:
+        output_div.innerHTML = ""
+        return
+
     R = Rtot[:,1]
     Rx = Rtot[:,0]
-    
-    js.console.log(f'{Rtot}')
-    js.console.log(f'{R}')
-    js.console.log(f'{Rx}')
-    
+    #js.console.log(f'{Rtot}')
+    #js.console.log(f'{R}')
+    #js.console.log(f'{Rx}')
+
     output_div.innerHTML = R
+
     
-    '''
-    dP = Conf()
     model = loadModel(dP)
+    '''
     with open(dP.spectral_range, "rb") as f:
         EnN = pickle.load(f)
 
@@ -296,35 +298,3 @@ def formatForCNN(A):
     x = np.stack(listmatrix, axis=0)
     return x
 
-#************************************
-# Print NN Info
-#************************************
-def printParam():
-    dP = Conf()
-    print('\n  ================================================')
-    print('  \033[1m CNN\033[0m - Parameters')
-    print('  ================================================')
-    print('  Optimizer:','Adam',
-                '\n  Convolutional layers:', dP.CL_filter,
-                '\n  Convolutional layers size:', dP.CL_size,
-                '\n  Max Pooling:', dP.max_pooling,
-                '\n  Dropout CNN:', dP.dropCNN,
-                '\n  Hidden layers:', dP.HL,
-                '\n  Activation function:','relu',
-                '\n  L2:',dP.l2,
-                '\n  Dropout HL:', dP.dropFCL,
-                '\n  Learning rate:', dP.l_rate,
-                '\n  Learning decay rate:', dP.l_rdecay)
-    if dP.fullSizeBatch:
-        print('  Batch size: full')
-    else:
-        print('  Batch size:', dP.batch_size)
-    print('  Epochs:',dP.epochs)
-    print('  Number of labels:', dP.numLabels)
-    print('  Stop at Best Model based on validation:', dP.stopAtBest)
-    print('  Save Best Model based on validation:', dP.saveBestModel)
-    if dP.regressor:
-        print('  Metric for Best Regression Model:', dP.metricBestModelR)
-    else:
-        print('  Metric for Best Classifier Model:', dP.metricBestModelC)
-    #print('  ================================================\n')

@@ -13,7 +13,7 @@ function handleFileSelect(){
         spectra.push([columns[0], columns[1]]);
       }
     }
-    //console.log(spectra);
+    console.log(spectra);
     };
   reader.readAsText(file);
  }

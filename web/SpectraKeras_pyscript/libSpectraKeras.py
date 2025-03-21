@@ -4,7 +4,7 @@
 * libSpectraKeas - Library for SpectraKeras
 * Pyscript version
 * Only for prediction with tflite_runtime
-* v2025.02.25.1
+* v2024.11.08.1
 * Uses: TFlite_runtime
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -48,10 +48,9 @@ def preProcess(Rtot, En, dP):
 # Load saved models
 #************************************
 def loadModel(dP):
-    #import tflite_runtime.interpreter as litert
-    import ai_edge_litert.interpreter as litert
+    import tflite_runtime.interpreter as tflite
     model_name = os.path.splitext(dP.model_name)[0]+'.tflite'
-    model = litert.Interpreter(model_path=model_name)
+    model = tflite.Interpreter(model_path=model_name)
     model.allocate_tensors()
     print("  Model name:", model_name)
     return model

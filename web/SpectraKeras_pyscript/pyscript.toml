@@ -1,6 +1,6 @@
 name = "SpectraKeras"
 description = "SpectraKeras"
-packages = ["numpy", "scipy"]
+packages = ["numpy", "scipy", "tflite-runtime"]
 [[fetch]]
 files = ['libSpectraKeras.py']
 
