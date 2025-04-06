@@ -138,7 +138,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     if defParam.saveFormatClass == True:
         tfclass_filename = learnFileRoot + '.tfclass'
         print(' Saving class file...\n')
-        with open(tfclass_filename, 'ab') as f:
+        with open(tfclass_filename, 'w') as f:
             np.savetxt(f, Cl2, delimiter='\t', fmt='%10.6f')
 
 #**********************************************

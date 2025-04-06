@@ -123,7 +123,7 @@ def saveMixFile(M, learnFile):
     if defParam.saveAsTxt == True:
         learnFile += '.txt'
         print("\n Saving mixture file (txt) in:\033[1m", learnFile+"\033[0m \n")
-        with open(learnFile, 'ab') as f:
+        with open(learnFile, 'w') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
     else:
         learnFile += '.h5'

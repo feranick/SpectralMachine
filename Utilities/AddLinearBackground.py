@@ -97,7 +97,7 @@ def saveLearnFile(M, learnFile):
     if defParam.saveAsTxt == True:
         learnFile += '.txt'
         print(" Saving new training file (txt) in:", learnFile+"\n")
-        with open(learnFile, 'ab') as f:
+        with open(learnFile, 'w') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
     else:
         learnFile += '.h5'

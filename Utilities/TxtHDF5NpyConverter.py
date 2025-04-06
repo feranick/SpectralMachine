@@ -59,7 +59,7 @@ def bin2text(learnFile):
     learnFileRoot = os.path.splitext(learnFile)[0]
     M = np.load(learnFile)
     if defParam.saveAsTxt == True:
-        with open(learnFileRoot+".txt", 'ab') as f:
+        with open(learnFileRoot+".txt", 'w') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
         print("Learning file converted to \033[1min\033[0m:", learnFileRoot+".txt\n")
     else:

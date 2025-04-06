@@ -111,7 +111,7 @@ def readLearnFile(learnFile):
 #*****************************************
 def writeFile(File, M):
     if defParam.saveAsTxt == True:
-        with open(File, 'ab') as f:
+        with open(File, 'w') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
     else:
         with h5py.File(File, 'w') as hf:

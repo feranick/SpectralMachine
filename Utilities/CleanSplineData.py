@@ -109,7 +109,7 @@ def saveFile(folder, file, type):
             newFile = folder + Params.folderTag + os.path.splitext(file)[0] + Params.fileTag
         else:
             newFile = folder + '/' + os.path.splitext(file)[0] + fileTag
-        with open(newFile, 'ab') as f:
+        with open(newFile, 'w') as f:
             np.savetxt(f, M1, delimiter='\t', fmt='%10.6f')
         print(' Data saved in:',newFile,'\n')
     

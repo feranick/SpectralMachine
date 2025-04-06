@@ -100,10 +100,10 @@ def readLearnFile(learnFile):
 def saveCVFiles(newTrain, newTest, trainFile, testFile):
     if defParam.saveAsTxt == True:
         print("\n Saving new training file (txt) in:", trainFile)
-        with open(trainFile, 'ab') as f:
+        with open(trainFile, 'w') as f:
             np.savetxt(f, newTrain, delimiter='\t', fmt='%10.6f')
         print(" Saving new cross validation (txt) in:", testFile, '\n')
-        with open(testFile, 'ab') as f:
+        with open(testFile, 'w') as f:
             np.savetxt(f, newTest, delimiter='\t', fmt='%10.6f')
     else:
         print("\n Saving new training file (hdf5) in: "+trainFile)

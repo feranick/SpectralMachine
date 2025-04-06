@@ -112,7 +112,7 @@ def writeFile(File, En, A, Cl):
     newMatrix = np.vstack((newMatrix, temp))
 
     if defParam.saveAsTxt == True:
-        with open(File, 'ab') as f:
+        with open(File, 'w') as f:
             np.savetxt(f, newMatrix, delimiter='\t', fmt='%10.6f')
     else:
         with h5py.File(File, 'w') as hf:

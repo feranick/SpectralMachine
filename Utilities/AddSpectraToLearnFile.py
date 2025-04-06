@@ -105,7 +105,7 @@ def makeFile(learnFile, sampleTag, sampleFile, param):
 def saveLearnFile(M, learnFile):
     if os.path.splitext(learnFile)[1] == '.txt':
         print(" Saving updated training file (txt) in:", learnFile+"\n")
-        with open(learnFile, 'ab') as f:
+        with open(learnFile, 'w') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
     elif os.path.splitext(sys.argv[1])[1] == '.h5':
         print(" Saving updated training file (hdf5) in: "+learnFile+"\n")
@@ -113,7 +113,7 @@ def saveLearnFile(M, learnFile):
             hf.create_dataset("M",  data=M)
     elif os.path.splitext(sys.argv[1])[1] == '.npy':
         print(" Saving updated training file (npy) in: "+learnFile+"\n")
-        with open(learnFile, 'ab') as f:
+        with open(learnFile, 'w') as f:
             np.save(f, M, '%10.6f')
     else:
         print(" Format of training file, "+learnFile+", not supported\n")

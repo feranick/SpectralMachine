@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2025.02.25.1
+* v2025.04.05.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -295,7 +295,7 @@ class Normalizer(object):
         return yn
 
     def save(self, name):
-        with open(name, 'ab') as f:
+        with open(name, 'w') as f:
             pickle.dump(self, f)
 
 #************************************
@@ -355,7 +355,7 @@ class NormalizeLabel(object):
         return vn
 
     def save(self, name):
-        with open(name, 'ab') as f:
+        with open(name, 'w') as f:
             pickle.dump(self, f)
 
 #************************************
@@ -398,6 +398,10 @@ class MultiClassReductor():
 
     def classes_(self):
         return self.totalClass
+    
+    def save(self):
+        with open(self.model_le, 'wb') as f:
+            pickle.dump(self, f)
 
 #************************************
 # Get name of prediction from h5 file
