@@ -27,7 +27,7 @@ def SpectraKeras_MLP():
 class Conf():
     def __init__(self):
         confFileName = "SpectraKeras_MLP.ini"
-        self.configFile = os.getcwd()+"/"+confFileName
+        self.configFile = os.path.join(os.getcwd(),confFileName)
         self.conf = configparser.ConfigParser()
         self.conf.optionxform = str
         if os.path.isfile(self.configFile) is False:
