@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2025.02.25.1
+* v2025.04.08.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************

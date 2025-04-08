@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2025.04.05.1
+* v2025.04.08.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -11,7 +11,7 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, getopt, time, configparser
+import sys, os.path, getopt, time, configparser, ast
 import platform, pickle, h5py, csv, glob
 from libSpectraKeras import *
 
@@ -97,14 +97,14 @@ class Conf():
     def readConfig(self,configFile):
         try:
             self.conf.read(configFile)
-            self.SKDef = self.conf['Parameters']
-            self.sysDef = self.conf['System']
+            self.SKPar = self.conf['Parameters']
+            self.sysPar = self.conf['System']
 
             self.regressor = self.conf.getboolean('Parameters','regressor')
             self.normalize = self.conf.getboolean('Parameters','normalize')
             self.l_rate = self.conf.getfloat('Parameters','l_rate')
             self.l_rdecay = self.conf.getfloat('Parameters','l_rdecay')
-            self.HL = eval(self.SKDef['HL'])
+            self.HL = ast.literal_eval(self.SKPar['HL'])
             self.drop = self.conf.getfloat('Parameters','drop')
             self.l2 = self.conf.getfloat('Parameters','l2')
             self.epochs = self.conf.getint('Parameters','epochs')
