@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2025.04.08.1
+* v2025.04.10.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -424,7 +424,11 @@ def convertMineralNameFromCSV(File):
     import pandas as pd
     fileRoot = os.path.splitext(File)[0]
     newFile = fileRoot+'.h5'
-    df = pd.read_csv(File, header=None).iloc[1:].drop([1,2,4], axis=1)
+    try:
+        df = pd.read_csv(File, header=None).iloc[1:].drop([1,2,4], axis=1)
+    except FileNotFoundError as e:
+        print("Hdf with mineral data file not found")
+        sys.exit()
     print(df)
     df.to_hdf(newFile, key='df', mode='w')
     print(" Original file "+newFile+" converted into h5\n")

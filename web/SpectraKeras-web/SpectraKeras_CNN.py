@@ -4,7 +4,7 @@
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
 * Simplified web version
-* v2025.04.08.1
+* v2025.04.10.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************

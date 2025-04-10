@@ -6,8 +6,8 @@ Machine learning software for rapid spectral analysis. While Raman spectra were 
    - DNNClassifier (TensorFlow, TensorFlow-Lite)
    - Convolutional Neural Networks (TensorFlow, TensorFlow-Lite)
 - Required libraries for prediction:
-   - tensorflow (v2.16.2 recommended)
-   - Optional: tensorflow-lite (v2.16.2 recommended)
+   - tensorflow (v2.18.1 recommended)
+   - Optional: tensorflow-lite (v2.18.1 recommended)
    - Optional: [tensorflow-lite runtime](https://www.tensorflow.org/lite/guide/python) 
    - Optional: tensorflow-lite runtime with [Coral EdgeTPU](https://coral.ai/docs/accelerator/get-started/)
 
@@ -23,7 +23,7 @@ Installation
 ## Installation from available wheel package
 If available from the main site, you can install SpectraKeras by running:
 
-    python3 -m pip install --upgrade spectrakeras-2025.02.25.1-py3-none-any.whl
+    python3 -m pip install --upgrade spectrakeras-2025.04.10.1-py3-none-any.whl
     
 SpectraKeras_CNN and Spectrakeras_MLP are available directly from the command line.
 NOTE: The Utilities in the `Utilities` folder are not included in the package, and can be run locally as needed.

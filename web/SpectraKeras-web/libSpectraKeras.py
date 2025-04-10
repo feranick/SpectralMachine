@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2025.04.08.1
+* v2025.04.10.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -151,7 +151,7 @@ def getPredictions(R, model, dP):
     else:
         predictions = model.predict(R)
         
-    probabilities = scipy.special.softmax(predictions.astype('double'))
+    #probabilities = scipy.special.softmax(predictions.astype('double'))
     return predictions, probabilities
 
 #************************************
@@ -384,6 +384,9 @@ class CustomRound:
 # MultiClassReductor
 #************************************
 class MultiClassReductor():
+    def __init__(self,dP):
+        self.model_le = dP.model_le
+    
     def fit(self,tc):
         self.totalClass = tc.tolist()
 
@@ -398,13 +401,21 @@ class MultiClassReductor():
 
     def classes_(self):
         return self.totalClass
+    
+    def save(self):
+        with open(self.model_le, 'wb') as f:
+            pickle.dump(self, f)
 
 #************************************
 # Get name of prediction from h5 file
 #************************************
 def getMineral(File, pred):
     import pandas as pd
-    df = pd.read_hdf(File)
+    try:
+        df = pd.read_hdf(File)
+    except FileNotFoundError as e:
+        print("Hdf with mineral data file not found")
+        sys.exit()
     name = df[df[0]==str(pred)].iloc[0,1]
     ind = name.find('__')
     return name[:ind]
@@ -413,7 +424,11 @@ def convertMineralNameFromCSV(File):
     import pandas as pd
     fileRoot = os.path.splitext(File)[0]
     newFile = fileRoot+'.h5'
-    df = pd.read_csv(File, header=None).iloc[1:].drop([1,2,4], axis=1)
+    try:
+        df = pd.read_csv(File, header=None).iloc[1:].drop([1,2,4], axis=1)
+    except FileNotFoundError as e:
+        print("Hdf with mineral data file not found")
+        sys.exit()
     print(df)
     df.to_hdf(newFile, key='df', mode='w')
     print(" Original file "+newFile+" converted into h5\n")
