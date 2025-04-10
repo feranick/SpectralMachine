@@ -151,7 +151,7 @@ def getPredictions(R, model, dP):
     else:
         predictions = model.predict(R)
         
-    probabilities = scipy.special.softmax(predictions.astype('double'))
+    #probabilities = scipy.special.softmax(predictions.astype('double'))
     return predictions, probabilities
 
 #************************************
@@ -384,6 +384,9 @@ class CustomRound:
 # MultiClassReductor
 #************************************
 class MultiClassReductor():
+    def __init__(self,dP):
+        self.model_le = dP.model_le
+    
     def fit(self,tc):
         self.totalClass = tc.tolist()
 

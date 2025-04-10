@@ -283,7 +283,7 @@ def train(learnFile, testFile, flag):
         if testFile is not None:
             Cl2_test = le.transform(Cl_test)
         '''
-        le = MultiClassReductor()
+        le = MultiClassReductor(dP)
         le.fit(np.unique(totCl, axis=0))
         Cl2 = le.transform(Cl)
 
