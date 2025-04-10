@@ -495,10 +495,6 @@ def train(learnFile, testFile, flag):
         accuracy = np.asarray(log.history['accuracy'])
         val_acc = np.asarray(log.history['val_accuracy'])
         print("  Number unique classes (training): ", np.unique(Cl).size)
-        if testFile is not None:
-            Cl2_test = le.transform(Cl_test)
-            print("  Number unique classes (validation):", np.unique(Cl_test).size)
-            print("  Number unique classes (total): ", np.unique(totCl).size)
         printParam()
         print('\n  ========================================================')
         print('  \033[1m CNN - Classifier \033[0m - Training Summary')
