@@ -411,7 +411,11 @@ class MultiClassReductor():
 #************************************
 def getMineral(File, pred):
     import pandas as pd
-    df = pd.read_hdf(File)
+    try:
+        df = pd.read_hdf(File)
+    except FileNotFoundError as e:
+        print("Hdf with mineral data file not found")
+        sys.exit()
     name = df[df[0]==str(pred)].iloc[0,1]
     ind = name.find('__')
     return name[:ind]
