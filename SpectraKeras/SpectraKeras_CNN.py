@@ -350,7 +350,7 @@ def train(learnFile, testFile, flag):
                 model.add(keras.layers.MaxPooling2D(pool_size=(1, dP.max_pooling[i])))
             except:
                 print("  WARNING: Pooling layer is larger than last convolution layer\n  Aborting\n")
-                return
+                sys.exit()
             model.add(keras.layers.Dropout(dP.dropCNN[i]))
         '''
         try:
