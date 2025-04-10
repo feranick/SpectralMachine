@@ -235,7 +235,7 @@ def train(learnFile, testFile):
         totA = A
         totCl = Cl
 
-    with open(dP.spectral_range, 'ab') as f:
+    with open(dP.spectral_range, 'wb') as f:
         pickle.dump(En, f)
 
     print("  Total number of points per data:",En.size)
@@ -271,7 +271,7 @@ def train(learnFile, testFile):
             print("  Number unique classes (total): ", np.unique(totCl).size)
 
         print("\n  Label Encoder saved in:", dP.model_le,"\n")
-        with open(dP.model_le, 'ab') as f:
+        with open(dP.model_le, 'wb') as f:
             pickle.dump(le, f)
 
         #totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
@@ -431,10 +431,6 @@ def train(learnFile, testFile):
         accuracy = np.asarray(log.history['accuracy'])
         val_acc = np.asarray(log.history['val_accuracy'])
         print("  Number unique classes (training): ", np.unique(Cl).size)
-        if testFile is not None:
-            Cl2_test = le.transform(Cl_test)
-            print("  Number unique classes (validation):", np.unique(Cl_test).size)
-            print("  Number unique classes (total): ", np.unique(totCl).size)
         printParam()
         print('\n  ========================================================')
         print('  \033[1m MLP - Classifier \033[0m - Training Summary')
@@ -672,8 +668,6 @@ def convertTflite(learnFile):
     dP.useTFlitePred = False
     dP.TFliteRuntime = False
     dP.runCoralEdge = False
-    if checkTFVersion('2.0.0'):
-        tf.compat.v1.enable_eager_execution()
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
     model = loadModel(dP)
