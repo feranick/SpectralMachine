@@ -259,7 +259,7 @@ def train(learnFile, testFile, flag):
         totCl = Cl
 
     if flag == False:
-        with open(dP.spectral_range, 'ab') as f:
+        with open(dP.spectral_range, 'w') as f:
             pickle.dump(En, f)
 
     print("  Total number of points per data:",En.size)
@@ -296,7 +296,7 @@ def train(learnFile, testFile, flag):
 
         if flag == False:
             print("\n  Label Encoder saved in:", dP.model_le,"\n")
-            with open(dP.model_le, 'ab') as f:
+            with open(dP.model_le, 'w') as f:
                 pickle.dump(le, f)
 
         #totCl2 = keras.utils.to_categorical(totCl2, num_classes=np.unique(totCl).size)
