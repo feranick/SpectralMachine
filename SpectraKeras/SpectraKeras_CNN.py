@@ -628,15 +628,17 @@ def batchPredict(folder):
 
     predictions = np.zeros((0,0))
     fileName = []
+    predictions_list = []
     for file in glob.glob(folder+'/*.txt'):
         R, good = readTestFile(file, EnN, dP)
         if good:
             R = formatForCNN(R)
             try:
-                predictions = np.vstack((predictions,getPredictions(R, model, dP)[0].flatten()))
+                predictions_list.append(getPredictions(R, model, dP)[0].flatten())
             except:
-                predictions = np.array([getPredictions(R, model,dP)[0].flatten()])
+                predictions_list = [np.array([getPredictions(R, model,dP)[0].flatten()])]
             fileName.append(file)
+    predictions = np.array(predictions_list)
 
     if dP.regressor:
         summaryFile = np.array([['SpectraKeras_CNN','Regressor','',],['File name','Prediction','']])
