@@ -1,8 +1,8 @@
 #!/bin/bash -l
 #SBATCH -C gpu
 #SBATCH -t 18:00:00
-#SBATCH -J $1
-#SBATCH -o $1.o%j
+#SBATCH -J 20250406
+#SBATCH -o %x.o%j
 #SBATCH -A m526
 #SBATCH -N 1
 #SBATCH -c 32
@@ -14,13 +14,12 @@
 #SBATCH --mail-type=ALL
 
 exe=/global/homes/f/feranick/ml/train_rruff.sh
-input="20250406"
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export OMP_PROC_BIND=spread
 export OMP_PLACES=threads
 
-command="srun -n 4 --cpu-bind=cores --gpu-bind=none train_rruff.sh $1"
+command="srun -n 4 --cpu-bind=cores --gpu-bind=none train_rruff.sh $SLURM_JOB_NAME"
 
 echo $command
 
