@@ -743,8 +743,7 @@ def convertTflite(learnFile):
     dP.useTFlitePred = False
     dP.TFliteRuntime = False
     dP.runCoralEdge = False
-    if checkTFVersion('2.0.0'):
-        tf.compat.v1.enable_eager_execution()
+    
     learnFileRoot = os.path.splitext(learnFile)[0]
     En, A, Cl = readLearnFile(learnFile, dP)
     model = loadModel(dP)
