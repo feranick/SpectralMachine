@@ -4,7 +4,7 @@
 *********************************************************
 * Create Random Cross Validation Datasets from threshold
 * Based on high frequency datapoints
-* version: v2023.12.22.1
+* version: v2025.04.11.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 *********************************************************
 '''
@@ -62,7 +62,10 @@ def selectHFdata(A, Cl, HFthreshold, totNumPoints):
     print(" Classes with members with more than {0:.0f} elements: {1:.0f}".format(HFthreshold,uHFCl.shape[0]))
     print(" Number of classes to be selected for validation: ", totNumPoints)
     
-    if uHFCl.shape[0] < totNumPoints:
+    if uHFCl.shape[0] == 0:
+        print("\n \033[1mThere are no classes with the required number of datapoints. Aborting. \033[0m\n")
+        sys.exit()
+    elif uHFCl.shape[0] < totNumPoints:
         print("\n \033[1mNot enough classes to select {0:.0f} classes for validation\033[0m.\n  Setting max number of classes to {0:.0f}.".format(uHFCl.shape[0]))
         totNumPoints = uHFCl.shape[0]
         
