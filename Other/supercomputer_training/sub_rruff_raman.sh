@@ -13,7 +13,7 @@
 #SBATCH --mail-user=ferralis@mit.edu
 #SBATCH --mail-type=ALL
 
-exe=/global/homes/f/feranick/ml/train_rruff.sh
+exe=/global/homes/f/feranick/ml/train_rruff_raman.sh
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export OMP_PROC_BIND=spread
