@@ -42,13 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
         if ($num_files == 1) {
             //$command = "cd " . $folder . "; SpectraKeras_CNN -p $tmpfile 2>&1";
-            $command = "cd " . $folder . "; python3 ../SpectraKeras_CNN.py -p $tmpfile 2>&1";
+            $command = "cd " . $folder . "; export XLA_FLAGS=--xla_gpu_cuda_data_dir=/usr/local/cuda-12.5; python3 ../SpectraKeras_CNN.py -p $tmpfile 2>&1";
             $output = shell_exec($command);
         }
         else {
             $f = json_encode($files);
             $fn = json_encode($files_names);
-            $command = "cd " . $folder . "; python3 ../SpectraKeras_CNN.py -b $f $fn 2>&1";
+            $command = "cd " . $folder . "; export XLA_FLAGS=--xla_gpu_cuda_data_dir=/usr/local/cuda-12.5; python3 ../SpectraKeras_CNN.py -b $f $fn 2>&1";
             $output = shell_exec($command);
         }
 
