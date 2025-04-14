@@ -5,7 +5,7 @@
 * GenericDataMaker
 * Adds spectra to single file for classification
 * File must be in TXT format
-* version: v2024.10.07.1
+* version: v2025.04.13.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 **************************************************
 '''
@@ -13,7 +13,7 @@ print(__doc__)
 
 import numpy as np
 import sys, os.path, h5py
-from datetime import datetime, date
+from datetime import datetime
 
 #**********************************************
 # User customizable Parameters
@@ -57,13 +57,13 @@ def main():
         enStep = 0.5
         threshold = 0
     else:
-        enInit = sys.argv[2]
-        enFin =  sys.argv[3]
-        enStep = sys.argv[4]
+        enInit = float(sys.argv[2])
+        enFin =  float(sys.argv[3])
+        enStep = float(sys.argv[4])
         if len(sys.argv) < 6:
             threshold = 0
         else:
-            threshold = sys.argv[5]
+            threshold = float(sys.argv[5])
 
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
@@ -104,11 +104,11 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     else:
         print('\n\033[1m' + ' Train data file not found. Creating...' + '\033[0m')
         EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=float)
-        M = np.append([0], EnT)
+        M = np.array([np.append([0], EnT)])
 
     # process sample data
     for ind, f in enumerate(sorted(os.listdir("."))):
-        if (f != learnFile and os.path.splitext(f)[-1] == defParam.extSampleFiles):
+        if os.path.isfile(f) and f != learnFile and os.path.splitext(f)[-1] == defParam.extSampleFiles:
             try:
                 index = compound.index(f.partition(defParam.filePartition)[0])
             except:
@@ -152,7 +152,6 @@ def makeFile(sampleFile, EnT, M, param, threshold):
             if(En.size == 0):
                 print('\n Empty file \n' )
                 return False, M
-        with open(sampleFile, 'r') as f:
             R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = defParam.delimiter, skiprows = defParam.skipRows)
         R[R<float(threshold)*np.amax(R)/100] = 0
         print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))

@@ -5,7 +5,7 @@
 * XmuDataMaker
 * Adds spectra to single file for classification
 * File must be in Xmu
-* version: v2024.10.07.1
+* version: v2025.04.13.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 *************************************************
 '''
@@ -13,7 +13,7 @@ print(__doc__)
 
 import numpy as np
 import sys, os.path, h5py
-from datetime import datetime, date
+from datetime import datetime
 
 #**********************************************
 ''' main '''
@@ -39,13 +39,13 @@ def main():
         enFin = 337
         enStep = 0.3
     else:
-        enInit = sys.argv[2]
-        enFin =  sys.argv[3]
-        enStep = sys.argv[4]
+        enInit = float(sys.argv[2])
+        enFin =  float(sys.argv[3])
+        enStep = float(sys.argv[4])
         if len(sys.argv) < 6:
             threshold = 0
         else:
-            threshold = sys.argv[5]
+            threshold = float(sys.argv[5])
 
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
@@ -84,10 +84,10 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     else:
         print('\n\033[1m' + ' Train data file not found. Creating...' + '\033[0m')
         EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=float)
-        M = np.append([0], EnT)
+        M = np.array([np.append([0], EnT)])
 
     for ind, f in enumerate(sorted(os.listdir("."))):
-        if (f != learnFile and os.path.splitext(f)[-1] == ".xmu"):
+        if os.path.isfile(f) and f != learnFile and os.path.splitext(f)[-1] == ".xmu":
             try:
                 index = compound.index(f.partition("_")[0])
             except:
@@ -117,7 +117,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     if defParam.saveFormatClass == True:
         tfclass_filename = learnFileRoot + '.tfclass'
         print(' Saving class file...\n')
-        with open(tfclass_filename, 'ab') as f:
+        with open(tfclass_filename, 'w') as f:
             np.savetxt(f, Cl2, delimiter='\t', fmt='%10.6f')
 
 #**********************************************
