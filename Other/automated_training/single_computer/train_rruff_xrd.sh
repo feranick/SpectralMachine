@@ -41,6 +41,9 @@ cd $1
 "${base}RruffDataMaker.py" $masterFile $enInit1 $enFin1 $enStep1
 mv $masterFile* ..
 cd ..
+rm -r $1
+mkdir raw
+mv *.zip raw
 "${base}ConvMineralListCSVtoH5.py" *.csv
 "${base}NormLearnFile.py" $masterFile".h5"
 "${base}ThresholdCrossValidMaker.py" $masterFile"_norm1.h5" $hfsel1 $val1
