@@ -19,15 +19,9 @@ import sys, os.path
 #************************************
 def main():
     
-    if len(sys.argv) < 2:
-        print(' Usage:\n')
-        print(' (Single File): python3 ReadRruff.py <folder> <RRuFF filename>\n')
-        print(' (Batch conversion): python3 ReadRruff.py <folder>\n')
-        print(' <folder> Directory where original files are located\n')
-        print(' Requires python 3.x. Not compatible with python 2.x\n')
-        return
-    
-    if len(sys.argv) < 3:
+    if len(sys.argv) == 3:
+        saveFile(sys.argv[1],sys.argv[2],0)
+    elif len(sys.argv) == 2:
         try:
             os.mkdir(sys.argv[1] + '_ASCII/')
         except:
@@ -37,8 +31,15 @@ def main():
             filepath = os.path.join(sys.argv[1], f)
             if os.path.isfile(filepath) and (root[-1] == ".txt") and (root[0][-5:] != "ASCII"):
                 saveFile(sys.argv[1],f,1)
-    else:
-        saveFile(sys.argv[1],sys.argv[2],0)
+    elif len(sys.argv) < 2 or if len(sys.argv) > 3:
+        print(' Usage:\n')
+        print(' (Single File): python3 ReadRruff.py <folder> <RRuFF filename>\n')
+        print(' (Batch conversion): python3 ReadRruff.py <folder>\n')
+        print(' <folder> Directory where original files are located\n')
+        print(' Requires python 3.x. Not compatible with python 2.x\n')
+        return
+    
+        
 
     print(' Done!\n')
     
