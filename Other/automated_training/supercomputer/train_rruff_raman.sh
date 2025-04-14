@@ -22,7 +22,7 @@ export XLA_FLAGS=--xla_gpu_cuda_data_dir=/global/homes/f/feranick/.conda/envs/fe
 module load python
 conda create -y --name fera_env
 conda activate fera_env
-conda install -y tensorflow numpy pandas pydot graphviz scipy tf-keras keras
+conda install -y tensorflow numpy pandas pydot graphviz scipy tf-keras keras h5py
 
 folder="rruff-raman_"$1
 mkdir $folder
