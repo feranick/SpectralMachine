@@ -5,7 +5,7 @@
 * RRuffDataMaker
 * Adds spectra to single file for classification
 * File must be in RRuFF
-* version: v2024.10.07.1
+* version: v2025.04.13.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 *************************************************
 '''
@@ -13,7 +13,7 @@ print(__doc__)
 
 import numpy as np
 import sys, os.path, h5py
-from datetime import datetime, date
+from datetime import datetime
 
 #**********************************************
 ''' main '''
@@ -38,13 +38,13 @@ def main():
         enFin = 1500
         enStep = 0.5
     else:
-        enInit = sys.argv[2]
-        enFin =  sys.argv[3]
-        enStep = sys.argv[4]
+        enInit = float(sys.argv[2])
+        enFin =  float(sys.argv[3])
+        enStep = float(sys.argv[4])
         if len(sys.argv) < 6:
             threshold = 0
         else:
-            threshold = sys.argv[5]
+            threshold = float(sys.argv[5])
 
     if len(sys.argv) == 7:
         defParam.useMinForBoundary = True
@@ -85,11 +85,11 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     else:
         print('\n\033[1m' + ' Train data file not found. Creating...' + '\033[0m')
         EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=float)
-        M = np.append([0], EnT)
+        M = np.array([np.append([0], EnT)])
 
     # process sample data
     for ind, f in enumerate(sorted(os.listdir("."))):
-        if (f != learnFile and os.path.splitext(f)[-1] == ".txt"):
+        if os.path.isfile(f) and f != learnFile and os.path.splitext(f)[-1] == ".txt":
             try:
                 index = compound.index(f.partition("_")[0])
             except:
@@ -119,7 +119,7 @@ def processMultiFile(learnFile, enInit, enFin, enStep, threshold):
     if defParam.saveFormatClass == True:
         tfclass_filename = learnFileRoot + '.tfclass'
         print(' Saving class file...\n')
-        with open(tfclass_filename, 'ab') as f:
+        with open(tfclass_filename, 'w') as f:
             np.savetxt(f, Cl2, delimiter='\t', fmt='%10.6f')
 
 #**********************************************
@@ -133,7 +133,6 @@ def makeFile(sampleFile, EnT, M, param, threshold):
             if(En.size == 0):
                 print('\n Empty file \n' )
                 return False, M
-        with open(sampleFile, 'r') as f:
             R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = ',', skiprows = 10)
         R[R<float(threshold)*np.amax(R)/100] = 0
         print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
@@ -169,7 +168,7 @@ def saveLearningFile(M, learnFileRoot):
     if defParam.saveAsTxt == True:
         learnFile = learnFileRoot+'.txt'
         print(" Saving new training file (txt) in:", learnFile+"\n")
-        with open(learnFile, 'wb') as f:
+        with open(learnFile, 'w') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
     else:
         learnFile = learnFileRoot+'.h5'
