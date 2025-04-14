@@ -4,7 +4,7 @@
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
 * Simplified web version
-* v2025.04.10.1
+* v2025.04.14.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -116,7 +116,7 @@ class Conf():
             self.l_rdecay = self.conf.getfloat('Parameters','l_rdecay')
             self.CL_filter = ast.literal_eval(self.SKPar['CL_filter'])
             self.CL_size = ast.literal_eval(self.SKPar['CL_size'])
-            self.max_pooling = ast.literal_eval(self.SKDef['max_pooling'])
+            self.max_pooling = ast.literal_eval(self.SKPar['max_pooling'])
             self.dropCNN = ast.literal_eval(self.SKPar['dropCNN'])
             self.HL = ast.literal_eval(self.SKPar['HL'])
             self.dropFCL = self.conf.getfloat('Parameters','dropFCL')

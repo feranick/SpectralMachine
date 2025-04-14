@@ -2,7 +2,7 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* v2025.04.10.1
+* v2025.04.14.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -151,7 +151,10 @@ def getPredictions(R, model, dP):
     else:
         predictions = model.predict(R)
         
-    #probabilities = scipy.special.softmax(predictions.astype('double'))
+    if dP.regressor:
+        probabilities = 0
+    else:
+        probabilities = scipy.special.softmax(predictions.astype('double'))
     return predictions, probabilities
 
 #************************************

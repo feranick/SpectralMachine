@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_MLP Classifier and Regressor
-* v2025.04.10.1
+* v2025.04.14.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
