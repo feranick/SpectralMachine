@@ -11,12 +11,12 @@
 base="/global/homes/f/feranick/exec/SpectraKeras/"
 
 version=$1
-masterFile="AAA-powder-"$version
-enInit=5
-enFin1=90
-enStep1=0.02
-hfsel1=10
-val1=22
+masterFile="AAA-"$version
+enInit1=110
+enFin1=1200
+enStep1=1
+hfsel1=20
+val1=30
 
 export XLA_FLAGS=--xla_gpu_cuda_data_dir=/global/homes/f/feranick/.conda/envs/fera_env
 module load python
@@ -24,15 +24,19 @@ conda create -y --name fera_env
 conda activate fera_env
 conda install -y tensorflow numpy pandas pydot graphviz scipy tf-keras keras
 
-folder="rruff-xrd_"$1
+folder="rruff-raman_"$1
 mkdir $folder
 cd $folder
-    wget https://rruff.info/zipped_data_files/powder/DIF.zip
-    wget https://rruff.info/zipped_data_files/powder/Reference_PDF.zip
-    wget https://rruff.info/zipped_data_files/powder/Refinement_Data.zip
-    wget https://rruff.info/zipped_data_files/powder/Refinement_Output_Data.zip
-    wget https://rruff.info/zipped_data_files/powder/XY_Processed.zip
-    https://rruff.info/zipped_data_files/powder/XY_RAW.zip
+    wget https://rruff.info/zipped_data_files/raman/LR-Raman.zip
+    wget https://rruff.info/zipped_data_files/raman/excellent_oriented.zip
+    wget https://rruff.info/zipped_data_files/raman/excellent_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/fair_oriented.zip
+    wget https://rruff.info/zipped_data_files/raman/fair_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/ignore_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/poor_oriented.zip
+    wget https://rruff.info/zipped_data_files/raman/poor_unoriented.zip
+    wget https://rruff.info/zipped_data_files/raman/unrated_oriented.zip
+    wget https://rruff.info/zipped_data_files/raman/unrated_unoriented.zip
 echo " Create folder: "$1
 mkdir $1
 pathfiles=./
