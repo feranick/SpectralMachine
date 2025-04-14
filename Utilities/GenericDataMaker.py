@@ -148,11 +148,13 @@ def makeFile(sampleFile, EnT, M, param, threshold):
     print('\n Process file in class #: ' + str(param))
     try:
         with open(sampleFile, 'r') as f:
-            En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = defParam.delimiter, skiprows = defParam.skipRows)
+            M_tmp = np.loadtxt(f, unpack = True, usecols=range(0,2), delimiter = ',', skiprows = 10)
+            En = M_tmp[0]
+            R = M_tmp[1]
             if(En.size == 0):
                 print('\n Empty file \n' )
                 return False, M
-            R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = defParam.delimiter, skiprows = defParam.skipRows)
+                
         R[R<float(threshold)*np.amax(R)/100] = 0
         print(' Number of points in \"' + sampleFile + '\": ' + str(En.shape[0]))
         print(' Setting datapoints below ', threshold, '% of max (',str(np.amax(R)),')')
