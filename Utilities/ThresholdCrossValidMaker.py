@@ -76,9 +76,7 @@ def selectHFdata(A, Cl, HFthreshold, totNumPoints):
         listInd.append(np.random.choice(np.where(Cl==i)[0],replace=False))
         #listInd = np.append(listInd,np.random.choice(np.where(Cl==i)[0],replace=False)).tolist()
         
-    print(listInd)
     listnp = np.array(listInd, dtype=int)
-    print(listnp)
 
     A_train = np.delete(A,listInd,0)
     Cl_train = np.delete(Cl,listInd)
