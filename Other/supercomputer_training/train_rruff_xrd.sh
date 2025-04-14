@@ -44,7 +44,7 @@ for i in $( ls $pathfiles );
    done
 
 cd $1
-"${base}RruffDataMaker.py" $masterFile enInit1 enFin1 enStep1
+"${base}RruffDataMaker.py" $masterFile $enInit1 $enFin1 $enStep1
 mv $masterFile* ..
 cd ..
 "${base}ConvMineralListCSVtoH5.py" *.csv
