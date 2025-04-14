@@ -5,14 +5,14 @@
 * ReadRruFF
 * Convert RRuFFspectra to ASCII
 * File must be in RRuFF
-* version: v2023.12.15.1
+* version: v2025.04.13.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
 print(__doc__)
 
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path
 
 #************************************
 # Main
@@ -34,7 +34,8 @@ def main():
             pass
         for ind, f in enumerate(os.listdir(sys.argv[1])):
             root=os.path.splitext(f)
-            if (root[-1] == ".txt") and (root[0][-5:] != "ASCII"):
+            filepath = os.path.join(sys.argv[1], f)
+            if os.path.isfile(filepath) and (root[-1] == ".txt") and (root[0][-5:] != "ASCII"):
                 saveFile(sys.argv[1],f,1)
     else:
         saveFile(sys.argv[1],sys.argv[2],0)
@@ -53,7 +54,7 @@ def saveFile(folder, file, type):
             newFile = folder + '_ASCII/' + os.path.splitext(file)[0] + '_ASCII.txt'
         else:
             newFile = folder + '/' + os.path.splitext(file)[0] + '_ASCII.txt'
-        with open(newFile, 'ab') as f:
+        with open(newFile, 'w') as f:
             np.savetxt(f, M, delimiter='\t', fmt='%10.6f')
     except:
         print('\033[1m ' + str(sys.argv[1]) + ' file not found \n' + '\033[0m')
