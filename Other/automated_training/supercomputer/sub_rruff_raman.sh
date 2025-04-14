@@ -19,7 +19,7 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export OMP_PROC_BIND=spread
 export OMP_PLACES=threads
 
-command="srun -n 4 --cpu-bind=cores --gpu-bind=none train_rruff.sh $SLURM_JOB_NAME"
+command="srun -n 4 --cpu-bind=cores --gpu-bind=none train_rruff_raman.sh $SLURM_JOB_NAME"
 
 echo $command
 

@@ -16,7 +16,7 @@ enInit1=110
 enFin1=1200
 enStep1=1
 hfsel1=20
-val1=30
+val1=37
 
 export XLA_FLAGS=--xla_gpu_cuda_data_dir=/global/homes/f/feranick/.conda/envs/fera_env
 module load python
