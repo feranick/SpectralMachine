@@ -26,7 +26,7 @@ cd $folder
     wget https://rruff.info/zipped_data_files/powder/Refinement_Data.zip
     wget https://rruff.info/zipped_data_files/powder/Refinement_Output_Data.zip
     wget https://rruff.info/zipped_data_files/powder/XY_Processed.zip
-    https://rruff.info/zipped_data_files/powder/XY_RAW.zip
+    wget https://rruff.info/zipped_data_files/powder/XY_RAW.zip
 echo " Create folder: "$1
 mkdir $1
 pathfiles=./
