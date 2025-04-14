@@ -11,7 +11,7 @@
 print(__doc__)
 
 import numpy as np
-import sys, os, csv, h5py
+import sys, os, h5py
 
 class defParam:
     saveAsTxt = False
@@ -37,7 +37,7 @@ def main():
         newTrainFile = newTrainFile + '.h5'
         newTestFile = newTestFile + '.h5'
         
-    if os.path.exists(newTrainFile) or os.path.exists(newTestFile) == True:
+    if os.path.exists(newTrainFile) or os.path.exists(newTestFile):
         print(" Training or cross validation test files exist. Exiting.\n")
         return
     
@@ -69,15 +69,21 @@ def selectHFdata(A, Cl, HFthreshold, totNumPoints):
         print("\n \033[1mNot enough classes to select {0:.0f} classes for validation\033[0m.\n  Setting max number of classes to {0:.0f}.".format(uHFCl.shape[0]))
         totNumPoints = uHFCl.shape[0]
         
-    list = np.array([]).astype(int)
-    listSelHF = np.random.choice(uHFCl, int(totNumPoints), replace=False)
+    #listInd = np.array([]).astype(int)
+    listInd = []
+    listSelHF = np.random.choice(uHFCl, totNumPoints, replace=False)
     for i in listSelHF:
-        list = np.append(list,np.random.choice(np.where(np.in1d(Cl,i) == True)[0],replace=False)).tolist()
+        listInd.append(np.random.choice(np.where(Cl==i)[0],replace=False))
+        #listInd = np.append(listInd,np.random.choice(np.where(Cl==i)[0],replace=False)).tolist()
+        
+    print(listInd)
+    listnp = np.array(listInd, dtype=int)
+    print(listnp)
 
-    A_train = np.delete(A,list,0)
-    Cl_train = np.delete(Cl,list)
-    A_cv = A[list]
-    Cl_cv = Cl[list]
+    A_train = np.delete(A,listInd,0)
+    Cl_train = np.delete(Cl,listInd)
+    A_cv = A[listInd]
+    Cl_cv = Cl[listInd]
     
     print("\n Generated validation set with {0:.0f} members, each from a class with at least {1:.0f} elements.".format(listSelHF.shape[0],uHFCl.shape[0]))
 
@@ -111,7 +117,7 @@ def readLearnFile(learnFile):
 def writeFile(File, En, A, Cl):
     print(' Number of datapoints:', str(A.shape[0]))
     newMatrix = np.append([0], En).reshape(1,-1)
-    temp = np.hstack((Cl[np.newaxis].T, A))
+    temp = np.hstack((Cl.reshape(-1,1), A))
     newMatrix = np.vstack((newMatrix, temp))
 
     if defParam.saveAsTxt == True:
