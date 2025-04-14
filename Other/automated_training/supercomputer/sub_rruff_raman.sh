@@ -1,7 +1,7 @@
 #!/bin/bash -l
 #SBATCH -C gpu
 #SBATCH -t 18:00:00
-#SBATCH -J 20250406
+#SBATCH -J 20250413r
 #SBATCH -o %x.o%j
 #SBATCH -A m526
 #SBATCH -N 1
