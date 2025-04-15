@@ -21,8 +21,8 @@ import matplotlib.pyplot as plt
 #************************************
 class defParam:
     saveAsTxt = True
-    saveAsASCII = True
-    plotData = False
+    saveAsASCII = False
+    plotData = True
 
 def main():
     if len(sys.argv) < 4:
