@@ -436,7 +436,7 @@ def plotActivationsPredictions(R, model):
 # Lists the program usage
 #************************************
 def usage():
-    print('\n Error. Please try again later.\n')
+    print('\n Please make sure you have chosen at least one file.\n')
 
 #************************************
 # Main initialization routine
