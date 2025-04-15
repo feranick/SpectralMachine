@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2025.04.14.1
+* v2025.04.15.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -589,10 +589,10 @@ def predict(testFile):
             for i in range(len(predictions[0])-1):
                 if predictions[0][i]>0.01:
                     if dP.useTFlitePred:
-                        print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(predValue)),
+                        print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(le.inverse_transform(i)[0])),
                             int(le.inverse_transform(i)[0]), 100*predictions[0][i]/255))
                     else:
-                        print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(predValue)),
+                        print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(le.inverse_transform(i)[0])),
                             int(le.inverse_transform(i)[0]), 100*predictions[0][i]))
                     
             print('\033[1m\n  {0:s} \033[0m(Class: {1:d}, probability = {2:.2f}%)\n'.format(getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
