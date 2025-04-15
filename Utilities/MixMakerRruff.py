@@ -23,6 +23,7 @@ class defParam:
     saveAsTxt = True
     saveAsASCII = True
     plotData = True
+    realTimePlotData = False
 
 def main():
     if len(sys.argv) < 4:
@@ -98,6 +99,8 @@ def main():
                     plt.plot(EnT,R,label=label)
         except:
             print("\n Skipping: ",file)
+            
+    mixR = mixR/np.amax(mixR)
 
     try:
         newR = np.transpose(np.vstack((EnT, mixR)))
@@ -108,12 +111,13 @@ def main():
     saveMixFile(newR, mixFile)
 
     if defParam.plotData == True:
-        plt.plot(EnT, mixR, linewidth=3, label=r'Mixture')
+        plt.plot(EnT, mixR, linewidth=3, label=r'Mixture', zorder=1)
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Raman Intensity [arb. units]')
         plt.legend(loc='upper right')
         plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
-        #plt.show()
+        if defParam.realTimePlotData:
+            plt.show()
         plt.close()
 
 #***************************************
