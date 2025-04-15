@@ -161,6 +161,14 @@ Training data
 =============
 We do not provide advanced training sets, some of which can be found online. We only provide a simple Raman dataset mainly for testing purposes: it is loosely based on 633nm data from Ferralis et al. [Carbon 108 (2016) 440](http://dx.doi.org/10.1016/j.carbon.2016.07.039).
 
+Note on GPU
+=============
+When training on systems with multiple GPUs, several parallel training sessins can be carried out by setting the appropriate environmental variable. In case the GPU available is 1:
+
+```
+CUDA_VISIBLE_DEVICES=1  SpectraKeras_CNN -t TrainingFile ValidationFile
+```
+
 More on Machine Learning tools used
 ====================================
 
