@@ -12,8 +12,8 @@
 print(__doc__)
 
 import numpy as np
-import sys, os.path, glob, csv, re, h5py
-from datetime import datetime, date
+import sys, os.path, re, h5py
+from datetime import datetime
 import matplotlib.pyplot as plt
 
 #************************************
