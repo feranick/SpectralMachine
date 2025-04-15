@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 '''
 ***********************************************
-* ReadRruFF
+* ReadXmu
 * Convert Xanes Xmu to ASCII
 * File must be in xmu fomat
-* version: v2025.04.14.1
+* version: v2025.04.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
@@ -18,9 +18,10 @@ import sys, os.path
 # Main
 #************************************
 def main():
-    if len(sys.argv) == 2:
+    if len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
-            saveFile(sys.argv[1],"",0)
+            for ind, f in enumerate(sys.argv[1:]):
+                saveFile(f,"")
         else:
             asciiPath = os.path.join(sys.argv[1], 'ASCII')
             if not os.path.isdir(asciiPath):
@@ -29,12 +30,12 @@ def main():
                 root=os.path.splitext(f)
                 filePath = os.path.join(sys.argv[1], f)
                 if os.path.isfile(filePath) and (root[-1] == ".txt") and (root[0][-5:] != "ASCII"):
-                    saveFile(f,asciiPath,1)
+                    saveFile(f,asciiPath)
     else:
         print(' Usage:\n')
-        print(' (Single File): python3 ReadXmu.py <xmu filename>\n')
+        print(' (Single File): python3 ReadXmu.py <Xmu filename1> <Xmu filename2>, <Xmu filename3> ...\n')
         print(' (Batch conversion): python3 ReadXmu.py <folder>\n')
-        print(' <folder> Directory where original files are located\n')
+        print(' <folder> Directory where original Xmu files are located\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     
@@ -43,7 +44,7 @@ def main():
 #************************************
 # Save File
 #************************************
-def saveFile(file, folder, type):
+def saveFile(file, folder):
     try:
         with open(file, 'r') as f:
             #M = np.loadtxt(f, skiprows = 40, unpack=True)
