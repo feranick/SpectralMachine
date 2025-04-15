@@ -5,7 +5,7 @@
 * MixMakerRruff
 * Mix different rruff files into a ASCII
 * Files must be in RRuFF
-* version: v2023.12.15.1
+* version: v2025.04.15.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 #************************************
 class defParam:
     saveAsTxt = True
-    saveAsASCII = False
+    saveAsASCII = True
     plotData = False
 
 def main():
@@ -30,14 +30,14 @@ def main():
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     else:
-        enInit = sys.argv[1]
-        enFin =  sys.argv[2]
-        enStep = sys.argv[3]
+        enInit = float(sys.argv[1])
+        enFin =  float(sys.argv[2])
+        enStep = float(sys.argv[3])
         if len(sys.argv)<5:
             print("No threshold defined, setting to zero")
             threshold = 0
         else:
-            threshold = sys.argv[4]
+            threshold = float(sys.argv[4])
             print("Setting threshold to:", threshold,"%")
 
     rootMixFile = "mixture"
@@ -48,8 +48,8 @@ def main():
     plt.figure(num=plotFile)
 
     with open(summaryMixFile, "a") as sum_file:
-                    sum_file.write('Classification started: '+dateTimeStamp+\
-                    ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+"\n")
+        sum_file.write('Classification started: '+dateTimeStamp+\
+                ",enInit="+str(enInit)+",enFin="+str(enFin)+",enStep="+str(enStep)+"\n")
     index = 0
     first = True
 
@@ -57,12 +57,12 @@ def main():
         try:
             if file[:7] != "mixture" and os.path.splitext(file)[-1] == ".txt" and file[-10:] != "_ASCII.txt":
                 with open(file, 'r') as f:
-                    En = np.loadtxt(f, unpack = True, usecols=range(0,1), delimiter = ',', skiprows = 10)
-                with open(file, 'r') as f:
-                    R = np.loadtxt(f, unpack = True, usecols=range(1,2), delimiter = ',', skiprows = 10)
+                    M_tmp = np.loadtxt(f, unpack = True, usecols=range(0,2), delimiter = ',', skiprows = 10)
+                    En = M_tmp[0]
+                    R = M_tmp[1]
                     
                 R[R<float(threshold)*np.amax(R)/100] = 0
-                print('\n' + file + '\n File OK, converting to ASCII...')
+                print('\n' + file + '\n File OK, processing...')
 
                 EnT = np.arange(float(enInit), float(enFin), float(enStep), dtype=float)
             
@@ -138,9 +138,9 @@ def saveAsASCII(EnT, R, file):
     try:
         convertFile = os.path.splitext(file)[0] + '_ASCII.txt'
         convertR = np.transpose(np.vstack((EnT, R)))
-        with open(convertFile, 'ab') as f:
+        with open(convertFile, 'w') as f:
             np.savetxt(f, convertR, delimiter='\t', fmt='%10.6f')
-        print(" Saving spectra as ASCII in: "+file)
+        print(" Saving spectra as ASCII in: "+convertFile)
     except:
         print(" Saving spectra as ASCII failed")
 
