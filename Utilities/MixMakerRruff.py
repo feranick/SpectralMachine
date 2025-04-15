@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 #************************************
 class defParam:
     saveAsTxt = True
-    saveAsASCII = False
+    saveAsASCII = True
     plotData = True
 
 def main():
@@ -113,7 +113,7 @@ def main():
         plt.ylabel('Raman Intensity [arb. units]')
         plt.legend(loc='upper right')
         plt.savefig(plotFile+".png", dpi = 160, format = 'png')  # Save plot
-        plt.show()
+        #plt.show()
         plt.close()
 
 #***************************************
