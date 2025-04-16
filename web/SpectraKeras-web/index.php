@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <h2>SpectraKeras: Identify  minerals from spectra</h2>
 
-    Upload one or more ASCII files with the Raman spectra or an XRD scan of an uknown mineral. A Convolutional neural netowrk machine learning algorithm trained on the <a href="https://rruff.info" target="_blank" rel="noopener noreferrer">Rruff library</a> will predict the type of mineral.
+    Upload one or more ASCII files with Raman spectra or an XRD scans of unknown minerals. A convolutional neural network machine learning algorithm trained on the <a href="https://rruff.info" target="_blank" rel="noopener noreferrer">Rruff library</a> will predict the type of mineral.
     <br>Files are discarded after prediction. <a href="https://github.com/feranick/SpectralMachine" target="_blank" rel="noopener noreferrer">SpectraKeras is open-source and code and python scripts are available on Github</a>.
     <br><br> Sample input files can be found here for <a href="ml-raman/Abelsonite_raman.txt">raman</a> or <a href="ml-xrd/Albite_xrd.txt">powder-xrd</a>.
     <br><br>To get names of the minerals corresponding to the prediction values, use the link to the ML models below.
