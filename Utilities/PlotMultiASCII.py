@@ -5,14 +5,14 @@
 * PlotMultiASCII
 * Plot Multiple ASCII Data
 * File must be in ASCII
-* version: v2023.12.15.1
+* version: v2025.04.16.1
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************
 '''
 print(__doc__)
 
 import numpy as np
-import sys, os.path, getopt, glob, csv
+import sys, os.path
 import matplotlib.pyplot as plt
 
 #************************************
@@ -35,6 +35,8 @@ def main():
                 M[:,1] = M[:,1]/np.max(M[:,1])
             
                 print(" Plotting:", file)
+            
+                #label = re.search('(.+?)__',file).group(1)
                 plt.plot(M[:,0],M[:,1],label=file)
             else:
                 pass
@@ -44,8 +46,8 @@ def main():
     
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Raman Intensity [arb. units]')
-    #plt.legend()
-    #plt.savefig("MultiASCII" + '.png', dpi = 160, format = 'png')  # Save plot
+    plt.legend(loc='upper right')
+    plt.savefig("MultiASCII" + '.png', dpi = 160, format = 'png')  # Save plot
     plt.show()
 
 #************************************
