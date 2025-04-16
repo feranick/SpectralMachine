@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-
+    <link rel="stylesheet" href="style.css">
     <title>SpectraKeras</title>
     <script type="text/javascript" src="SpectraKeras.js" ></script>
   </head>
@@ -106,10 +106,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <br><br> Sample input files can be found here for <a href="ml-raman/Abelsonite_raman.txt">raman</a> or <a href="ml-xrd/Albite_xrd.txt">powder-xrd</a>.
     <br><br>To get names of the minerals corresponding to the prediction values, use the link to the ML models below.
     <br>Current Raman ML model: <a href="ml-raman/AAA-20250413r_2025-04-14_11-42-21.csv">AAA-20250413_norm1_train-cv_hfsel20_val37 CNN_2-15_b4_keras3 </a>
-    <br>Current XRD ML model: <a href="ml-xrd/AAA-powder-20250225_2025-02-25_16-07-01.csv">AAA-Powder_20250225_norm1_train-cv_hfsel10_val22 CNN_powder_2-15_b4</a>
+    <br>Current XRD ML model: <a href="ml-xrd/AAA-powder-20250413x_2025-04-14_16-53-28.csv">AAA-Powder-20250413_norm1_train-cv_hfsel10_val22 CNN_powder_2-15_b4</a><br>
 
-    <form name="SpectraKeras" method="post" enctype="multipart/form-data">
-      <br><br><input type="file" name="files[]" multiple />
+    <br><form name="SpectraKeras" method="post" enctype="multipart/form-data">
+      <input type="file" name="files[]" multiple />
       <input type="submit" value="Identify Mineral via ML" name="submit" />
       <br><br><select name="mode" id="mode" onchange="selectModel()">
             <option>Raman Spectroscopy</option>
