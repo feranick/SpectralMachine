@@ -47,15 +47,15 @@ button {
 }
 
 /* Output Area Styling */
-/*#out {
+#out {
   margin-top: 20px;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
   overflow-y: scroll;
-  height: 200px;
+  height: 400px;
 }
-*/
+
 /* Links Styling */
 a {
   color: #007bff;
