@@ -5,13 +5,24 @@ body {
 }
 
 /* Form Styling */
-form {
+/*form {
   max-width: 500px;
-/*margin: 0 auto;*/
   margin: 0;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
+}*/
+
+fieldset {
+  max-width: 500px;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+legend {
+    font-family: sans-serif;
 }
 
 label {
@@ -28,16 +39,6 @@ select, input[type="text"] {
   border-radius: 3px;
 }
 
-/* Button Styling */
-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
 /* Feature Entries Styling */
 .feature-entry {
   display: flex;
@@ -46,14 +47,57 @@ button {
   margin-bottom: 10px;
 }
 
+/* This hides the original file input element */
+.hidden-button {
+  display: none;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 24px;
+    cursor: pointer;
+    background-color: #007bff; /* The button's main color */
+    color: white;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: translateY(-2px);
+}
+
+.button:active {
+    transform: translateY(0);
+}
+
+.button:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.7; 
+}
+
 /* Output Area Styling */
-#out {
+/*.text-area {
+  font-family: sans-serif;
   margin-top: 20px;
   padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  overflow-y: scroll;
-  height: 400px;
+}*/
+
+pre {
+  font-family: "sans-serif, monospace; /* Specify your desired font and fallbacks */
+  font-size: 14px;
 }
 
 /* Links Styling */

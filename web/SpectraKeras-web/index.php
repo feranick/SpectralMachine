@@ -75,52 +75,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </head>
 
   <body>
-    <script>
-    const url = 'index.php'
-    const form = document.querySelector('form')
-
-    form.addEventListener('submit', (e) => {
-    e.preventDefault()
-
-    const files = document.querySelector('[type=file]').files
-    const formData = new FormData()
-
-    for (let i = 0; i < files.length; i++) {
-        let file = files[i]
-
-        formData.append('files[]', file)
-    }
-
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        return response.text();
-    }).then(data => {
-        console.log(data);
-    });
-    });
-
-
-    </script>
-
+    <form id="dummyForm" style="display: none;">
+    </form>
+    <script>setForm()</script>
     <h2>SpectraKeras: Identify minerals from spectra</h2>
 
     Upload one or more ASCII files with Raman spectra or an XRD scans of unknown minerals. A convolutional neural network machine learning algorithm trained on the <a href="https://rruff.info" target="_blank" rel="noopener noreferrer">Rruff library</a> will predict the type of mineral.
     <br>Files are discarded after prediction. <a href="https://github.com/feranick/SpectralMachine" target="_blank" rel="noopener noreferrer">SpectraKeras is open-source and code and python scripts are available on Github</a>.
     <br><br> Sample input files can be found here for <a href="samples/Abelsonite_raman.txt">raman</a> or <a href="samples/Albite_xrd.txt">powder-xrd</a>.
     <br><br>To get names of the minerals corresponding to the prediction values, use the link to the ML models below.
-    <br>Current Raman ML model: <a href="ml-raman/AAA-20250914_2025-09-15_04-44-27.csv">AAA-20250914_norm1_train-cv_hfsel20_val37</a>
-    <br>Current XRD ML model: <a href="ml-xrd/AAA-powder-20250914_2025-09-15_05-52-17.csv">AAA-Powder-20250914_norm1_train-cv_hfsel10_val22</a>
-
-    <br><form name="SpectraKeras" method="post" enctype="multipart/form-data">
-      <input type="file" name="files[]" multiple />
-      <input type="submit" value="Identify Mineral via ML" name="submit" />
+    <br>Current Raman ML model: <a href="ml-raman/AAA-20250921_2025-09-22_15-58-29.csv">AAA-20250921_norm1_train-cv_hfsel20_val37</a>
+    <br>Current XRD ML model: <a href="ml-xrd/AAA-powder-20250921_2025-09-22_17-11-52.csv">AAA-Powder-20250921_norm1_train-cv_hfsel10_val22</a>
+    
+    <br><br><fieldset>
+    <form name="SpectraKeras" method="post" enctype="multipart/form-data">
+      <input id="inputFile" type="file" name="files[]" multiple class="hidden-button">
+      <label for="inputFile" class="button">Choose Files</label>
+      <input type="submit" value="Identify Mineral via ML" name="submit" class="button">
       <br><br><select name="mode" id="mode" onchange="selectModel()">
             <option>Raman Spectroscopy</option>
             <option>Powder X-ray Diffraction (XRD)</option>
             </select>
     </form>
+    </fieldset>
     <text_area><pre><?php echo $output; ?></pre></text_area>
     <text_area><pre><?php echo $output2; ?></pre></text_area>
 
