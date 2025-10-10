@@ -2,10 +2,8 @@
 '''
 **********************************************
 * libSpectraKeas - Library for SpectraKeras
-* Pyscript version
-* Only for prediction with tflite_runtime
 * v2025.05.21.1
-* Uses: TFlite_runtime
+* Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
 '''
@@ -48,31 +46,24 @@ def preProcess(Rtot, En, dP):
 # Load saved models
 #************************************
 def loadModel(dP):
-    import tflite_runtime.interpreter as tflite
-    model_name = os.path.splitext(dP.model_name)[0]+'.tflite'
-    model = tflite.Interpreter(model_path=model_name)
-    model.allocate_tensors()
-    print("  Model name:", model_name)
-    return model
-'''
-def loadModel(dP):
+    #getTFVersion(dP)
     if dP.TFliteRuntime:
-        import tflite_runtime.interpreter as tflite
+        #import tflite_runtime.interpreter as litert
+        import ai_edge_litert.interpreter as litert
         # model here is intended as interpreter
         if dP.runCoralEdge:
-            #print(" Running on Coral Edge TPU")
+            print(" Running on Coral Edge TPU")
             try:
                 model_name = os.path.splitext(dP.model_name)[0]+'_edgetpu.tflite'
-                model = tflite.Interpreter(model_path=model_name,
-                    experimental_delegates=[tflite.load_delegate(dP.edgeTPUSharedLib,{})])
+                model = litert.Interpreter(model_path=model_name,
+                    experimental_delegates=[litert.load_delegate(dP.edgeTPUSharedLib,{})])
             except:
                 print(" Coral Edge TPU not found. Please make sure it's connected and Tflite-runtime matches the TF version that is installled.")
         else:
             model_name = os.path.splitext(dP.model_name)[0]+'.tflite'
-            model = tflite.Interpreter(model_path=model_name)
+            model = litert.Interpreter(model_path=model_name)
         model.allocate_tensors()
     else:
-        getTFVersion(dP)
         import tensorflow as tf
         if checkTFVersion("2.16.0"):
             import tensorflow.keras as keras
@@ -84,7 +75,17 @@ def loadModel(dP):
         if dP.useTFlitePred:
             # model here is intended as interpreter
             model_name=os.path.splitext(dP.model_name)[0]+'.tflite'
-            model = tf.lite.Interpreter(model_path=model_name)
+            
+            try:
+                # Using tf.lite (to be deprecated)
+                model = tf.lite.Interpreter(model_path=model_name)
+                print("  Running on tf.lite\n")
+            except:
+                # Using ai_edge_litert
+                import ai_edge_litert.interpreter as litert
+                model = litert.Interpreter(model_path=model_name)
+                print("  Running on ai_edge_litert\n")
+                
             model.allocate_tensors()
         else:
             model_name = dP.model_name
@@ -92,9 +93,8 @@ def loadModel(dP):
                 model = keras.models.load_model(model_name)
             else:
                 model = keras.saving.load_model(model_name)
-    print("  Model name:", model_name)
+    #print("  Model name:", model_name)
     return model
-'''
 
 #************************************
 # Make prediction based on framework
@@ -129,21 +129,87 @@ def getPredictions(R, model, dP):
 ### Create Quantized tflite model
 #************************************
 def makeQuantizedTFmodel(A, dP):
-    pass
+    import tensorflow as tf
+ 
+    print("\n  =========================================================")
+    print("   Creating\033[1m quantized TensorFlowLite Model \033[0m")
+    print("  =========================================================\n")
+
+    A2 = tf.cast(A, tf.float32)
+    A = tf.data.Dataset.from_tensor_slices((A2)).batch(1)
+
+    def representative_dataset_gen():
+        for input_value in A.take(100):
+            yield[input_value]
+
+    if dP.kerasVersion == 2:
+        if checkTFVersion("2.16.0"):
+            import tensorflow.keras as keras
+        else:
+            import tf_keras as keras
+        model = keras.models.load_model(dP.model_name)
+    else:
+        # Previous method, TF <= 2.16.2
+        #import keras
+        #model = keras.layers.TFSMLayer(dP.model_name, call_endpoint='serve')
+        #converter = tf.lite.TFLiteConverter.from_keras_model(model)
+        # New method
+        #model = tf.saved_model.load(dP.model_name)
+        #concrete_func = model.signatures['serving_default']
+        #converter = tf.lite.TFLiteConverter.from_concrete_functions([concrete_func])
+        # New method 2:
+        import keras
+        model = keras.saving.load_model(dP.model_name)
+        
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.representative_dataset = representative_dataset_gen
+    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    converter.inference_input_type = tf.uint8
+    converter.inference_output_type = tf.uint8
+    tflite_quant_model = converter.convert()
+
+    with open(os.path.splitext(dP.model_name)[0]+'.tflite', 'wb') as o:
+        o.write(tflite_quant_model)
 
 #************************************
 # Plot Weights
 #************************************
 def plotWeights(dP, En, A, model, type):
-    pass
+    import matplotlib.pyplot as plt
+    if checkTFVersion("2.16.0"):
+        import tensorflow as tf
+        import tensorflow.keras as keras
+    else:
+        #import tf_keras as keras
+        import keras
+    plotFileName = "model_" + type + "_weights" + ".png"
+    plt.figure(tight_layout=True)
+    #plotInd = 511
+    plotInd = (len(dP.HL)+2)*100+11
+    for layer in model.layers:
+        if isinstance(layer, keras.layers.Dense):
+            w_layer = layer.get_weights()[0]
+            ax = plt.subplot(plotInd)
+            newX = np.arange(En[0], En[-1], (En[-1]-En[0])/w_layer.shape[0])
+            plt.plot(En, np.interp(En, newX, w_layer[:,0]), label=layer.get_config()['name'])
+            plt.legend(loc="upper right")
+            plt.setp(ax.get_xticklabels(), visible=False)
+            plotInd +=1
+            print(" Preparing weigths for layer:",layer.name)
+
+    ax1 = plt.subplot(plotInd)
+    ax1.plot(En, A[0], label='Sample data')
+
+    plt.xlabel("Raman shift [1/cm]")
+    plt.legend(loc="upper right")
+    plt.savefig(plotFileName, dpi = 160, format = 'png')  # Save plot
+    print(" Saving weights plots in:", plotFileName,"\n")
 
 #************************************
 # Get TensorFlow Version
 #************************************
-
 def getTFVersion(dP):
-    pass
-    '''
     import tensorflow as tf
     if checkTFVersion("2.16.0"):
         import tensorflow.keras as keras
@@ -157,19 +223,23 @@ def getTFVersion(dP):
             kv = "- Keras v. " + keras.__version__
     from packaging import version
     if dP.useTFlitePred:
-        print("\n TensorFlow (Lite) v.",tf.version.VERSION,kv, "\n")
+        if dP.TFliteRuntime:
+            try:
+                import tflite_runtime as litert
+                print("\n  TFlite-runtime v.",litert.__version__,kv, "\n")
+            except:
+                import ai_edge_litert as litert
+                print("\n  LiteRT v.",litert.__version__,kv, "\n")
+        else:
+            print("\n  TensorFlow (Lite) v.",tf.version.VERSION,kv, "\n")
     else:
-        print("\n TensorFlow v.",tf.version.VERSION,kv, "\n" )
-    '''
+        print("\n  TensorFlow v.",tf.version.VERSION,kv, "\n" )
         
 def checkTFVersion(vers):
-    return 0
-    '''
     import tensorflow as tf
     from packaging import version
     v = version.parse(tf.__version__)
     return v < version.parse(vers)
-    '''
 
 #************************************
 # Normalizer
@@ -192,7 +262,7 @@ class Normalizer(object):
     def transform_single(self,y):
         yn = np.copy(y)
         yn = np.multiply(y - np.amin(y),
-            self.YnormTo/(np.amax(y) - np.amin(y)))
+                self.YnormTo/(np.amax(y) - np.amin(y)))
         return yn
 
     def save(self, name):
@@ -285,9 +355,9 @@ class CustomRound:
 # MultiClassReductor
 #************************************
 class MultiClassReductor():
-    def __self__(self):
-        self.name = name
-
+    def __init__(self,dP):
+        self.model_le = dP.model_le
+    
     def fit(self,tc):
         self.totalClass = tc.tolist()
 
@@ -302,3 +372,34 @@ class MultiClassReductor():
 
     def classes_(self):
         return self.totalClass
+    
+    def save(self):
+        with open(self.model_le, 'wb') as f:
+            pickle.dump(self, f)
+
+#************************************
+# Get name of prediction from h5 file
+#************************************
+def getMineral(File, pred):
+    import pandas as pd
+    try:
+        df = pd.read_hdf(File)
+    except FileNotFoundError as e:
+        print("Hdf with mineral data file not found")
+        sys.exit()
+    name = df[df[0]==str(pred)].iloc[0,1]
+    ind = name.find('__')
+    return name[:ind]
+    
+def convertMineralNameFromCSV(File):
+    import pandas as pd
+    fileRoot = os.path.splitext(File)[0]
+    newFile = fileRoot+'.h5'
+    try:
+        df = pd.read_csv(File, header=None).iloc[1:].drop([1,2,4], axis=1)
+    except FileNotFoundError as e:
+        print("Hdf with mineral data file not found")
+        sys.exit()
+    print(df)
+    df.to_hdf(newFile, key='df', mode='w')
+    print(" Original file "+newFile+" converted into h5\n")

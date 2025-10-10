@@ -3,21 +3,21 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* Pyscript version
-* Only for prediction with tflite_runtime
+* Simplified web version
 * v2025.05.21.1
-* Uses: TFlite_runtime
+* Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
 '''
 #print(__doc__)
 
 import numpy as np
-import sys, os.path, configparser, js, ast
+import pandas as pd
+from io import BytesIO
+import sys, configparser, ast, io, csv, os.path, glob, platform
+from js import document, Blob, URL
 from pyscript import fetch, document
 import _pickle as pickle
-#import pickle
-
 from libSpectraKeras import *
 
 #************************************
@@ -31,19 +31,38 @@ class Conf():
 
         self.readConfig(configIni)
         self.model_directory = "/"
-
         if self.regressor:
-            self.modelName = "model_regressor_CNN.tflite"
+            self.modelName = "model_regressor_CNN.h5"
+            self.summaryFileName = "summary_regressor_CNN.csv"
+            self.model_png = self.model_directory+"model_regressor_CNN.png"
         else:
             self.predProbThreshold = 90.00
-            self.modelName = "model_classifier_CNN.tflite"
+            self.modelName = "model_classifier_CNN.h5"
+            self.summaryFileName = "summary_classifier_CNN.csv"
+            self.summaryAccFileName = "summary_classifier_CNN_accuracy.csv"
+            self.model_png = self.model_directory+"model_classifier_CNN.png"
 
         self.tb_directory = "model_CNN"
         self.model_name = self.model_directory+self.modelName
-
+        
+        if self.kerasVersion == 3:
+            self.model_name = os.path.splitext(self.model_name)[0]+".keras"
+        
         self.model_le = self.model_directory+"model_le.pkl"
         self.spectral_range = "model_spectral_range.pkl"
+        self.table_names = self.model_directory+"AAA_table_names.h5"
 
+        self.actPlotTrain = self.model_directory+"model_CNN_train-activations_conv2D_"
+        self.actPlotPredict = self.model_directory+"model_CNN_pred-activations_"
+        self.sizeColPlot = 4
+
+        if platform.system() == 'Linux':
+            self.edgeTPUSharedLib = "libedgetpu.so.1"
+        if platform.system() == 'Darwin':
+            self.edgeTPUSharedLib = "libedgetpu.1.dylib"
+        if platform.system() == 'Windows':
+            self.edgeTPUSharedLib = "edgetpu.dll"
+        
     def SKDef(self):
         self.conf['Parameters'] = {
             'regressor' : False,
@@ -83,7 +102,6 @@ class Conf():
     def readConfig(self,configFile):
         try:
             self.conf.read_string(configFile)
-
             self.SKPar = self.conf['Parameters']
             self.sysPar = self.conf['System']
 
@@ -110,7 +128,7 @@ class Conf():
             self.saveBestModel = self.conf.getboolean('Parameters','saveBestModel')
             self.metricBestModelR = self.conf.get('Parameters','metricBestModelR')
             self.metricBestModelC = self.conf.get('Parameters','metricBestModelC')
-
+                
             self.kerasVersion = self.conf.getint('System','kerasVersion')
             self.makeQuantizedTFlite = self.conf.getboolean('System','makeQuantizedTFlite')
             self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
@@ -119,57 +137,67 @@ class Conf():
         except:
             print(" Error in reading configuration file. Please check it\n")
 
-async def getFile(file, bin):
-    if document.querySelector("#model").selectedIndex == 0:
-        folder = "model-raman"
-    else:
-        folder = "model-raman"
+    # Create configuration file
+    def createConfig(self):
+        try:
+            self.SKDef()
+            self.sysDef()
+            with open(self.configFile, 'w') as configfile:
+                self.conf.write(configfile)
+        except:
+            print("Error in creating configuration file")
+
+#************************************
+# Get Data from Files
+#************************************
+async def getFile(folder, file, bin):
     url = "./"+folder+"/"+file
     if bin:
         data = await fetch(url).bytearray()
     else:
         data = await fetch(url).text()
     return data
+    
+async def getModelFolder():
+    model = document.querySelector("#model").value
+    if model == "Raman Spectroscopy":
+        folder = "ml-raman"
+    elif model == "Powder X-ray Diffraction (XRD)":
+        folder = "ml-xrd"
+    return folder
 
-async def getModel(event):
-    global df
-    document.querySelector("#button").disabled = True
-    document.querySelector("#model").disabled = True
-
-    ini = await getFile("SpectraKeras_CNN.ini", False)
-    dP = Conf(ini)
-
-    #modelPkl = await getFile(folder, dP.modelName, True)
-    #df = pickle.loads(modelPkl)
-    #output_div.innerHTML = ""
-    document.querySelector("#button").disabled = False
-    document.querySelector("#model").disabled = False
-
-#************************************
-# Main
-#************************************
-async def main(event):
+async def getSpectraFiles(event):
     output_div = document.querySelector("#output")
     output_div.innerHTML = "Please wait..."
-
-    ini = await getFile("SpectraKeras_CNN.ini", False)
+    folder = await getModelFolder()
+        
+    ini = await getFile(folder, "SpectraKeras_CNN.ini", False)
     dP = Conf(ini)
-    Rtot = np.asarray(js.spectra.to_py())
-    if len(Rtot) == 0:
-        output_div.innerHTML = ""
-        return
-
-    R = Rtot[:,1]
-    Rx = Rtot[:,0]
-    #js.console.log(f'{Rtot}')
-    #js.console.log(f'{R}')
-    #js.console.log(f'{Rx}')
-
-    output_div.innerHTML = R
-
+    model_le = await getFile(folder, dP.model_le, True)
+    spectral_range = await getFile(folder, dP.spectral_range, True)
+    EnN = pickle.loads(spectral_range)
     
+    inputFile = document.getElementById("inputFile").files.item(0)
+    array_buf = await inputFile.arrayBuffer()
+    file_bytes = array_buf.to_bytes()
+    data = BytesIO(file_bytes)
+    
+    Rtot = np.loadtxt(data, unpack =True)
+    print(Rtot)
+    R = preProcess(Rtot, EnN, dP)
+    print(R)
+    R = formatForCNN(R)
+    print(R)
+    
+    
+
+
+#************************************
+# Prediction
+#************************************
+def predict(testFile):
+    dP = Conf()
     model = loadModel(dP)
-    '''
     with open(dP.spectral_range, "rb") as f:
         EnN = pickle.load(f)
 
@@ -191,6 +219,7 @@ async def main(event):
     else:
         with open(dP.model_le, "rb") as f:
             le = pickle.load(f)
+    
         #predictions = model.predict(R, verbose=0)
         predictions, _ = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
@@ -208,18 +237,23 @@ async def main(event):
                 predValue = le.inverse_transform(pred_class)[0]
             else:
                 predValue = 0
-            print('  Prediction\t| Probability [%]')
-            print('  ----------------------------- ')
+            print('  Prediction\t| Class \t| Probability [%]')
+            print('  -------------------------------------------------------- ')
             for i in range(len(predictions[0])-1):
                 if predictions[0][i]>0.01:
                     if dP.useTFlitePred:
-                        print("  {0:d}\t\t| {1:.2f}".format(int(le.inverse_transform(i)[0]),100*predictions[0][i]/255))
+                        print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(le.inverse_transform(i)[0])),
+                            int(le.inverse_transform(i)[0]), 100*predictions[0][i]/255))
                     else:
-                        print("  {0:d}\t\t| {1:.2f}".format(int(le.inverse_transform(i)[0]),100*predictions[0][i]))
-            print('\n  Predicted value = {0:d} (probability = {1:.2f}%)\n'.format(int(predValue), predProb))
+                        print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(le.inverse_transform(i)[0])),
+                            int(le.inverse_transform(i)[0]), 100*predictions[0][i]))
+                    
+            print('\n  {0:s} (Class: {1:d}, probability = {2:.2f}%)\n'.format(getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
             print('  ========================================================\n')
 
         else:
+            pass
+            '''
             print('\n ==========================================')
             print('\n Predicted value (probability = ' + str(predProb) + '%)')
             print(' ==========================================\n')
@@ -227,66 +261,84 @@ async def main(event):
             print("  2:",str(predValue[1]),"%")
             print("  3:",str((predValue[1]/0.5)*(100-99.2-.3)),"%\n")
             print(' ==========================================\n')
+            '''
 
     if dP.plotActivations and not dP.useTFlitePred:
         plotActivationsPredictions(R,model)
-    '''
 
 #************************************
-# Accuracy determination
+# Batch Prediction
 #************************************
-def accDeterm(testFile):
+def batchPredict(array, names):
+    import json
     dP = Conf()
     model = loadModel(dP)
-    En, A, Cl = readLearnFile(testFile, dP)
+    with open(dP.spectral_range, "rb") as f:
+        EnN = pickle.load(f)
+
+    files = array.replace('\\','').replace('[','').replace(']','').split(',')
+    fileName = names.replace('[','').replace(']','').split(',')
+
     predictions = np.zeros((0,0))
-    fileName = []
-
-    print("\n  Number of spectra in testing file:",A.shape[0])
-
-    for row in A:
-        R = formatForCNN(np.array([row]))
-        try:
-            predictions, _ = np.vstack((predictions,getPredictions(R, model, dP).flatten()))
-        except:
-            predictions, _ = np.array([getPredictions(R, model,dP).flatten()])
+    predictions_list = []
+    for file in files:
+        R, good = readTestFile(file, EnN, dP)
+        if good:
+            R = formatForCNN(R)
+            try:
+                predictions_list.append(getPredictions(R, model, dP)[0].flatten())
+            except:
+                predictions_list = [np.array([getPredictions(R, model,dP)[0].flatten()])]
+    predictions = np.array(predictions_list)
 
     if dP.regressor:
-        print("\n  Accuracy determination is not defined in regression. Exiting.\n")
-        return
+        print('\n  ========================================================')
+        print('  CNN - Regressor - Prediction')
+        print('  ========================================================')
+        for i in range(predictions.shape[0]):
+            predValue = predictions[i][0]
+            print('  {0:s}:\n   Predicted value = {1:.2f}\n'.format(fileName[i],predValue))
+        print('  ========================================================\n')
+
     else:
         with open(dP.model_le, "rb") as f:
             le = pickle.load(f)
-        summaryFile = np.array([['SpectraKeras_CNN','Classifier',''],['Real Class','Predicted Class', 'Probability']])
-
-        successPred = 0
-
+        
+        print('\n  ========================================================')
+        print('  CNN - Classifier - Prediction')
+        print('  ========================================================')
+        indPredProb = 0
         for i in range(predictions.shape[0]):
             pred_class = np.argmax(predictions[i])
             if dP.useTFlitePred:
                 predProb = round(100*predictions[i][pred_class]/255,2)
             else:
                 predProb = round(100*predictions[i][pred_class],2)
-            rosterPred = np.where(predictions[i][0]>0.1)[0]
+            rosterPred = np.atleast_1d(predictions[i][0]).nonzero()[0]
 
             if pred_class.size >0:
                 predValue = le.inverse_transform(pred_class)[0]
+                print('  {0:s}:\n   {1:s} (Class: {2:d}, probability = {3:.2f}%)\n'.format(fileName[i],getMineral(dP.table_names, int(predValue)), int(predValue), predProb))
             else:
                 predValue = 0
-            if Cl[i] == predValue:
-                successPred+=1
+                print('  {0:s}:\n   No predicted value (probability = {1:.2f}%)\n'.format(fileName[i],predProb))
+            if predProb > dP.predProbThreshold:
+                indPredProb += 1
+        print('  ========================================================\n')
+        print(" Predictions with probability > {0:.2f}:  {1:.2f}%\n".format(dP.predProbThreshold, indPredProb*100/predictions.shape[0]))
 
-            summaryFile = np.vstack((summaryFile,[Cl[i], predValue, predProb]))
+#************************************
+# Accuracy determination
+#************************************
+def accDeterm(testFile):
+    pass
 
-    print("\n\033[1m  Overall average accuracy: {0:.2f}% \033[0m".format(successPred*100/Cl.shape[0]))
-    summaryFile[0,2] = "Av Acc: {0:.2f}%".format(successPred*100/Cl.shape[0])
-
-    import pandas as pd
-    df = pd.DataFrame(summaryFile)
-    df.to_csv(dP.summaryAccFileName, index=False, header=False)
-    print("\n  Prediction summary saved in:",dP.summaryAccFileName,"\n")
-
-
+#****************************************************
+# Convert model to quantized TFlite
+#****************************************************
+def convertTflite(learnFile):
+    pass
+    
 #****************************************************
 # Format data for CNN
 #****************************************************
@@ -298,3 +350,53 @@ def formatForCNN(A):
     x = np.stack(listmatrix, axis=0)
     return x
 
+#************************************
+# Print NN Info
+#************************************
+def printParam():
+    dP = Conf()
+    print('\n  ================================================')
+    print('  \033[1m CNN\033[0m - Parameters')
+    print('  ================================================')
+    print('  Optimizer:','Adam',
+                '\n  Convolutional layers:', dP.CL_filter,
+                '\n  Convolutional layers size:', dP.CL_size,
+                '\n  Max Pooling:', dP.max_pooling,
+                '\n  Dropout CNN:', dP.dropCNN,
+                '\n  Hidden layers:', dP.HL,
+                '\n  Activation function:','relu',
+                '\n  L2:',dP.l2,
+                '\n  Dropout HL:', dP.dropFCL,
+                '\n  Learning rate:', dP.l_rate,
+                '\n  Learning decay rate:', dP.l_rdecay)
+    if dP.fullSizeBatch:
+        print('  Batch size: full')
+    else:
+        print('  Batch size:', dP.batch_size)
+    print('  Epochs:',dP.epochs)
+    print('  Number of labels:', dP.numLabels)
+    print('  Stop at Best Model based on validation:', dP.stopAtBest)
+    print('  Save Best Model based on validation:', dP.saveBestModel)
+    if dP.regressor:
+        print('  Metric for Best Regression Model:', dP.metricBestModelR)
+    else:
+        print('  Metric for Best Classifier Model:', dP.metricBestModelC)
+    #print('  ================================================\n')
+
+#************************************
+# Plot Activations in Predictions
+#************************************
+def plotActivationsTrain(model):
+    pass
+
+#************************************
+# Plot Activations in Predictions
+#************************************
+def plotActivationsPredictions(R, model):
+    pass
+
+#************************************
+# Lists the program usage
+#************************************
+def usage():
+    print('\n Please make sure you have chosen at least one file.\n')
