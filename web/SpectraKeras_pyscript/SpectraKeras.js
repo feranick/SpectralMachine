@@ -1,3 +1,8 @@
+function showPyData() {
+    const myData = window.input_data;
+    console.log(myData);
+    }
+
 function selectModel() {
   setCookie("selectedIndex", document.SpectraKeras.mode.selectedIndex ,1000);
  }

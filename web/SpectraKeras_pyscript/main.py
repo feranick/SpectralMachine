@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 from io import BytesIO
 import sys, configparser, ast, io, csv, os.path, glob, platform
-from js import document, Blob, URL
+from js import document, Blob, URL, console, window
 from pyscript import fetch, document
 import _pickle as pickle
 from libSpectraKeras import *
@@ -188,7 +188,8 @@ async def getSpectraFiles(event):
     print(R)
     R = formatForCNN(R)
     print(R)
-    
+    window.__setattr__("input_data",R)
+  
     
 
 

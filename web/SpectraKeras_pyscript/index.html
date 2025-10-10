@@ -34,6 +34,7 @@
       <input id="inputFile" type="file" name="files[]" multiple class="hidden-button" py-change="getSpectraFiles">
       <label for="inputFile" class="button">Choose Files</label>
       <input type="submit" value="Identify Mineral via ML" name="submit" class="button">
+      <input type="submit" value="test PyData" name="submitPyData" class="button" onclick=showPyData()>
       <br><br><select name="model" id="model" onchange="selectModel()">
             <option>Raman Spectroscopy</option>
             <option>Powder X-ray Diffraction (XRD)</option>
