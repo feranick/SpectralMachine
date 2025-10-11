@@ -1,7 +1,11 @@
 function showPyData() {
-    const myData = window.input_data;
-    console.log(myData);
-    }
+    // 1. Retrieve the Pyodide Proxy object
+    let R = window.pyscriptData.toJs({ dict_converter: Object.fromEntries })[0];
+    
+    // 3. Access and display the data
+    console.log("R:", R);
+    console.log("R.length:",R.length);
+}
 
 function selectModel() {
   setCookie("selectedIndex", document.SpectraKeras.mode.selectedIndex ,1000);

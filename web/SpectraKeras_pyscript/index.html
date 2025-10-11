@@ -30,17 +30,17 @@
     <br>Current XRD ML model: <a href="ml-xrd/AAA-powder-20251005_2025-10-07_18-14-20.csv">AAA-Powder-20251005_norm1_train-cv_hfsel10_val22</a>
     
     <br><br><fieldset>
-    <form name="SpectraKeras" method="post" enctype="multipart/form-data">
+    <form name="SpectraKeras" enctype="multipart/form-data">
       <input id="inputFile" type="file" name="files[]" multiple class="hidden-button" py-change="getSpectraFiles">
       <label for="inputFile" class="button">Choose Files</label>
       <input type="submit" value="Identify Mineral via ML" name="submit" class="button">
-      <input type="submit" value="test PyData" name="submitPyData" class="button" onclick=showPyData()>
       <br><br><select name="model" id="model" onchange="selectModel()">
             <option>Raman Spectroscopy</option>
             <option>Powder X-ray Diffraction (XRD)</option>
             </select>
     </form>
     </fieldset>
+    <input type="submit" value="test PyData" name="submitPyData" class="button" onclick=showPyData()>
     <text_area><pre><?php echo $output; ?></pre></text_area>
     <text_area><pre><?php echo $output2; ?></pre></text_area>
 
