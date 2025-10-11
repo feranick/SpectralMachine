@@ -5,6 +5,7 @@ function showPyData() {
     // 3. Access and display the data
     console.log("R:", R);
     console.log("R.length:",R.length);
+    console.log(window.folder);
 }
 
 function selectModel() {

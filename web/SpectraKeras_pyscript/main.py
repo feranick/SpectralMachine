@@ -183,19 +183,21 @@ async def getSpectraFiles(event):
     data = BytesIO(file_bytes)
     
     Rtot = np.loadtxt(data, unpack =True)
-    print("Rtot:",Rtot)
+    #print("Rtot:",Rtot)
     print("Rtot.shape:",Rtot.shape)
     R = preProcess(Rtot, EnN, dP)
-    print("R1:",R)
+    #print("R1:",R)
     print("R1.shape",R.shape)
     #R = formatForCNN(R)
     #print("R2:",R)
     #print("R2.shape",R.shape)
    
     window.__setattr__("pyscriptData",R)
-  
+    window.__setattr__("folder",folder)
     
-
+    from js import showPyData
+    showPyData()
+  
 
 #************************************
 # Prediction
