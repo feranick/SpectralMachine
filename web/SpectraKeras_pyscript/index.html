@@ -19,7 +19,6 @@
   <body>
     <form id="dummyForm" style="display: none;">
     </form>
-    <script>setForm()</script>
     <h2>SpectraKeras: Identify minerals from spectra</h2>
 
     Upload one or more ASCII files with Raman spectra or an XRD scans of unknown minerals. A convolutional neural network machine learning algorithm trained on the <a href="https://rruff.info" target="_blank" rel="noopener noreferrer">Rruff library</a> will predict the type of mineral.
@@ -40,7 +39,6 @@
             </select>
     </form>
     </fieldset>
-    <input type="submit" value="test PyData" name="submitPyData" class="button" onclick=showPyData()>
     <text_area><pre><?php echo $output; ?></pre></text_area>
     <text_area><pre><?php echo $output2; ?></pre></text_area>
 

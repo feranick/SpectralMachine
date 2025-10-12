@@ -9,11 +9,11 @@ function showPyData() {
 }
 
 function selectModel() {
-  setCookie("selectedIndex", document.SpectraKeras.mode.selectedIndex ,1000);
+  setCookie("selectedIndex", document.SpectraKeras.model.selectedIndex ,1000);
  }
 
 function init() {
-  document.SpectraKeras.mode.selectedIndex = getCookie("selectedIndex");
+  document.SpectraKeras.model.selectedIndex = getCookie("selectedIndex");
 }
 
 window.onload = init;
@@ -29,26 +29,3 @@ function setCookie(name, value, days) {
   document.cookie = name + '=' + value + ';expires=' + e.toUTCString() + ';path=/;domain=.' + document.domain;
 }
 // ########################################################
-
-
-function setForm() {
-    const url = 'index.php'
-    const form = document.querySelector('form')
-    form.addEventListener('submit', (e) => {
-    e.preventDefault()
-    const files = document.querySelector('[type=file]').files
-    const formData = new FormData()
-    for (let i = 0; i < files.length; i++) {
-        let file = files[i]
-        formData.append('files[]', file)
-    }
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        return response.text();
-    }).then(data => {
-        console.log(data);
-    });
-    });
-    }
