@@ -195,8 +195,8 @@ async def getSpectraFiles(event):
     window.__setattr__("pyscriptData",R)
     window.__setattr__("folder",folder)
     
-    from js import showPyData
-    showPyData()
+    from js import runModel
+    runModel()
   
 
 #************************************

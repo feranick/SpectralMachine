@@ -1,11 +1,23 @@
-function showPyData() {
-    // 1. Retrieve the Pyodide Proxy object
-    let R = window.pyscriptData.toJs({ dict_converter: Object.fromEntries })[0];
+async function runModel() {
+    console.log("FOLDER3:",window.folder);
+    //const MODEL_URL = './'+window.folder+'/model_classifier_CNN_js/model.json';
+    const MODEL_URL = './'+window.folder+'/tfjs_output_dir/model.json';
+
+    try {
+        const model = await tf.loadLayersModel(MODEL_URL);
+        console.log("Model is ready for prediction!");
+
+        // Example usage:
+        // const prediction = model.predict(yourInputTensor); 
+        // prediction.print();
+    } catch (error) {
+        console.error("Error loading the model:", error);
+    }
     
-    // 3. Access and display the data
+    let R = window.pyscriptData.toJs({ dict_converter: Object.fromEntries })[0];
     console.log("R:", R);
     console.log("R.length:",R.length);
-    console.log(window.folder);
+    console.log("FOLDER:",window.folder);
 }
 
 function selectModel() {
