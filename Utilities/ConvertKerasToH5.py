@@ -16,7 +16,7 @@ import sys, os.path, h5py
 #************************************
 def main():
     if len(sys.argv) < 2:
-        print(' Usage:\n  python3.py ConvertToTFJS <model in HDF5 format>\n')
+        print(' Usage:\n  python3.py ConvertKerasToH5 <model in HDF5 format>\n')
         print(' Requires python 3.x. Not compatible with python 2.x\n')
         return
     else:

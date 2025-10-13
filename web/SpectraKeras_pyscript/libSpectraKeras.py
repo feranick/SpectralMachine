@@ -8,7 +8,7 @@
 **********************************************
 '''
 import numpy as np
-import scipy, js
+import scipy, sys
 import os.path, pickle
 
 #************************************

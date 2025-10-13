@@ -198,6 +198,10 @@ async def getSpectraFiles(event):
     window.__setattr__("folder",folder)
     window.__setattr__("input_shape",Rcnn.shape)
     
+    table_names = await getFile(folder, dP.table_names, True)
+    mineral = getMineral(table_names, 123)
+    print(mineral)
+    
     from js import loadModel, showData
     #loadModel()
     showData()

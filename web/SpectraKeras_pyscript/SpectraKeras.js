@@ -59,9 +59,9 @@ function showData() {
     console.log("R:", R);
     console.log("R.length:",R.length);
     console.log("FOLDER:",window.folder);
-    const pred_value = 123;
-    const mineral_name = window.py_getMineral(folder+"/AAA_table_names.h5", pred_value);
-    console.log("MINERAL:",mineral_name);
+    //const pred_value = 123;
+    //const mineral_name = window.py_getMineral(folder+"/AAA_table_names.h5", pred_value);
+    //console.log("MINERAL:",mineral_name);
 }
 
 function selectModel() {
