@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+'''
+**********************************************
+* Convert Keras models into H5
+* v2025.10.13.1
+* Uses: TensorFlow, Keras
+* By: Nicola Ferralis <feranick@hotmail.com>
+**********************************************
+'''
+print(__doc__)
+import sys, os.path, h5py
+
+#************************************
+# Main
+#************************************
+def main():
+    if len(sys.argv) < 2:
+        print(' Usage:\n  python3.py ConvertToTFJS <model in HDF5 format>\n')
+        print(' Requires python 3.x. Not compatible with python 2.x\n')
+        return
+    else:
+        print('\n Converting',sys.argv[1],'to TFjs (model.json)...\n')
+        convertModelToTFJS(sys.argv[1])
+
+#************************************
+# Convert TF Model to TF.Lite
+#************************************
+def convertModelToTFJS(savedModel):
+    import tensorflow as tf
+    import keras
+    #import tensorflow.keras as keras
+    #import tensorflow.keras as keras
+    model = keras.models.load_model(savedModel)
+    #tf.keras.models.load_model('model_classifier_CNN.keras')
+    convFile = os.path.splitext(savedModel)[0]+'.h5'
+    
+    model.save(convFile)
+    
+    print('\n Converted model saved inside:',convFile,'\n')
+
+#************************************
+# Main initialization routine
+#************************************
+if __name__ == "__main__":
+    sys.exit(main())
+
+
