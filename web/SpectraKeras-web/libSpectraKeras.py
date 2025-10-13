@@ -8,7 +8,7 @@
 **********************************************
 '''
 import numpy as np
-import scipy
+import scipy, sys
 import os.path, pickle, h5py
 
 #************************************

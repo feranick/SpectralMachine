@@ -8,7 +8,7 @@
 **********************************************
 '''
 import numpy as np
-import scipy
+import scipy, sys
 import os.path, pickle, h5py
 
 #************************************
@@ -422,7 +422,7 @@ def getMineral(File, pred):
     name = df[df[0]==str(pred)].iloc[0,1]
     ind = name.find('__')
     return name[:ind]
-    
+        
 def convertMineralNameFromCSV(File):
     import pandas as pd
     fileRoot = os.path.splitext(File)[0]

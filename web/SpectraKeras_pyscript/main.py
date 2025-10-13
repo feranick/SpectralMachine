@@ -20,6 +20,8 @@ from pyscript import fetch, document
 import _pickle as pickle
 from libSpectraKeras import *
 
+window.py_getMineral = getMineral
+
 #************************************
 # Parameters
 #************************************
@@ -188,15 +190,18 @@ async def getSpectraFiles(event):
     R = preProcess(Rtot, EnN, dP)
     #print("R1:",R)
     print("R1.shape",R.shape)
-    #R = formatForCNN(R)
+    Rcnn = formatForCNN(R)
     #print("R2:",R)
     #print("R2.shape",R.shape)
-   
+       
     window.__setattr__("pyscriptData",R)
     window.__setattr__("folder",folder)
+    window.__setattr__("input_shape",Rcnn.shape)
     
-    from js import runModel
-    runModel()
+    from js import loadModel, showData
+    #loadModel()
+    showData()
+    
   
 
 #************************************
