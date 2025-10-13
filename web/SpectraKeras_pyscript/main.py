@@ -198,7 +198,7 @@ async def getSpectraFiles(event):
     window.__setattr__("folder",folder)
     window.__setattr__("input_shape",Rcnn.shape)
     
-    table_names = await getFile(folder, dP.table_names, True)
+    table_names = await getFile(folder, "AAA_table_names.csv", False)
     mineral = getMineral(table_names, 123)
     print(mineral)
     

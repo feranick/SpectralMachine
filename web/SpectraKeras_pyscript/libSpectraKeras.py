@@ -380,13 +380,47 @@ class MultiClassReductor():
 #************************************
 # Get name of prediction from h5 file
 #************************************
-def getMineral(File, pred):
+def getMineral(csv_text, pred):
+    import pandas as pd
+    from io import StringIO
+
+    # StringIO treats the string of text as a file
+    csv_file_like_object = StringIO(csv_text)
+    
+    # Read the data from the text string
+    # We use header=None because the Python script saved it without a header
+    df = pd.read_csv(csv_file_like_object, header=None)
+
+    # The rest of your logic remains the same
+    name = df[df[0] == str(pred)].iloc[0, 1]
+    ind = name.find('__')
+    return name[:ind]
+
+def getMineral2(File, pred):
     import pandas as pd
     try:
         df = pd.read_hdf(File)
     except FileNotFoundError as e:
         print("Hdf with mineral data file not found")
         sys.exit()
+    name = df[df[0]==str(pred)].iloc[0,1]
+    ind = name.find('__')
+    return name[:ind]
+    
+def getMineral3(file_bytes, pred):
+    import pandas as pd
+    
+    virtual_file_path = "temp_table.h5"
+
+    with open(virtual_file_path, "wb") as f:
+        f.write(file_bytes)
+
+    try:
+        df = pd.read_hdf(virtual_file_path)
+    except FileNotFoundError as e:
+        print("Hdf with mineral data file not found")
+        sys.exit() # Or handle the error as you see fit
+
     name = df[df[0]==str(pred)].iloc[0,1]
     ind = name.find('__')
     return name[:ind]
