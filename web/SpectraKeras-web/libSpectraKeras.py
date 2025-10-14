@@ -423,6 +423,16 @@ def getMineral(File, pred):
     ind = name.find('__')
     return name[:ind]
     
+def getMineralJS(csv_text, pred):
+    import pandas as pd
+    from io import StringIO
+
+    csv_file_like_object = StringIO(csv_text)
+    df = pd.read_csv(csv_file_like_object, header=None)
+    name = df[df[0] == pred].iloc[1, 1]
+    ind = name.find('__')
+    return name[:ind]
+    
 def convertMineralNameFromCSV(File):
     import pandas as pd
     fileRoot = os.path.splitext(File)[0]

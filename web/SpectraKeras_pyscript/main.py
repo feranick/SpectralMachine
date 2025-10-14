@@ -199,14 +199,12 @@ async def getSpectraFiles(event):
     window.__setattr__("input_shape",Rcnn.shape)
     
     table_names = await getFile(folder, "AAA_table_names.csv", False)
-    mineral = getMineral(table_names, 123)
+    mineral = getMineralJS(table_names, 123)
     print(mineral)
     
     from js import loadModel, showData
     #loadModel()
     showData()
-    
-  
 
 #************************************
 # Prediction
