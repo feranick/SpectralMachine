@@ -1,3 +1,7 @@
+window.SAVED_LIBRARIES_DATA = null;
+
+
+
 async function loadModel() {
     const MODEL_URL = './' + window.folder + '/model_classifier_CNN_js/model.json';
     try {
@@ -10,7 +14,7 @@ async function loadModel() {
     }
 }
 
-/*
+
 async function loadModel() {
     console.log("FOLDER3:", window.folder);
     console.log("Model input shape:", window.input_shape);
@@ -52,7 +56,7 @@ async function loadModel() {
     }
 }
 
-*/
+
 
 function showData() {
     let R = window.pyscriptData.toJs({ dict_converter: Object.fromEntries })[0];
@@ -68,9 +72,6 @@ function selectModel() {
   setCookie("selectedIndex", document.SpectraKeras.model.selectedIndex ,1000);
  }
 
-function init() {
-  document.SpectraKeras.model.selectedIndex = getCookie("selectedIndex");
-}
 
 window.onload = init;
 

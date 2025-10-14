@@ -380,12 +380,18 @@ class MultiClassReductor():
 #************************************
 # Get name of prediction from h5 file
 #************************************
-def getMineralJS(csv_text, pred):
+def loadGetMineralJS(csv_text, pred):
+    return getMineralJS(loadMineralJS(csv_text), pred)
+    
+def loadMineralJS(csv_text):
     import pandas as pd
     from io import StringIO
-
     csv_file_like_object = StringIO(csv_text)
     df = pd.read_csv(csv_file_like_object, header=None)
+    return df
+    
+def getMineralJS(df, pred):
+    import pandas as pd
     name = df[df[0] == pred].iloc[1, 1]
     ind = name.find('__')
     return name[:ind]

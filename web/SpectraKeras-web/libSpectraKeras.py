@@ -412,6 +412,22 @@ class MultiClassReductor():
 #************************************
 # Get name of prediction from h5 file
 #************************************
+def loadGetMineralJS(csv_text, pred):
+    return getMineralJS(loadMineralJS(csv_text), pred)
+    
+def loadMineralJS(csv_text):
+    import pandas as pd
+    from io import StringIO
+    csv_file_like_object = StringIO(csv_text)
+    df = pd.read_csv(csv_file_like_object, header=None)
+    return df
+    
+def getMineralJS(df, pred):
+    import pandas as pd
+    name = df[df[0] == pred].iloc[1, 1]
+    ind = name.find('__')
+    return name[:ind]
+    
 def getMineral(File, pred):
     import pandas as pd
     try:
@@ -420,16 +436,6 @@ def getMineral(File, pred):
         print("Hdf with mineral data file not found")
         sys.exit()
     name = df[df[0]==str(pred)].iloc[0,1]
-    ind = name.find('__')
-    return name[:ind]
-    
-def getMineralJS(csv_text, pred):
-    import pandas as pd
-    from io import StringIO
-
-    csv_file_like_object = StringIO(csv_text)
-    df = pd.read_csv(csv_file_like_object, header=None)
-    name = df[df[0] == pred].iloc[1, 1]
     ind = name.find('__')
     return name[:ind]
     

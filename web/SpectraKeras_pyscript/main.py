@@ -167,17 +167,23 @@ async def getModelFolder():
     elif model == "Powder X-ray Diffraction (XRD)":
         folder = "ml-xrd"
     return folder
-
-async def getSpectraFiles(event):
-    output_div = document.querySelector("#output")
-    output_div.innerHTML = "Please wait..."
+    
+async def getSavedLibraries():
     folder = await getModelFolder()
-        
     ini = await getFile(folder, "SpectraKeras_CNN.ini", False)
     dP = Conf(ini)
     model_le = await getFile(folder, dP.model_le, True)
     spectral_range = await getFile(folder, dP.spectral_range, True)
     EnN = pickle.loads(spectral_range)
+    table_names = await getFile(folder, "AAA_table_names.csv", False)
+    names = loadMineralJS(table_names)
+    return dP,folder,EnN,spectral_range, names
+
+async def getSpectraFiles(event):
+    output_div = document.querySelector("#output")
+    output_div.innerHTML = "Please wait..."
+    
+    dP,folder,EnN,spectral_range,names  = await getSavedLibraries()
     
     inputFile = document.getElementById("inputFile").files.item(0)
     array_buf = await inputFile.arrayBuffer()
@@ -198,13 +204,12 @@ async def getSpectraFiles(event):
     window.__setattr__("folder",folder)
     window.__setattr__("input_shape",Rcnn.shape)
     
-    table_names = await getFile(folder, "AAA_table_names.csv", False)
-    mineral = getMineralJS(table_names, 123)
+    mineral = getMineralJS(names, 123)
     print(mineral)
     
     from js import loadModel, showData
-    #loadModel()
     showData()
+    loadModel()
 
 #************************************
 # Prediction
