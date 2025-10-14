@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2025.05.21.1-test
+* v2025.05.21.1-test5
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -402,9 +402,9 @@ def train(learnFile, testFile, flag):
         tbLogs.append(es)
     if dP.saveBestModel == True:
         if dP.regressor:
-            mc = keras.callbacks.ModelCheckpoint(dP.model_name, monitor=dP.metricBestModelR, mode='min', verbose=1, save_best_only=True)
+            mc = keras.callbacks.ModelCheckpoint(dP.model_name, monitor=dP.metricBestModelR, mode='min', verbose=1, save_best_only=True, save_weights_only=False)
         else:
-            mc = keras.callbacks.ModelCheckpoint(dP.model_name, monitor=dP.metricBestModelC, mode='max', verbose=1, save_best_only=True)
+            mc = keras.callbacks.ModelCheckpoint(dP.model_name, monitor=dP.metricBestModelC, mode='max', verbose=1, save_best_only=True, save_weights_only=False)
         tbLogs.append(mc)
         
     #tbLogs = [tbLog, es, mc]
@@ -431,12 +431,14 @@ def train(learnFile, testFile, flag):
             callbacks = tbLogs,
             verbose=2,
 	        validation_split=dP.cv_split)
-    
-    if dP.saveBestModel == False:
-        model.save(dP.model_name)
-    else:
-        model = loadModel(dP)
-        
+
+    #model.save(dP.model_name)
+
+    #if dP.saveBestModel == False:
+    #    model.save(dP.model_name)
+    #else:
+    #    model = loadModel(dP)
+ 
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     
     if dP.makeQuantizedTFlite:
