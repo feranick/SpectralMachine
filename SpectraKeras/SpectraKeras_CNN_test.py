@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2025.05.21.1-test5
+* v2025.05.21.1-test6
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -432,13 +432,9 @@ def train(learnFile, testFile, flag):
             verbose=2,
 	        validation_split=dP.cv_split)
 
-    #model.save(dP.model_name)
+    if dP.saveBestModel == False:
+        model.save(dP.model_name)
 
-    #if dP.saveBestModel == False:
-    #    model.save(dP.model_name)
-    #else:
-    #    model = loadModel(dP)
- 
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     
     if dP.makeQuantizedTFlite:
