@@ -65,13 +65,12 @@ def loadModel(dP):
         model.allocate_tensors()
     else:
         import tensorflow as tf
-        if checkTFVersion("2.16.0"):
-            import tensorflow.keras as keras
+        
+        if dP.kerasVersion == 2:
+            import tf_keras as keras
         else:
-            if dP.kerasVersion == 2:
-                import tf_keras as keras
-            else:
-                import keras
+            import keras
+            
         if dP.useTFlitePred:
             # model here is intended as interpreter
             model_name=os.path.splitext(dP.model_name)[0]+'.tflite'
@@ -143,21 +142,9 @@ def makeQuantizedTFmodel(A, dP):
             yield[input_value]
 
     if dP.kerasVersion == 2:
-        if checkTFVersion("2.16.0"):
-            import tensorflow.keras as keras
-        else:
-            import tf_keras as keras
+        import tf_keras as keras
         model = keras.models.load_model(dP.model_name)
     else:
-        # Previous method, TF <= 2.16.2
-        #import keras
-        #model = keras.layers.TFSMLayer(dP.model_name, call_endpoint='serve')
-        #converter = tf.lite.TFLiteConverter.from_keras_model(model)
-        # New method
-        #model = tf.saved_model.load(dP.model_name)
-        #concrete_func = model.signatures['serving_default']
-        #converter = tf.lite.TFLiteConverter.from_concrete_functions([concrete_func])
-        # New method 2:
         import keras
         model = keras.saving.load_model(dP.model_name)
         
@@ -211,16 +198,12 @@ def plotWeights(dP, En, A, model, type):
 #************************************
 def getTFVersion(dP):
     import tensorflow as tf
-    if checkTFVersion("2.16.0"):
-        import tensorflow.keras as keras
-        kv = "- Keras v. " + keras.__version__
+    if dP.kerasVersion == 2:
+        import tf_keras as keras
+        kv = "- tf_keras v. " + keras.__version__
     else:
-        if dP.kerasVersion == 2:
-            import tf_keras as keras
-            kv = "- tf_keras v. " + keras.__version__
-        else:
-            import keras
-            kv = "- Keras v. " + keras.__version__
+        import keras
+        kv = "- Keras v. " + keras.__version__
     from packaging import version
     if dP.useTFlitePred:
         if dP.TFliteRuntime:

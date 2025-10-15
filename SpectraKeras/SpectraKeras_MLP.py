@@ -204,13 +204,10 @@ def main():
 def train(learnFile, testFile):
     dP = Conf()
     import tensorflow as tf
-    if checkTFVersion("2.16.0"):
-        import tensorflow.keras as keras
+    if dP.kerasVersion == 2:
+        import tf_keras as keras
     else:
-        if dP.kerasVersion == 2:
-            import tf_keras as keras
-        else:
-            import keras
+        import keras
 
     opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
     conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0

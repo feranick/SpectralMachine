@@ -228,13 +228,10 @@ def main():
 def train(learnFile, testFile, flag):
     dP = Conf()
     import tensorflow as tf
-    if checkTFVersion("2.16.0"):
-        import tensorflow.keras as keras
+    if dP.kerasVersion == 2:
+        import tf_keras as keras
     else:
-        if dP.kerasVersion == 2:
-            import tf_keras as keras
-        else:
-            import keras
+        import keras
         
     opts = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=1)     # Tensorflow 2.0
     conf = tf.compat.v1.ConfigProto(gpu_options=opts)  # Tensorflow 2.0
@@ -801,13 +798,10 @@ def plotActivationsTrain(model):
     import matplotlib.pyplot as plt
     import tensorflow as tf
     dP = Conf()
-    if checkTFVersion("2.16.0"):
-        import tensorflow.keras as keras
+    if dP.kerasVersion == 2:
+        import tf_keras as keras
     else:
-        if dP.kerasVersion == 2:
-            import tf_keras as keras
-        else:
-            import keras
+        import keras
     i = 0
     for layer in model.layers:
         if isinstance(layer, keras.layers.Conv2D):
@@ -833,14 +827,11 @@ def plotActivationsTrain(model):
 def plotActivationsPredictions(R, model):
     print(" Saving activation plots...\n")
     import matplotlib.pyplot as plt
-    if checkTFVersion("2.16.0"):
-        import tensorflow as tf
-        import tensorflow.keras as keras
+    import tensorflow as tf
+    if dP.kerasVersion == 2:
+        import tf_keras as keras
     else:
-        if dP.kerasVersion == 2:
-            import tf_keras as keras
-        else:
-            import keras
+        import keras
     from keras.models import Model
     
     dP = Conf()
