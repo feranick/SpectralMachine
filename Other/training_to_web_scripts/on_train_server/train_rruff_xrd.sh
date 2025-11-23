@@ -9,6 +9,8 @@
 
 #base="/Users/feranick/Desktop/"
 base=""
+#baseURL="https://rruff.info/zipped_data_files"
+baseURL="https://www.rruff.net/zipped_data_files"
 
 cp ../SpectraKeras_CNN.ini .
 
@@ -23,12 +25,12 @@ val1=22
 folder="rruff-xrd_"$1
 mkdir $folder
 cd $folder
-    wget https://rruff.info/zipped_data_files/powder/DIF.zip
-    wget https://rruff.info/zipped_data_files/powder/Reference_PDF.zip
-    wget https://rruff.info/zipped_data_files/powder/Refinement_Data.zip
-    wget https://rruff.info/zipped_data_files/powder/Refinement_Output_Data.zip
-    wget https://rruff.info/zipped_data_files/powder/XY_Processed.zip
-    wget https://rruff.info/zipped_data_files/powder/XY_RAW.zip
+    wget $baseURL/powder/DIF.zip
+    wget $baseURL/powder/Reference_PDF.zip
+    wget $baseURL/powder/Refinement_Data.zip
+    wget $baseURL/powder/Refinement_Output_Data.zip
+    wget $baseURL/powder/XY_Processed.zip
+    wget $baseURL/powder/XY_RAW.zip
 echo " Create folder: "$1
 mkdir $1
 pathfiles=./
@@ -59,4 +61,4 @@ cp ../../SpectraKeras_CNN.ini .
 
 edgetpu_compiler model_classifier_CNN.tflite 
 
-mv ../log*
+mv ../log* 

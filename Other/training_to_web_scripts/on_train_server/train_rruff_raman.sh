@@ -9,6 +9,8 @@
 
 #base="/Users/feranick/Desktop/"
 base=""
+#baseURL="https://rruff.info/zipped_data_files"
+baseURL="https://www.rruff.net/zipped_data_files"
 
 cp ../SpectraKeras_CNN.ini .
 
@@ -23,16 +25,16 @@ val1=37
 folder="rruff-raman_"$1
 mkdir $folder
 cd $folder
-    wget https://rruff.info/zipped_data_files/raman/LR-Raman.zip
-    wget https://rruff.info/zipped_data_files/raman/excellent_oriented.zip
-    wget https://rruff.info/zipped_data_files/raman/excellent_unoriented.zip
-    wget https://rruff.info/zipped_data_files/raman/fair_oriented.zip
-    wget https://rruff.info/zipped_data_files/raman/fair_unoriented.zip
-    wget https://rruff.info/zipped_data_files/raman/ignore_unoriented.zip
-    wget https://rruff.info/zipped_data_files/raman/poor_oriented.zip
-    wget https://rruff.info/zipped_data_files/raman/poor_unoriented.zip
-    wget https://rruff.info/zipped_data_files/raman/unrated_oriented.zip
-    wget https://rruff.info/zipped_data_files/raman/unrated_unoriented.zip
+    wget $baseURL/raman/LR-Raman.zip
+    wget $baseURL/raman/excellent_oriented.zip
+    wget $baseURL/raman/excellent_unoriented.zip
+    wget $baseURL/raman/fair_oriented.zip
+    wget $baseURL/raman/fair_unoriented.zip
+    wget $baseURL/raman/ignore_unoriented.zip
+    wget $baseURL/raman/poor_oriented.zip
+    wget $baseURL/raman/poor_unoriented.zip
+    wget $baseURL/raman/unrated_oriented.zip
+    wget $baseURL/raman/unrated_unoriented.zip
 echo " Create folder: "$1
 mkdir $1
 pathfiles=./

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-URL="https://rruff.info/zipped_data_files/raman/"
+#URL="https://rruff.info/zipped_data_files/raman/"
+URL="https://www.rruff.net/zipped_data_files/raman/"
 HTML_CONTENT=$(curl -s "$URL")
-newDate=$(echo "$HTML_CONTENT" | grep -o -E '[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort -u | tr -d '-')
+newDate=$(echo "$HTML_CONTENT" | grep -o -E '[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort -u | tr -d '-' | tail -n 1)
 
 echo "Training for data:" $newDate
 
