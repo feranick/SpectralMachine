@@ -23,19 +23,19 @@ cd SpectraKeras
 
 cd ml-raman
 rm -r *
-scp user@server.com:/home/user/ml/rruff-raman/$1/log_SK_Raman.o* .
-scp user@server.com:/home/user/ml/rruff-raman/$1/rruff-*/*.csv .
-scp user@server.com:/home/user/ml/rruff-raman/$1/rruff-*/AAA_table_names.h5 .
-scp user@server.com:/home/user/ml/rruff-raman/$1/rruff-*/hfsel*/* .
+rsync -azv user@server.com:/home/user/ml/rruff-raman/$1/log_SK_Raman.o* .
+rsync -azv user@server.com:/home/user/ml/rruff-raman/$1/rruff-*/*.csv .
+rsync -azv user@server.com:/home/user/ml/rruff-raman/$1/rruff-*/AAA_table_names.h5 .
+rsync -azv user@server.com:/home/user/ml/rruff-raman/$1/rruff-*/hfsel*/* .
 csvRaman=`ls *.csv`
 cd ..
 
 cd ml-xrd
 rm -r *
-scp user@server.com:/home/user/ml/rruff-powder/$1/log_SK_Powder.o* .
-scp user@server.com:/home/user/ml/rruff-powder/$1/rruff-*/*.csv .
-scp user@server.com:/home/user/ml/rruff-powder/$1/rruff-*/AAA_table_names.h5 .
-scp user@server.com:/home/user/ml/rruff-powder/$1/rruff-*/hfsel*/* .
+rsync -azv user@server.com:/home/user/ml/rruff-powder/$1/log_SK_Powder.o* .
+rsync -azv user@server.com:/home/user/ml/rruff-powder/$1/rruff-*/*.csv .
+rsync -azv user@server.com:/home/user/ml/rruff-powder/$1/rruff-*/AAA_table_names.h5 .
+rsync -azv user@server.com:/home/user/ml/rruff-powder/$1/rruff-*/hfsel*/* .
 csvXrd=`ls *.csv`
 cd ..
 
