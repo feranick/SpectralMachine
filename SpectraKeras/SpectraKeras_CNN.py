@@ -152,7 +152,7 @@ class Conf():
                 self.conf.write(configfile)
                 
         except Exception as e:
-            print("Error in creating configuration file")
+            print("Error in creating configuration file:")
             print(f"  {e}\n")
 
 #************************************
