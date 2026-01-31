@@ -4,7 +4,7 @@
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
 * Simplified web version
-* v2025.10.15.1
+* v2026.01.30.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -139,8 +139,10 @@ class Conf():
             self.useTFlitePred = self.conf.getboolean('System','useTFlitePred')
             self.TFliteRuntime = self.conf.getboolean('System','TFliteRuntime')
             self.runCoralEdge = self.conf.getboolean('System','runCoralEdge')
-        except:
-            print(" Error in reading configuration file. Please check it\n")
+            
+        except Exception as e:
+            print("Error in reading configuration file:")
+            print(f"  {e}\n")
 
     # Create configuration file
     def createConfig(self):
@@ -149,9 +151,10 @@ class Conf():
             self.sysDef()
             with open(self.configFile, 'w') as configfile:
                 self.conf.write(configfile)
-        except:
-            print("Error in creating configuration file")
-
+                
+        except Exception as e:
+            print("Error in creating configuration file:")
+            print(f"  {e}\n")
 #************************************
 # Main
 #************************************
