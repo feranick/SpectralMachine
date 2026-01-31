@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2026.01.30.1
+* v2026.01.31.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -180,8 +180,9 @@ def main():
                     train(sys.argv[2], None, False)
                 else:
                     train(sys.argv[2], sys.argv[3], False)
-            except:
-                usage()
+            except Exception as e:
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-n" , "--net"):
@@ -191,35 +192,40 @@ def main():
                 else:
                     train(sys.argv[2], sys.argv[3], True)
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
             try:
                 predict(sys.argv[2])
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-b" , "--batch"):
             try:
                 batchPredict(sys.argv[2])
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-l" , "--lite"):
             try:
                 convertTflite(sys.argv[2])
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-a" , "--accuracy"):
             try:
                 accDeterm(sys.argv[2])
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
     total_time = time.perf_counter() - start_time

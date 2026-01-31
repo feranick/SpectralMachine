@@ -181,7 +181,8 @@ def main():
                 else:
                     train(sys.argv[2], sys.argv[3], False)
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-n" , "--net"):
@@ -191,7 +192,8 @@ def main():
                 else:
                     train(sys.argv[2], sys.argv[3], True)
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-p" , "--predict"):
@@ -206,21 +208,24 @@ def main():
             try:
                 batchPredict(sys.argv[2], sys.argv[3])
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-l" , "--lite"):
             try:
                 convertTflite(sys.argv[2])
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-a" , "--accuracy"):
             try:
                 accDeterm(sys.argv[2])
             except:
-                usage()
+                print(" Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
     total_time = time.perf_counter() - start_time
