@@ -174,8 +174,9 @@ def main():
             try:
                 predict(sys.argv[2])
             except:
-               usage()
-               sys.exit(2)
+                print("\n Error:")
+                print(f"  {e}\n")
+                sys.exit(2)
 
         if o in ("-b" , "--batch"):
             try:

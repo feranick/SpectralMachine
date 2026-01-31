@@ -197,8 +197,9 @@ def main():
         if o in ("-p" , "--predict"):
             try:
                 predict(sys.argv[2])
-            except:
-                usage()
+            except Exception as e:
+                print("\n Error:")
+                print(f"  {e}\n")
                 sys.exit(2)
 
         if o in ("-b" , "--batch"):
