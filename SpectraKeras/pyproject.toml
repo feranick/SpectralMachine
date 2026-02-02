@@ -9,7 +9,7 @@ include = [
 
 [project]
 name = "SpectraKeras"
-version = "v2026.01.31.1"
+version = "v2026.02.02.1"
 dependencies = ["numpy", "h5py", "tensorflow", "pydot", "graphviz","scipy","tf-keras","tables"]
 authors = [{ name="Nicola Ferralis", email="ferralis@mit.edu" },]
 description = "Machine learning for scientific spectra"

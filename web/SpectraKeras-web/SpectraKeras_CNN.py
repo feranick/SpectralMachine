@@ -4,7 +4,7 @@
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
 * Simplified web version
-* v2026.01.30.1
+* v2026.02.02.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -180,7 +180,7 @@ def main():
                     train(sys.argv[2], None, False)
                 else:
                     train(sys.argv[2], sys.argv[3], False)
-            except:
+            except Exception as e:
                 print(" Error:")
                 print(f"  {e}\n")
                 sys.exit(2)
@@ -191,7 +191,7 @@ def main():
                     train(sys.argv[2], None, True)
                 else:
                     train(sys.argv[2], sys.argv[3], True)
-            except:
+            except Exception as e:
                 print(" Error:")
                 print(f"  {e}\n")
                 sys.exit(2)
@@ -207,7 +207,7 @@ def main():
         if o in ("-b" , "--batch"):
             try:
                 batchPredict(sys.argv[2], sys.argv[3])
-            except:
+            except Exception as e:
                 print(" Error:")
                 print(f"  {e}\n")
                 sys.exit(2)
@@ -215,7 +215,7 @@ def main():
         if o in ("-l" , "--lite"):
             try:
                 convertTflite(sys.argv[2])
-            except:
+            except Exception as e:
                 print(" Error:")
                 print(f"  {e}\n")
                 sys.exit(2)
@@ -223,7 +223,7 @@ def main():
         if o in ("-a" , "--accuracy"):
             try:
                 accDeterm(sys.argv[2])
-            except:
+            except Exception as e:
                 print(" Error:")
                 print(f"  {e}\n")
                 sys.exit(2)
