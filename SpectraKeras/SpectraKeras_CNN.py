@@ -434,10 +434,13 @@ def train(learnFile, testFile, flag):
             verbose=2,
 	        validation_split=dP.cv_split)
     
-    if dP.saveBestModel == False:
-        model.save(dP.model_name)
-    else:
-        model = loadModel(dP)
+    model.save(dP.model_name)
+    
+    # Disable the use of saveBestModel - not working when True
+    #if dP.saveBestModel == False:
+    #    model.save(dP.model_name)
+    #else:
+    #    model = loadModel(dP)
         
     keras.utils.plot_model(model, to_file=dP.model_png, show_shapes=True)
     
