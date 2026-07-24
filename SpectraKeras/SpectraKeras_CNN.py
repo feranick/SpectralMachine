@@ -3,7 +3,7 @@
 '''
 **********************************************
 * SpectraKeras_CNN Classifier and Regressor
-* v2026.02.02.1
+* v2026.07.24.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 **********************************************
@@ -581,7 +581,7 @@ def predict(testFile):
         predictions, _ = getPredictions(R, model,dP)
         pred_class = np.argmax(predictions)
         if dP.useTFlitePred:
-            predProb = round(100*predictions[0][pred_class]/255,2)
+            predProb = round(100*float(predictions[0][pred_class])/255,2)
         else:
             predProb = round(100*predictions[0][pred_class],2)
         rosterPred = np.where(predictions[0]>0.1)[0]
@@ -600,7 +600,7 @@ def predict(testFile):
                 if predictions[0][i]>0.01:
                     if dP.useTFlitePred:
                         print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(le.inverse_transform(i)[0])),
-                            int(le.inverse_transform(i)[0]), 100*predictions[0][i]/255))
+                            int(le.inverse_transform(i)[0]), 100*float(predictions[0][i])/255))
                     else:
                         print("  {0:s}\t| {1:d}\t\t| {2:.2f}".format(getMineral(dP.table_names, int(le.inverse_transform(i)[0])),
                             int(le.inverse_transform(i)[0]), 100*predictions[0][i]))

@@ -3,7 +3,7 @@
 '''
 ***********************************************************
 * Convert TF Keras V3 models into TF.Lite
-* v2026.02.02.1
+* v2026.07.24.1
 * Uses: TensorFlow
 * By: Nicola Ferralis <feranick@hotmail.com>
 ***********************************************************
