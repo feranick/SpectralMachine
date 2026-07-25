@@ -42,14 +42,19 @@ cd ..
 echo $csvRaman
 echo $csvXrd
 
+if [[ -z "$csvRaman" || -z "$csvXrd" ]]; then
+    echo "ERROR: could not find a .csv in ml-raman and/or ml-xrd"
+    exit 1
+fi
+
+# Replace the whole matching line rather than grepping for its old contents:
+# no need to escape whatever happens to already be in index.php.
 search_string_Raman='<br>Current Raman ML model:'
-old_string_Raman=`grep "$search_string_Raman" index.php`
-new_string_Raman="    <br>Current Raman ML model: <a href=\"ml-raman/$csvRaman\">AAA-$1_norm1_train>
-sed -i "s|$old_string_Raman|$new_string_Raman|g" index.php
+new_string_Raman="    <br>Current Raman ML model: <a href=\"ml-raman/$csvRaman\">AAA-$1_norm1_train</a>"
+sed -i "s|^.*${search_string_Raman}.*$|${new_string_Raman}|" index.php
 
 search_string_Xrd='<br>Current XRD ML model:'
-old_string_Xrd=`grep "$search_string_Xrd" index.php`
-new_string_Xrd="    <br>Current XRD ML model: <a href=\"ml-xrd/$csvXrd\">AAA-Powder-$1_norm1_train->
-sed -i "s|$old_string_Xrd|$new_string_Xrd|g" index.php
+new_string_Xrd="    <br>Current XRD ML model: <a href=\"ml-xrd/$csvXrd\">AAA-Powder-$1_norm1_train</a>"
+sed -i "s|^.*${search_string_Xrd}.*$|${new_string_Xrd}|" index.php
 
 cd ..
