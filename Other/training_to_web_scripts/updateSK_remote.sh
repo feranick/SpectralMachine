@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# update_ML_SK
+# update_SK_remote
 #
 # By Nicola Ferralis <feranick@hotmail.com>
 #

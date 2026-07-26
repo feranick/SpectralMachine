@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# update_ML_SK
+# update_SK_local
 #
 # By Nicola Ferralis <feranick@hotmail.com>
 #
@@ -23,7 +23,7 @@ cd SpectraKeras || exit 1
 #mkdir ml-xrd
 
 cd ml-raman || exit 1
-#rm -r *
+rm -r *
 cp ~/ml/rruff-raman/"$1"/log_SK_Raman.o* .
 cp ~/ml/rruff-raman/"$1"/rruff-*/*.csv .
 cp ~/ml/rruff-raman/"$1"/rruff-*/AAA_table_names.h5 .
@@ -33,7 +33,7 @@ csvRaman=$(ls -1t *.csv | head -n 1)
 cd ..
 
 cd ml-xrd || exit 1
-#rm -r *
+rm -r *
 cp ~/ml/rruff-powder/"$1"/log_SK_Powder.o* .
 cp ~/ml/rruff-powder/"$1"/rruff-*/*.csv .
 cp ~/ml/rruff-powder/"$1"/rruff-*/AAA_table_names.h5 .
